@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "449124894302",
+    "project_id": "yucat-d8fb5",
+    "storage_bucket": "yucat-d8fb5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:449124894302:android:3c02760de7dd30e42d56cf",
+        "android_client_info": {
+          "package_name": "com.example.yucat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "449124894302-u4afm6g2dtj9dgo7apbd5kq8pc9taj0d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3aQ05I4n0GNwlRu9MKL2PaK7cRfGChpI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "449124894302-u4afm6g2dtj9dgo7apbd5kq8pc9taj0d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
