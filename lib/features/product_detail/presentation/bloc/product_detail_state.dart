@@ -17,7 +17,7 @@ class ProductDetailHiddenState extends ProductDetailState {
 }
 
 class ProductDetailLoadedState extends ProductDetailState {
-  final ProductModel product;
+  final ProductDisplayModel product;
 
   const ProductDetailLoadedState({required this.product});
 

@@ -5,7 +5,7 @@ sealed class ProductDetailEvent extends Equatable {
 }
 
 class ProductDetailInitialEvent extends ProductDetailEvent {
-  final ProductModel? product;
+  final ProductDisplayModel? product;
 
   const ProductDetailInitialEvent({this.product});
 

@@ -1,9 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ScanTrackingService {
   static const String _freeScansCountKey = 'free_scans_count';
-  static const String _entitlementID = 'yucat Pro';
+  static const String _entitlementID = 'yucat pro';
   static const int _maxFreeScans = 3;
 
   final SharedPreferences _prefs;
@@ -29,10 +30,26 @@ class ScanTrackingService {
   /// Check if user has an active subscription
   Future<bool> hasActiveSubscription() async {
     try {
+      // Sync purchases first to ensure we have the latest subscription status
+      await Purchases.syncPurchases();
       final customerInfo = await Purchases.getCustomerInfo();
+
+      // Debug: Print all available entitlements
+      debugPrint(
+        'Available entitlements: ${customerInfo.entitlements.all.keys}',
+      );
+      debugPrint('Looking for entitlement: $_entitlementID');
+
       final entitlement = customerInfo.entitlements.all[_entitlementID];
-      return entitlement?.isActive == true;
+      final isActive = entitlement?.isActive == true;
+
+      debugPrint(
+        'Entitlement found: ${entitlement != null}, isActive: $isActive',
+      );
+
+      return isActive;
     } catch (e) {
+      debugPrint('Error checking subscription: $e');
       // If there's an error checking subscription, assume no subscription
       return false;
     }

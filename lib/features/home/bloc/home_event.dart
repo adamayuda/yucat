@@ -44,3 +44,28 @@ class SearchByBarcodeEvent extends HomeEvent {
   @override
   List<Object?> get props => [barcode];
 }
+
+class BarcodeDetectedEvent extends HomeEvent {
+  final String barcode;
+
+  const BarcodeDetectedEvent({required this.barcode});
+
+  @override
+  List<Object?> get props => [barcode];
+}
+
+class PaywallDismissedEvent extends HomeEvent {
+  final bool purchasedSubscription;
+
+  const PaywallDismissedEvent({required this.purchasedSubscription});
+
+  @override
+  List<Object?> get props => [purchasedSubscription];
+}
+
+class ResetScannerEvent extends HomeEvent {
+  const ResetScannerEvent();
+
+  @override
+  List<Object?> get props => [];
+}

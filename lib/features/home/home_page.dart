@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +10,7 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/home/bloc/home_bloc.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
-import 'package:yucat/features/product_detail/presentation/models/product_model.dart';
+import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/service_locator.dart';
 
@@ -45,7 +43,10 @@ class _HomePage extends State<HomePage> {
     return BlocListener<HomeBloc, HomeState>(
       bloc: _bloc,
       listenWhen: (previous, current) =>
-          current is HomeNavigateToProductDetailState,
+          current is HomeNavigateToProductDetailState ||
+          current is HomeScanLimitReachedState ||
+          current is HomeScanProcessedState ||
+          current is HomeScanResetState,
       listener: (context, state) {
         if (state is HomeNavigateToProductDetailState) {
           context.router.push(ProductDetailRoute(product: state.product)).then((
@@ -53,48 +54,168 @@ class _HomePage extends State<HomePage> {
           ) {
             // Reset to loaded state when user returns from product detail
             _bloc.add(HomeInitialEvent());
+            // Also reset scanner for next scan
+            _bloc.add(ResetScannerEvent());
           });
+        } else if (state is HomeScanLimitReachedState) {
+          // Show paywall when scan limit is reached
+          _showPaywallAndHandleResult(state.barcode);
+        } else if (state is HomeScanProcessedState) {
+          // Process the scan by searching for the product
+          _bloc.add(SearchByBarcodeEvent(barcode: state.barcode));
+        } else if (state is HomeScanResetState) {
+          // Scanner reset handled in _HomeLoadedState
         }
       },
       child: BlocBuilder<HomeBloc, HomeState>(
         bloc: _bloc,
         buildWhen: (previous, current) =>
-            previous != current && current is! HomeNavigateToProductDetailState,
+            previous != current &&
+            current is! HomeNavigateToProductDetailState &&
+            current is! HomeScanLimitReachedState &&
+            current is! HomeScanProcessedState &&
+            current is! HomeScanResetState,
         builder: (context, state) => _onStateChangeBuilder(state),
       ),
     );
+  }
+
+  Future<void> _showPaywallAndHandleResult(String barcode) async {
+    final purchasedSubscription = await _showPaywall();
+    _bloc.add(
+      PaywallDismissedEvent(purchasedSubscription: purchasedSubscription),
+    );
+  }
+
+  Future<bool> _showPaywall() async {
+    try {
+      CustomerInfo customerInfo = await Purchases.getCustomerInfo();
+
+      if (customerInfo.entitlements.all['yucat pro'] != null &&
+          customerInfo.entitlements.all['yucat pro']?.isActive == true) {
+        // User already has active subscription
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('You already have an active subscription'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return true;
+      } else {
+        Offerings? offerings;
+        try {
+          offerings = await Purchases.getOfferings();
+        } on PlatformException catch (e) {
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+              title: const Text('Error'),
+              content: Text(e.message ?? 'Unknown error'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (offerings == null || offerings.current == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No offerings available at this time'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return false;
+        } else if (offerings.current!.availablePackages.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'No subscription packages available. Please configure products in RevenueCat dashboard.',
+              ),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 4),
+            ),
+          );
+          return false;
+        } else {
+          // Current offering is available with packages, show paywall
+          final paywallResult = await RevenueCatUI.presentPaywall();
+          debugPrint('Paywall result: $paywallResult');
+
+          // After paywall is dismissed, sync and check if user purchased subscription
+          if (mounted) {
+            try {
+              await Purchases.syncPurchases();
+              await Future.delayed(const Duration(milliseconds: 500));
+
+              final updatedCustomerInfo = await Purchases.getCustomerInfo();
+              final hasActiveSubscription =
+                  updatedCustomerInfo.entitlements.all['yucat pro']?.isActive ==
+                  true;
+              if (hasActiveSubscription) {
+                final scanTrackingService = sl<ScanTrackingService>();
+                await scanTrackingService.resetFreeScansCount();
+                return true;
+              }
+            } catch (e) {
+              debugPrint('Error checking subscription after paywall: $e');
+              try {
+                final updatedCustomerInfo = await Purchases.getCustomerInfo();
+                final hasActiveSubscription =
+                    updatedCustomerInfo
+                        .entitlements
+                        .all['yucat pro']
+                        ?.isActive ==
+                    true;
+                if (hasActiveSubscription) {
+                  final scanTrackingService = sl<ScanTrackingService>();
+                  await scanTrackingService.resetFreeScansCount();
+                  return true;
+                }
+              } catch (e2) {
+                debugPrint('Error getting customer info: $e2');
+              }
+            }
+          }
+          return false;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error showing paywall: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return false;
+    }
   }
 
   Widget _onStateChangeBuilder(HomeState state) {
     switch (state) {
       case HomeLoadingState():
         return Scaffold(
-          // appBar: PreferredSize(
-          //   preferredSize: Size.fromHeight(kToolbarHeight),
-          //   child: TopAppBar(
-          //     title: state.user.welcomeMessage,
-          //     hideBackButton: true,
-          //   ),
-          // ),
-          body: Center(child: Text('Loading')),
+          backgroundColor: DSColors.lightGrey,
+          body: const _ProductLoadingView(),
         );
       case HomeLoadedState():
         return _HomeLoadedState(
+          bloc: _bloc,
           onTap: (countryCode) => _dispatch(
             CountryTapEvent(countryCode: countryCode, context: context),
           ),
-          onBarcodeScanned: (barcode) {
-            _dispatch(SearchByBarcodeEvent(barcode: barcode));
-          },
         );
       case HomeSearchResultsState():
         return _HomeLoadedState(
+          bloc: _bloc,
           onTap: (countryCode) => _dispatch(
             CountryTapEvent(countryCode: countryCode, context: context),
           ),
-          onBarcodeScanned: (barcode) {
-            _dispatch(SearchByBarcodeEvent(barcode: barcode));
-          },
           searchResults: state.products,
         );
       case HomeErrorState():
@@ -121,13 +242,13 @@ class _HomePage extends State<HomePage> {
 }
 
 class _HomeLoadedState extends StatefulWidget {
+  final HomeBloc bloc;
   final void Function(String) onTap;
-  final void Function(String)? onBarcodeScanned;
-  final List<ProductModel>? searchResults;
+  final List<ProductDisplayModel>? searchResults;
 
   const _HomeLoadedState({
+    required this.bloc,
     required this.onTap,
-    this.onBarcodeScanned,
     this.searchResults,
   });
 
@@ -140,17 +261,6 @@ class __HomeLoadedState extends State<_HomeLoadedState> {
   final MobileScannerController _scannerController = MobileScannerController();
   bool _hasScanned = false;
   bool _isRestarting = false;
-  bool _isLoading = false;
-  late final ScanTrackingService _scanTrackingService;
-
-  // TODO: Replace with your actual entitlement ID from RevenueCat dashboard
-  static const String entitlementID = 'yucat Pro';
-
-  @override
-  void initState() {
-    super.initState();
-    _scanTrackingService = sl<ScanTrackingService>();
-  }
 
   Future<void> _restartScanner() async {
     if (_isRestarting) return;
@@ -216,115 +326,22 @@ class __HomeLoadedState extends State<_HomeLoadedState> {
   }
 
   @override
-  void dispose() {
-    _scannerController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _showPaywall() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      CustomerInfo customerInfo = await Purchases.getCustomerInfo();
-
-      if (customerInfo.entitlements.all[entitlementID] != null &&
-          customerInfo.entitlements.all[entitlementID]?.isActive == true) {
-        // User already has active subscription
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('You already have an active subscription'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      } else {
-        Offerings? offerings;
-        try {
-          offerings = await Purchases.getOfferings();
-        } on PlatformException catch (e) {
-          if (mounted) {
-            await showDialog(
-              context: context,
-              builder: (BuildContext context) => AlertDialog(
-                title: const Text('Error'),
-                content: Text(e.message ?? 'Unknown error'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('OK'),
-                  ),
-                ],
-              ),
-            );
-          }
-        }
-
-        if (offerings == null || offerings.current == null) {
-          // Offerings are empty, show a message to your user
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('No offerings available at this time'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          }
-        } else if (offerings.current!.availablePackages.isEmpty) {
-          // Offering exists but has no packages/products configured
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'No subscription packages available. Please configure products in RevenueCat dashboard.',
-                ),
-                backgroundColor: Colors.orange,
-                duration: Duration(seconds: 4),
-              ),
-            );
-          }
-        } else {
-          // Current offering is available with packages, show paywall
-          final paywallResult = await RevenueCatUI.presentPaywall();
-          debugPrint('Paywall result: $paywallResult');
-
-          // After paywall is dismissed, check if user purchased subscription
-          // and reset free scan count if they did
-          if (mounted) {
-            final updatedCustomerInfo = await Purchases.getCustomerInfo();
-            final hasActiveSubscription =
-                updatedCustomerInfo.entitlements.all[entitlementID]?.isActive ==
-                true;
-            if (hasActiveSubscription) {
-              await _scanTrackingService.resetFreeScansCount();
-            }
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('Error showing paywall: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    return BlocListener<HomeBloc, HomeState>(
+      bloc: widget.bloc,
+      listenWhen: (previous, current) => current is HomeScanResetState,
+      listener: (context, state) {
+        if (state is HomeScanResetState) {
+          // Reset scanner for next scan
+          _hasScanned = false;
+          _restartScanner();
+        }
+      },
+      child: _buildScannerView(),
+    );
+  }
+
+  Widget _buildScannerView() {
     return Scaffold(
       backgroundColor: DSColors.lightGrey,
       body: Stack(
@@ -343,29 +360,10 @@ class __HomeLoadedState extends State<_HomeLoadedState> {
                   // Stop scanning to prevent multiple calls
                   _scannerController.stop();
 
-                  // Check if user can perform scan
-                  final canScan = await _scanTrackingService.canPerformScan();
-
-                  if (!canScan) {
-                    // User has reached free scan limit, show paywall
-                    if (mounted) {
-                      await _showPaywall();
-                      // Reset scanner after paywall is shown
-                      _hasScanned = false;
-                      _restartScanner();
-                    }
-                    return;
-                  }
-
-                  // User can scan - increment count if they don't have subscription
-                  final hasSubscription = await _scanTrackingService
-                      .hasActiveSubscription();
-                  if (!hasSubscription) {
-                    await _scanTrackingService.incrementFreeScansCount();
-                  }
-
-                  // Dispatch search event
-                  widget.onBarcodeScanned?.call(barcode.rawValue!);
+                  // Dispatch event to bloc
+                  widget.bloc.add(
+                    BarcodeDetectedEvent(barcode: barcode.rawValue!),
+                  );
                   break;
                 }
               }
@@ -413,8 +411,240 @@ class __HomeLoadedState extends State<_HomeLoadedState> {
           //             ),
           //           ),
           //   ),
+          // Test button overlay
+          // Positioned(
+          //   bottom: 32,
+          //   left: 16,
+          //   right: 16,
+          //   child: ElevatedButton(
+          //     onPressed: () {
+          //       widget.bloc.add(SearchByBarcodeEvent(barcode: '6970117126389'));
+          //     },
+          //     style: ElevatedButton.styleFrom(
+          //       backgroundColor: Colors.blue,
+          //       foregroundColor: Colors.white,
+          //       padding: const EdgeInsets.symmetric(
+          //         horizontal: 24,
+          //         vertical: 16,
+          //       ),
+          //     ),
+          //     child: const Text('Test Barcode Search'),
+          //   ),
+          // ),
         ],
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _scannerController.dispose();
+    super.dispose();
+  }
+}
+
+class _ProductLoadingView extends StatefulWidget {
+  const _ProductLoadingView();
+
+  @override
+  State<_ProductLoadingView> createState() => _ProductLoadingViewState();
+}
+
+class _ProductLoadingViewState extends State<_ProductLoadingView>
+    with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late AnimationController _pulseController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _pulseAnimation;
+
+  final List<LoadingStep> _steps = [
+    const LoadingStep(
+      icon: Icons.qr_code_scanner,
+      title: 'Scanning barcode',
+      description: 'Reading product code...',
+    ),
+    const LoadingStep(
+      icon: Icons.cloud_download,
+      title: 'Fetching product data',
+      description: 'Retrieving information...',
+    ),
+    const LoadingStep(
+      icon: Icons.science,
+      title: 'Analyzing ingredients',
+      description: 'Processing nutritional data...',
+    ),
+    const LoadingStep(
+      icon: Icons.assignment,
+      title: 'Preparing results',
+      description: 'Almost ready...',
+    ),
+  ];
+
+  int _currentStepIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
+
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    _fadeController.forward();
+    _startStepCycle();
+  }
+
+  void _startStepCycle() {
+    Future.delayed(const Duration(milliseconds: 5000), () {
+      if (!mounted) return;
+      if (_currentStepIndex < _steps.length - 1) {
+        setState(() {
+          _currentStepIndex = _currentStepIndex + 1;
+        });
+        _fadeController.reset();
+        _fadeController.forward();
+        _startStepCycle();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentStep = _steps[_currentStepIndex];
+    final progress = (_currentStepIndex + 1) / _steps.length;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(DSDimens.sizeL),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Animated icon with pulse effect
+            ScaleTransition(
+              scale: _pulseAnimation,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: DSColors.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  currentStep.icon,
+                  size: 60,
+                  color: DSColors.primary,
+                ),
+              ),
+            ),
+            const SizedBox(height: DSDimens.sizeXl),
+            // Step title with fade animation
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: Text(
+                currentStep.title,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: DSColors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: DSDimens.sizeXs),
+            // Step description with fade animation
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: Text(
+                currentStep.description,
+                style: const TextStyle(fontSize: 16, color: DSColors.darkGrey),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: DSDimens.sizeXl),
+            // Progress indicator
+            SizedBox(
+              width: 200,
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(DSDimens.sizeXs),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 8,
+                      backgroundColor: DSColors.inputLightGrey,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        DSColors.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: DSDimens.sizeXs),
+                  Text(
+                    '${(_currentStepIndex + 1)} of ${_steps.length}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: DSColors.darkGrey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: DSDimens.sizeXl),
+            // Step indicators
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                _steps.length,
+                (index) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: index == _currentStepIndex ? 24 : 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: index <= _currentStepIndex
+                          ? DSColors.primary
+                          : DSColors.inputLightGrey,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LoadingStep {
+  final IconData icon;
+  final String title;
+  final String description;
+
+  const LoadingStep({
+    required this.icon,
+    required this.title,
+    required this.description,
+  });
 }

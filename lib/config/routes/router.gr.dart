@@ -95,7 +95,7 @@ class OnBoardingRoute extends PageRouteInfo<void> {
 class ProductDetailRoute extends PageRouteInfo<ProductDetailRouteArgs> {
   ProductDetailRoute({
     Key? key,
-    ProductModel? product,
+    ProductDisplayModel? product,
     List<PageRouteInfo>? children,
   }) : super(
          ProductDetailRoute.name,
@@ -121,11 +121,48 @@ class ProductDetailRouteArgs {
 
   final Key? key;
 
-  final ProductModel? product;
+  final ProductDisplayModel? product;
 
   @override
   String toString() {
     return 'ProductDetailRouteArgs{key: $key, product: $product}';
+  }
+}
+
+/// generated route for
+/// [ProductListingPage]
+class ProductListingRoute extends PageRouteInfo<ProductListingRouteArgs> {
+  ProductListingRoute({
+    Key? key,
+    required String brandName,
+    List<PageRouteInfo>? children,
+  }) : super(
+         ProductListingRoute.name,
+         args: ProductListingRouteArgs(key: key, brandName: brandName),
+         initialChildren: children,
+       );
+
+  static const String name = 'ProductListingRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<ProductListingRouteArgs>();
+      return ProductListingPage(key: args.key, brandName: args.brandName);
+    },
+  );
+}
+
+class ProductListingRouteArgs {
+  const ProductListingRouteArgs({this.key, required this.brandName});
+
+  final Key? key;
+
+  final String brandName;
+
+  @override
+  String toString() {
+    return 'ProductListingRouteArgs{key: $key, brandName: $brandName}';
   }
 }
 

@@ -1,15 +1,19 @@
 // import 'package:event_bus/event_bus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/profile/bloc/profile_event.dart';
 import 'package:yucat/features/profile/bloc/profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
+  final LogScreenViewUsecase _logScreenViewUsecase;
   // final CurrentUserUsecase currentUserUsecase;
   // final SignOutUsecase signOutUsecase;
   // final DeleteAccountUsecase deleteAccountUsecase;
   // final EventBus eventBus;
 
-  ProfileBloc() : super(ProfileHiddenState()) {
+  ProfileBloc({required LogScreenViewUsecase logScreenViewUsecase})
+    : _logScreenViewUsecase = logScreenViewUsecase,
+      super(ProfileHiddenState()) {
     on<ProfileInitialEvent>(_onProfileInitialEvent);
   }
 
@@ -17,6 +21,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProfileInitialEvent event,
     Emitter<ProfileState> emit,
   ) async {
+    _logScreenViewUsecase.call(screenName: 'ProfileScreen');
     emit(ProfileLoadingState());
 
     // final user = currentUserUsecase.call();

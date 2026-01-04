@@ -11,7 +11,7 @@ class AlgoliaSearchDataSource {
 
   Future<Hit?> searchByBarcode(String barcode) async {
     try {
-      final request = SearchForHits(indexName: "products", query: barcode);
+      final request = SearchForHits(indexName: "products2", query: barcode);
 
       final response = await _client.searchIndex(request: request);
 
@@ -31,9 +31,25 @@ class AlgoliaSearchDataSource {
     }
   }
 
+  Future<List<Hit>> searchByBrand(String brandName) async {
+    try {
+      final request = SearchForHits(
+        indexName: "products2",
+        query: '',
+        facetFilters: ["brand:$brandName"],
+      );
+
+      final response = await _client.searchIndex(request: request);
+
+      return response.hits;
+    } catch (e) {
+      throw Exception('Failed to search Algolia: $e');
+    }
+  }
+
   Future<List<Hit>> searchByQuery(String query) async {
     try {
-      final request = SearchForHits(indexName: "products", query: query);
+      final request = SearchForHits(indexName: "products2", query: query);
 
       final response = await _client.searchIndex(request: request);
 

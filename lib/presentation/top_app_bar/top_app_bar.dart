@@ -27,7 +27,7 @@ class TopAppBar extends StatelessWidget {
     final hasCustomBg = backgroundColor != null;
 
     return AppBar(
-      backgroundColor: backgroundColor ?? DSColors.lightGrey,
+      backgroundColor: backgroundColor ?? DSColors.white,
       centerTitle: centerTitle,
       scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,

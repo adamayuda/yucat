@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:yucat/features/product_detail/presentation/models/product_model.dart';
+import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 
 sealed class HomeState extends Equatable {
   const HomeState();
@@ -25,7 +25,7 @@ class HomeLoadedState extends HomeState {
 }
 
 class HomeSearchResultsState extends HomeState {
-  final List<ProductModel> products;
+  final List<ProductDisplayModel> products;
   final String query;
 
   const HomeSearchResultsState({required this.products, required this.query});
@@ -44,10 +44,42 @@ class HomeErrorState extends HomeState {
 }
 
 class HomeNavigateToProductDetailState extends HomeState {
-  final ProductModel product;
+  final ProductDisplayModel product;
 
   const HomeNavigateToProductDetailState({required this.product});
 
   @override
   List<Object?> get props => [product];
+}
+
+class HomeScanLimitReachedState extends HomeState {
+  final String barcode;
+
+  const HomeScanLimitReachedState({required this.barcode});
+
+  @override
+  List<Object?> get props => [barcode];
+}
+
+class HomeShowPaywallState extends HomeState {
+  const HomeShowPaywallState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class HomeScanProcessedState extends HomeState {
+  final String barcode;
+
+  const HomeScanProcessedState({required this.barcode});
+
+  @override
+  List<Object?> get props => [barcode];
+}
+
+class HomeScanResetState extends HomeState {
+  const HomeScanResetState();
+
+  @override
+  List<Object?> get props => [];
 }

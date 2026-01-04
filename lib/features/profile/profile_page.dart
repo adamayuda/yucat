@@ -140,7 +140,7 @@ class _ProfileLoadedState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: DSColors.lightGrey,
+        backgroundColor: DSColors.white,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         title: const Text(
@@ -180,14 +180,14 @@ class _ProfileLoadedState extends StatelessWidget {
                     ),
                     splashColor: DSColors.lightGrey.withOpacity(0.3),
                   ),
-                  const Divider(height: 1, color: DSColors.lightGrey),
+                  Divider(height: 1, color: DSColors.lightGrey),
                   ListTile(
                     title: const Text('Privacy Policy'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () => _launchPrivacyPolicy(context),
                     splashColor: DSColors.lightGrey.withOpacity(0.3),
                   ),
-                  const Divider(height: 1, color: DSColors.lightGrey),
+                  Divider(height: 1, color: DSColors.lightGrey),
                   ListTile(
                     title: const Text('Terms & Conditions'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),

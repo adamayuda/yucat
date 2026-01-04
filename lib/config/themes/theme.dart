@@ -5,7 +5,7 @@ class DSColors {
   static const Color primary = Color(0xFFFF00A8);
   static const Color black = Color(0xFF4A4A4A);
   static const Color white = Color(0xFFFFFFFF);
-  static const Color lightGrey = Color(0xFFF2F2F2);
+  static Color lightGrey = Colors.grey.shade200;
   static const Color darkGrey = Color(0xFFA2A2A2);
   static const Color inputLightGrey = Color(0xFFDFDFE0);
   static const Color inputDarkGrey = Color(0xFF7D7D82);
@@ -27,7 +27,7 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: DSColors.lightGrey,
+      scaffoldBackgroundColor: DSColors.white,
       // listTileTheme: ListTileThemeData(
       //   tileColor: DSColors.lightGrey,
       //   shape: RoundedRectangleBorder(

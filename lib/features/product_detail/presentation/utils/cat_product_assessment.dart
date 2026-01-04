@@ -1,5 +1,5 @@
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
-import 'package:yucat/features/product_detail/presentation/models/product_model.dart';
+import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 
 class CatProductAssessment {
   final List<String> pros;
@@ -8,7 +8,10 @@ class CatProductAssessment {
   const CatProductAssessment({required this.pros, required this.cons});
 }
 
-CatProductAssessment evaluateAgeProsCons(CatEntity cat, ProductModel product) {
+CatProductAssessment evaluateAgeProsCons(
+  CatEntity cat,
+  ProductDisplayModel product,
+) {
   final pros = <String>[];
   final cons = <String>[];
 
@@ -68,7 +71,10 @@ CatProductAssessment evaluateAgeProsCons(CatEntity cat, ProductModel product) {
 }
 
 /// Combines all current rule sets (age, weight, etc.) into a single assessment.
-CatProductAssessment evaluateCatProduct(CatEntity cat, ProductModel product) {
+CatProductAssessment evaluateCatProduct(
+  CatEntity cat,
+  ProductDisplayModel product,
+) {
   final ageAssessment = evaluateAgeProsCons(cat, product);
   final weightAssessment = evaluateWeightProsCons(cat, product);
   final activityAssessment = evaluateActivityProsCons(cat, product);
@@ -98,7 +104,7 @@ CatProductAssessment evaluateCatProduct(CatEntity cat, ProductModel product) {
 
 CatProductAssessment evaluateActivityProsCons(
   CatEntity cat,
-  ProductModel product,
+  ProductDisplayModel product,
 ) {
   final pros = <String>[];
   final cons = <String>[];
@@ -111,14 +117,14 @@ CatProductAssessment evaluateActivityProsCons(
   switch (activityLevel) {
     case 'low':
       // con: high calories (>360 kcal)
-      if (product.caloriesPer100g > 360) {
+      if (product.calories > 360) {
         cons.add(
           'High calories (>360 kcal/100g) may not suit a low-activity cat',
         );
       }
 
       // pro: moderate calorie (<330 kcal)
-      if (product.caloriesPer100g > 0 && product.caloriesPer100g < 330) {
+      if (product.calories > 0 && product.calories < 330) {
         pros.add(
           'Moderate calories (<330 kcal/100g) are better for low-activity cats',
         );
@@ -127,7 +133,7 @@ CatProductAssessment evaluateActivityProsCons(
 
     case 'high':
       // pro: high calorie (>380 kcal)
-      if (product.caloriesPer100g > 380) {
+      if (product.calories > 380) {
         pros.add(
           'Higher calories (>380 kcal/100g) support a highly active cat',
         );
@@ -145,7 +151,7 @@ CatProductAssessment evaluateActivityProsCons(
 
 CatProductAssessment evaluateBreedProsCons(
   CatEntity cat,
-  ProductModel product,
+  ProductDisplayModel product,
 ) {
   final pros = <String>[];
   final cons = <String>[];
@@ -218,7 +224,7 @@ CatProductAssessment evaluateBreedProsCons(
 
     case 'british shorthair':
       // con: high-calorie foods
-      if (product.caloriesPer100g > 360) {
+      if (product.calories > 360) {
         cons.add(
           'High-calorie food may promote weight gain in British Shorthairs',
         );
@@ -250,7 +256,7 @@ CatProductAssessment evaluateBreedProsCons(
 
 CatProductAssessment evaluateNeuteredProsCons(
   CatEntity cat,
-  ProductModel product,
+  ProductDisplayModel product,
 ) {
   final pros = <String>[];
   final cons = <String>[];
@@ -265,7 +271,7 @@ CatProductAssessment evaluateNeuteredProsCons(
   switch (status) {
     case 'neutered':
       // con: calorie dense foods (we'll interpret as very high calories)
-      if (product.caloriesPer100g > 380) {
+      if (product.calories > 380) {
         cons.add(
           'Very calorie-dense food (>380 kcal/100g) can promote weight gain in neutered cats',
         );
@@ -303,7 +309,7 @@ CatProductAssessment evaluateNeuteredProsCons(
       }
 
       // pro: calorie dense (>400kcal)
-      if (product.caloriesPer100g > 400) {
+      if (product.calories > 400) {
         pros.add(
           'Very calorie-dense food (>400 kcal/100g) helps meet energy demands in pregnancy/lactation',
         );
@@ -316,7 +322,7 @@ CatProductAssessment evaluateNeuteredProsCons(
 
 CatProductAssessment evaluateWeightProsCons(
   CatEntity cat,
-  ProductModel product,
+  ProductDisplayModel product,
 ) {
   final pros = <String>[];
   final cons = <String>[];
@@ -329,7 +335,7 @@ CatProductAssessment evaluateWeightProsCons(
   switch (bodyCondition) {
     case 'underweight':
       // pro: high calories (>380 kcal/100g)
-      if (product.caloriesPer100g > 380) {
+      if (product.calories > 380) {
         pros.add(
           'High calories (>380 kcal/100g) can help an underweight cat gain weight',
         );
@@ -347,14 +353,14 @@ CatProductAssessment evaluateWeightProsCons(
 
     case 'overweight':
       // con: high calories (>360 kcal/100g)
-      if (product.caloriesPer100g > 360) {
+      if (product.calories > 360) {
         cons.add(
           'High calories (>360 kcal/100g) may not be ideal for an overweight cat',
         );
       }
 
       // pro: low calories (<320 kcal/100g)
-      if (product.caloriesPer100g > 0 && product.caloriesPer100g < 320) {
+      if (product.calories > 0 && product.calories < 320) {
         pros.add(
           'Lower calories (<320 kcal/100g) help manage weight in overweight cats',
         );
@@ -375,7 +381,7 @@ CatProductAssessment evaluateWeightProsCons(
       }
 
       // con: calories > 330 kcal
-      if (product.caloriesPer100g > 330) {
+      if (product.calories > 330) {
         cons.add('High calories (>330 kcal/100g) are not ideal for obese cats');
       }
 
@@ -391,17 +397,17 @@ CatProductAssessment evaluateWeightProsCons(
   return CatProductAssessment(pros: pros, cons: cons);
 }
 
-bool _isSeniorFormula(ProductModel product) {
+bool _isSeniorFormula(ProductDisplayModel product) {
   final text = (product.pros + product.cons).join(' ').toLowerCase();
   return text.contains('senior');
 }
 
-bool _hasJointSupport(ProductModel product) {
+bool _hasJointSupport(ProductDisplayModel product) {
   final text = (product.pros + product.cons).join(' ').toLowerCase();
   return text.contains('glucosamine') || text.contains('chondroitin');
 }
 
-bool _isKidneyFriendly(ProductModel product) {
+bool _isKidneyFriendly(ProductDisplayModel product) {
   final text = (product.pros + product.cons).join(' ').toLowerCase();
   return text.contains('kidney') ||
       text.contains('renal') ||
@@ -409,7 +415,7 @@ bool _isKidneyFriendly(ProductModel product) {
       text.contains('reduced phosphorus');
 }
 
-bool _hasOmega3(ProductModel product) {
+bool _hasOmega3(ProductDisplayModel product) {
   final text = (product.pros + product.cons).join(' ').toLowerCase();
   return text.contains('omega-3') ||
       text.contains('omega 3') ||
@@ -417,7 +423,7 @@ bool _hasOmega3(ProductModel product) {
       text.contains('salmon oil');
 }
 
-bool _hasManyFillers(ProductModel product) {
+bool _hasManyFillers(ProductDisplayModel product) {
   final text = (product.pros + product.cons).join(' ').toLowerCase();
   final hasCorn = text.contains('corn');
   final hasWheat = text.contains('wheat');
@@ -428,7 +434,7 @@ bool _hasManyFillers(ProductModel product) {
 
 CatProductAssessment evaluateHealthConditionProsCons(
   CatEntity cat,
-  ProductModel product,
+  ProductDisplayModel product,
 ) {
   final pros = <String>[];
   final cons = <String>[];
@@ -598,7 +604,7 @@ bool _hasNovelProtein(String text) {
       text.contains('rabbit');
 }
 
-bool _isWetFood(ProductModel product) {
+bool _isWetFood(ProductDisplayModel product) {
   // Heuristic: moisture very high suggests wet food.
   return product.moisture > 70;
 }

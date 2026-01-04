@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 
 part 'onboarding_event.dart';
 part 'onboarding_state.dart';
@@ -10,10 +11,13 @@ part 'onboarding_state.dart';
 class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
   static const String _onboardingCompletedKey = 'onboarding_completed';
   final SharedPreferences _prefs;
-
-  OnBoardingBloc({required SharedPreferences prefs})
-    : _prefs = prefs,
-      super(OnBoardingLoadingState()) {
+  final LogScreenViewUsecase _logScreenViewUsecase;
+  OnBoardingBloc({
+    required SharedPreferences prefs,
+    required LogScreenViewUsecase logScreenViewUsecase,
+  }) : _prefs = prefs,
+       _logScreenViewUsecase = logScreenViewUsecase,
+       super(OnBoardingLoadingState()) {
     on<OnBoardingInitialEvent>(_onOnBoardingInitialEvent);
     on<OnBoardingCompletedEvent>(_onOnBoardingCompletedEvent);
   }
@@ -22,6 +26,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     OnBoardingInitialEvent event,
     Emitter<OnBoardingState> emit,
   ) async {
+    _logScreenViewUsecase.call(screenName: 'OnBoardingScreen');
     print('OnBoardingBloc _onOnBoardingInitialEvent');
     emit(OnBoardingLoadingState());
     // emit(OnBoardingReadyState());
