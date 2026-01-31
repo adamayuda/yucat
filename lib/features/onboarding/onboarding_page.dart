@@ -166,105 +166,139 @@ class _OnBoardingPage extends State<OnBoardingPage> {
     }
   }
 
+  void _onSkip() {
+    _bloc.add(OnBoardingSkipEvent(context: context));
+  }
+
   Widget _buildOnboarding() {
+    final theme = Theme.of(context);
+
     final pages = [
       const _OnboardingView(
-        image: 'assets/images/onboarding1.png',
-        title: 'Discover What’s Really in Your Cat’s Food',
+        image: 'assets/images/boarding1.png',
+        title: 'Hey, welcome!',
         subtitle:
-            'Scan any cat food barcode to see ingredients, nutrition quality, and brand transparency — all in one tap.',
+            'Scan any cat food barcode to instantly see ingredients and nutrition quality.',
       ),
       const _OnboardingView(
-        image: 'assets/images/onboarding2.png',
-        title: 'Scan Instantly or Search',
-        subtitle:
-            'Point your camera at a barcode or type the product name to reveal ingredient insights and healthier alternatives.',
+        image: 'assets/images/boarding2.png',
+        title: 'Cat product scanner',
+        subtitle: "Scan any cat food barcode and see what's inside",
       ),
       const _OnboardingView(
-        image: 'assets/images/onboarding3.png',
-        title: 'Understand. Compare. Choose Better.',
+        image: 'assets/images/boarding3.png',
+        title: 'Join the Community',
         subtitle:
-            'Yucat helps you spot unhealthy ingredients and pick the best food for your furry friend — every single day.',
+            "Create your cat's profile to explore trusted product ratings and connect with passionate cat owners.",
+      ),
+      const _OnboardingView(
+        image: 'assets/images/boarding4.png',
+        title: 'Add New Cat',
+        subtitle: "Let's create your profile. This will ony take a minute!",
       ),
     ];
 
     return Scaffold(
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: _onPageChanged,
-                children: pages,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: DSDimens.sizeL),
-              child: Column(
-                children: [
-                  if (_currentPage == pages.length - 1) ...[
-                    SizedBox(
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: DSDimens.sizeL,
-                        ),
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _onGetStarted,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: DSColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: DSDimens.sizeS,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                DSDimens.sizeXs,
+            Column(
+              children: [
+                Expanded(
+                  child: PageView(
+                    controller: _pageController,
+                    onPageChanged: _onPageChanged,
+                    children: pages,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: DSDimens.sizeL),
+                  child: SizedBox(
+                    height: 60,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        if (_currentPage == pages.length - 1)
+                          SizedBox(
+                            width: double.infinity,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: DSDimens.sizeL,
                               ),
-                            ),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _onGetStarted,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: DSColors.primary,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: DSDimens.sizeS,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      DSDimens.sizeXxs,
                                     ),
                                   ),
-                                )
-                              : const Text(
-                                  'Get Started',
-                                  style: TextStyle(
-                                    fontSize: DSDimens.sizeS,
-                                    fontWeight: FontWeight.w600,
-                                  ),
                                 ),
-                        ),
-                      ),
-                    ),
-                  ],
-                  if (_currentPage != pages.length - 1)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SmoothPageIndicator(
-                          controller: _pageController,
-                          count: pages.length,
-                          effect: const WormEffect(
-                            dotColor: DSColors.white,
-                            activeDotColor: DSColors.primary,
-                            dotHeight: 10,
-                            dotWidth: 10,
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Start',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          )
+                        else
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SmoothPageIndicator(
+                                controller: _pageController,
+                                count: pages.length,
+                                effect: const WormEffect(
+                                  dotColor: Color(0xFFF9E9F5),
+                                  activeDotColor: DSColors.primary,
+                                  dotHeight: 14,
+                                  dotWidth: 14,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
                       ],
                     ),
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
+            if (_currentPage == pages.length - 1)
+              Positioned(
+                top: DSDimens.sizeS,
+                right: DSDimens.sizeL,
+                child: TextButton(
+                  onPressed: _onSkip,
+                  child: Text(
+                    'Skip',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontSize: 16,
+                      color: const Color(0xFF686868),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -288,28 +322,32 @@ class _OnboardingView extends StatelessWidget {
     final theme = Theme.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+        padding: const EdgeInsets.symmetric(horizontal: 40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(
-              width: 256,
-              height: 256,
+              width: 342,
+              height: 198,
               child: Image.asset(image, fit: BoxFit.contain),
             ),
-            const SizedBox(height: DSDimens.sizeXs),
+            const SizedBox(height: 50),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: theme.textTheme.displaySmall,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontSize: 29,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(height: DSDimens.sizeXs),
+            const SizedBox(height: DSDimens.sizeS),
             Text(
               subtitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: DSColors.darkGrey,
+                fontSize: 16,
+                color: const Color(0xFF686868),
               ),
             ),
           ],

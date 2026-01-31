@@ -30,173 +30,94 @@ class ProfilePhotoStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Text(
-              'Add a photo of your cat',
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(),
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5E8FF),
+                  borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
+                ),
+                width: 40,
+                height: 40,
+                child: Image.asset(
+                  'assets/images/camera.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              SizedBox(width: DSDimens.sizeS),
+              Expanded(
+                child: Text(
+                  'Add a photo of your cat',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontSize: 29,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
+          SizedBox(height: DSDimens.sizeS),
+
           Center(
             child: Text(
               'A cute picture makes the profile feel complete.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-          SizedBox(height: DSDimens.sizeM),
-          if (hasSelection)
-            // Show selected photo centered
-            Column(
+          SizedBox(height: DSDimens.sizeS),
+          GestureDetector(
+            onTap: () async {
+              final XFile? image = await imagePicker.pickImage(
+                source: ImageSource.gallery,
+              );
+              if (image != null) {
+                onPhotoSelected(File(image.path));
+              }
+            },
+            child: Column(
               children: [
-                Center(
-                  child: Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: DSColors.white,
-                      borderRadius: BorderRadius.circular(DSDimens.sizeM),
-                      border: Border.all(color: Colors.grey[300]!, width: 1),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(DSDimens.sizeM),
-                      child: profilePhoto != null
-                          ? Image.file(profilePhoto!, fit: BoxFit.cover)
-                          : Image.asset(
-                              'assets/images/cat_default.png',
-                              fit: BoxFit.cover,
-                            ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: DSDimens.sizeM),
-                Center(
-                  child: OutlinedButton(
-                    onPressed: onRemovePhoto,
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: DSColors.primary),
-                      foregroundColor: Colors.white,
-                      backgroundColor: DSColors.primary.withOpacity(0.1),
-                    ),
-                    child: Text(
-                      'Change Photo',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: DSColors.inputDarkGrey,
+                Container(
+                  width: double.infinity,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 175,
+                        height: 175,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFFEFEFEF),
+                        ),
+                        child: profilePhoto != null
+                            ? ClipOval(
+                                child: Image.file(
+                                  profilePhoto!,
+                                  width: 175,
+                                  height: 175,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Icon(
+                                Icons.camera_alt,
+                                size: 85,
+                                color: DSColors.white,
+                              ),
                       ),
-                    ),
-                  ),
-                ),
-              ],
-            )
-          else
-            // Show both options side by side
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Upload square
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () async {
-                      final XFile? image = await imagePicker.pickImage(
-                        source: ImageSource.gallery,
-                      );
-                      if (image != null) {
-                        onPhotoSelected(File(image.path));
-                      }
-                    },
-                    child: Column(
-                      children: [
-                        AspectRatio(
-                          aspectRatio: 1,
-                          child: Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: DSColors.white,
-                              borderRadius: BorderRadius.circular(
-                                DSDimens.sizeM,
-                              ),
-                              border: Border.all(
-                                color: Colors.grey[300]!,
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 80,
-                                  height: 80,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: DSColors.primary.withOpacity(0.1),
-                                  ),
-                                  child: Icon(
-                                    Icons.camera_alt,
-                                    size: 40,
-                                    color: DSColors.primary,
-                                  ),
-                                ),
-                                SizedBox(height: DSDimens.sizeS),
-                                Text(
-                                  'Upload Photo',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(width: DSDimens.sizeM),
-                // Default square
-                Expanded(
-                  child: GestureDetector(
-                    onTap: onUseDefault,
-                    child: Column(
-                      children: [
-                        AspectRatio(
-                          aspectRatio: 1,
-                          child: Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: DSColors.white,
-                              borderRadius: BorderRadius.circular(
-                                DSDimens.sizeM,
-                              ),
-                              border: Border.all(
-                                color: Colors.grey[300]!,
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 80,
-                                  height: 80,
-                                  child: Image.asset(
-                                    'assets/images/cat_default.png',
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                                SizedBox(height: DSDimens.sizeS),
-                                Text(
-                                  'Use Default',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      SizedBox(height: DSDimens.sizeS),
+                      Text(
+                        'Tap to upload',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
+          ),
         ],
       ),
     );

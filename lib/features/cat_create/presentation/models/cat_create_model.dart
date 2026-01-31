@@ -9,6 +9,7 @@ class CatCreateModel {
   final File? profileImageFile;
   final String? neuteredStatus;
   final String? breed;
+  final String? gender;
   final String? weightCategory;
   final String? activityLevel;
   final String? coatType;
@@ -23,6 +24,7 @@ class CatCreateModel {
     this.profileImageFile,
     this.neuteredStatus,
     this.breed,
+    this.gender,
     this.weightCategory,
     this.activityLevel,
     this.coatType,

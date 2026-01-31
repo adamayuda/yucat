@@ -400,7 +400,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   child: Container(
                     padding: EdgeInsets.all(DSDimens.sizeS),
                     decoration: BoxDecoration(
-                      color: DSColors.lightGrey.withOpacity(0.3),
+                      color: DSColors.white,
                       borderRadius: BorderRadius.circular(DSDimens.sizeS),
                     ),
                     child: Column(

@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
@@ -17,10 +16,10 @@ import 'package:yucat/features/cat_create/widgets/age_step.dart';
 import 'package:yucat/features/cat_create/widgets/breed_step.dart';
 import 'package:yucat/features/cat_create/widgets/cat_name_step.dart';
 import 'package:yucat/features/cat_create/widgets/coat_step.dart';
+import 'package:yucat/features/cat_create/widgets/gender_step.dart';
 import 'package:yucat/features/cat_create/widgets/health_conditions_step.dart';
 import 'package:yucat/features/cat_create/widgets/neutered_status_step.dart';
 import 'package:yucat/features/cat_create/widgets/profile_photo_step.dart';
-import 'package:yucat/features/cat_create/widgets/weight_step.dart';
 import 'package:yucat/services/cat_tracking_service.dart';
 import 'package:yucat/service_locator.dart';
 
@@ -67,8 +66,11 @@ class _CreateCatPageState extends State<CreateCatPage> {
 
   bool _neutered = false;
   String? _neuteredStatus;
-  String? _breed;
+  String? _breed = 'Other';
   String? _ageGroup;
+  int _years = 0;
+  int _months = 0;
+  String? _gender;
   String? _weightCategory;
   String? _activityLevel;
   String? _coatType;
@@ -81,6 +83,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
   final PageController _pageController = PageController();
 
   static const List<String> _breeds = [
+    'Other',
     'Abyssinian',
     'American Shorthair',
     'Bengal',
@@ -104,7 +107,6 @@ class _CreateCatPageState extends State<CreateCatPage> {
     'Tonkinese',
     'Turkish Angora',
     'Tuxedo',
-    'Other',
   ];
 
   late CatCreateBloc _bloc;
@@ -163,6 +165,18 @@ class _CreateCatPageState extends State<CreateCatPage> {
     }
   }
 
+  void _goToPreviousStep() {
+    if (_currentStep > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      // If on first step, exit the page
+      Navigator.of(context).pop();
+    }
+  }
+
   Future<void> _handleSubmit() async {
     // The name field is already validated on step 0 via `_goToNextStep`.
     // At this point the field widget may not be mounted anymore, so we
@@ -189,22 +203,22 @@ class _CreateCatPageState extends State<CreateCatPage> {
       return;
     }
 
-    final canCreateCat = await _catTrackingService.canCreateCat(
-      userId: user.uid,
-    );
-    if (!canCreateCat) {
-      // User has reached free cat limit, show paywall
-      await _showPaywall();
+    // final canCreateCat = await _catTrackingService.canCreateCat(
+    //   userId: user.uid,
+    // );
+    // if (!canCreateCat) {
+    //   // User has reached free cat limit, show paywall
+    //   await _showPaywall();
 
-      // After paywall is dismissed, check again if user can create (in case they subscribed)
-      final canCreateAfterPaywall = await _catTrackingService.canCreateCat(
-        userId: user.uid,
-      );
-      if (!canCreateAfterPaywall) {
-        // User still can't create, don't proceed
-        return;
-      }
-    }
+    //   // After paywall is dismissed, check again if user can create (in case they subscribed)
+    //   final canCreateAfterPaywall = await _catTrackingService.canCreateCat(
+    //     userId: user.uid,
+    //   );
+    //   if (!canCreateAfterPaywall) {
+    //     // User still can't create, don't proceed
+    //     return;
+    //   }
+    // }
 
     setState(() => _isLoading = true);
 
@@ -219,6 +233,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
           profileImageFile: _profilePhoto,
           neuteredStatus: _neuteredStatus,
           breed: _breed,
+          gender: _gender,
           weightCategory: _weightCategory,
           activityLevel: _activityLevel,
           coatType: _coatType,
@@ -228,95 +243,95 @@ class _CreateCatPageState extends State<CreateCatPage> {
     );
   }
 
-  Future<void> _showPaywall() async {
-    setState(() {
-      _isLoading = true;
-    });
+  // Future<void> _showPaywall() async {
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
 
-    try {
-      CustomerInfo customerInfo = await Purchases.getCustomerInfo();
+  //   try {
+  //     CustomerInfo customerInfo = await Purchases.getCustomerInfo();
 
-      if (customerInfo.entitlements.all[_entitlementID] != null &&
-          customerInfo.entitlements.all[_entitlementID]?.isActive == true) {
-        // User already has active subscription
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('You already have an active subscription'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      } else {
-        Offerings? offerings;
-        try {
-          offerings = await Purchases.getOfferings();
-        } on PlatformException catch (e) {
-          if (mounted) {
-            await showDialog(
-              context: context,
-              builder: (BuildContext context) => AlertDialog(
-                title: const Text('Error'),
-                content: Text(e.message ?? 'Unknown error'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('OK'),
-                  ),
-                ],
-              ),
-            );
-          }
-        }
+  //     if (customerInfo.entitlements.all[_entitlementID] != null &&
+  //         customerInfo.entitlements.all[_entitlementID]?.isActive == true) {
+  //       // User already has active subscription
+  //       if (mounted) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           const SnackBar(
+  //             content: Text('You already have an active subscription'),
+  //             duration: Duration(seconds: 2),
+  //           ),
+  //         );
+  //       }
+  //     } else {
+  //       Offerings? offerings;
+  //       try {
+  //         offerings = await Purchases.getOfferings();
+  //       } on PlatformException catch (e) {
+  //         if (mounted) {
+  //           await showDialog(
+  //             context: context,
+  //             builder: (BuildContext context) => AlertDialog(
+  //               title: const Text('Error'),
+  //               content: Text(e.message ?? 'Unknown error'),
+  //               actions: [
+  //                 TextButton(
+  //                   onPressed: () => Navigator.of(context).pop(),
+  //                   child: const Text('OK'),
+  //                 ),
+  //               ],
+  //             ),
+  //           );
+  //         }
+  //       }
 
-        if (offerings == null || offerings.current == null) {
-          // Offerings are empty, show a message to your user
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('No offerings available at this time'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          }
-        } else if (offerings.current!.availablePackages.isEmpty) {
-          // Offering exists but has no packages/products configured
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'No subscription packages available. Please configure products in RevenueCat dashboard.',
-                ),
-                backgroundColor: Colors.orange,
-                duration: Duration(seconds: 4),
-              ),
-            );
-          }
-        } else {
-          // Current offering is available with packages, show paywall
-          final paywallResult = await RevenueCatUI.presentPaywall();
-          debugPrint('Paywall result: $paywallResult');
-        }
-      }
-    } catch (e) {
-      debugPrint('Error showing paywall: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
+  //       if (offerings == null || offerings.current == null) {
+  //         // Offerings are empty, show a message to your user
+  //         if (mounted) {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             const SnackBar(
+  //               content: Text('No offerings available at this time'),
+  //               duration: Duration(seconds: 2),
+  //             ),
+  //           );
+  //         }
+  //       } else if (offerings.current!.availablePackages.isEmpty) {
+  //         // Offering exists but has no packages/products configured
+  //         if (mounted) {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             const SnackBar(
+  //               content: Text(
+  //                 'No subscription packages available. Please configure products in RevenueCat dashboard.',
+  //               ),
+  //               backgroundColor: Colors.orange,
+  //               duration: Duration(seconds: 4),
+  //             ),
+  //           );
+  //         }
+  //       } else {
+  //         // Current offering is available with packages, show paywall
+  //         final paywallResult = await RevenueCatUI.presentPaywall();
+  //         debugPrint('Paywall result: $paywallResult');
+  //       }
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Error showing paywall: $e');
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text('Error: ${e.toString()}'),
+  //           backgroundColor: Colors.red,
+  //           duration: const Duration(seconds: 3),
+  //         ),
+  //       );
+  //     }
+  //   } finally {
+  //     if (mounted) {
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
+  //     }
+  //   }
+  // }
 
   Widget _buildStepWrapper(int stepIndex) {
     return SingleChildScrollView(
@@ -331,7 +346,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
+          // mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildStepContent(stepIndex),
             SizedBox(height: DSDimens.sizeXl),
@@ -375,6 +390,16 @@ class _CreateCatPageState extends State<CreateCatPage> {
           },
         );
       case 2:
+        return GenderStep(
+          key: const ValueKey('step_3'),
+          gender: _gender,
+          onGenderChanged: (value) {
+            setState(() {
+              _gender = value;
+            });
+          },
+        );
+      case 3:
         return AgeStep(
           key: const ValueKey('step_2'),
           ageGroup: _ageGroup,
@@ -383,14 +408,16 @@ class _CreateCatPageState extends State<CreateCatPage> {
               _ageGroup = value;
             });
           },
-        );
-      case 3:
-        return WeightStep(
-          key: const ValueKey('step_3'),
-          weightCategory: _weightCategory,
-          onWeightCategoryChanged: (value) {
+          years: _years,
+          months: _months,
+          onYearsChanged: (value) {
             setState(() {
-              _weightCategory = value;
+              _years = value;
+            });
+          },
+          onMonthsChanged: (value) {
+            setState(() {
+              _months = value;
             });
           },
         );
@@ -451,6 +478,88 @@ class _CreateCatPageState extends State<CreateCatPage> {
     }
   }
 
+  Widget _buildStepperBar() {
+    const totalSteps = 9;
+    final currentStepNumber = _currentStep + 1;
+    final progress = currentStepNumber / totalSteps;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              TextButton.icon(
+                onPressed: _goToPreviousStep,
+                icon: Icon(
+                  Icons.chevron_left,
+                  size: 24,
+                  color: const Color(0xFF686868),
+                ),
+                label: Text(
+                  'Back',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF686868),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 12,
+            width: double.infinity,
+            child: Stack(
+              children: [
+                // Background (uncompleted portion)
+                Container(
+                  width: double.infinity,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: const Color(
+                      0xFFF5E8FF,
+                    ), // Light lavender/pale purple
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                // Progress (completed portion)
+                FractionallySizedBox(
+                  widthFactor: progress,
+                  child: Container(
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFFF5FC9), // Pink/vibrant color
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Step $currentStepNumber of $totalSteps',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: const Color(0xFF686868),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<CatCreateBloc, CatCreateState>(
@@ -471,36 +580,21 @@ class _CreateCatPageState extends State<CreateCatPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: DSColors.lightGrey,
+        backgroundColor: DSColors.white,
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kToolbarHeight * 1.5),
+          preferredSize: const Size.fromHeight(kToolbarHeight * 1.5 + 8),
           child: AppBar(
-            backgroundColor: DSColors.lightGrey,
+            backgroundColor: DSColors.white,
             scrolledUnderElevation: 0,
             surfaceTintColor: Colors.transparent,
             automaticallyImplyLeading: false,
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SmoothPageIndicator(
-                  controller: _pageController,
-                  count: 9,
-                  effect: const WormEffect(
-                    dotColor: Colors.grey,
-                    activeDotColor: DSColors.primary,
-                    dotHeight: 10,
-                    dotWidth: 10,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(),
+            titleSpacing: 0,
+            flexibleSpace: SafeArea(
+              child: SizedBox(
+                width: double.infinity,
+                child: _buildStepperBar(),
               ),
-            ],
+            ),
           ),
         ),
         body: _isLoading
@@ -508,7 +602,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
             : LayoutBuilder(
                 builder: (context, constraints) {
                   return Padding(
-                    padding: EdgeInsets.all(DSDimens.sizeL),
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 62),
                     child: PageView(
                       controller: _pageController,
                       onPageChanged: _onPageChanged,
@@ -536,56 +630,143 @@ class _CreateCatPageState extends State<CreateCatPage> {
             ? null
             : Padding(
                 padding: EdgeInsets.only(
-                  left: DSDimens.sizeS,
-                  right: DSDimens.sizeS,
-                  top: DSDimens.sizeS,
-                  bottom:
-                      MediaQuery.of(context).padding.bottom + DSDimens.sizeL,
+                  left: 40,
+                  right: 40,
+                  // top: DSDimens.sizeS,
+                  bottom: 50,
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _isLoading
-                            ? null
-                            : _currentStep == 8
-                            ? () => _handleSubmit()
-                            : _goToNextStep,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: DSColors.primary,
-                          foregroundColor: DSColors.white,
-                          padding: EdgeInsets.symmetric(
-                            vertical: DSDimens.sizeM,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(DSDimens.sizeS),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    DSColors.white,
+                child: _currentStep == 1
+                    ? Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: _goToNextStep,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFF3F4F6),
+                                    foregroundColor: DSColors.white,
+                                    disabledBackgroundColor: const Color(
+                                      0xFFEDAFDD,
+                                    ),
+                                    disabledForegroundColor: DSColors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: DSDimens.sizeS,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        DSDimens.sizeXxs,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Skip for now',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: const Color(0xFF475567),
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
-                              )
-                            : Text(
-                                _currentStep == 8
-                                    ? 'Complete Profile'
-                                    : 'Continue',
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(
-                                      color: DSColors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
                               ),
+                            ],
+                          ),
+                          SizedBox(height: DSDimens.sizeS),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: _isLoading
+                                      ? null
+                                      : _profilePhoto == null
+                                      ? null
+                                      : _goToNextStep,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: DSColors.primary,
+                                    foregroundColor: DSColors.white,
+                                    disabledBackgroundColor: const Color(
+                                      0xFFEDAFDD,
+                                    ),
+                                    disabledForegroundColor: DSColors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: DSDimens.sizeS,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        DSDimens.sizeXxs,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Next',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: _isLoading
+                                  ? null
+                                  : _currentStep == 0 &&
+                                        _nameController.text.trim().isEmpty
+                                  ? null
+                                  : _currentStep == 8
+                                  ? () => _handleSubmit()
+                                  : _goToNextStep,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: DSColors.primary,
+                                foregroundColor: DSColors.white,
+                                disabledBackgroundColor: const Color(
+                                  0xFFEDAFDD,
+                                ),
+                                disabledForegroundColor: DSColors.white,
+                                // padding: EdgeInsets.symmetric(
+                                //   vertical: DSDimens.sizeM,
+                                // ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: DSDimens.sizeS,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    DSDimens.sizeXxs,
+                                  ),
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              DSColors.white,
+                                            ),
+                                      ),
+                                    )
+                                  : Text(
+                                      _currentStep == 8
+                                          ? 'Create Profile'
+                                          : 'Next',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
               ),
       ),
     );

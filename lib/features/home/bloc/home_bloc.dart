@@ -36,7 +36,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
        _logScreenViewUsecase = logScreenViewUsecase,
        super(HomeHiddenState()) {
     on<HomeInitialEvent>(_onHomeInitialEvent);
-    on<CountryTapEvent>(_onCountryTapEvent);
     on<SearchByBarcodeEvent>(_onSearchByBarcodeEvent);
     on<BarcodeDetectedEvent>(_onBarcodeDetectedEvent);
     on<PaywallDismissedEvent>(_onPaywallDismissedEvent);
@@ -58,17 +57,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     // await Future.delayed(const Duration(milliseconds: 100));
 
     emit(HomeLoadedState());
-  }
-
-  Future<void> _onCountryTapEvent(
-    CountryTapEvent event,
-    Emitter<HomeState> emit,
-  ) async {
-    print('pushing plan listing route');
-    // event.context.router.push(
-    //   PlanListingRoute(countryCode: event.countryCode),
-    // );
-    // final user = currentUserUsecase();
   }
 
   Future<void> _onSearchByBarcodeEvent(
@@ -105,8 +93,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async {
     // Check subscription status first
-    final hasSubscription = await _scanTrackingService.hasActiveSubscription();
-    print('BarcodeDetectedEvent: hasSubscription = $hasSubscription');
+    // final hasSubscription = await _scanTrackingService.hasActiveSubscription();
+    // print('BarcodeDetectedEvent: hasSubscription = $hasSubscription');
 
     // Check if user can perform scan
     final canScan = await _scanTrackingService.canPerformScan();
@@ -121,16 +109,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     // User can scan - increment count if they don't have subscription
-    if (!hasSubscription) {
-      print(
-        'BarcodeDetectedEvent: No subscription, incrementing free scan count',
-      );
-      await _scanTrackingService.incrementFreeScansCount();
-    } else {
-      print(
-        'BarcodeDetectedEvent: User has subscription, skipping scan count increment',
-      );
-    }
+    // if (!hasSubscription) {
+    //   print(
+    //     'BarcodeDetectedEvent: No subscription, incrementing free scan count',
+    //   );
+    //   await _scanTrackingService.incrementFreeScansCount();
+    // } else {
+    //   print(
+    //     'BarcodeDetectedEvent: User has subscription, skipping scan count increment',
+    //   );
+    // }
+    await _scanTrackingService.incrementFreeScansCount();
 
     // Process the scan
     print(
@@ -146,11 +135,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     if (event.purchasedSubscription && _pendingBarcode != null) {
       // User purchased subscription, process the scan immediately
       // User can scan - increment count if they don't have subscription
-      final hasSubscription = await _scanTrackingService
-          .hasActiveSubscription();
-      if (!hasSubscription) {
-        await _scanTrackingService.incrementFreeScansCount();
-      }
+      // final hasSubscription = await _scanTrackingService
+      //     .hasActiveSubscription();
+      // if (!hasSubscription) {
+      //   await _scanTrackingService.incrementFreeScansCount();
+      // }
 
       // Process the scan
       emit(HomeScanProcessedState(barcode: _pendingBarcode!));

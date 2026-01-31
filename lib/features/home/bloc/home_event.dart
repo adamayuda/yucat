@@ -10,27 +10,11 @@ class HomeInitialEvent extends HomeEvent {
   List<Object?> get props => [];
 }
 
-class CountryTapEvent extends HomeEvent {
-  final String countryCode;
-  final BuildContext context;
-
-  const CountryTapEvent({
-    required this.countryCode,
-    required this.context,
-  });
-
-  @override
-  List<Object?> get props => [countryCode, context];
-}
-
 class SearchEvent extends HomeEvent {
   final String query;
   final BuildContext context;
 
-  const SearchEvent({
-    required this.query,
-    required this.context,
-  });
+  const SearchEvent({required this.query, required this.context});
 
   @override
   List<Object?> get props => [query, context];

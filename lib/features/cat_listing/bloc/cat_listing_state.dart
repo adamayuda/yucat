@@ -28,3 +28,17 @@ class CatListingErrorState extends CatListingState {
   @override
   List<Object?> get props => [message];
 }
+
+class CatListingShowPaywallState extends CatListingState {
+  const CatListingShowPaywallState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class CatListingEmptyState extends CatListingState {
+  const CatListingEmptyState();
+
+  @override
+  List<Object?> get props => [];
+}

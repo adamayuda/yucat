@@ -204,20 +204,9 @@ class _HomePage extends State<HomePage> {
           body: const _ProductLoadingView(),
         );
       case HomeLoadedState():
-        return _HomeLoadedState(
-          bloc: _bloc,
-          onTap: (countryCode) => _dispatch(
-            CountryTapEvent(countryCode: countryCode, context: context),
-          ),
-        );
+        return _HomeLoadedState(bloc: _bloc);
       case HomeSearchResultsState():
-        return _HomeLoadedState(
-          bloc: _bloc,
-          onTap: (countryCode) => _dispatch(
-            CountryTapEvent(countryCode: countryCode, context: context),
-          ),
-          searchResults: state.products,
-        );
+        return _HomeLoadedState(bloc: _bloc, searchResults: state.products);
       case HomeErrorState():
         return Scaffold(
           body: Center(
@@ -243,14 +232,9 @@ class _HomePage extends State<HomePage> {
 
 class _HomeLoadedState extends StatefulWidget {
   final HomeBloc bloc;
-  final void Function(String) onTap;
   final List<ProductDisplayModel>? searchResults;
 
-  const _HomeLoadedState({
-    required this.bloc,
-    required this.onTap,
-    this.searchResults,
-  });
+  const _HomeLoadedState({required this.bloc, this.searchResults});
 
   @override
   State<_HomeLoadedState> createState() => __HomeLoadedState();

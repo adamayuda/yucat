@@ -1,29 +1,20 @@
-import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
+import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 
 class CatTrackingService {
-  static const String _entitlementID = 'yucat Pro';
   static const int _maxFreeCats = 1;
 
   final GetCatsUsecase _getCatsUsecase;
+  final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
 
-  CatTrackingService({required GetCatsUsecase getCatsUsecase})
-      : _getCatsUsecase = getCatsUsecase;
-
-  /// Check if user has an active subscription
-  Future<bool> hasActiveSubscription() async {
-    try {
-      final customerInfo = await Purchases.getCustomerInfo();
-      final entitlement = customerInfo.entitlements.all[_entitlementID];
-      return entitlement?.isActive == true;
-    } catch (e) {
-      // If there's an error checking subscription, assume no subscription
-      return false;
-    }
-  }
+  CatTrackingService({
+    required GetCatsUsecase getCatsUsecase,
+    required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
+  }) : _getCatsUsecase = getCatsUsecase,
+       _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase;
 
   /// Get the current number of cats for a user
-  Future<int> getCatsCount({required String userId}) async {
+  Future<int> _getCatsCount({required String userId}) async {
     try {
       final cats = await _getCatsUsecase(userId: userId);
       return cats.length;
@@ -34,18 +25,17 @@ class CatTrackingService {
   }
 
   /// Check if user has reached the free cat limit
-  Future<bool> hasReachedFreeCatLimit({required String userId}) async {
-    final catsCount = await getCatsCount(userId: userId);
+  Future<bool> _hasReachedFreeCatLimit({required String userId}) async {
+    final catsCount = await _getCatsCount(userId: userId);
     return catsCount >= _maxFreeCats;
   }
 
   /// Check if user can create a cat (has subscription or hasn't reached limit)
   Future<bool> canCreateCat({required String userId}) async {
-    final hasSubscription = await hasActiveSubscription();
+    final hasSubscription = await _hasActiveSubscriptionUseCase();
     if (hasSubscription) {
       return true;
     }
-    return !(await hasReachedFreeCatLimit(userId: userId));
+    return !(await _hasReachedFreeCatLimit(userId: userId));
   }
 }
-

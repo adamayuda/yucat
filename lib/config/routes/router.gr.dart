@@ -91,6 +91,22 @@ class OnBoardingRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [PaywallPage]
+class PaywallRoute extends PageRouteInfo<void> {
+  const PaywallRoute({List<PageRouteInfo>? children})
+    : super(PaywallRoute.name, initialChildren: children);
+
+  static const String name = 'PaywallRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const PaywallPage();
+    },
+  );
+}
+
+/// generated route for
 /// [ProductDetailPage]
 class ProductDetailRoute extends PageRouteInfo<ProductDetailRouteArgs> {
   ProductDetailRoute({

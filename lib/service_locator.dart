@@ -6,6 +6,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:yucat/core/subscription/data/repositories/subscription_repository_impl.dart';
+import 'package:yucat/core/subscription/domain/repositories/subscription_repository.dart';
+import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 import 'package:yucat/features/analytics/data/repository/analytics_repository_impl.dart';
 import 'package:yucat/features/analytics/data/sources/analytics_data_source.dart';
 import 'package:yucat/features/analytics/domain/repository/analytics_repository.dart';
@@ -36,6 +39,7 @@ import 'package:yucat/features/cat_listing/bloc/cat_listing_bloc.dart';
 import 'package:yucat/features/cat_listing/mappers/cat_entity_to_model_mapper.dart';
 import 'package:yucat/features/home/bloc/home_bloc.dart';
 import 'package:yucat/features/onboarding/bloc/onboarding_bloc.dart';
+import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
 import 'package:yucat/features/product_detail/presentation/bloc/product_detail_bloc.dart';
 import 'package:yucat/features/product_listing/presentation/bloc/product_listing_bloc.dart';
 import 'package:yucat/features/profile/bloc/profile_bloc.dart';
@@ -160,6 +164,7 @@ Future<void> _registerRepositories() async {
   sl.registerSingleton<AuthRepository>(
     AuthRepositoryImpl(dataSource: sl<AuthFirebaseDataSource>()),
   );
+  sl.registerSingleton<SubscriptionRepository>(SubscriptionRepositoryImpl());
 }
 
 Future<void> _registerUseCases() async {
@@ -202,14 +207,23 @@ Future<void> _registerUseCases() async {
   sl.registerSingleton<SigninAnonymouslyUsecase>(
     SigninAnonymouslyUsecase(repository: sl<AuthRepository>()),
   );
+  sl.registerSingleton<HasActiveSubscriptionUseCase>(
+    HasActiveSubscriptionUseCase(repository: sl<SubscriptionRepository>()),
+  );
 }
 
 Future<void> _registerServices() async {
   sl.registerSingleton<ScanTrackingService>(
-    ScanTrackingService(prefs: sl<SharedPreferences>()),
+    ScanTrackingService(
+      prefs: sl<SharedPreferences>(),
+      hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
+    ),
   );
   sl.registerSingleton<CatTrackingService>(
-    CatTrackingService(getCatsUsecase: sl<GetCatsUsecase>()),
+    CatTrackingService(
+      getCatsUsecase: sl<GetCatsUsecase>(),
+      hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
+    ),
   );
 }
 
@@ -267,6 +281,7 @@ Future<void> _registerBlocs() async {
       catEntityToModelMapper: sl<CatEntityToModelMapper>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+      catTrackingService: sl<CatTrackingService>(),
     ),
   );
   sl.registerBloc<CatCreateBloc>(
@@ -274,6 +289,11 @@ Future<void> _registerBlocs() async {
       createCatUsecase: sl<CreateCatUsecase>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+    ),
+  );
+  sl.registerBloc<PaywallBloc>(
+    () => PaywallBloc(
+      hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
     ),
   );
 }

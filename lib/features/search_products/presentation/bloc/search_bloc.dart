@@ -70,15 +70,9 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     SearchQueryEvent event,
     Emitter<SearchState> emit,
   ) async {
-    if (event.query.isEmpty) {
+    if (event.query.isEmpty || event.query.length < 3) {
       EasyDebounce.cancel('search_query');
-      emit(const SearchLoadedState());
-      return;
-    }
-
-    // If query is less than 3 characters, show initial discover state
-    if (event.query.length < 3) {
-      EasyDebounce.cancel('search_query');
+      // emit(const SearchLoadedState());
       if (_brands.isNotEmpty) {
         emit(SearchDiscoverLoadedState(brands: _brands));
       }

@@ -25,66 +25,73 @@ class NeuteredStatusStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Text(
-              'Is your cat neutered?',
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(),
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5E8FF),
+                  borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
+                ),
+                width: 40,
+                height: 40,
+                child: Image.asset(
+                  'assets/images/vaccin.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              SizedBox(width: DSDimens.sizeS),
+              Expanded(
+                child: Text(
+                  'Is your cat neutered?',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontSize: 29,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
+          SizedBox(height: DSDimens.sizeS),
           Center(
             child: Text(
               'Neutered cats often need different calorie levels.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-          SizedBox(height: DSDimens.sizeM),
+
+          SizedBox(height: DSDimens.sizeS),
 
           Column(
             children: _options.map((option) {
               final isSelected = status == option['value'];
               return Padding(
-                padding: EdgeInsets.only(
-                  bottom: option == _options.last ? 0 : DSDimens.sizeS,
-                ),
+                padding: const EdgeInsets.only(bottom: 16),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
                   onTap: () => onStatusChanged(option['value']),
+                  borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: DSDimens.sizeS,
-                      vertical: DSDimens.sizeXs,
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-                      border: Border.all(
-                        color: isSelected
-                            ? DSColors.primary
-                            : Colors.grey[300]!,
-                        width: isSelected ? 2 : 1,
-                      ),
+                      color: isSelected
+                          ? const Color(0xFFFEF5FE)
+                          : const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            option['label']!,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                                  color: isSelected
-                                      ? DSColors.primary
-                                      : Colors.grey[800],
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      option['label']!,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFF334156),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),

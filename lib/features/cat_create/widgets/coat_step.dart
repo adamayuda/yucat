@@ -17,93 +17,79 @@ class CoatStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'What type of coat does your cat have?',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(),
-          ),
-          Text(
-            'Coat health can guide ingredient recommendations.',
-            textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-          ),
-          SizedBox(height: DSDimens.sizeM),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: _CoatOption(
-                  label: 'Short hair',
-                  value: 'short_hair',
-                  isSelected: coatType == 'short_hair',
-                  onTap: () => onCoatTypeChanged('short_hair'),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5E8FF),
+                  borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
+                ),
+                width: 40,
+                height: 40,
+                child: Image.asset(
+                  'assets/images/camera.png',
+                  fit: BoxFit.contain,
                 ),
               ),
-              SizedBox(width: DSDimens.sizeM),
+              SizedBox(width: DSDimens.sizeS),
               Expanded(
-                child: _CoatOption(
-                  label: 'Long hair',
-                  value: 'long_hair',
-                  isSelected: coatType == 'long_hair',
-                  onTap: () => onCoatTypeChanged('long_hair'),
-                ),
-              ),
-              SizedBox(width: DSDimens.sizeM),
-              Expanded(
-                child: _CoatOption(
-                  label: 'Hairless',
-                  value: 'hairless',
-                  isSelected: coatType == 'hairless',
-                  onTap: () => onCoatTypeChanged('hairless'),
+                child: Text(
+                  'What type of coat does your cat have?',
+
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontSize: 29,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CoatOption extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _CoatOption({
-    required this.label,
-    required this.value,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 120,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? DSColors.primary.withOpacity(0.1)
-              : DSColors.white,
-          borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-          border: Border.all(
-            color: isSelected ? DSColors.primary : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: isSelected ? DSColors.primary : Colors.grey[700],
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          SizedBox(height: DSDimens.sizeS),
+          Center(
+            child: Text(
+              'Coat health can guide ingredient recommendations.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
+          SizedBox(height: DSDimens.sizeS),
+
+          Column(
+            children: ['Short hair', 'Long hair', 'Hairless'].map((coatLabel) {
+              final coatValue = coatLabel.toLowerCase().replaceAll(' ', '_');
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: InkWell(
+                  onTap: () => onCoatTypeChanged(coatValue),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: coatType == coatValue
+                          ? const Color(0xFFFEF5FE)
+                          : const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      coatLabel,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFF334156),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }

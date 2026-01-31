@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
+import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
 import 'firebase_options.dart';
 
 import 'package:flutter/material.dart';
@@ -68,6 +69,7 @@ class App extends StatelessWidget {
         BlocProvider(create: (context) => sl<CatListingBloc>()),
         BlocProvider(create: (context) => sl<CatCreateBloc>()),
         BlocProvider(create: (context) => sl<ProductListingBloc>()),
+        BlocProvider(create: (context) => sl<PaywallBloc>()),
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,

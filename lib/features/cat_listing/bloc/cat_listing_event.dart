@@ -17,3 +17,12 @@ class CatListingFetchCatsEvent extends CatListingEvent {
   @override
   List<Object?> get props => [];
 }
+
+class CatListingCreateCatEvent extends CatListingEvent {
+  final BuildContext context;
+
+  const CatListingCreateCatEvent({required this.context});
+
+  @override
+  List<Object?> get props => [context];
+}

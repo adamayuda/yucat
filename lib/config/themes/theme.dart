@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DSColors {
-  static const Color primary = Color(0xFFFF00A8);
+  static const Color primary = Color(0xFFED67CA);
   static const Color black = Color(0xFF4A4A4A);
   static const Color white = Color(0xFFFFFFFF);
   static Color lightGrey = Colors.grey.shade200;

@@ -15,13 +15,46 @@ class BottomNavBar extends StatelessWidget {
       onTap: (value) {
         tabsRouter.setActiveIndex(value);
       },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.qr_code_scanner),
-          label: 'Scanner',
+          icon: Image.asset(
+            'assets/images/Search gray.png',
+            width: 32,
+            height: 32,
+          ),
+          activeIcon: Image.asset(
+            'assets/images/Search.png',
+            width: 32,
+            height: 32,
+          ),
+          label: 'Search',
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.pets), label: 'My Cats'),
+        BottomNavigationBarItem(
+          icon: Image.asset(
+            'assets/images/Scan gray.png',
+            width: 32,
+            height: 32,
+          ),
+          activeIcon: Image.asset(
+            'assets/images/Scan.png',
+            width: 32,
+            height: 32,
+          ),
+          label: 'Scan',
+        ),
+        BottomNavigationBarItem(
+          icon: Image.asset(
+            'assets/images/My Cats gray.png',
+            width: 32,
+            height: 32,
+          ),
+          activeIcon: Image.asset(
+            'assets/images/My Cats.png',
+            width: 32,
+            height: 32,
+          ),
+          label: 'My Cats',
+        ),
       ],
     );
   }

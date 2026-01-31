@@ -50,30 +50,54 @@ class HealthConditionsStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Any health considerations?',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5E8FF),
+                  borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
+                ),
+                width: 40,
+                height: 40,
+                child: Image.asset(
+                  'assets/images/heart.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              SizedBox(width: DSDimens.sizeS),
+              Expanded(
+                child: Text(
+                  'Any health considerations?',
+
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontSize: 29,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
-          Text(
-            'Allergies, sensitivities, or vet notes help refine scoring.',
-            textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+          SizedBox(height: DSDimens.sizeS),
+          Center(
+            child: Text(
+              'Allergies, sensitivities, or vet notes help refine scoring.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
-          SizedBox(height: DSDimens.sizeM),
+
+          SizedBox(height: DSDimens.sizeS),
+
           Column(
             children: _options.map((option) {
               final value = option['value']!;
               final isSelected = selectedHealthConditions.contains(value);
-              final isLast = option == _options.last;
               return Padding(
-                padding: EdgeInsets.only(bottom: isLast ? 0 : DSDimens.sizeS),
+                padding: const EdgeInsets.only(bottom: 16),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
                   onTap: () {
                     final current = List<String>.from(selectedHealthConditions);
 
@@ -98,38 +122,25 @@ class HealthConditionsStep extends StatelessWidget {
 
                     onHealthConditionsChanged(current);
                   },
+                  borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: DSDimens.sizeS,
-                      vertical: DSDimens.sizeXs,
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-                      border: Border.all(
-                        color: isSelected
-                            ? DSColors.primary
-                            : Colors.grey[300]!,
-                        width: isSelected ? 2 : 1,
-                      ),
+                      color: isSelected
+                          ? const Color(0xFFFEF5FE)
+                          : const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            option['label']!,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                                  color: isSelected
-                                      ? DSColors.primary
-                                      : Colors.grey[800],
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      option['label']!,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFF334156),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),

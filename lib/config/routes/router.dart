@@ -8,6 +8,7 @@ import 'package:yucat/features/search_products/presentation/search_page.dart';
 import 'package:yucat/features/home/home_page.dart';
 import 'package:yucat/features/product_detail/presentation/product_detail_page.dart';
 import 'package:yucat/features/product_listing/presentation/product_listing_page.dart';
+import 'package:yucat/features/paywall/paywall_page.dart';
 import 'package:yucat/presentation/main/main_page.dart';
 import 'package:flutter/material.dart';
 
@@ -33,6 +34,11 @@ class AppRouter extends RootStackRouter {
     AutoRoute(
       page: CreateCatRoute.page,
       path: '/cats/create',
+      fullscreenDialog: true,
+    ),
+    AutoRoute(
+      page: PaywallRoute.page,
+      path: '/paywall',
       fullscreenDialog: true,
     ),
   ];
