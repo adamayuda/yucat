@@ -21,7 +21,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProfileInitialEvent event,
     Emitter<ProfileState> emit,
   ) async {
-    _logScreenViewUsecase.call(screenName: 'ProfileScreen');
+    // _logScreenViewUsecase.call(screenName: 'ProfileScreen');
     emit(ProfileLoadingState());
 
     // final user = currentUserUsecase.call();

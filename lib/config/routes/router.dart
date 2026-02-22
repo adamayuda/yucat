@@ -10,6 +10,7 @@ import 'package:yucat/features/product_detail/presentation/product_detail_page.d
 import 'package:yucat/features/product_listing/presentation/product_listing_page.dart';
 import 'package:yucat/features/paywall/paywall_page.dart';
 import 'package:yucat/presentation/main/main_page.dart';
+import 'package:yucat/features/splash/presentation/splash_page.dart';
 import 'package:flutter/material.dart';
 
 part 'router.gr.dart';
@@ -18,7 +19,8 @@ part 'router.gr.dart';
 class AppRouter extends RootStackRouter {
   @override
   List<AutoRoute> get routes => [
-    AutoRoute(page: OnBoardingRoute.page, path: '/'),
+    AutoRoute(page: SplashRoute.page, path: '/', initial: true),
+    AutoRoute(page: OnBoardingRoute.page, path: '/onboarding'),
     AutoRoute(
       page: MainRoute.page,
       path: '/main',

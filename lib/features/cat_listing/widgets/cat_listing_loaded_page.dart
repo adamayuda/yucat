@@ -1,13 +1,19 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat_listing/bloc/cat_listing_bloc.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
 
 class CatListingLoadedWidget extends StatelessWidget {
   final List<CatModel> cats;
-
-  const CatListingLoadedWidget({super.key, required this.cats});
+  final VoidCallback onPressed;
+  const CatListingLoadedWidget({
+    super.key,
+    required this.cats,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,14 +21,40 @@ class CatListingLoadedWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeS),
       child: ListView.builder(
         padding: const EdgeInsets.only(bottom: DSDimens.sizeS),
-        itemCount: cats.length,
+        itemCount: cats.length + 1, // +1 for the create cat button
         itemBuilder: (context, index) {
+          if (index == cats.length) {
+            // Create cat button at the bottom
+            return SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onPressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: DSColors.primary,
+                  foregroundColor: DSColors.white,
+                  disabledBackgroundColor: const Color(0xFFEDAFDD),
+                  disabledForegroundColor: DSColors.white,
+                  padding: const EdgeInsets.symmetric(vertical: DSDimens.sizeS),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
+                  ),
+                ),
+                child: const Text(
+                  'Add a new cat profile!',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+            );
+          }
           final cat = cats[index];
-          return CatListItemCard(
-            cat: cat,
-            onScanPressed: () {
-              // TODO: Navigate to scan page for this cat
-            },
+          return Padding(
+            padding: const EdgeInsets.only(bottom: DSDimens.sizeS),
+            child: CatListItemCard(
+              cat: cat,
+              onScanPressed: () {
+                // TODO: Navigate to scan page for this cat
+              },
+            ),
           );
         },
       ),
@@ -137,7 +169,7 @@ class CatListItemCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _buildStatCard(
-                      icon: "assets/images/icon-weight.png",
+                      icon: "assets/images/Icons/Weight.png",
                       label: 'Weight',
                       value: cat.weight != null
                           ? '${cat.weight} kg'
@@ -147,7 +179,7 @@ class CatListItemCard extends StatelessWidget {
                   const SizedBox(width: DSDimens.sizeXxs),
                   Expanded(
                     child: _buildStatCard(
-                      icon: "assets/images/icon-sex.png",
+                      icon: "assets/images/Icons/gender.png",
                       label: 'Gender',
                       value: 'Not specified', // Gender not in model
                     ),
@@ -226,30 +258,24 @@ class CatListItemCard extends StatelessWidget {
                 return const SizedBox.shrink();
               }
 
-              return Padding(
-                padding: const EdgeInsets.only(
-                  top: DSDimens.sizeM,
-                  left: DSDimens.sizeM,
-                  right: DSDimens.sizeM,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Needs attention',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: DSDimens.sizeXxs),
+                  Text(
+                    'Needs attention',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                    const SizedBox(height: DSDimens.sizeS),
-                    Wrap(
-                      spacing: DSDimens.sizeXxs,
-                      runSpacing: DSDimens.sizeXxs,
-                      children: children,
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: DSDimens.sizeXxs),
+                  Wrap(
+                    spacing: DSDimens.sizeXxs,
+                    runSpacing: DSDimens.sizeXxs,
+                    children: children,
+                  ),
+                ],
               );
             },
           ),

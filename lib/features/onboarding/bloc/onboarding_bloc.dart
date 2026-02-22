@@ -13,6 +13,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
   static const String _onboardingCompletedKey = 'onboarding_completed';
   final SharedPreferences _prefs;
   final LogScreenViewUsecase _logScreenViewUsecase;
+
   OnBoardingBloc({
     required SharedPreferences prefs,
     required LogScreenViewUsecase logScreenViewUsecase,
@@ -20,6 +21,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
        _logScreenViewUsecase = logScreenViewUsecase,
        super(OnBoardingLoadingState()) {
     on<OnBoardingInitialEvent>(_onOnBoardingInitialEvent);
+    on<OnBoardingPageChangedEvent>(_onOnBoardingPageChangedEvent);
     on<OnBoardingCompletedEvent>(_onOnBoardingCompletedEvent);
     on<OnBoardingSkipEvent>(_onOnBoardingSkipEvent);
   }
@@ -28,46 +30,46 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     OnBoardingInitialEvent event,
     Emitter<OnBoardingState> emit,
   ) async {
-    _logScreenViewUsecase.call(screenName: 'OnBoardingScreen');
-    print('OnBoardingBloc _onOnBoardingInitialEvent');
-    emit(OnBoardingLoadingState());
-    // emit(OnBoardingReadyState());
+    _logScreenViewUsecase.call(
+      screenName: 'OnBoardingRoute',
+      index: 0,
+      name: 'welcome',
+    );
+    emit(const OnBoardingReadyState());
+  }
 
-    // Check if onboarding has already been completed
-    final isCompleted = _prefs.getBool(_onboardingCompletedKey) ?? false;
+  void _onOnBoardingPageChangedEvent(
+    OnBoardingPageChangedEvent event,
+    Emitter<OnBoardingState> emit,
+  ) {
+    _logScreenViewUsecase.call(
+      screenName: 'OnBoardingRoute',
+      index: event.page,
+      name: event.pageName,
+    );
 
-    if (isCompleted) {
-      // If already completed, redirect to home
-      event.context.router.replaceNamed('/main/home');
-    } else {
-      // If not completed, show onboarding
-      emit(OnBoardingReadyState());
-    }
+    emit(OnBoardingReadyState(currentPage: event.page));
   }
 
   Future<void> _onOnBoardingCompletedEvent(
     OnBoardingCompletedEvent event,
     Emitter<OnBoardingState> emit,
   ) async {
-    print('OnBoardingBloc _onOnBoardingCompletedEvent');
-
-    // Save onboarding completion status
     await _prefs.setBool(_onboardingCompletedKey, true);
 
-    // Navigate to home (MainRoute with HomeRoute as active tab) when onboarding is completed
     await event.context.router.push(const CreateCatRoute());
+
+    event.context.router.replace(const CatListingRoute());
   }
 
   Future<void> _onOnBoardingSkipEvent(
     OnBoardingSkipEvent event,
     Emitter<OnBoardingState> emit,
   ) async {
-    print('OnBoardingBloc _onOnBoardingCompletedEvent');
-
-    // Save onboarding completion status
     await _prefs.setBool(_onboardingCompletedKey, true);
 
-    // Navigate to home (MainRoute with HomeRoute as active tab) when onboarding is completed
-    event.context.router.replaceNamed('/main/home');
+    await event.context.router.push(const PaywallRoute());
+
+    event.context.router.replace(const HomeRoute());
   }
 }

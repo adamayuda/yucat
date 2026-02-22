@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 
-class CoatStep extends StatelessWidget {
-  final String? coatType;
-  final ValueChanged<String?> onCoatTypeChanged;
+class ActivityStep extends StatelessWidget {
+  final String? activityLevel;
+  final ValueChanged<String?> onActivityLevelChanged;
 
-  const CoatStep({
+  const ActivityStep({
     super.key,
-    required this.coatType,
-    required this.onCoatTypeChanged,
+    required this.activityLevel,
+    required this.onActivityLevelChanged,
   });
 
   @override
@@ -28,15 +28,14 @@ class CoatStep extends StatelessWidget {
                 width: 40,
                 height: 40,
                 child: Image.asset(
-                  'assets/images/camera.png',
+                  'assets/images/Icons/body cat 2.png',
                   fit: BoxFit.contain,
                 ),
               ),
               SizedBox(width: DSDimens.sizeS),
               Expanded(
                 child: Text(
-                  'What type of coat does your cat have?',
-
+                  'How active is your cat?',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontSize: 29,
                     fontWeight: FontWeight.bold,
@@ -48,7 +47,8 @@ class CoatStep extends StatelessWidget {
           SizedBox(height: DSDimens.sizeS),
           Center(
             child: Text(
-              'Coat health can guide ingredient recommendations.',
+              'Activity helps us understand calorie needs.',
+
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -58,12 +58,12 @@ class CoatStep extends StatelessWidget {
           SizedBox(height: DSDimens.sizeS),
 
           Column(
-            children: ['Short hair', 'Long hair', 'Hairless'].map((coatLabel) {
-              final coatValue = coatLabel.toLowerCase().replaceAll(' ', '_');
+            children: ['Low', 'Medium', 'High'].map((level) {
+              final value = level.toLowerCase();
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: InkWell(
-                  onTap: () => onCoatTypeChanged(coatValue),
+                  onTap: () => onActivityLevelChanged(value),
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
                     width: double.infinity,
@@ -72,13 +72,13 @@ class CoatStep extends StatelessWidget {
                       vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      color: coatType == coatValue
+                      color: activityLevel == value
                           ? const Color(0xFFFEF5FE)
                           : const Color(0xFFF9FAFB),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      coatLabel,
+                      level,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: const Color(0xFF334156),
                         fontWeight: FontWeight.w500,

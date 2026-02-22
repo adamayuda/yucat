@@ -1,23 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 
-class AgeStep extends StatelessWidget {
-  final String? ageGroup;
-  final ValueChanged<String?> onAgeGroupChanged;
-  final int years;
-  final int months;
-  final ValueChanged<int> onYearsChanged;
-  final ValueChanged<int> onMonthsChanged;
+class AgeStep extends StatefulWidget {
+  final int? age;
+  final ValueChanged<int?> onAgeChanged;
 
-  const AgeStep({
-    super.key,
-    required this.ageGroup,
-    required this.onAgeGroupChanged,
-    required this.years,
-    required this.months,
-    required this.onYearsChanged,
-    required this.onMonthsChanged,
-  });
+  const AgeStep({super.key, required this.age, required this.onAgeChanged});
+
+  @override
+  State<AgeStep> createState() => _AgeStepState();
+}
+
+class _AgeStepState extends State<AgeStep> {
+  int _years = 0;
+  int _months = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeFromAge(widget.age);
+  }
+
+  @override
+  void didUpdateWidget(covariant AgeStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.age != widget.age) {
+      _initializeFromAge(widget.age);
+    }
+  }
+
+  void _initializeFromAge(int? ageInMonths) {
+    if (ageInMonths == null) return;
+    setState(() {
+      _years = ageInMonths ~/ 12;
+      _months = ageInMonths % 12;
+    });
+  }
+
+  void _notifyAgeChanged() {
+    final totalMonths = _years * 12 + _months;
+    widget.onAgeChanged(totalMonths);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +59,7 @@ class AgeStep extends StatelessWidget {
                 width: 40,
                 height: 40,
                 child: Image.asset(
-                  'assets/images/cake.png',
+                  'assets/images/Icons/cake.png',
                   fit: BoxFit.contain,
                 ),
               ),
@@ -68,17 +91,26 @@ class AgeStep extends StatelessWidget {
           // Years input
           _NumberInputRow(
             label: 'Years',
-            value: years,
+            value: _years,
             onDecrement: () {
-              if (years > 0) {
-                onYearsChanged(years - 1);
+              if (_years > 0) {
+                setState(() {
+                  _years -= 1;
+                });
+                _notifyAgeChanged();
               }
             },
             onIncrement: () {
-              onYearsChanged(years + 1);
+              setState(() {
+                _years += 1;
+              });
+              _notifyAgeChanged();
             },
             onValueChanged: (value) {
-              onYearsChanged(value);
+              setState(() {
+                _years = value;
+              });
+              _notifyAgeChanged();
             },
           ),
 
@@ -87,17 +119,30 @@ class AgeStep extends StatelessWidget {
           // Months input
           _NumberInputRow(
             label: 'Months',
-            value: months,
+            value: _months,
             onDecrement: () {
-              if (months > 0) {
-                onMonthsChanged(months - 1);
+              if (_months > 0) {
+                setState(() {
+                  _months -= 1;
+                });
+                _notifyAgeChanged();
               }
             },
             onIncrement: () {
-              onMonthsChanged(months + 1);
+              setState(() {
+                _months += 1;
+                if (_months >= 12) {
+                  _years += _months ~/ 12;
+                  _months = _months % 12;
+                }
+              });
+              _notifyAgeChanged();
             },
             onValueChanged: (value) {
-              onMonthsChanged(value);
+              setState(() {
+                _months = value.clamp(0, 11);
+              });
+              _notifyAgeChanged();
             },
           ),
         ],
@@ -228,49 +273,6 @@ class _SquareButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(DSDimens.sizeXs),
         ),
         child: Icon(icon, color: Colors.black, size: 20),
-      ),
-    );
-  }
-}
-
-class _AgeGroupOption extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _AgeGroupOption({
-    required this.label,
-    required this.value,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 120,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? DSColors.primary.withOpacity(0.1)
-              : DSColors.white,
-          borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-          border: Border.all(
-            color: isSelected ? DSColors.primary : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: isSelected ? DSColors.primary : Colors.grey[700],
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ),
       ),
     );
   }

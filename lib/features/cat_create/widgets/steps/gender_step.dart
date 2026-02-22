@@ -28,7 +28,7 @@ class GenderStep extends StatelessWidget {
                 width: 40,
                 height: 40,
                 child: Image.asset(
-                  'assets/images/gender.png',
+                  'assets/images/Icons/gender.png',
                   fit: BoxFit.contain,
                 ),
               ),

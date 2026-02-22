@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 
-class ActivityStep extends StatelessWidget {
-  final String? activityLevel;
-  final ValueChanged<String?> onActivityLevelChanged;
+class NeuteredStatusStep extends StatelessWidget {
+  /// One of: "intact", "neutered", "pregnant", "lactating"
+  final String? status;
+  final ValueChanged<String?> onStatusChanged;
 
-  const ActivityStep({
+  static const List<Map<String, String>> _options = [
+    {'value': 'intact', 'label': 'Intact'},
+    {'value': 'neutered', 'label': 'Neutered / Spayed'},
+    {'value': 'pregnant', 'label': 'Pregnant'},
+    {'value': 'lactating', 'label': 'Lactating'},
+  ];
+
+  const NeuteredStatusStep({
     super.key,
-    required this.activityLevel,
-    required this.onActivityLevelChanged,
+    required this.status,
+    required this.onStatusChanged,
   });
 
   @override
@@ -28,14 +36,14 @@ class ActivityStep extends StatelessWidget {
                 width: 40,
                 height: 40,
                 child: Image.asset(
-                  'assets/images/camera.png',
+                  'assets/images/Icons/syringe.png',
                   fit: BoxFit.contain,
                 ),
               ),
               SizedBox(width: DSDimens.sizeS),
               Expanded(
                 child: Text(
-                  'How active is your cat?',
+                  'Is your cat neutered?',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontSize: 29,
                     fontWeight: FontWeight.bold,
@@ -47,7 +55,7 @@ class ActivityStep extends StatelessWidget {
           SizedBox(height: DSDimens.sizeS),
           Center(
             child: Text(
-              'Activity helps us understand calorie needs.',
+              'Neutered cats often need different calorie levels.',
 
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 16,
@@ -55,15 +63,16 @@ class ActivityStep extends StatelessWidget {
               ),
             ),
           ),
+
           SizedBox(height: DSDimens.sizeS),
 
           Column(
-            children: ['Low', 'Medium', 'High'].map((level) {
-              final value = level.toLowerCase();
+            children: _options.map((option) {
+              final isSelected = status == option['value'];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: InkWell(
-                  onTap: () => onActivityLevelChanged(value),
+                  onTap: () => onStatusChanged(option['value']),
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
                     width: double.infinity,
@@ -72,13 +81,13 @@ class ActivityStep extends StatelessWidget {
                       vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      color: activityLevel == value
+                      color: isSelected
                           ? const Color(0xFFFEF5FE)
                           : const Color(0xFFF9FAFB),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      level,
+                      option['label']!,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: const Color(0xFF334156),
                         fontWeight: FontWeight.w500,

@@ -49,7 +49,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     SearchInitialEvent event,
     Emitter<SearchState> emit,
   ) async {
-    _logScreenViewUsecase.call(screenName: 'SearchScreen');
+    // _logScreenViewUsecase.call(screenName: 'SearchScreen');
     emit(SearchDiscoverLoadingState());
     final brands = await _getBrandsUsecase.call();
     final mappedBrands = _brandToModelMapper(brands);

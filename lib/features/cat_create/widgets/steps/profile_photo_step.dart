@@ -41,7 +41,7 @@ class ProfilePhotoStep extends StatelessWidget {
                 width: 40,
                 height: 40,
                 child: Image.asset(
-                  'assets/images/camera.png',
+                  'assets/images/Icons/camera.png',
                   fit: BoxFit.contain,
                 ),
               ),

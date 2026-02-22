@@ -30,3 +30,13 @@ class OnBoardingSkipEvent extends OnBoardingEvent {
   @override
   List<Object?> get props => [context];
 }
+
+class OnBoardingPageChangedEvent extends OnBoardingEvent {
+  final int page;
+  final String pageName;
+
+  const OnBoardingPageChangedEvent(this.page, this.pageName);
+
+  @override
+  List<Object?> get props => [page, pageName];
+}

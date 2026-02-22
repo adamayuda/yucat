@@ -34,7 +34,7 @@ class ProductListingBloc
     ProductListingInitialEvent event,
     Emitter<ProductListingState> emit,
   ) async {
-    _logScreenViewUsecase.call(screenName: 'ProductListingScreen');
+    // _logScreenViewUsecase.call(screenName: 'ProductListingScreen');
 
     emit(ProductListingLoadingState());
 

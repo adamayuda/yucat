@@ -5,7 +5,15 @@ class LogScreenViewUsecase {
 
   LogScreenViewUsecase({required this.repository});
 
-  Future<void> call({required String screenName}) async {
-    return await repository.logScreenView(screenName: screenName);
+  Future<void> call({
+    required String screenName,
+    int? index,
+    String? name,
+  }) async {
+    return repository.trackScreenView(
+      screenName: screenName,
+      index: index,
+      name: name,
+    );
   }
 }

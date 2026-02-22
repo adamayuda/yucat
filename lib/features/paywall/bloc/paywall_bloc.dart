@@ -79,14 +79,14 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
         return;
       } else {
         // Current offering is available with packages, show paywall via RevenueCatUI
-        emit(const PaywallLoadedState());
+        // emit(const PaywallLoadedState());
         final paywallResult = await RevenueCatUI.presentPaywall();
         debugPrint('Paywall result: $paywallResult');
 
         // After paywall is dismissed, sync and check if user purchased subscription
         try {
           await Purchases.syncPurchases();
-          await Future.delayed(const Duration(milliseconds: 500));
+          // await Future.delayed(const Duration(milliseconds: 500));
 
           // final updatedCustomerInfo = await Purchases.getCustomerInfo();
           final hasActiveSubscription = await _hasActiveSubscriptionUseCase(

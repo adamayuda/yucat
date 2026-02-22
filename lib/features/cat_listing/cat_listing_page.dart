@@ -63,14 +63,18 @@ class _CatListingPageState extends State<CatListingPage> {
       case CatListingLoadingState():
         return CatListingLoadingWidget();
       case CatListingLoadedState():
-        return CatListingLoadedWidget(cats: state.cats);
+        return CatListingLoadedWidget(
+          cats: state.cats,
+          onPressed: () =>
+              _bloc.add(CatListingCreateCatEvent(context: context)),
+        );
       case CatListingErrorState():
         return CatListingErrorWidget(
           message: state.message,
           onPressed: () => _bloc.add(const CatListingFetchCatsEvent()),
         );
-      case CatListingShowPaywallState():
-        return CatListingLoadingWidget();
+      // case CatListingShowPaywallState():
+      //   return CatListingLoadingWidget();
       case CatListingEmptyState():
         return CatListingEmptyWidget(
           onPressed: () =>

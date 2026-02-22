@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/core/subscription/data/repositories/subscription_repository_impl.dart';
 import 'package:yucat/core/subscription/domain/repositories/subscription_repository.dart';
@@ -58,12 +59,16 @@ import 'package:yucat/features/search_products/presentation/bloc/search_bloc.dar
 import 'package:yucat/features/search_products/presentation/mappers/brand_to_model_mapper.dart';
 import 'package:yucat/features/search_products/presentation/mappers/product_to_model_mapper.dart';
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
+import 'package:yucat/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/services/cat_tracking_service.dart';
 
 final sl = GetIt.instance;
 
+const _mixpanelToken = 'a2e7bb0030da8c6a41153524b5051ea4';
+
 Future<void> initializeDependencies() async {
+  await _registerMixpanel();
   await _registerSharedPreferences();
   await _registerDio();
   await _registerFirebaseFunctions();
@@ -73,6 +78,14 @@ Future<void> initializeDependencies() async {
   await _registerUseCases();
   await _registerServices();
   await _registerBlocs();
+}
+
+Future<void> _registerMixpanel() async {
+  final mixpanel = await Mixpanel.init(
+    _mixpanelToken,
+    trackAutomaticEvents: true,
+  );
+  sl.registerSingleton<Mixpanel>(mixpanel);
 }
 
 Future<void> _registerSharedPreferences() async {
@@ -137,9 +150,7 @@ Future<void> _registerRepositories() async {
     ),
   );
   sl.registerSingleton<AnalyticsRepository>(
-    AnalyticsRepositoryImpl(
-      analyticsFirebaseDataSource: sl<AnalyticsFirebaseDataSource>(),
-    ),
+    AnalyticsRepositoryImpl(mixpanel: sl<Mixpanel>()),
   );
   sl.registerSingleton<ProductRepository>(
     ProductRepositoryImpl(
@@ -237,6 +248,7 @@ extension BlocProviderRegistration on GetIt {
 }
 
 Future<void> _registerBlocs() async {
+  sl.registerBloc<SplashBloc>(() => SplashBloc(prefs: sl<SharedPreferences>()));
   sl.registerBloc<ProductListingBloc>(
     () => ProductListingBloc(
       searchByBrandUsecase: sl<SearchByBrandUsecase>(),
@@ -267,6 +279,7 @@ Future<void> _registerBlocs() async {
       signinAnonymouslyUsecase: sl<SigninAnonymouslyUsecase>(),
       scanTrackingService: sl<ScanTrackingService>(),
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+      prefs: sl<SharedPreferences>(),
     ),
   );
   sl.registerBloc<ProfileBloc>(

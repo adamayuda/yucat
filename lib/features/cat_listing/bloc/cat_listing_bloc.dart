@@ -42,7 +42,7 @@ class CatListingBloc extends Bloc<CatListingEvent, CatListingState> {
     CatListingInitialEvent event,
     Emitter<CatListingState> emit,
   ) async {
-    _logScreenViewUsecase.call(screenName: 'CatListingScreen');
+    // _logScreenViewUsecase.call(screenName: 'CatListingScreen');
     add(const CatListingFetchCatsEvent());
   }
 
@@ -61,6 +61,11 @@ class CatListingBloc extends Bloc<CatListingEvent, CatListingState> {
       final catModels = cats
           .map((cat) => _catEntityToModelMapper(cat))
           .toList();
+      print('===============================================> cats: $cats');
+      if (catModels.isEmpty) {
+        emit(const CatListingEmptyState());
+        return;
+      }
       emit(CatListingLoadedState(cats: catModels));
     } catch (e) {
       emit(CatListingErrorState(message: e.toString()));
@@ -78,9 +83,9 @@ class CatListingBloc extends Bloc<CatListingEvent, CatListingState> {
       emit(const CatListingErrorState(message: 'User not authenticated'));
       return;
     }
-    event.context.router.push(const PaywallRoute());
+    // event.context.router.push(const PaywallRoute());
 
-    return;
+    // return;
 
     final canCreateCat = await _catTrackingService.canCreateCat(
       userId: user.uid,
@@ -88,10 +93,17 @@ class CatListingBloc extends Bloc<CatListingEvent, CatListingState> {
 
     if (!canCreateCat) {
       // User has reached free cat limit, show paywall
-      emit(CatListingShowPaywallState());
-      return;
+      final purchasedSubscription = await event.context.router.push<bool>(
+        const PaywallRoute(),
+      );
+
+      if (purchasedSubscription == false) {
+        return;
+      }
     }
 
-    event.context.router.push(const CreateCatRoute());
+    await event.context.router.push(const CreateCatRoute());
+    // After returning from create cat page, fetch the cat list again
+    add(const CatListingFetchCatsEvent());
   }
 }

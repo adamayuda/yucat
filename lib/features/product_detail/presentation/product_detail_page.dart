@@ -199,8 +199,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           children: [
             Expanded(
               child: _NutritionCard(
-                icon: Icons.egg_outlined,
-                iconColor: Colors.purple,
+                iconAsset: 'assets/images/Icons/egg.png',
                 value: '${product.protein.toStringAsFixed(1)}%',
                 label: 'Protein',
               ),
@@ -208,8 +207,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             VerticalDivider(width: 1, thickness: 1, color: DSColors.lightGrey),
             Expanded(
               child: _NutritionCard(
-                icon: Icons.water_drop_outlined,
-                iconColor: Colors.blue,
+                iconAsset: 'assets/images/Icons/water.png',
                 value: '${product.moisture.toStringAsFixed(1)}%',
                 label: 'Moisture',
               ),
@@ -217,8 +215,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             VerticalDivider(width: 1, thickness: 1, color: DSColors.lightGrey),
             Expanded(
               child: _NutritionCard(
-                icon: Icons.cookie_outlined,
-                iconColor: Colors.amber,
+                iconAsset: 'assets/images/Icons/butter.png',
                 value: '${product.fat.toStringAsFixed(1)}%',
                 label: 'Fat',
               ),
@@ -226,8 +223,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             VerticalDivider(width: 1, thickness: 1, color: DSColors.lightGrey),
             Expanded(
               child: _NutritionCard(
-                icon: Icons.eco_outlined,
-                iconColor: Colors.green,
+                iconAsset: 'assets/images/Icons/fire.png',
                 value: '${product.fiber.toStringAsFixed(1)}%',
                 label: 'Fiber',
               ),
@@ -235,8 +231,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             VerticalDivider(width: 1, thickness: 1, color: DSColors.lightGrey),
             Expanded(
               child: _NutritionCard(
-                icon: Icons.grain_outlined,
-                iconColor: Colors.orange,
+                iconAsset: 'assets/images/Icons/wheat.png',
                 value: '${product.carbs.toStringAsFixed(1)}%',
                 label: 'Carbs',
               ),
@@ -259,10 +254,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.favorite_border,
-            color: DSColors.green,
-            size: DSDimens.sizeXxl,
+          Image.asset(
+            'assets/images/Icons/heart.png',
+            width: DSDimens.sizeXxl,
+            height: DSDimens.sizeXxl,
+            fit: BoxFit.contain,
           ),
           SizedBox(width: DSDimens.sizeXxs),
           Expanded(
@@ -467,7 +463,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               items: assessment.pros,
                               value: '${assessment.pros.length}',
                               indicatorColor: DSColors.green,
-                              emoji: '✅',
+                              iconAsset: 'assets/images/Icons/green.png',
                             ),
                           if (hasCons) ...[
                             SizedBox(height: DSDimens.sizeXxs),
@@ -476,7 +472,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               items: assessment.cons,
                               value: '${assessment.cons.length}',
                               indicatorColor: Colors.orange,
-                              emoji: '❌',
+                              iconAsset: 'assets/images/Icons/red.png',
                             ),
                           ],
                         ] else ...[
@@ -519,7 +515,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         ),
         SizedBox(height: DSDimens.sizeXxs),
         Container(
-          padding: EdgeInsets.all(DSDimens.sizeS),
+          padding: EdgeInsets.symmetric(
+            horizontal: 0,
+            vertical: DSDimens.sizeXs,
+          ),
           decoration: BoxDecoration(
             color: DSColors.white,
             border: Border.all(color: DSColors.lightGrey),
@@ -536,15 +535,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       top: DSDimens.sizeXxs / 4,
                     ),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          '✅ ',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: DSColors.darkGrey,
-                                fontSize: 12,
-                              ),
+                        Image.asset(
+                          'assets/images/Icons/green.png',
+                          width: 32,
+                          height: 32,
+                          fit: BoxFit.contain,
                         ),
                         Expanded(
                           child: Text(
@@ -570,15 +567,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       top: DSDimens.sizeXxs / 4,
                     ),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          '❌ ',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: DSColors.darkGrey,
-                                fontSize: 12,
-                              ),
+                        Padding(
+                          padding: EdgeInsets.only(right: DSDimens.sizeXxs / 2),
+                          child: Image.asset(
+                            'assets/images/Icons/red.png',
+                            width: 32,
+                            height: 32,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                         Expanded(
                           child: Text(
@@ -604,14 +602,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 }
 
 class _NutritionCard extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
+  final String iconAsset;
   final String value;
   final String label;
 
   const _NutritionCard({
-    required this.icon,
-    required this.iconColor,
+    required this.iconAsset,
     required this.value,
     required this.label,
   });
@@ -620,7 +616,7 @@ class _NutritionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: iconColor, size: 32),
+        Image.asset(iconAsset, width: 32, height: 32, fit: BoxFit.contain),
         SizedBox(height: DSDimens.sizeXxxs),
         Text(
           value,
@@ -645,14 +641,14 @@ class _ResultItem extends StatelessWidget {
   final List<String> items;
   final String value;
   final Color indicatorColor;
-  final String? emoji;
+  final String? iconAsset;
 
   const _ResultItem({
     required this.label,
     required this.items,
     required this.value,
     required this.indicatorColor,
-    this.emoji,
+    this.iconAsset,
   });
 
   @override
@@ -674,14 +670,27 @@ class _ResultItem extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          emoji != null ? '$emoji ' : '• ',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: DSColors.darkGrey,
-                                fontSize: 12,
-                              ),
-                        ),
+                        if (iconAsset != null)
+                          Padding(
+                            padding: EdgeInsets.only(
+                              right: DSDimens.sizeXxs / 2,
+                            ),
+                            child: Image.asset(
+                              iconAsset!,
+                              width: 32,
+                              height: 32,
+                              fit: BoxFit.contain,
+                            ),
+                          )
+                        else
+                          Text(
+                            '• ',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: DSColors.darkGrey,
+                                  fontSize: 12,
+                                ),
+                          ),
                         Expanded(
                           child: Text(
                             item,

@@ -10,6 +10,10 @@ class OnBoardingLoadingState extends OnBoardingState {
 }
 
 class OnBoardingReadyState extends OnBoardingState {
+  final int currentPage;
+
+  const OnBoardingReadyState({this.currentPage = 0});
+
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [currentPage];
 }

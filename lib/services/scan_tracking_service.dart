@@ -29,45 +29,37 @@ class ScanTrackingService {
   }
 
   /// Check if user has reached the free scan limit
-  bool hasReachedFreeScanLimit() {
-    return getFreeScansCount() >= _maxFreeScans;
+  Future<bool> hasReachedFreeScanLimit() async {
+    final currentCount = getFreeScansCount();
+    final hasReachedLimit = currentCount >= _maxFreeScans;
+    if (!hasReachedLimit) {
+      await incrementFreeScansCount();
+    }
+    return hasReachedLimit;
   }
-
-  // /// Check if user has an active subscription
-  // Future<bool> hasActiveSubscription() async {
-  //   try {
-  //     // Sync purchases first to ensure we have the latest subscription status
-  //     await Purchases.syncPurchases();
-  //     final customerInfo = await Purchases.getCustomerInfo();
-
-  //     // Debug: Print all available entitlements
-  //     debugPrint(
-  //       'Available entitlements: ${customerInfo.entitlements.all.keys}',
-  //     );
-  //     debugPrint('Looking for entitlement: $_entitlementID');
-
-  //     final entitlement = customerInfo.entitlements.all[_entitlementID];
-  //     final isActive = entitlement?.isActive == true;
-
-  //     debugPrint(
-  //       'Entitlement found: ${entitlement != null}, isActive: $isActive',
-  //     );
-
-  //     return isActive;
-  //   } catch (e) {
-  //     debugPrint('Error checking subscription: $e');
-  //     // If there's an error checking subscription, assume no subscription
-  //     return false;
-  //   }
-  // }
 
   /// Check if user can perform a scan (has subscription or hasn't reached limit)
   Future<bool> canPerformScan() async {
+    print('[ScanTrackingService] canPerformScan() called');
     final hasSubscription = await _hasActiveSubscriptionUseCase();
+    print('[ScanTrackingService] hasSubscription: $hasSubscription');
+
     if (hasSubscription) {
+      print(
+        '[ScanTrackingService] User has active subscription, allowing scan',
+      );
       return true;
     }
-    return !hasReachedFreeScanLimit();
+
+    final currentCount = getFreeScansCount();
+    print(
+      '[ScanTrackingService] Free scans used: $currentCount/$_maxFreeScans',
+    );
+    final hasReachedLimit = await hasReachedFreeScanLimit();
+    print('[ScanTrackingService] hasReachedFreeScanLimit: $hasReachedLimit');
+    final canScan = !hasReachedLimit;
+    print('[ScanTrackingService] canPerformScan result: $canScan');
+    return canScan;
   }
 
   /// Reset the free scan count (useful for testing or if user purchases subscription)

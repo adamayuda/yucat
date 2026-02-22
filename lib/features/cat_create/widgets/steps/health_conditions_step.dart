@@ -1,22 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 
-class NeuteredStatusStep extends StatelessWidget {
-  /// One of: "intact", "neutered", "pregnant", "lactating"
-  final String? status;
-  final ValueChanged<String?> onStatusChanged;
+/// Health conditions step.
+///
+/// Exposes one of the following values:
+/// - "none"
+/// - "urinary_issues"
+/// - "kidney_disease"
+/// - "sensitive_stomach"
+/// - "skin_allergies"
+/// - "food_allergies"
+/// - "diabetes"
+/// - "dental_problems"
+/// - "hairball_issues"
+/// - "heart_condition"
+/// - "joint_issues"
+class HealthConditionsStep extends StatelessWidget {
+  /// Currently selected health condition values.
+  ///
+  /// Multiple values can be selected at the same time.
+  final List<String> selectedHealthConditions;
+
+  /// Callback when the selected health conditions change.
+  final ValueChanged<List<String>> onHealthConditionsChanged;
 
   static const List<Map<String, String>> _options = [
-    {'value': 'intact', 'label': 'Intact'},
-    {'value': 'neutered', 'label': 'Neutered / Spayed'},
-    {'value': 'pregnant', 'label': 'Pregnant'},
-    {'value': 'lactating', 'label': 'Lactating'},
+    {'value': 'none', 'label': 'None'},
+    {'value': 'urinary_issues', 'label': 'Urinary issues'},
+    {'value': 'kidney_disease', 'label': 'Kidney disease'},
+    {'value': 'sensitive_stomach', 'label': 'Sensitive stomach'},
+    {'value': 'skin_allergies', 'label': 'Skin allergies'},
+    {'value': 'food_allergies', 'label': 'Food allergies'},
+    {'value': 'diabetes', 'label': 'Diabetes'},
+    {'value': 'dental_problems', 'label': 'Dental problems'},
+    {'value': 'hairball_issues', 'label': 'Hairball issues'},
+    {'value': 'heart_condition', 'label': 'Heart condition'},
+    {'value': 'joint_issues', 'label': 'Joint or mobility issues'},
   ];
 
-  const NeuteredStatusStep({
+  const HealthConditionsStep({
     super.key,
-    required this.status,
-    required this.onStatusChanged,
+    required this.selectedHealthConditions,
+    required this.onHealthConditionsChanged,
   });
 
   @override
@@ -36,14 +61,15 @@ class NeuteredStatusStep extends StatelessWidget {
                 width: 40,
                 height: 40,
                 child: Image.asset(
-                  'assets/images/vaccin.png',
+                  'assets/images/Icons/heart.png',
                   fit: BoxFit.contain,
                 ),
               ),
               SizedBox(width: DSDimens.sizeS),
               Expanded(
                 child: Text(
-                  'Is your cat neutered?',
+                  'Any health considerations?',
+
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontSize: 29,
                     fontWeight: FontWeight.bold,
@@ -55,8 +81,7 @@ class NeuteredStatusStep extends StatelessWidget {
           SizedBox(height: DSDimens.sizeS),
           Center(
             child: Text(
-              'Neutered cats often need different calorie levels.',
-
+              'Allergies, sensitivities, or vet notes help refine scoring.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -68,11 +93,35 @@ class NeuteredStatusStep extends StatelessWidget {
 
           Column(
             children: _options.map((option) {
-              final isSelected = status == option['value'];
+              final value = option['value']!;
+              final isSelected = selectedHealthConditions.contains(value);
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: InkWell(
-                  onTap: () => onStatusChanged(option['value']),
+                  onTap: () {
+                    final current = List<String>.from(selectedHealthConditions);
+
+                    if (value == 'none') {
+                      // Selecting "none" clears all other conditions.
+                      if (isSelected) {
+                        current.remove(value);
+                      } else {
+                        current
+                          ..clear()
+                          ..add(value);
+                      }
+                    } else {
+                      // Selecting any specific condition deselects "none".
+                      current.remove('none');
+                      if (isSelected) {
+                        current.remove(value);
+                      } else {
+                        current.add(value);
+                      }
+                    }
+
+                    onHealthConditionsChanged(current);
+                  },
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
                     width: double.infinity,

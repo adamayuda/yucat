@@ -18,7 +18,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     ProductDetailInitialEvent event,
     Emitter<ProductDetailState> emit,
   ) async {
-    _logScreenViewUsecase.call(screenName: 'ProductDetailScreen');
+    // _logScreenViewUsecase.call(screenName: 'ProductDetailScreen');
     if (event.product != null) {
       emit(ProductDetailLoadedState(product: event.product!));
       return;

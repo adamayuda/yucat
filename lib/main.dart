@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
 import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
+import 'package:yucat/features/splash/presentation/bloc/splash_bloc.dart';
 import 'firebase_options.dart';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -20,13 +22,13 @@ import 'package:yucat/features/profile/bloc/profile_bloc.dart';
 import 'package:yucat/features/search_products/presentation/bloc/search_bloc.dart';
 import 'package:yucat/service_locator.dart';
 
+import 'config/routes/analytics_route_observer.dart';
 import 'config/routes/router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
 
   // Configure RevenueCat for iOS
   if (Platform.isIOS) {
@@ -70,13 +72,22 @@ class App extends StatelessWidget {
         BlocProvider(create: (context) => sl<CatCreateBloc>()),
         BlocProvider(create: (context) => sl<ProductListingBloc>()),
         BlocProvider(create: (context) => sl<PaywallBloc>()),
+        BlocProvider(create: (context) => sl<SplashBloc>()),
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         // localizationsDelegates: AppLocalizations.localizationsDelegates,
         // supportedLocales: AppLocalizations.supportedLocales,
-        routerConfig: _appRouter.config(),
+        routerConfig: _appRouter.config(
+          navigatorObservers: () => [
+            ...AutoRouterDelegate.defaultNavigatorObserversBuilder(),
+            AnalyticsRouteObserver(
+              logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+              router: _appRouter,
+            ),
+          ],
+        ),
       ),
     );
   }

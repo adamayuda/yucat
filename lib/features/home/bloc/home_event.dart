@@ -31,11 +31,12 @@ class SearchByBarcodeEvent extends HomeEvent {
 
 class BarcodeDetectedEvent extends HomeEvent {
   final String barcode;
+  final BuildContext context;
 
-  const BarcodeDetectedEvent({required this.barcode});
+  const BarcodeDetectedEvent({required this.barcode, required this.context});
 
   @override
-  List<Object?> get props => [barcode];
+  List<Object?> get props => [barcode, context];
 }
 
 class PaywallDismissedEvent extends HomeEvent {

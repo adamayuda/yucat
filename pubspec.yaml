@@ -3,7 +3,7 @@ description: "A new Flutter project."
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.2+1
+version: 1.0.4+1
 
 environment:
   sdk: ^3.8.1
@@ -40,6 +40,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   firebase_analytics: ^11.6.0
   lottie: ^3.0.0
+  mixpanel_flutter: ^2.5.0
 
 dev_dependencies:
   flutter_test:
@@ -54,3 +55,5 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/Icons/
+    - assets/images/Illustrations/

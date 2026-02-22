@@ -6,6 +6,6 @@ class LogSearchUsecase {
   LogSearchUsecase({required this.repository});
 
   Future<void> call({required String searchTerm}) async {
-    return await repository.logSearch(searchTerm: searchTerm);
+    // return await repository.logSearch(searchTerm: searchTerm);
   }
 }

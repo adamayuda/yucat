@@ -73,7 +73,7 @@ class _BreedStepState extends State<BreedStep> {
                 width: 40,
                 height: 40,
                 child: Image.asset(
-                  'assets/images/breed.png',
+                  'assets/images/Icons/breed.png',
                   fit: BoxFit.contain,
                 ),
               ),

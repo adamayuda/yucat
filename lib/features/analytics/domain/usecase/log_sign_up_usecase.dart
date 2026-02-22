@@ -6,6 +6,6 @@ class LogSignUpUsecase {
   LogSignUpUsecase({required this.repository});
 
   Future<void> call({required String method}) async {
-    return await repository.logSignUp(method: method);
+    // return await repository.logSignUp(method: method);
   }
 }
