@@ -18,6 +18,7 @@ import 'package:yucat/features/analytics/domain/usecase/log_login_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_search_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_sign_up_usecase.dart';
+import 'package:yucat/features/analytics/domain/usecase/set_user_properties_usecase.dart';
 import 'package:yucat/features/auth/data/repository/auth_repository_impl.dart';
 import 'package:yucat/features/auth/data/sources/auth_data_source.dart';
 import 'package:yucat/features/auth/domain/repository/auth_repository.dart';
@@ -200,6 +201,9 @@ Future<void> _registerUseCases() async {
   sl.registerSingleton<LogSearchUsecase>(
     LogSearchUsecase(repository: sl<AnalyticsRepository>()),
   );
+  sl.registerSingleton<SetUserPropertiesUsecase>(
+    SetUserPropertiesUsecase(repository: sl<AnalyticsRepository>()),
+  );
   sl.registerSingleton<SearchByQueryUsecase>(
     SearchByQueryUsecase(searchRepository: sl<SearchRepository>()),
   );
@@ -260,6 +264,7 @@ Future<void> _registerBlocs() async {
     () => OnBoardingBloc(
       prefs: sl<SharedPreferences>(),
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+      logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
   sl.registerBloc<SearchBloc>(
@@ -302,6 +307,7 @@ Future<void> _registerBlocs() async {
       createCatUsecase: sl<CreateCatUsecase>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+      logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
   sl.registerBloc<PaywallBloc>(

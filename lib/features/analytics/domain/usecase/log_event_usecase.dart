@@ -7,11 +7,11 @@ class LogEventUsecase {
 
   Future<void> call({
     required String eventName,
-    required Map<String, Object> parameters,
+    Map<String, dynamic>? properties,
   }) async {
-    // return await repository.logEvent(
-    //   eventName: eventName,
-    //   parameters: parameters,
-    // );
+    return await repository.trackEvent(
+      eventName: eventName,
+      properties: properties,
+    );
   }
 }

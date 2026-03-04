@@ -13,4 +13,27 @@ class AnalyticsRepositoryImpl extends AnalyticsRepository {
       properties: {'screen_name': screenName, 'index': index, 'name': name},
     );
   }
+
+  @override
+  Future<void> trackEvent({
+    required String eventName,
+    Map<String, dynamic>? properties,
+  }) async {
+    _mixpanel.track(eventName, properties: properties);
+  }
+
+  @override
+  Future<void> setUserProperty({
+    required String propertyName,
+    required dynamic value,
+  }) async {
+    _mixpanel.getPeople().set(propertyName, value);
+  }
+
+  @override
+  Future<void> setUserProperties(Map<String, dynamic> properties) async {
+    properties.forEach((key, value) {
+      _mixpanel.getPeople().set(key, value);
+    });
+  }
 }

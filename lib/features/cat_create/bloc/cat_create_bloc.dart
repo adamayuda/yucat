@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/routes/router.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/create_cat_usecase.dart';
@@ -28,14 +29,19 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
   final CreateCatUsecase _createCatUsecase;
   final CurrentUserUsecase _currentUserUsecase;
   final LogScreenViewUsecase _logScreenViewUsecase;
+  final LogEventUsecase _logEventUsecase;
+
+  DateTime? _creationStartTime;
 
   CatCreateBloc({
     required CreateCatUsecase createCatUsecase,
     required CurrentUserUsecase currentUserUsecase,
     required LogScreenViewUsecase logScreenViewUsecase,
+    required LogEventUsecase logEventUsecase,
   }) : _createCatUsecase = createCatUsecase,
        _currentUserUsecase = currentUserUsecase,
        _logScreenViewUsecase = logScreenViewUsecase,
+       _logEventUsecase = logEventUsecase,
        super(
          const CatCreateLoadedState(
            currentStep: 0,
@@ -56,6 +62,17 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
     final currentState = state;
     if (currentState is CatCreateLoadedState && currentState.currentStep < 8) {
       final nextStep = event.step + 1;
+
+      _logEventUsecase.call(
+        eventName: 'Cat Creation Step Completed',
+        properties: {
+          'step_index': event.step,
+          'step_name': _stepNames[event.step],
+          'next_step_index': nextStep,
+          'next_step_name': _stepNames[nextStep],
+        },
+      );
+
       emit(CatCreateLoadedState(currentStep: nextStep, cat: currentState.cat));
       _logScreenViewUsecase.call(
         screenName: _createCatScreenName,
@@ -71,6 +88,18 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
   ) {
     final currentState = state;
     if (currentState is CatCreateLoadedState) {
+      if (event.step < currentState.currentStep) {
+        _logEventUsecase.call(
+          eventName: 'Cat Creation Step Abandoned',
+          properties: {
+            'from_step': currentState.currentStep,
+            'to_step': event.step,
+            'from_step_name': _stepNames[currentState.currentStep],
+            'to_step_name': _stepNames[event.step],
+          },
+        );
+      }
+
       emit(
         CatCreateLoadedState(currentStep: event.step, cat: currentState.cat),
       );
@@ -86,7 +115,15 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
     CatCreateInitialEvent event,
     Emitter<CatCreateState> emit,
   ) async {
-    // _logScreenViewUsecase.call(screenName: 'CatCreateScreen');
+    _creationStartTime = DateTime.now();
+
+    _logEventUsecase.call(
+      eventName: 'Cat Creation Started',
+      properties: {
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+
     emit(
       const CatCreateLoadedState(
         currentStep: 0,
@@ -115,17 +152,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
     Emitter<CatCreateState> emit,
   ) async {
     try {
-      // emit(const CatCreateLoadingState());
-
       final user = _currentUserUsecase();
-      // if (user == null) {
-      //   emit(
-      //     const CatCreateErrorState(
-      //       message: 'You must be signed in to create a cat.',
-      //     ),
-      //   );
-      //   return;
-      // }
 
       await _createCatUsecase(
         userId: user!.uid,
@@ -143,10 +170,35 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
         healthConditions: event.cat.healthConditions,
       );
 
+      final creationTimeSeconds = _creationStartTime != null
+          ? DateTime.now().difference(_creationStartTime!).inSeconds
+          : null;
+
+      _logEventUsecase.call(
+        eventName: 'Cat Created',
+        properties: {
+          'name': event.cat.name,
+          'age_group': event.cat.ageGroup,
+          'breed': event.cat.breed,
+          'has_health_conditions': event.cat.healthConditions.isNotEmpty,
+          'health_conditions': event.cat.healthConditions,
+          'neutered': event.cat.neutered,
+          'has_photo': event.cat.profileImageFile != null,
+          'creation_time_seconds': creationTimeSeconds,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+
       event.context.router.push(const CatListingRoute());
-      // emit(const CatCreateLoadedState());
     } catch (e) {
-      // emit(CatCreateErrorState(message: e.toString()));
+      _logEventUsecase.call(
+        eventName: 'Cat Creation Failed',
+        properties: {
+          'error_type': e.runtimeType.toString(),
+          'error_message': e.toString(),
+          'step_index': (state as CatCreateLoadedState).currentStep,
+        },
+      );
     }
   }
 }

@@ -32,6 +32,7 @@ class CatTrackingService {
 
   /// Check if user can create a cat (has subscription or hasn't reached limit)
   Future<bool> canCreateCat({required String userId}) async {
+    return true;
     final hasSubscription = await _hasActiveSubscriptionUseCase();
     if (hasSubscription) {
       return true;

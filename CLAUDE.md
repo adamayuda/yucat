@@ -198,4 +198,12 @@ RevenueCat is configured **only for iOS** in `main.dart`:
 - **Mapper pattern**: Strict separation between domain entities and presentation models
 - **Analytics**: All screens auto-tracked via AnalyticsRouteObserver
 - **Anonymous auth**: Users auto-signed in anonymously on first launch
-- **Git workflow**: NEVER commit or push changes unless explicitly requested by the user
+
+## Git Workflow - CRITICAL
+
+**NEVER commit or push changes unless explicitly requested by the user.**
+
+- Only commit when the user explicitly says "commit", "save changes", or uses similar language
+- NEVER push to remote unless the user explicitly says "push"
+- The user has a commit-push skill available - let them use it when they want
+- Always ask before performing any git operations if unclear
