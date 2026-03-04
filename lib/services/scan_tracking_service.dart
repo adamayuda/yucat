@@ -1,7 +1,6 @@
-import 'package:flutter/foundation.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 
 class ScanTrackingService {
   static const String _freeScansCountKey = 'free_scans_count';
@@ -10,12 +9,15 @@ class ScanTrackingService {
 
   final SharedPreferences _prefs;
   final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
+  final LogEventUsecase _logEventUsecase;
 
   ScanTrackingService({
     required SharedPreferences prefs,
     required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
+    required LogEventUsecase logEventUsecase,
   }) : _prefs = prefs,
-       _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase;
+       _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
+       _logEventUsecase = logEventUsecase;
 
   /// Get the current number of free scans used
   int getFreeScansCount() {
@@ -34,6 +36,16 @@ class ScanTrackingService {
     final hasReachedLimit = currentCount >= _maxFreeScans;
     if (!hasReachedLimit) {
       await incrementFreeScansCount();
+    } else {
+      // Track that user hit the limit
+      _logEventUsecase.call(
+        eventName: 'Free Limit Hit',
+        properties: {
+          'limit_type': 'scans',
+          'limit_value': _maxFreeScans,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
     }
     return hasReachedLimit;
   }

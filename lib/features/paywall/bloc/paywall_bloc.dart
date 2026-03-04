@@ -6,15 +6,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
 
 class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
+  final LogEventUsecase _logEventUsecase;
+
+  DateTime? _paywallShownTime;
 
   PaywallBloc({
     required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
+    required LogEventUsecase logEventUsecase,
   }) : _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
+       _logEventUsecase = logEventUsecase,
        super(const PaywallInitialState()) {
     on<PaywallInitialEvent>(_onPaywallInitialEvent);
   }
@@ -79,19 +85,49 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
         return;
       } else {
         // Current offering is available with packages, show paywall via RevenueCatUI
-        // emit(const PaywallLoadedState());
+        _paywallShownTime = DateTime.now();
+
+        _logEventUsecase.call(
+          eventName: 'Paywall Shown',
+          properties: {
+            'trigger': 'manual',
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
+
         final paywallResult = await RevenueCatUI.presentPaywall();
         debugPrint('Paywall result: $paywallResult');
+
+        final timeViewedSeconds = _paywallShownTime != null
+            ? DateTime.now().difference(_paywallShownTime!).inSeconds
+            : null;
 
         // After paywall is dismissed, sync and check if user purchased subscription
         try {
           await Purchases.syncPurchases();
-          // await Future.delayed(const Duration(milliseconds: 500));
 
-          // final updatedCustomerInfo = await Purchases.getCustomerInfo();
           final hasActiveSubscription = await _hasActiveSubscriptionUseCase(
             forceRefresh: true,
           );
+
+          if (hasActiveSubscription) {
+            _logEventUsecase.call(
+              eventName: 'Subscription Completed',
+              properties: {
+                'timestamp': DateTime.now().toIso8601String(),
+              },
+            );
+          }
+
+          _logEventUsecase.call(
+            eventName: 'Paywall Dismissed',
+            properties: {
+              'time_viewed_seconds': timeViewedSeconds,
+              'cta_tapped': hasActiveSubscription,
+              'timestamp': DateTime.now().toIso8601String(),
+            },
+          );
+
           emit(
             PaywallSuccessState(purchasedSubscription: hasActiveSubscription),
           );
@@ -101,11 +137,31 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
             final hasActiveSubscription = await _hasActiveSubscriptionUseCase(
               forceRefresh: true,
             );
+
+            _logEventUsecase.call(
+              eventName: 'Paywall Dismissed',
+              properties: {
+                'time_viewed_seconds': timeViewedSeconds,
+                'cta_tapped': hasActiveSubscription,
+                'timestamp': DateTime.now().toIso8601String(),
+              },
+            );
+
             emit(
               PaywallSuccessState(purchasedSubscription: hasActiveSubscription),
             );
           } catch (e2) {
             debugPrint('Error getting customer info: $e2');
+
+            _logEventUsecase.call(
+              eventName: 'Paywall Dismissed',
+              properties: {
+                'time_viewed_seconds': timeViewedSeconds,
+                'cta_tapped': false,
+                'timestamp': DateTime.now().toIso8601String(),
+              },
+            );
+
             emit(PaywallSuccessState(purchasedSubscription: false));
           }
         }

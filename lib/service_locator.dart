@@ -232,12 +232,14 @@ Future<void> _registerServices() async {
     ScanTrackingService(
       prefs: sl<SharedPreferences>(),
       hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
+      logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
   sl.registerSingleton<CatTrackingService>(
     CatTrackingService(
       getCatsUsecase: sl<GetCatsUsecase>(),
       hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
+      logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
 }
@@ -313,6 +315,7 @@ Future<void> _registerBlocs() async {
   sl.registerBloc<PaywallBloc>(
     () => PaywallBloc(
       hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
+      logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
 }
