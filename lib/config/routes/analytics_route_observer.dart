@@ -9,6 +9,13 @@ class AnalyticsRouteObserver extends NavigatorObserver {
   final LogScreenViewUsecase _logScreenViewUsecase;
   final StackRouter _router;
 
+  /// Routes that handle their own internal PageView tracking and should be excluded
+  /// from automatic route tracking to prevent duplicate events.
+  static const Set<String> _excludedRoutes = {
+    'CreateCatRoute',
+    'OnBoardingRoute',
+  };
+
   AnalyticsRouteObserver({
     required LogScreenViewUsecase logScreenViewUsecase,
     required StackRouter router,
@@ -21,7 +28,9 @@ class AnalyticsRouteObserver extends NavigatorObserver {
     final name = segments.isNotEmpty
         ? segments.last.name
         : route?.settings.name;
-    if (name != null && name.isNotEmpty) {
+
+    // Skip tracking if this route handles its own PageView tracking
+    if (name != null && name.isNotEmpty && !_excludedRoutes.contains(name)) {
       _logScreenViewUsecase.call(screenName: name);
     }
   }

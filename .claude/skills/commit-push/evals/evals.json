@@ -1,0 +1,81 @@
+{
+  "skill_name": "commit-push",
+  "note": "These tests should be run in a test branch or test repository to avoid affecting production code",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I've made some changes to the analytics tracking. Can you commit and push them for me?",
+      "expected_output": "Analyzes the changes, generates a commit message related to analytics (e.g., 'Update analytics tracking'), commits all changes, and pushes to the current branch. Shows confirmation with commit hash and branch name.",
+      "files": [],
+      "test_setup": "Modify lib/config/routes/analytics_route_observer.dart before running",
+      "assertions": [
+        {
+          "name": "commit_created",
+          "description": "A git commit should be created"
+        },
+        {
+          "name": "message_relevant",
+          "description": "Commit message should reference analytics or tracking"
+        },
+        {
+          "name": "message_concise",
+          "description": "Commit message should be under 72 characters"
+        },
+        {
+          "name": "changes_pushed",
+          "description": "Changes should be pushed to remote"
+        },
+        {
+          "name": "confirmation_shown",
+          "description": "User should see confirmation with branch and commit hash"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "push my changes",
+      "expected_output": "Checks for changes, generates an appropriate short commit message based on what was modified, commits, and pushes. Handles multiple file types appropriately.",
+      "files": [],
+      "test_setup": "Make changes to multiple files (e.g., modify a dart file and pubspec.yaml)",
+      "assertions": [
+        {
+          "name": "status_checked",
+          "description": "Should check git status first"
+        },
+        {
+          "name": "all_changes_staged",
+          "description": "All modified files should be staged"
+        },
+        {
+          "name": "message_generated",
+          "description": "Should auto-generate a message, not ask user"
+        },
+        {
+          "name": "message_imperative",
+          "description": "Message should use imperative mood (Add/Fix/Update/etc)"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "commit and push the code",
+      "expected_output": "If no changes exist, informs user that working directory is clean and doesn't attempt to commit/push. If changes exist, proceeds with commit and push.",
+      "files": [],
+      "test_setup": "Test with clean working directory (no changes)",
+      "assertions": [
+        {
+          "name": "no_empty_commit",
+          "description": "Should not create a commit when no changes exist"
+        },
+        {
+          "name": "clear_message",
+          "description": "Should inform user that no changes were found"
+        },
+        {
+          "name": "graceful_exit",
+          "description": "Should exit gracefully without errors"
+        }
+      ]
+    }
+  ]
+}

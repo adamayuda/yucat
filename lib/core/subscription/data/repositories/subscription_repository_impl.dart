@@ -2,7 +2,7 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:yucat/core/subscription/domain/repositories/subscription_repository.dart';
 
 class SubscriptionRepositoryImpl implements SubscriptionRepository {
-  static const String _entitlementID = 'yucat Pro';
+  static const String _entitlementID = 'yucat pro';
 
   CustomerInfo? _cachedCustomerInfo;
 
