@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat_detail/presentation/bloc/cat_detail_bloc.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
@@ -42,7 +43,8 @@ class _CatDetailPageState extends State<CatDetailPage> {
             ),
           );
         } else if (state is CatDetailNavigateToEditState) {
-          // TODO: Navigate to edit screen in Phase 5
+          // Navigate to edit screen
+          context.router.push(CreateCatRoute(cat: state.cat));
         }
       },
       builder: (context, state) {

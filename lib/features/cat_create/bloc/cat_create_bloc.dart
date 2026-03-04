@@ -7,6 +7,8 @@ import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/create_cat_usecase.dart';
+import 'package:yucat/features/cat/domain/usecases/update_cat_usecase.dart';
+import 'package:yucat/features/cat_create/mappers/cat_model_to_entity_mapper.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_create_model.dart';
 
 part 'cat_create_event.dart';
@@ -27,18 +29,25 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
   ];
 
   final CreateCatUsecase _createCatUsecase;
+  final UpdateCatUsecase _updateCatUsecase;
+  final CatModelToEntityMapper _catModelToEntityMapper;
   final CurrentUserUsecase _currentUserUsecase;
   final LogScreenViewUsecase _logScreenViewUsecase;
   final LogEventUsecase _logEventUsecase;
 
   DateTime? _creationStartTime;
+  CatCreateModel? _originalCat;
 
   CatCreateBloc({
     required CreateCatUsecase createCatUsecase,
+    required UpdateCatUsecase updateCatUsecase,
+    required CatModelToEntityMapper catModelToEntityMapper,
     required CurrentUserUsecase currentUserUsecase,
     required LogScreenViewUsecase logScreenViewUsecase,
     required LogEventUsecase logEventUsecase,
   }) : _createCatUsecase = createCatUsecase,
+       _updateCatUsecase = updateCatUsecase,
+       _catModelToEntityMapper = catModelToEntityMapper,
        _currentUserUsecase = currentUserUsecase,
        _logScreenViewUsecase = logScreenViewUsecase,
        _logEventUsecase = logEventUsecase,
@@ -117,17 +126,22 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
   ) async {
     _creationStartTime = DateTime.now();
 
+    final isEditMode = event.cat != null;
+    _originalCat = event.cat;
+
     _logEventUsecase.call(
-      eventName: 'Cat Creation Started',
+      eventName: isEditMode ? 'Cat Edit Started' : 'Cat Creation Started',
       properties: {
+        'is_edit_mode': isEditMode,
+        if (isEditMode) 'cat_name': event.cat!.name,
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
 
     emit(
-      const CatCreateLoadedState(
+      CatCreateLoadedState(
         currentStep: 0,
-        cat: CatCreateModel(name: '', neutered: false),
+        cat: event.cat ?? const CatCreateModel(name: '', neutered: false),
       ),
     );
   }
@@ -153,46 +167,69 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
   ) async {
     try {
       final user = _currentUserUsecase();
+      final isEditMode = _originalCat != null;
 
-      await _createCatUsecase(
-        userId: user!.uid,
-        name: event.cat.name,
-        age: event.cat.age,
-        ageGroup: event.cat.ageGroup,
-        weight: event.cat.weight,
-        neutered: event.cat.neutered,
-        profileImageFile: event.cat.profileImageFile,
-        neuteredStatus: event.cat.neuteredStatus,
-        breed: event.cat.breed,
-        weightCategory: event.cat.weightCategory,
-        activityLevel: event.cat.activityLevel,
-        coatType: event.cat.coatType,
-        healthConditions: event.cat.healthConditions,
-      );
+      if (isEditMode) {
+        // Update existing cat
+        final catEntity = _catModelToEntityMapper(event.cat);
+        await _updateCatUsecase(cat: catEntity);
 
-      final creationTimeSeconds = _creationStartTime != null
-          ? DateTime.now().difference(_creationStartTime!).inSeconds
-          : null;
+        // Track which fields changed
+        final fieldsChanged = _getChangedFields(event.cat);
 
-      _logEventUsecase.call(
-        eventName: 'Cat Created',
-        properties: {
-          'name': event.cat.name,
-          'age_group': event.cat.ageGroup,
-          'breed': event.cat.breed,
-          'has_health_conditions': event.cat.healthConditions.isNotEmpty,
-          'health_conditions': event.cat.healthConditions,
-          'neutered': event.cat.neutered,
-          'has_photo': event.cat.profileImageFile != null,
-          'creation_time_seconds': creationTimeSeconds,
-          'timestamp': DateTime.now().toIso8601String(),
-        },
-      );
+        _logEventUsecase.call(
+          eventName: 'Cat Profile Updated',
+          properties: {
+            'cat_name': event.cat.name,
+            'cat_age_group': event.cat.ageGroup ?? 'unknown',
+            'cat_breed': event.cat.breed ?? 'unknown',
+            'fields_changed': fieldsChanged,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
+      } else {
+        // Create new cat
+        await _createCatUsecase(
+          userId: user!.uid,
+          name: event.cat.name,
+          age: event.cat.age,
+          ageGroup: event.cat.ageGroup,
+          weight: event.cat.weight,
+          neutered: event.cat.neutered,
+          profileImageFile: event.cat.profileImageFile,
+          neuteredStatus: event.cat.neuteredStatus,
+          breed: event.cat.breed,
+          weightCategory: event.cat.weightCategory,
+          activityLevel: event.cat.activityLevel,
+          coatType: event.cat.coatType,
+          healthConditions: event.cat.healthConditions,
+        );
+
+        final creationTimeSeconds = _creationStartTime != null
+            ? DateTime.now().difference(_creationStartTime!).inSeconds
+            : null;
+
+        _logEventUsecase.call(
+          eventName: 'Cat Created',
+          properties: {
+            'name': event.cat.name,
+            'age_group': event.cat.ageGroup,
+            'breed': event.cat.breed,
+            'has_health_conditions': event.cat.healthConditions.isNotEmpty,
+            'health_conditions': event.cat.healthConditions,
+            'neutered': event.cat.neutered,
+            'has_photo': event.cat.profileImageFile != null,
+            'creation_time_seconds': creationTimeSeconds,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
+      }
 
       event.context.router.push(const CatListingRoute());
     } catch (e) {
+      final isEditMode = _originalCat != null;
       _logEventUsecase.call(
-        eventName: 'Cat Creation Failed',
+        eventName: isEditMode ? 'Cat Update Failed' : 'Cat Creation Failed',
         properties: {
           'error_type': e.runtimeType.toString(),
           'error_message': e.toString(),
@@ -200,5 +237,40 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
         },
       );
     }
+  }
+
+  List<String> _getChangedFields(CatCreateModel updatedCat) {
+    if (_originalCat == null) return [];
+
+    final changedFields = <String>[];
+
+    if (updatedCat.name != _originalCat!.name) changedFields.add('name');
+    if (updatedCat.age != _originalCat!.age) changedFields.add('age');
+    if (updatedCat.ageGroup != _originalCat!.ageGroup) {
+      changedFields.add('ageGroup');
+    }
+    if (updatedCat.weight != _originalCat!.weight) changedFields.add('weight');
+    if (updatedCat.neutered != _originalCat!.neutered) {
+      changedFields.add('neutered');
+    }
+    if (updatedCat.neuteredStatus != _originalCat!.neuteredStatus) {
+      changedFields.add('neuteredStatus');
+    }
+    if (updatedCat.breed != _originalCat!.breed) changedFields.add('breed');
+    if (updatedCat.weightCategory != _originalCat!.weightCategory) {
+      changedFields.add('weightCategory');
+    }
+    if (updatedCat.activityLevel != _originalCat!.activityLevel) {
+      changedFields.add('activityLevel');
+    }
+    if (updatedCat.coatType != _originalCat!.coatType) {
+      changedFields.add('coatType');
+    }
+    if (updatedCat.healthConditions != _originalCat!.healthConditions) {
+      changedFields.add('healthConditions');
+    }
+    if (updatedCat.profileImageFile != null) changedFields.add('profileImage');
+
+    return changedFields;
   }
 }

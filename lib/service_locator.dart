@@ -38,6 +38,7 @@ import 'package:yucat/features/cat/domain/usecases/delete_cat_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/update_cat_usecase.dart';
 import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
+import 'package:yucat/features/cat_create/mappers/cat_model_to_create_mapper.dart';
 import 'package:yucat/features/cat_create/mappers/cat_model_to_entity_mapper.dart';
 import 'package:yucat/features/cat_detail/presentation/bloc/cat_detail_bloc.dart';
 import 'package:yucat/features/cat_listing/bloc/cat_listing_bloc.dart';
@@ -143,6 +144,7 @@ Future<void> _registerMappers() async {
   sl.registerSingleton<CatEntityToModelMapper>(CatEntityToModelMapperImpl());
   sl.registerSingleton<CatDocumentMapper>(CatDocumentMapperImpl());
   sl.registerSingleton<CatModelToEntityMapper>(CatModelToEntityMapper());
+  sl.registerSingleton<CatModelToCreateMapper>(CatModelToCreateMapperImpl());
   sl.registerSingleton<BrandToModelMapper>(BrandToModelMapperImpl());
 }
 
@@ -328,6 +330,8 @@ Future<void> _registerBlocs() async {
   sl.registerBloc<CatCreateBloc>(
     () => CatCreateBloc(
       createCatUsecase: sl<CreateCatUsecase>(),
+      updateCatUsecase: sl<UpdateCatUsecase>(),
+      catModelToEntityMapper: sl<CatModelToEntityMapper>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),

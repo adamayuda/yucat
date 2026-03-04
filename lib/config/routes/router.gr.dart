@@ -65,18 +65,38 @@ class CatListingRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [CreateCatPage]
-class CreateCatRoute extends PageRouteInfo<void> {
-  const CreateCatRoute({List<PageRouteInfo>? children})
-    : super(CreateCatRoute.name, initialChildren: children);
+class CreateCatRoute extends PageRouteInfo<CreateCatRouteArgs> {
+  CreateCatRoute({Key? key, CatModel? cat, List<PageRouteInfo>? children})
+    : super(
+        CreateCatRoute.name,
+        args: CreateCatRouteArgs(key: key, cat: cat),
+        initialChildren: children,
+      );
 
   static const String name = 'CreateCatRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const CreateCatPage();
+      final args = data.argsAs<CreateCatRouteArgs>(
+        orElse: () => const CreateCatRouteArgs(),
+      );
+      return CreateCatPage(key: args.key, cat: args.cat);
     },
   );
+}
+
+class CreateCatRouteArgs {
+  const CreateCatRouteArgs({this.key, this.cat});
+
+  final Key? key;
+
+  final CatModel? cat;
+
+  @override
+  String toString() {
+    return 'CreateCatRouteArgs{key: $key, cat: $cat}';
+  }
 }
 
 /// generated route for

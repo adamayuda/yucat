@@ -5,10 +5,12 @@ sealed class CatCreateEvent extends Equatable {
 }
 
 class CatCreateInitialEvent extends CatCreateEvent {
-  const CatCreateInitialEvent();
+  final CatCreateModel? cat;
+
+  const CatCreateInitialEvent({this.cat});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [cat];
 }
 
 class CatCreateGoToNextStepEvent extends CatCreateEvent {

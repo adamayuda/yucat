@@ -6,7 +6,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
+import 'package:yucat/features/cat_create/mappers/cat_model_to_create_mapper.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_create_model.dart';
+import 'package:yucat/features/cat_listing/models/cat_model.dart';
 import 'package:yucat/features/cat_create/widgets/stepper_bar_widget.dart';
 import 'package:yucat/features/cat_create/widgets/stepper_bottom_widget.dart';
 import 'package:yucat/features/cat_create/widgets/steps/activity_step.dart';
@@ -22,7 +24,9 @@ import 'package:yucat/service_locator.dart';
 
 @RoutePage()
 class CreateCatPage extends StatefulWidget {
-  const CreateCatPage({super.key});
+  final CatModel? cat;
+
+  const CreateCatPage({super.key, this.cat});
 
   @override
   State<CreateCatPage> createState() => _CreateCatPageState();
@@ -71,6 +75,16 @@ class _CreateCatPageState extends State<CreateCatPage> {
     super.initState();
     _bloc = context.read<CatCreateBloc>();
     _currentUserUsecase = sl<CurrentUserUsecase>();
+
+    // Convert CatModel to CatCreateModel if editing
+    CatCreateModel? catCreateModel;
+    if (widget.cat != null) {
+      final mapper = sl<CatModelToCreateMapper>();
+      catCreateModel = mapper(widget.cat!);
+      _nameController.text = catCreateModel.name;
+    }
+
+    _bloc.add(CatCreateInitialEvent(cat: catCreateModel));
     _bloc.add(const CatCreateStepChangedEvent(step: 0));
     // Listen to name field changes to update swipe physics
     _nameController.addListener(_onNameChanged);

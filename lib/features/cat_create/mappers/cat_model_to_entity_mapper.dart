@@ -3,6 +3,7 @@ import 'package:yucat/features/cat_create/presentation/models/cat_create_model.d
 
 class CatModelToEntityMapper {
   CatEntity call(CatCreateModel model) => CatEntity(
+    id: model.id,
     name: model.name,
     age: model.age,
     weight: model.weight,

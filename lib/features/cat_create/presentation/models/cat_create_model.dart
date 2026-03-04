@@ -1,12 +1,14 @@
 import 'dart:io';
 
 class CatCreateModel {
+  final String? id;
   final String name;
   final int? age;
   final String? ageGroup;
   final double? weight;
   final bool neutered;
   final File? profileImageFile;
+  final String? profileImageUrl;
   final String? neuteredStatus;
   final String? breed;
   final String? gender;
@@ -16,12 +18,14 @@ class CatCreateModel {
   final List<String> healthConditions;
 
   const CatCreateModel({
+    this.id,
     required this.name,
     this.age,
     this.ageGroup,
     this.weight,
     this.neutered = false,
     this.profileImageFile,
+    this.profileImageUrl,
     this.neuteredStatus,
     this.breed,
     this.gender,
@@ -32,12 +36,14 @@ class CatCreateModel {
   });
 
   CatCreateModel copyWith({
+    String? id,
     String? name,
     int? age,
     String? ageGroup,
     double? weight,
     bool? neutered,
     File? profileImageFile,
+    String? profileImageUrl,
     String? neuteredStatus,
     String? breed,
     String? gender,
@@ -47,12 +53,14 @@ class CatCreateModel {
     List<String>? healthConditions,
   }) {
     return CatCreateModel(
+      id: id ?? this.id,
       name: name ?? this.name,
       age: age ?? this.age,
       ageGroup: ageGroup ?? this.ageGroup,
       weight: weight ?? this.weight,
       neutered: neutered ?? this.neutered,
       profileImageFile: profileImageFile ?? this.profileImageFile,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       neuteredStatus: neuteredStatus ?? this.neuteredStatus,
       breed: breed ?? this.breed,
       gender: gender ?? this.gender,

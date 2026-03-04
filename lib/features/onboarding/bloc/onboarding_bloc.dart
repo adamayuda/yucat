@@ -90,7 +90,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
 
     await _prefs.setBool(_onboardingCompletedKey, true);
 
-    await event.context.router.push(const CreateCatRoute());
+    await event.context.router.push(CreateCatRoute());
 
     event.context.router.replace(const CatListingRoute());
   }

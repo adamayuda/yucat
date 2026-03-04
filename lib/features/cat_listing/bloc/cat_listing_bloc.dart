@@ -102,7 +102,7 @@ class CatListingBloc extends Bloc<CatListingEvent, CatListingState> {
       }
     }
 
-    await event.context.router.push(const CreateCatRoute());
+    await event.context.router.push(CreateCatRoute());
     // After returning from create cat page, fetch the cat list again
     add(const CatListingFetchCatsEvent());
   }

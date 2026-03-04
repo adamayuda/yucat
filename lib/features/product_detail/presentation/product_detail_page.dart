@@ -358,7 +358,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () async {
-                      await context.router.push(const CreateCatRoute());
+                      await context.router.push(CreateCatRoute());
                       // Refresh cats list when returning from create cat page
                       _refreshCats();
                     },
