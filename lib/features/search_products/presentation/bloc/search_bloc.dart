@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/routes/router.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/search/domain/usecases/search_by_query_usecase.dart';
@@ -20,6 +21,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final SearchByQueryUsecase _searchByQueryUsecase;
   final ProductToModelMapper _productToModelMapper;
   final LogScreenViewUsecase _logScreenViewUsecase;
+  final LogEventUsecase _logEventUsecase;
   final GetBrandsUsecase _getBrandsUsecase;
   final BrandToModelMapper _brandToModelMapper;
   // Store ProductEntity list to preserve nutritional data
@@ -31,11 +33,13 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     required SearchByQueryUsecase searchByQueryUsecase,
     required ProductToModelMapper productToModelMapper,
     required LogScreenViewUsecase logScreenViewUsecase,
+    required LogEventUsecase logEventUsecase,
     required GetBrandsUsecase getBrandsUsecase,
     required BrandToModelMapper brandToModelMapper,
   }) : _searchByQueryUsecase = searchByQueryUsecase,
        _productToModelMapper = productToModelMapper,
        _logScreenViewUsecase = logScreenViewUsecase,
+       _logEventUsecase = logEventUsecase,
        _getBrandsUsecase = getBrandsUsecase,
        _brandToModelMapper = brandToModelMapper,
        super(SearchHiddenState()) {
@@ -108,6 +112,27 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       final mappedProducts = products
           .map((product) => _productToModelMapper(product))
           .toList();
+
+      _logEventUsecase.call(
+        eventName: 'Product Searched',
+        properties: {
+          'query': event.query,
+          'query_length': event.query.length,
+          'results_count': products.length,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+
+      _logEventUsecase.call(
+        eventName: 'Search Results Viewed',
+        properties: {
+          'query': event.query,
+          'results_count': products.length,
+          'has_results': products.isNotEmpty,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+
       emit(
         SearchLoadedState(
           products: mappedProducts,
@@ -124,6 +149,16 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     NavigateToProductDetailEvent event,
     Emitter<SearchState> emit,
   ) async {
+    _logEventUsecase.call(
+      eventName: 'Product Selected',
+      properties: {
+        'product_name': event.product.name,
+        'product_brand': event.product.brand,
+        'source': 'search',
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+
     event.context.router.push(ProductDetailRoute(product: event.product));
   }
 

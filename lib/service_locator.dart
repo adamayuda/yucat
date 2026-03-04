@@ -274,6 +274,7 @@ Future<void> _registerBlocs() async {
       searchByQueryUsecase: sl<SearchByQueryUsecase>(),
       productToModelMapper: sl<ProductToModelMapper>(),
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+      logEventUsecase: sl<LogEventUsecase>(),
       getBrandsUsecase: sl<GetBrandsUsecase>(),
       brandToModelMapper: sl<BrandToModelMapper>(),
     ),
@@ -286,6 +287,7 @@ Future<void> _registerBlocs() async {
       signinAnonymouslyUsecase: sl<SigninAnonymouslyUsecase>(),
       scanTrackingService: sl<ScanTrackingService>(),
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+      logEventUsecase: sl<LogEventUsecase>(),
       prefs: sl<SharedPreferences>(),
     ),
   );
