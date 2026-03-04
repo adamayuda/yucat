@@ -1,4 +1,5 @@
 class CatEntity {
+  final String? id;
   final String name;
   final int? age;
   final double? weight;
@@ -13,6 +14,7 @@ class CatEntity {
   final List<String>? healthConditions;
 
   const CatEntity({
+    this.id,
     required this.name,
     this.age,
     this.weight,

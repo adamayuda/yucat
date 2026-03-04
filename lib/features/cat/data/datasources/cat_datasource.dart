@@ -102,4 +102,39 @@ class CatDataSource {
       rethrow;
     }
   }
+
+  Future<void> deleteCat({required String catId}) async {
+    try {
+      // Delete Firestore document
+      await _firestore.collection('cats').doc(catId).delete();
+
+      // Try to delete profile image from Storage if exists
+      try {
+        final listResult = await _storage.ref().child('cats').listAll();
+        for (final item in listResult.items) {
+          if (item.name.startsWith(catId)) {
+            await item.delete();
+          }
+        }
+      } catch (e) {
+        // Ignore if image doesn't exist or can't be deleted
+        print('Error deleting cat profile image: $e');
+      }
+    } catch (e) {
+      print('Error deleting cat: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateCat({
+    required String catId,
+    required Map<String, dynamic> catData,
+  }) async {
+    try {
+      await _firestore.collection('cats').doc(catId).update(catData);
+    } catch (e) {
+      print('Error updating cat: $e');
+      rethrow;
+    }
+  }
 }

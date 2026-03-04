@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
+import 'package:yucat/features/cat_detail/presentation/bloc/cat_detail_bloc.dart';
 import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
 import 'package:yucat/features/splash/presentation/bloc/splash_bloc.dart';
 import 'firebase_options.dart';
@@ -70,6 +71,7 @@ class App extends StatelessWidget {
         BlocProvider(create: (context) => sl<ProductDetailBloc>()),
         BlocProvider(create: (context) => sl<CatListingBloc>()),
         BlocProvider(create: (context) => sl<CatCreateBloc>()),
+        BlocProvider(create: (context) => sl<CatDetailBloc>()),
         BlocProvider(create: (context) => sl<ProductListingBloc>()),
         BlocProvider(create: (context) => sl<PaywallBloc>()),
         BlocProvider(create: (context) => sl<SplashBloc>()),

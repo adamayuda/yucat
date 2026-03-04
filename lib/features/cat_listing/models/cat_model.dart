@@ -1,4 +1,5 @@
 class CatModel {
+  final String? id;
   final String name;
   final int? age;
   final double? weight;
@@ -13,6 +14,7 @@ class CatModel {
   final List<String>? healthConditions;
 
   const CatModel({
+    this.id,
     required this.name,
     this.age,
     this.weight,

@@ -49,11 +49,24 @@ class CatListingLoadedWidget extends StatelessWidget {
           final cat = cats[index];
           return Padding(
             padding: const EdgeInsets.only(bottom: DSDimens.sizeS),
-            child: CatListItemCard(
-              cat: cat,
-              onScanPressed: () {
-                // TODO: Navigate to scan page for this cat
+            child: GestureDetector(
+              onTap: () async {
+                final deleted = await context.router.push<bool>(
+                  CatDetailRoute(cat: cat),
+                );
+                // If a cat was deleted, refresh the list
+                if (deleted == true && context.mounted) {
+                  context.read<CatListingBloc>().add(
+                    const CatListingFetchCatsEvent(),
+                  );
+                }
               },
+              child: CatListItemCard(
+                cat: cat,
+                onScanPressed: () {
+                  // TODO: Navigate to scan page for this cat
+                },
+              ),
             ),
           );
         },

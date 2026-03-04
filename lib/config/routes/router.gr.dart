@@ -11,6 +11,43 @@
 part of 'router.dart';
 
 /// generated route for
+/// [CatDetailPage]
+class CatDetailRoute extends PageRouteInfo<CatDetailRouteArgs> {
+  CatDetailRoute({
+    Key? key,
+    required CatModel cat,
+    List<PageRouteInfo>? children,
+  }) : super(
+         CatDetailRoute.name,
+         args: CatDetailRouteArgs(key: key, cat: cat),
+         initialChildren: children,
+       );
+
+  static const String name = 'CatDetailRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<CatDetailRouteArgs>();
+      return CatDetailPage(key: args.key, cat: args.cat);
+    },
+  );
+}
+
+class CatDetailRouteArgs {
+  const CatDetailRouteArgs({this.key, required this.cat});
+
+  final Key? key;
+
+  final CatModel cat;
+
+  @override
+  String toString() {
+    return 'CatDetailRouteArgs{key: $key, cat: $cat}';
+  }
+}
+
+/// generated route for
 /// [CatListingPage]
 class CatListingRoute extends PageRouteInfo<void> {
   const CatListingRoute({List<PageRouteInfo>? children})

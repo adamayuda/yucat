@@ -100,4 +100,19 @@ class CatRepositoryImpl implements CatRepository {
 
     return (entity: entity, catId: catId);
   }
+
+  @override
+  Future<void> deleteCat({required String catId}) async {
+    return _dataSource.deleteCat(catId: catId);
+  }
+
+  @override
+  Future<void> updateCat({required CatEntity cat}) async {
+    if (cat.id == null) {
+      throw Exception('Cannot update cat without ID');
+    }
+
+    final catData = _mapper.toDocument(cat);
+    return _dataSource.updateCat(catId: cat.id!, catData: catData);
+  }
 }

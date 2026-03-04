@@ -34,9 +34,12 @@ import 'package:yucat/features/cat/data/mappers/cat_document_mapper.dart';
 import 'package:yucat/features/cat/data/repositories/cat_repository_impl.dart';
 import 'package:yucat/features/cat/domain/repositories/cat_repository.dart';
 import 'package:yucat/features/cat/domain/usecases/create_cat_usecase.dart';
+import 'package:yucat/features/cat/domain/usecases/delete_cat_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
+import 'package:yucat/features/cat/domain/usecases/update_cat_usecase.dart';
 import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
 import 'package:yucat/features/cat_create/mappers/cat_model_to_entity_mapper.dart';
+import 'package:yucat/features/cat_detail/presentation/bloc/cat_detail_bloc.dart';
 import 'package:yucat/features/cat_listing/bloc/cat_listing_bloc.dart';
 import 'package:yucat/features/cat_listing/mappers/cat_entity_to_model_mapper.dart';
 import 'package:yucat/features/home/bloc/home_bloc.dart';
@@ -216,6 +219,12 @@ Future<void> _registerUseCases() async {
   sl.registerSingleton<CreateCatUsecase>(
     CreateCatUsecase(repository: sl<CatRepository>()),
   );
+  sl.registerSingleton<DeleteCatUsecase>(
+    DeleteCatUsecase(repository: sl<CatRepository>()),
+  );
+  sl.registerSingleton<UpdateCatUsecase>(
+    UpdateCatUsecase(repository: sl<CatRepository>()),
+  );
   sl.registerSingleton<CurrentUserUsecase>(
     CurrentUserUsecase(repository: sl<AuthRepository>()),
   );
@@ -307,6 +316,13 @@ Future<void> _registerBlocs() async {
       currentUserUsecase: sl<CurrentUserUsecase>(),
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
       catTrackingService: sl<CatTrackingService>(),
+    ),
+  );
+  sl.registerBloc<CatDetailBloc>(
+    () => CatDetailBloc(
+      deleteCatUsecase: sl<DeleteCatUsecase>(),
+      logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+      logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
   sl.registerBloc<CatCreateBloc>(

@@ -9,6 +9,7 @@ class CatEntityToModelMapperImpl extends CatEntityToModelMapper {
   @override
   CatModel call(CatEntity entity) {
     return CatModel(
+      id: entity.id,
       name: entity.name,
       age: entity.age,
       weight: entity.weight,

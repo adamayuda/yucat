@@ -3,6 +3,7 @@ import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 
 abstract class CatDocumentMapper {
   CatEntity call(QueryDocumentSnapshot<Map<String, dynamic>> doc);
+  Map<String, dynamic> toDocument(CatEntity entity);
 }
 
 class CatDocumentMapperImpl implements CatDocumentMapper {
@@ -10,6 +11,7 @@ class CatDocumentMapperImpl implements CatDocumentMapper {
   CatEntity call(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data();
     return CatEntity(
+      id: doc.id,
       name: data['name'] as String,
       age: data['age'] as int?,
       weight: data['weight'] as double?,
@@ -25,5 +27,25 @@ class CatDocumentMapperImpl implements CatDocumentMapper {
           ?.map((e) => e as String)
           .toList(),
     );
+  }
+
+  @override
+  Map<String, dynamic> toDocument(CatEntity entity) {
+    return {
+      'name': entity.name,
+      'age': entity.age,
+      'weight': entity.weight,
+      'neutered': entity.neutered,
+      if (entity.profileImageUrl != null)
+        'profileImageUrl': entity.profileImageUrl,
+      'age_group': entity.ageGroup,
+      'neutered_status': entity.neuteredStatus,
+      'breed': entity.breed,
+      'weight_category': entity.weightCategory,
+      'activity_level': entity.activityLevel,
+      'coat_type': entity.coatType,
+      if (entity.healthConditions != null && entity.healthConditions!.isNotEmpty)
+        'health_conditions': entity.healthConditions,
+    };
   }
 }

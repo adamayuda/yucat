@@ -27,4 +27,6 @@ abstract class CatRepository {
     String? coatType,
     List<String>? healthConditions,
   });
+  Future<void> deleteCat({required String catId});
+  Future<void> updateCat({required CatEntity cat});
 }
