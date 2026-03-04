@@ -295,7 +295,10 @@ Future<void> _registerBlocs() async {
     () => ProfileBloc(logScreenViewUsecase: sl<LogScreenViewUsecase>()),
   );
   sl.registerBloc<ProductDetailBloc>(
-    () => ProductDetailBloc(logScreenViewUsecase: sl<LogScreenViewUsecase>()),
+    () => ProductDetailBloc(
+      logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+      logEventUsecase: sl<LogEventUsecase>(),
+    ),
   );
   sl.registerBloc<CatListingBloc>(
     () => CatListingBloc(
