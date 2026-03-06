@@ -50,7 +50,7 @@ class CatListingEmptyWidget extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: DSColors.primary,
                 foregroundColor: DSColors.white,
-                disabledBackgroundColor: const Color(0xFFEDAFDD),
+                disabledBackgroundColor: DSColors.primaryDisabled,
                 disabledForegroundColor: DSColors.white,
                 // padding: EdgeInsets.symmetric(
                 //   vertical: DSDimens.sizeM,

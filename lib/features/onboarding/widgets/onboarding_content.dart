@@ -43,7 +43,7 @@ class OnboardingContent extends StatelessWidget {
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 16,
-                color: const Color(0xFF686868),
+                color: DSColors.bodyText,
               ),
             ),
           ],

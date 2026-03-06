@@ -67,7 +67,7 @@ class _BreedStepState extends State<BreedStep> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5E8FF),
+                  color: DSColors.primaryLight,
                   borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
                 ),
                 width: 40,
@@ -93,14 +93,14 @@ class _BreedStepState extends State<BreedStep> {
           TextField(
             controller: _searchController,
             style: const TextStyle(
-              color: Color(0xFFA0A8B6),
+              color: DSColors.placeholder,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
             decoration: InputDecoration(
               hintText: 'Search breeds...',
               hintStyle: const TextStyle(
-                color: Color(0xFFA0A8B6),
+                color: DSColors.placeholder,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -113,11 +113,11 @@ class _BreedStepState extends State<BreedStep> {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-                borderSide: const BorderSide(color: Color(0xFFE6E7EB)),
+                borderSide: BorderSide(color: DSColors.border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-                borderSide: const BorderSide(color: Color(0xFFFF61E5)),
+                borderSide: BorderSide(color: DSColors.primaryFocus),
               ),
             ),
           ),
@@ -137,14 +137,14 @@ class _BreedStepState extends State<BreedStep> {
                     ),
                     decoration: BoxDecoration(
                       color: widget.selectedBreed == breed
-                          ? const Color(0xFFFEF5FE)
-                          : const Color(0xFFF9FAFB),
+                          ? DSColors.primarySurface
+                          : DSColors.surface,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       breed,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF334156),
+                        color: DSColors.darkBlue,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

@@ -22,7 +22,7 @@ class CatNameStep extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5E8FF),
+                  color: DSColors.primaryLight,
                   borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
                 ),
                 width: 40,
@@ -58,14 +58,14 @@ class CatNameStep extends StatelessWidget {
             key: nameFieldKey,
             controller: nameController,
             style: const TextStyle(
-              color: Color(0xFFA0A8B6),
+              color: DSColors.placeholder,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
             decoration: InputDecoration(
               hintText: 'Enter your cat\'s name',
               hintStyle: const TextStyle(
-                color: Color(0xFFA0A8B6),
+                color: DSColors.placeholder,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -78,11 +78,11 @@ class CatNameStep extends StatelessWidget {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-                borderSide: const BorderSide(color: Color(0xFFE6E7EB)),
+                borderSide: BorderSide(color: DSColors.border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-                borderSide: const BorderSide(color: Color(0xFFFF61E5)),
+                borderSide: BorderSide(color: DSColors.primaryFocus),
               ),
             ),
             validator: (value) {

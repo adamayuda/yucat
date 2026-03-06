@@ -160,7 +160,7 @@ class _OnBoardingPage extends State<OnBoardingPage> {
                                 controller: _pageController,
                                 count: pages.length,
                                 effect: const WormEffect(
-                                  dotColor: Color(0xFFF9E9F5),
+                                  dotColor: DSColors.primaryMuted,
                                   activeDotColor: DSColors.primary,
                                   dotHeight: 14,
                                   dotWidth: 14,
@@ -185,7 +185,7 @@ class _OnBoardingPage extends State<OnBoardingPage> {
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontSize: 16,
-                      color: const Color(0xFF686868),
+                      color: DSColors.bodyText,
                     ),
                   ),
                 ),

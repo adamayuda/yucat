@@ -2,14 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DSColors {
+  // Primary & Brand
   static const Color primary = Color(0xFFED67CA);
+  static const Color primaryVibrant = Color(0xFFFF5FC9);
+  static const Color primaryFocus = Color(0xFFFF61E5);
+  static const Color primaryDisabled = Color(0xFFEDAFDD);
+  static const Color primarySurface = Color(0xFFFEF5FE);
+  static const Color primaryLight = Color(0xFFF5E8FF);
+  static const Color primaryMuted = Color(0xFFF9E9F5);
+
+  // Neutrals
   static const Color black = Color(0xFF4A4A4A);
-  static const Color white = Color(0xFFFFFFFF);
-  static Color lightGrey = Colors.grey.shade200;
+  static const Color darkBlue = Color(0xFF334156);
+  static const Color bodyText = Color(0xFF686868);
+  static const Color inputDarkGrey = Color(0xFF7D7D82);
+  static const Color placeholder = Color(0xFFA0A8B6);
   static const Color darkGrey = Color(0xFFA2A2A2);
   static const Color inputLightGrey = Color(0xFFDFDFE0);
-  static const Color inputDarkGrey = Color(0xFF7D7D82);
+  static const Color border = Color(0xFFE6E7EB);
+  static Color lightGrey = Colors.grey.shade200;
+  static const Color surface = Color(0xFFF9FAFB);
+  static const Color white = Color(0xFFFFFFFF);
+
+  // Semantic
   static const Color green = Color(0xFF84E475);
+  static const Color red = Color(0xFFE53935);
 }
 
 class DSDimens {

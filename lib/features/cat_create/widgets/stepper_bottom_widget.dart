@@ -23,7 +23,7 @@ class StepperBottomWidget extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: DSColors.primary,
                 foregroundColor: DSColors.white,
-                disabledBackgroundColor: const Color(0xFFEDAFDD),
+                disabledBackgroundColor: DSColors.primaryDisabled,
                 disabledForegroundColor: DSColors.white,
                 padding: const EdgeInsets.symmetric(vertical: DSDimens.sizeS),
                 shape: RoundedRectangleBorder(

@@ -22,7 +22,7 @@ class ActivityStep extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5E8FF),
+                  color: DSColors.primaryLight,
                   borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
                 ),
                 width: 40,
@@ -73,14 +73,14 @@ class ActivityStep extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: activityLevel == value
-                          ? const Color(0xFFFEF5FE)
-                          : const Color(0xFFF9FAFB),
+                          ? DSColors.primarySurface
+                          : DSColors.surface,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       level,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF334156),
+                        color: DSColors.darkBlue,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

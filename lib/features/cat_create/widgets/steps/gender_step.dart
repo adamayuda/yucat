@@ -22,7 +22,7 @@ class GenderStep extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5E8FF),
+                  color: DSColors.primaryLight,
                   borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
                 ),
                 width: 40,
@@ -96,19 +96,19 @@ class _GenderOption extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           decoration: BoxDecoration(
             color: isSelected
-                ? const Color(0xFFFEF5FE)
-                : const Color(0xFFF9FAFB),
+                ? DSColors.primarySurface
+                : DSColors.surface,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 40, color: const Color(0xFF334156)),
+              Icon(icon, size: 40, color: DSColors.darkBlue),
               SizedBox(height: DSDimens.sizeXs),
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF334156),
+                  color: DSColors.darkBlue,
                   fontWeight: FontWeight.w500,
                 ),
               ),

@@ -35,7 +35,7 @@ class ProfilePhotoStep extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5E8FF),
+                  color: DSColors.primaryLight,
                   borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
                 ),
                 width: 40,

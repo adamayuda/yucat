@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yucat/config/themes/theme.dart';
 
 const totalSteps = 9;
 
@@ -30,12 +31,12 @@ class StepperBarWidget extends StatelessWidget {
                 icon: Icon(
                   Icons.chevron_left,
                   size: 24,
-                  color: const Color(0xFF686868),
+                  color: DSColors.bodyText,
                 ),
                 label: Text(
                   'Back',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF686868),
+                    color: DSColors.bodyText,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -59,9 +60,7 @@ class StepperBarWidget extends StatelessWidget {
                   width: double.infinity,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: const Color(
-                      0xFFF5E8FF,
-                    ), // Light lavender/pale purple
+                    color: DSColors.primaryLight, // Light lavender/pale purple
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
@@ -71,7 +70,7 @@ class StepperBarWidget extends StatelessWidget {
                   child: Container(
                     height: 12,
                     decoration: BoxDecoration(
-                      color: Color(0xFFFF5FC9), // Pink/vibrant color
+                      color: DSColors.primaryVibrant, // Pink/vibrant color
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -84,7 +83,7 @@ class StepperBarWidget extends StatelessWidget {
             'Step $stepNumber of $totalSteps',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF686868),
+              color: DSColors.bodyText,
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
