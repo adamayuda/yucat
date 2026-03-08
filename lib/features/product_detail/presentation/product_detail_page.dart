@@ -10,6 +10,7 @@ import 'package:yucat/features/product_detail/presentation/bloc/product_detail_b
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/utils/cat_product_assessment.dart';
 import 'package:yucat/presentation/top_app_bar/top_app_bar.dart';
+import 'package:yucat/presentation/widgets/app_loading_widget.dart';
 import 'package:yucat/service_locator.dart';
 
 @RoutePage()
@@ -70,7 +71,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             preferredSize: Size.fromHeight(kToolbarHeight),
             child: TopAppBar(title: ''),
           ),
-          body: const Center(child: CircularProgressIndicator()),
+          body: const AppLoadingWidget(),
         );
       case ProductDetailLoadedState():
         return Scaffold(
@@ -322,7 +323,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               border: Border.all(color: DSColors.lightGrey),
               borderRadius: BorderRadius.circular(DSDimens.sizeS),
             ),
-            child: const Center(child: CircularProgressIndicator()),
+            child: const AppLoadingWidget(),
           );
         }
 

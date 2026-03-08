@@ -5,6 +5,7 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_listing/presentation/bloc/product_listing_bloc.dart';
 import 'package:yucat/presentation/top_app_bar/top_app_bar.dart';
+import 'package:yucat/presentation/widgets/app_loading_widget.dart';
 
 @RoutePage()
 class ProductListingPage extends StatefulWidget {
@@ -52,7 +53,7 @@ class _ProductListingPage extends State<ProductListingPage> {
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
-          body: Center(child: Text('Loading')),
+          body: const AppLoadingWidget(),
         );
       case ProductListingLoadedState():
         return Scaffold(

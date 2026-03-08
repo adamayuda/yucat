@@ -5,6 +5,7 @@ import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat_detail/presentation/bloc/cat_detail_bloc.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
+import 'package:yucat/presentation/widgets/app_loading_widget.dart';
 
 @RoutePage()
 class CatDetailPage extends StatefulWidget {
@@ -48,7 +49,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
         if (state is CatDetailLoadingState) {
           return Scaffold(
             appBar: AppBar(title: const Text('Cat Profile')),
-            body: const Center(child: CircularProgressIndicator()),
+            body: const AppLoadingWidget(),
           );
         }
 

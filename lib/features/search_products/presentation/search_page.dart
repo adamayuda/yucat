@@ -10,6 +10,7 @@ import 'package:yucat/features/search_products/presentation/widgets/search_disco
 import 'package:yucat/features/search_products/presentation/widgets/search_discover_loading_page.dart';
 import 'package:yucat/service_locator.dart';
 import 'package:yucat/presentation/top_app_bar/top_app_bar.dart';
+import 'package:yucat/presentation/widgets/app_loading_widget.dart';
 
 @RoutePage()
 class SearchPage extends StatefulWidget {
@@ -124,7 +125,7 @@ class _SearchPage extends State<SearchPage> {
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
-          body: Center(child: Text('Loading')),
+          body: const AppLoadingWidget(),
         );
       case SearchLoadedState():
         return Scaffold(
@@ -170,7 +171,7 @@ class _SearchPage extends State<SearchPage> {
                 ),
               ),
               if (state.isLoading)
-                Expanded(child: Center(child: CircularProgressIndicator()))
+                const Expanded(child: AppLoadingWidget())
               else if (state.products.isNotEmpty) ...[
                 Expanded(
                   child: ListView.builder(

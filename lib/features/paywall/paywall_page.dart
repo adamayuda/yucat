@@ -36,7 +36,10 @@ class _PaywallPage extends State<PaywallPage> {
       listener: _onStateChangeListener,
       buildWhen: _buildWhen,
       builder: (context, state) {
-        return Scaffold(body: _onStateChangeBuilder(state));
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: _onStateChangeBuilder(state),
+        );
       },
     );
   }

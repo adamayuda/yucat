@@ -1,4 +1,5 @@
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/presentation/widgets/app_loading_widget.dart';
 import 'package:yucat/features/profile/bloc/profile_bloc.dart';
 import 'package:yucat/features/profile/bloc/profile_state.dart';
 import 'package:yucat/features/profile/bloc/profile_event.dart';
@@ -37,7 +38,7 @@ class _ProfilePage extends State<ProfilePage> {
   Widget _onStateChangeBuilder(ProfileState state) {
     switch (state) {
       case ProfileLoadingState():
-        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        return const Scaffold(body: AppLoadingWidget());
       case ProfileLoadedState():
         return _ProfileLoadedState(
           onLogoutTap: () => _bloc.add(LogoutTapEvent()),

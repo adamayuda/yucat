@@ -41,10 +41,12 @@ class AppRouter extends RootStackRouter {
       fullscreenDialog: true,
     ),
     AutoRoute(page: CatDetailRoute.page, path: '/cats/detail'),
-    AutoRoute(
+    CustomRoute(
       page: PaywallRoute.page,
       path: '/paywall',
       fullscreenDialog: true,
+      opaque: false,
+      transitionsBuilder: TransitionsBuilders.slideBottom,
     ),
   ];
 }
