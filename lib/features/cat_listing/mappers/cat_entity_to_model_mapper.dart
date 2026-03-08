@@ -21,6 +21,7 @@ class CatEntityToModelMapperImpl extends CatEntityToModelMapper {
       weightCategory: entity.weightCategory,
       activityLevel: entity.activityLevel,
       coatType: entity.coatType,
+      gender: entity.gender,
       healthConditions: entity.healthConditions,
     );
   }

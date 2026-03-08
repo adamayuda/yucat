@@ -11,6 +11,7 @@ class CatModel {
   final String? weightCategory;
   final String? activityLevel;
   final String? coatType;
+  final String? gender;
   final List<String>? healthConditions;
 
   const CatModel({
@@ -26,6 +27,7 @@ class CatModel {
     this.weightCategory,
     this.activityLevel,
     this.coatType,
+    this.gender,
     this.healthConditions,
   });
 }

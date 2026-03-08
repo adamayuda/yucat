@@ -182,10 +182,10 @@ class CatListItemCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _buildStatCard(
-                      icon: "assets/images/Icons/Weight.png",
-                      label: 'Weight',
-                      value: cat.weight != null
-                          ? '${cat.weight} kg'
+                      icon: "assets/images/Icons/cake.png",
+                      label: 'Age',
+                      value: cat.age != null
+                          ? _formatAge(cat.age!)
                           : 'Not specified',
                     ),
                   ),
@@ -194,7 +194,9 @@ class CatListItemCard extends StatelessWidget {
                     child: _buildStatCard(
                       icon: "assets/images/Icons/gender.png",
                       label: 'Gender',
-                      value: 'Not specified', // Gender not in model
+                      value: cat.gender != null
+                          ? _formatGender(cat.gender!)
+                          : 'Not specified',
                     ),
                   ),
                 ],
@@ -218,7 +220,7 @@ class CatListItemCard extends StatelessWidget {
                   const SizedBox(width: DSDimens.sizeXxs),
                   Expanded(
                     child: _buildStatCard(
-                      icon: "assets/images/icon-coat.png",
+                      icon: "assets/images/Icons/hair.png",
                       label: 'Coat',
                       value: cat.coatType != null
                           ? _formatCoatType(cat.coatType!)
@@ -229,69 +231,26 @@ class CatListItemCard extends StatelessWidget {
               ),
             ],
           ),
-          // Needs attention section
-          Builder(
-            builder: (context) {
-              final children = <Widget>[
-                if (cat.weightCategory != null &&
-                    (cat.weightCategory == 'underweight' ||
-                        cat.weightCategory == 'overweight' ||
-                        cat.weightCategory == 'obese'))
-                  _buildAttentionTag(
-                    icon: Icons.warning,
-                    text: 'Weight concern',
-                    iconColor: Colors.red,
-                  ),
-                if (cat.healthConditions != null &&
-                    cat.healthConditions!.isNotEmpty)
-                  ...cat.healthConditions!.map((condition) {
-                    if (condition.toLowerCase().contains('skin') ||
-                        condition.toLowerCase().contains('allerg')) {
-                      return _buildAttentionTag(
-                        icon: Icons.pets,
-                        text: 'Skin allergies',
-                        iconColor: Colors.brown,
-                      );
-                    } else if (condition.toLowerCase().contains('pregnant')) {
-                      return _buildAttentionTag(
-                        icon: Icons.child_care,
-                        text: 'Pregnant',
-                        iconColor: Colors.orange,
-                      );
-                    }
-                    return _buildAttentionTag(
-                      icon: Icons.health_and_safety,
-                      text: _formatSnakeCase(condition),
-                      iconColor: Colors.orange,
-                    );
-                  }),
-              ];
-
-              if (children.isEmpty) {
-                return const SizedBox.shrink();
-              }
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: DSDimens.sizeXxs),
-                  Text(
-                    'Needs attention',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: DSDimens.sizeXxs),
-                  Wrap(
-                    spacing: DSDimens.sizeXxs,
-                    runSpacing: DSDimens.sizeXxs,
-                    children: children,
-                  ),
-                ],
-              );
-            },
-          ),
+          // Health Conditions section
+          if (cat.healthConditions != null &&
+              cat.healthConditions!.isNotEmpty) ...[
+            const SizedBox(height: DSDimens.sizeXxs),
+            Text(
+              'Health Conditions',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: DSDimens.sizeXxs),
+            Wrap(
+              spacing: DSDimens.sizeXxs,
+              runSpacing: DSDimens.sizeXxs,
+              children: cat.healthConditions!.map((condition) {
+                return _buildConditionChip(condition);
+              }).toList(),
+            ),
+          ],
         ],
       ),
     );
@@ -328,8 +287,18 @@ class CatListItemCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Image.asset(icon, width: 30, height: 30),
-          const SizedBox(width: DSDimens.sizeXxxs),
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: DSColors.primarySurface,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: Image.asset(icon, width: 18, height: 18),
+            ),
+          ),
+          const SizedBox(width: DSDimens.sizeXxs),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -352,29 +321,58 @@ class CatListItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAttentionTag({
-    required IconData icon,
-    required String text,
-    Color? iconColor,
-  }) {
+  Widget _buildConditionChip(String condition) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: DSDimens.sizeXxs,
-        vertical: DSDimens.sizeXxxs,
+        horizontal: 14,
+        vertical: 8,
       ),
       decoration: BoxDecoration(
-        color: DSColors.lightGrey,
-        borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
+        color: DSColors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: DSColors.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: iconColor ?? DSColors.darkGrey),
-          const SizedBox(width: 4),
-          Text(text, style: TextStyle(fontSize: 12, color: DSColors.darkGrey)),
+          Image.asset(
+            _healthConditionIcon(condition),
+            width: 16,
+            height: 16,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            _formatSnakeCase(condition),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: DSColors.bodyText,
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  String _healthConditionIcon(String condition) {
+    final key = condition.toLowerCase();
+    if (key.contains('urinary') || key.contains('urine')) {
+      return 'assets/images/Icons/urine.png';
+    } else if (key.contains('allerg') || key.contains('wheat') ||
+        key.contains('grain')) {
+      return 'assets/images/Icons/wheat.png';
+    } else if (key.contains('kidney') || key.contains('renal')) {
+      return 'assets/images/Icons/water.png';
+    } else if (key.contains('diabetes') || key.contains('sugar')) {
+      return 'assets/images/Icons/sugar.png';
+    } else if (key.contains('digest') || key.contains('stomach') ||
+        key.contains('food')) {
+      return 'assets/images/Icons/food.png';
+    } else if (key.contains('weight') || key.contains('obes')) {
+      return 'assets/images/Icons/Weight.png';
+    } else {
+      return 'assets/images/Icons/heart.png';
+    }
   }
 
   String _formatAgeGroup(String ageGroup) {
@@ -383,6 +381,22 @@ class CatListItemCard extends StatelessWidget {
       'adult' => 'Adult',
       'senior' => 'Senior',
       _ => ageGroup,
+    };
+  }
+
+  String _formatAge(int ageInMonths) {
+    final years = ageInMonths ~/ 12;
+    final months = ageInMonths % 12;
+    if (years == 0) return '$months mo';
+    if (months == 0) return '$years ${years == 1 ? 'yr' : 'yrs'}';
+    return '$years ${years == 1 ? 'yr' : 'yrs'} $months mo';
+  }
+
+  String _formatGender(String gender) {
+    return switch (gender.toLowerCase()) {
+      'male' => 'Male',
+      'female' => 'Female',
+      _ => gender,
     };
   }
 

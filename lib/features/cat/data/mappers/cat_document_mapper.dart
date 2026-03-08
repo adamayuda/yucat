@@ -23,6 +23,7 @@ class CatDocumentMapperImpl implements CatDocumentMapper {
       weightCategory: data['weight_category'] as String?,
       activityLevel: data['activity_level'] as String?,
       coatType: data['coat_type'] as String?,
+      gender: data['gender'] as String?,
       healthConditions: (data['health_conditions'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
@@ -44,6 +45,7 @@ class CatDocumentMapperImpl implements CatDocumentMapper {
       'weight_category': entity.weightCategory,
       'activity_level': entity.activityLevel,
       'coat_type': entity.coatType,
+      'gender': entity.gender,
       if (entity.healthConditions != null && entity.healthConditions!.isNotEmpty)
         'health_conditions': entity.healthConditions,
     };
