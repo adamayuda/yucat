@@ -26,6 +26,9 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     emit(SplashLoadingState());
     // event.context.router.replace(const OnBoardingRoute());
     // return;
+
+    // event.context.router.replace(const OnBoardingRoute());
+    // return;
     final isCompleted = _prefs.getBool(_onboardingCompletedKey) ?? false;
 
     if (isCompleted) {

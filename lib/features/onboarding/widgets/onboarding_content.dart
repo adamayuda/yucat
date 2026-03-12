@@ -24,11 +24,11 @@ class OnboardingContent extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(
-              width: 342,
-              height: 198,
-              child: Image.asset(image, fit: BoxFit.contain),
+              width: 280,
+              height: 280,
+              child: Image.asset(image, fit: BoxFit.cover),
             ),
-            const SizedBox(height: 50),
+            const SizedBox(height: 32),
             Text(
               title,
               textAlign: TextAlign.center,

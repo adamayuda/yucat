@@ -63,7 +63,6 @@ class _CatDetailPageState extends State<CatDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeaderSection(cat),
-                _buildStatsRow(cat),
                 _buildProfileCompletion(cat),
                 _buildDetailsGrid(cat),
                 if (cat.healthConditions != null &&
@@ -391,6 +390,13 @@ class _CatDetailPageState extends State<CatDetailPage> {
         'assets/images/Icons/hair.png',
         'Coat Type',
         cat.coatType != null ? _formatCoatType(cat.coatType!) : notSet,
+      ),
+      _TileData(
+        'assets/images/Icons/fire.png',
+        'Activity',
+        cat.activityLevel != null
+            ? _formatActivityLevel(cat.activityLevel!)
+            : notSet,
       ),
       _TileData(
         'assets/images/Icons/syringe.png',

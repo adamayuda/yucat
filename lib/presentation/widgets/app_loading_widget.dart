@@ -7,7 +7,7 @@ class AppLoadingWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Image.asset(
-        'assets/images/Illustrations/Animate This Illustration.webp',
+        'assets/images/Illustrations/Loading.gif',
         width: 200,
         height: 200,
       ),

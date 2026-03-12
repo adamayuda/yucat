@@ -156,7 +156,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             preferredSize: Size.fromHeight(kToolbarHeight),
             child: TopAppBar(title: ''),
           ),
-          body: const Center(child: Text('Error loading product')),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/Illustrations/Error.gif',
+                  width: 200,
+                  height: 200,
+                ),
+                const SizedBox(height: 16),
+                const Text('Error loading product'),
+              ],
+            ),
+          ),
         );
       default:
         return Scaffold(

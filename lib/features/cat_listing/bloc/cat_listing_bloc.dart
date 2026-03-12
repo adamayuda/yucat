@@ -61,7 +61,6 @@ class CatListingBloc extends Bloc<CatListingEvent, CatListingState> {
       final catModels = cats
           .map((cat) => _catEntityToModelMapper(cat))
           .toList();
-      print('===============================================> cats: $cats');
       if (catModels.isEmpty) {
         emit(const CatListingEmptyState());
         return;

@@ -78,24 +78,24 @@ class _OnBoardingPage extends State<OnBoardingPage> {
 
     final pages = [
       const OnboardingContent(
-        image: 'assets/images/boarding1.png',
+        image: 'assets/images/Illustrations/Hey, welcome!.gif',
         title: 'Hey, welcome!',
         subtitle:
             'Scan any cat food barcode to instantly see ingredients and nutrition quality.',
       ),
       const OnboardingContent(
-        image: 'assets/images/boarding2.png',
+        image: 'assets/images/Illustrations/Scanning barcode_1.gif',
         title: 'Cat product scanner',
         subtitle: "Scan any cat food barcode and see what's inside",
       ),
       const OnboardingContent(
-        image: 'assets/images/boarding3.png',
+        image: 'assets/images/Illustrations/Join the Community.gif',
         title: 'Join the Community',
         subtitle:
             "Create your cat's profile to explore trusted product ratings and connect with passionate cat owners.",
       ),
       const OnboardingContent(
-        image: 'assets/images/boarding4.png',
+        image: 'assets/images/Illustrations/Add new cat.gif',
         title: 'Add New Cat',
         subtitle: "Let's create your profile. This will ony take a minute!",
       ),

@@ -12,9 +12,7 @@ class AuthFirebaseDataSource {
   User? currentUser() {
     try {
       FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-      print(
-        '===============================================> currentUser: ${firebaseAuth.currentUser}',
-      );
+
       return firebaseAuth.currentUser;
     } catch (e) {
       throw UnimplementedError();

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:yucat/config/themes/theme.dart';
 
 class CatListingErrorWidget extends StatelessWidget {
@@ -18,6 +17,12 @@ class CatListingErrorWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Image.asset(
+            'assets/images/Illustrations/Error.gif',
+            width: 200,
+            height: 200,
+          ),
+          SizedBox(height: DSDimens.sizeM),
           Text(
             'Error: $message',
             style: Theme.of(
@@ -28,17 +33,6 @@ class CatListingErrorWidget extends StatelessWidget {
           ElevatedButton(onPressed: onPressed, child: const Text('Retry')),
         ],
       ),
-    );
-  }
-
-  Future<LottieComposition?> customDecoder(List<int> bytes) {
-    return LottieComposition.decodeZip(
-      bytes,
-      filePicker: (files) {
-        return files.firstWhere(
-          (f) => f.name.startsWith('animations/') && f.name.endsWith('.json'),
-        );
-      },
     );
   }
 }

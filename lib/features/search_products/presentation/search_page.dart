@@ -245,7 +245,20 @@ class _SearchPage extends State<SearchPage> {
                 ),
               ),
               Expanded(
-                child: Center(child: Text('Error occurred. Please try again.')),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/Illustrations/Error.gif',
+                        width: 200,
+                        height: 200,
+                      ),
+                      SizedBox(height: 16),
+                      Text('Error occurred. Please try again.'),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),

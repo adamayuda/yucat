@@ -52,7 +52,7 @@ class _HomePage extends State<HomePage> {
     switch (state) {
       case HomeLoadingState():
         return Scaffold(
-          backgroundColor: DSColors.lightGrey,
+          backgroundColor: DSColors.white,
           body: const HomeLoadingWidget(),
         );
       case HomeLoadedState(:final hasScanned):
@@ -71,7 +71,14 @@ class _HomePage extends State<HomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Image.asset(
+                  'assets/images/Illustrations/Error.gif',
+                  width: 200,
+                  height: 200,
+                ),
+                SizedBox(height: 16),
                 Text('Error: ${state.message}'),
+                SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => _dispatch(HomeInitialEvent()),
                   child: Text('Retry'),

@@ -89,10 +89,6 @@ class _HomeLoadedPageState extends State<HomeLoadedPage>
 
   @override
   Widget build(BuildContext context) {
-    print(
-      '===============================================> hasScanned: ${widget.hasScanned}',
-    );
-
     return MobileScanner(
       controller: _scannerController,
       overlayBuilder: _overlayBuilder,
