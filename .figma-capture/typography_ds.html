@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=900, initial-scale=1.0">
+<title>Typography - YuCat Design System</title>
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Satisfy&family=Cousine&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --ds-primary: #ED67CA;
+    --ds-black: #4A4A4A;
+    --ds-dark-grey: #A2A2A2;
+    --ds-border-light: #f0f0f0;
+  }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #FFFFFF;
+    padding: 60px;
+    color: var(--ds-black);
+    width: 900px;
+  }
+
+  .section-header {
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ds-black);
+  }
+  .section-desc {
+    font-size: 14px;
+    color: var(--ds-dark-grey);
+    margin-bottom: 24px;
+  }
+
+  /* Typography row */
+  .type-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    border-bottom: 1px solid var(--ds-border-light);
+    padding: 20px 0;
+  }
+
+  .type-meta {
+    width: 260px;
+    flex-shrink: 0;
+  }
+
+  .type-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ds-black);
+  }
+
+  .type-flutter {
+    font-family: 'Cousine', monospace;
+    font-size: 11px;
+    color: var(--ds-primary);
+    margin-top: 2px;
+  }
+
+  .type-spec {
+    font-family: 'Cousine', monospace;
+    font-size: 11px;
+    color: var(--ds-dark-grey);
+    margin-top: 2px;
+  }
+
+  .type-sample {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+  }
+</style>
+</head>
+<body>
+
+<div class="section-header">
+  <div class="section-title">Typography</div>
+</div>
+<div class="section-desc">Primary font: Poppins (Google Fonts) . Display font: Satisfy (Google Fonts) . Named after Flutter Material TextTheme</div>
+
+<!-- displaySmall -->
+<div class="type-row">
+  <div class="type-meta">
+    <div class="type-name">displaySmall</div>
+    <div class="type-flutter">Theme.of(context).textTheme.displaySmall</div>
+    <div class="type-spec">Satisfy . Regular</div>
+  </div>
+  <div class="type-sample">
+    <span style="font-family:'Satisfy',cursive; font-size:36px; color:#ED67CA;">YuCat</span>
+  </div>
+</div>
+
+<!-- headlineLarge -->
+<div class="type-row">
+  <div class="type-meta">
+    <div class="type-name">headlineLarge</div>
+    <div class="type-flutter">Theme.of(context).textTheme.headlineLarge</div>
+    <div class="type-spec">Poppins . 29px . Bold (700)</div>
+  </div>
+  <div class="type-sample">
+    <span style="font-family:'Poppins',sans-serif; font-size:29px; font-weight:700; color:#4A4A4A;">Welcome to YuCat</span>
+  </div>
+</div>
+
+<!-- headlineMedium -->
+<div class="type-row">
+  <div class="type-meta">
+    <div class="type-name">headlineMedium</div>
+    <div class="type-flutter">Theme.of(context).textTheme.headlineMedium</div>
+    <div class="type-spec">Poppins . 22px . Bold (700)</div>
+  </div>
+  <div class="type-sample">
+    <span style="font-family:'Poppins',sans-serif; font-size:22px; font-weight:700; color:#4A4A4A;">What's your cat's name?</span>
+  </div>
+</div>
+
+<!-- headlineSmall -->
+<div class="type-row">
+  <div class="type-meta">
+    <div class="type-name">headlineSmall</div>
+    <div class="type-flutter">Theme.of(context).textTheme.headlineSmall</div>
+    <div class="type-spec">Poppins . 20px . Bold (700)</div>
+  </div>
+  <div class="type-sample">
+    <span style="font-family:'Poppins',sans-serif; font-size:20px; font-weight:700; color:#4A4A4A;">App Bar Title</span>
+  </div>
+</div>
+
+<!-- titleLarge -->
+<div class="type-row">
+  <div class="type-meta">
+    <div class="type-name">titleLarge</div>
+    <div class="type-flutter">Theme.of(context).textTheme.titleLarge</div>
+    <div class="type-spec">Poppins . 18px . Bold (700)</div>
+  </div>
+  <div class="type-sample">
+    <span style="font-family:'Poppins',sans-serif; font-size:18px; font-weight:700; color:#4A4A4A;">Basic Information</span>
+  </div>
+</div>
+
+<!-- titleMedium -->
+<div class="type-row">
+  <div class="type-meta">
+    <div class="type-name">titleMedium</div>
+    <div class="type-flutter">Theme.of(context).textTheme.titleMedium</div>
+    <div class="type-spec">Poppins . 16px . SemiBold (600)</div>
+  </div>
+  <div class="type-sample">
+    <span style="font-family:'Poppins',sans-serif; font-size:16px; font-weight:600; color:#4A4A4A;">Button Label . Menu Item</span>
+  </div>
+</div>
+
+<!-- bodyLarge -->
+<div class="type-row">
+  <div class="type-meta">
+    <div class="type-name">bodyLarge</div>
+    <div class="type-flutter">Theme.of(context).textTheme.bodyLarge</div>
+    <div class="type-spec">Poppins . 16px . Regular (400)</div>
+  </div>
+  <div class="type-sample">
+    <span style="font-family:'Poppins',sans-serif; font-size:16px; font-weight:400; color:#4A4A4A;">A kitten's food and eating habits will provide the nutrition cat needs.</span>
+  </div>
+</div>
+
+<!-- bodyMedium -->
+<div class="type-row">
+  <div class="type-meta">
+    <div class="type-name">bodyMedium</div>
+    <div class="type-flutter">Theme.of(context).textTheme.bodyMedium</div>
+    <div class="type-spec">Poppins . 14px . Medium (500)</div>
+  </div>
+  <div class="type-sample">
+    <span style="font-family:'Poppins',sans-serif; font-size:14px; font-weight:500; color:#A2A2A2;">Info label . Secondary text</span>
+  </div>
+</div>
+
+<!-- labelLarge -->
+<div class="type-row">
+  <div class="type-meta">
+    <div class="type-name">labelLarge</div>
+    <div class="type-flutter">Theme.of(context).textTheme.labelLarge</div>
+    <div class="type-spec">Poppins . 12px . Medium (500)</div>
+  </div>
+  <div class="type-sample">
+    <span style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#A2A2A2;">Nav label . Step counter . Tag text</span>
+  </div>
+</div>
+
+<!-- labelSmall -->
+<div class="type-row">
+  <div class="type-meta">
+    <div class="type-name">labelSmall</div>
+    <div class="type-flutter">Theme.of(context).textTheme.labelSmall</div>
+    <div class="type-spec">Poppins . 11px . Medium (500)</div>
+  </div>
+  <div class="type-sample">
+    <span style="font-family:'Poppins',sans-serif; font-size:11px; font-weight:500; color:#A2A2A2;">SMALLEST LABEL TEXT</span>
+  </div>
+</div>
+
+</body>
+</html>

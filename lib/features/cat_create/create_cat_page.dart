@@ -162,14 +162,15 @@ class _CreateCatPageState extends State<CreateCatPage> {
 
   Widget _onStateChangeBuilder(CatCreateState state) {
     switch (state) {
-      case CatCreateLoadedState(:final currentStep, :final cat):
-        return _buildPageView(currentStep: currentStep, cat: cat);
+      case CatCreateLoadedState(:final currentStep, :final cat, :final isSubmitting):
+        return _buildPageView(currentStep: currentStep, cat: cat, isSubmitting: isSubmitting);
     }
   }
 
   Widget _buildPageView({
     required int currentStep,
     required CatCreateModel cat,
+    required bool isSubmitting,
   }) {
     return Scaffold(
       backgroundColor: DSColors.white,
@@ -216,6 +217,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
           ),
           StepperBottomWidget(
             currentStep: currentStep,
+            isSubmitting: isSubmitting,
             onNextStep: currentStep == 8
                 ? _handleSubmit
                 : () => _goToNextStep(step: currentStep),

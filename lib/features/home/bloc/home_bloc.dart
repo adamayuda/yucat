@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
@@ -8,26 +9,25 @@ import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/signin_anonymously_usecase.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
-import 'package:yucat/features/product/domain/usecases/fetch_product_by_barcode_usecase.dart';
+import 'package:yucat/features/product/domain/usecases/fetch_product_by_image_usecase.dart';
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
 import 'package:yucat/services/scan_tracking_service.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  final FetchProductByBarcodeUsecase _fetchProductByBarcodeUsecase;
+  final FetchProductByImageUsecase _fetchProductByImageUsecase;
   final ProductEntityToModelMapper _productEntityToModelMapper;
   final CurrentUserUsecase _currentUserUsecase;
   final SigninAnonymouslyUsecase _signinAnonymouslyUsecase;
   final ScanTrackingService _scanTrackingService;
+  // ignore: unused_field
   final LogScreenViewUsecase _logScreenViewUsecase;
   final LogEventUsecase _logEventUsecase;
+  // ignore: unused_field
   final SharedPreferences _prefs;
-  // TODO: Replace with your actual entitlement ID from RevenueCat dashboard
   static const String entitlementID = 'yucat pro';
 
-  String? _pendingBarcode;
-
   HomeBloc({
-    required FetchProductByBarcodeUsecase fetchProductByBarcodeUsecase,
+    required FetchProductByImageUsecase fetchProductByImageUsecase,
     required ProductEntityToModelMapper productEntityToModelMapper,
     required CurrentUserUsecase currentUserUsecase,
     required SigninAnonymouslyUsecase signinAnonymouslyUsecase,
@@ -35,7 +35,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required LogScreenViewUsecase logScreenViewUsecase,
     required LogEventUsecase logEventUsecase,
     required SharedPreferences prefs,
-  }) : _fetchProductByBarcodeUsecase = fetchProductByBarcodeUsecase,
+  }) : _fetchProductByImageUsecase = fetchProductByImageUsecase,
        _productEntityToModelMapper = productEntityToModelMapper,
        _currentUserUsecase = currentUserUsecase,
        _signinAnonymouslyUsecase = signinAnonymouslyUsecase,
@@ -45,211 +45,62 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
        _prefs = prefs,
        super(HomeHiddenState()) {
     on<HomeInitialEvent>(_onHomeInitialEvent);
-    on<SearchByBarcodeEvent>(_onSearchByBarcodeEvent);
-    on<BarcodeDetectedEvent>(_onBarcodeDetectedEvent);
-    // on<PaywallDismissedEvent>(_onPaywallDismissedEvent);
-    // on<ResetScannerEvent>(_onResetScannerEvent);
+    on<ImageCapturedEvent>(_onImageCapturedEvent);
   }
 
   Future<void> _onHomeInitialEvent(
     HomeInitialEvent event,
     Emitter<HomeState> emit,
   ) async {
-    // _prefs.clear();
-    // _logScreenViewUsecase.call(screenName: 'HomeScreen');
-
     emit(HomeLoadingState());
 
     final user = _currentUserUsecase();
     if (user == null) {
       await _signinAnonymouslyUsecase();
     }
-    // await Future.delayed(const Duration(milliseconds: 100));
 
     emit(HomeLoadedState());
   }
 
-  Future<void> _onSearchByBarcodeEvent(
-    SearchByBarcodeEvent event,
+  Future<void> _onImageCapturedEvent(
+    ImageCapturedEvent event,
     Emitter<HomeState> emit,
   ) async {
-    print('searching by barcode: ${event.barcode}');
-    emit(HomeLoadingState());
-
     _logEventUsecase.call(
-      eventName: 'Barcode Scanned',
+      eventName: 'Product Image Captured',
       properties: {
-        'barcode': event.barcode,
-        'scan_method': 'manual',
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-
-    try {
-      final product = await _fetchProductByBarcodeUsecase.call(
-        barcode: event.barcode,
-      );
-      print('product found:');
-      print('product: $product');
-
-      if (product == null) {
-        _logEventUsecase.call(
-          eventName: 'Barcode Scan Failed',
-          properties: {
-            'error_type': 'not_found',
-            'barcode': event.barcode,
-            'timestamp': DateTime.now().toIso8601String(),
-          },
-        );
-        emit(HomeErrorState(message: 'Product not found'));
-        return;
-      }
-
-      // Convert ProductEntity directly to ProductModel with all nutritional data
-      final productDetailModel = _productEntityToModelMapper(product);
-
-      _logEventUsecase.call(
-        eventName: 'Product Selected',
-        properties: {
-          'product_name': productDetailModel.name,
-          'product_brand': productDetailModel.brand,
-          'source': 'scan',
-          'timestamp': DateTime.now().toIso8601String(),
-        },
-      );
-
-      // Navigate to product detail page
-      emit(HomeNavigateToProductDetailState(product: productDetailModel));
-    } catch (e) {
-      _logEventUsecase.call(
-        eventName: 'Barcode Scan Failed',
-        properties: {
-          'error_type': 'error',
-          'barcode': event.barcode,
-          'error_message': e.toString(),
-          'timestamp': DateTime.now().toIso8601String(),
-        },
-      );
-      emit(HomeErrorState(message: 'Failed to search by barcode: $e'));
-    }
-  }
-
-  Future<void> _onBarcodeDetectedEvent(
-    BarcodeDetectedEvent event,
-    Emitter<HomeState> emit,
-  ) async {
-    emit(HomeLoadedState(hasScanned: true));
-
-    _logEventUsecase.call(
-      eventName: 'Barcode Scanned',
-      properties: {
-        'barcode': event.barcode,
-        'scan_method': 'camera',
+        'mime_type': event.mimeType,
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
 
     // Check if user can perform scan
     final canScan = await _scanTrackingService.canPerformScan();
-    print('BarcodeDetectedEvent: canScan = $canScan');
 
     if (!canScan) {
-      // User has reached free scan limit, need to show paywall
-      print('BarcodeDetectedEvent: Scan limit reached, showing paywall');
-      _pendingBarcode = event.barcode;
-
-      // Await paywall result
       final purchasedSubscription = await event.context.router.push<bool>(
         const PaywallRoute(),
       );
 
-      print(
-        'Paywall dismissed. Purchased subscription: $purchasedSubscription',
-      );
-
-      // If subscription was purchased, retry the scan
-      if (purchasedSubscription == true && _pendingBarcode != null) {
-        print(
-          'Subscription purchased, retrying scan with barcode: $_pendingBarcode',
-        );
-        final barcodeToRetry = _pendingBarcode!;
-        _pendingBarcode = null;
-
-        emit(HomeLoadingState());
-
-        try {
-          final product = await _fetchProductByBarcodeUsecase.call(
-            barcode: barcodeToRetry,
-          );
-          print('product found:');
-          print('product: $product');
-
-          if (product == null) {
-            _logEventUsecase.call(
-              eventName: 'Barcode Scan Failed',
-              properties: {
-                'error_type': 'not_found',
-                'barcode': barcodeToRetry,
-                'timestamp': DateTime.now().toIso8601String(),
-              },
-            );
-            emit(HomeErrorState(message: 'Product not found'));
-            return;
-          }
-
-          // Convert ProductEntity directly to ProductModel with all nutritional data
-          final productDetailModel = _productEntityToModelMapper(product);
-
-          _logEventUsecase.call(
-            eventName: 'Product Selected',
-            properties: {
-              'product_name': productDetailModel.name,
-              'product_brand': productDetailModel.brand,
-              'source': 'scan',
-              'timestamp': DateTime.now().toIso8601String(),
-            },
-          );
-
-          // Navigate to product detail page
-          event.context.router.push(
-            ProductDetailRoute(product: productDetailModel),
-          );
-          emit(HomeLoadedState(hasScanned: false));
-        } catch (e) {
-          _logEventUsecase.call(
-            eventName: 'Barcode Scan Failed',
-            properties: {
-              'error_type': 'error',
-              'barcode': barcodeToRetry,
-              'error_message': e.toString(),
-              'timestamp': DateTime.now().toIso8601String(),
-            },
-          );
-          emit(HomeErrorState(message: 'Failed to search by barcode: $e'));
-        }
-      } else {
-        // Paywall dismissed without purchase, reset scanner state
-        emit(HomeLoadedState(hasScanned: false));
-        _pendingBarcode = null;
+      if (purchasedSubscription != true) {
+        emit(HomeLoadedState());
+        return;
       }
-      return;
     }
 
     emit(HomeLoadingState());
 
     try {
-      final product = await _fetchProductByBarcodeUsecase.call(
-        barcode: event.barcode,
+      final product = await _fetchProductByImageUsecase.call(
+        imageBase64: event.imageBase64,
+        mimeType: event.mimeType,
       );
-      print('product found:');
-      print('product: $product');
 
       if (product == null) {
         _logEventUsecase.call(
-          eventName: 'Barcode Scan Failed',
+          eventName: 'Product Image Scan Failed',
           properties: {
             'error_type': 'not_found',
-            'barcode': event.barcode,
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
@@ -257,7 +108,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         return;
       }
 
-      // Convert ProductEntity directly to ProductModel with all nutritional data
       final productDetailModel = _productEntityToModelMapper(product);
 
       _logEventUsecase.call(
@@ -265,27 +115,41 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         properties: {
           'product_name': productDetailModel.name,
           'product_brand': productDetailModel.brand,
-          'source': 'scan',
+          'source': 'image',
           'timestamp': DateTime.now().toIso8601String(),
         },
       );
 
-      // Navigate to product detail page
       event.context.router.push(
         ProductDetailRoute(product: productDetailModel),
       );
-      emit(HomeLoadedState(hasScanned: false));
+      emit(HomeLoadedState());
     } catch (e) {
       _logEventUsecase.call(
-        eventName: 'Barcode Scan Failed',
+        eventName: 'Product Image Scan Failed',
         properties: {
           'error_type': 'error',
-          'barcode': event.barcode,
           'error_message': e.toString(),
           'timestamp': DateTime.now().toIso8601String(),
         },
       );
-      emit(HomeErrorState(message: 'Failed to search by barcode: $e'));
+      emit(HomeErrorState(message: _getUserFriendlyError(e)));
     }
+  }
+
+  String _getUserFriendlyError(Object e) {
+    final message = e.toString();
+    if (e is FirebaseFunctionsException &&
+        e.code == 'deadline-exceeded' ||
+        message.contains('deadline-exceeded') ||
+        message.contains('DEADLINE_EXCEEDED')) {
+      return 'The request took too long. Please try again.';
+    }
+    if (message.contains('network') ||
+        message.contains('SocketException') ||
+        message.contains('Connection')) {
+      return 'No internet connection. Please check your network and try again.';
+    }
+    return 'Something went wrong. Please try again.';
   }
 }

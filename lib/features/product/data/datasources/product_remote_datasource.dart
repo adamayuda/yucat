@@ -33,4 +33,34 @@ class RemoteSearchDataSource {
       throw Exception('Failed to search by barcode: $e');
     }
   }
+
+  Future<Map<String, dynamic>?> fetchProductByImage({
+    required String imageBase64,
+    required String mimeType,
+  }) async {
+    try {
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final callable = _functions.httpsCallable(
+        'fetchProductByImage',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 120)),
+      );
+      final result = await callable.call({
+        'image': imageBase64,
+        'mimeType': mimeType,
+      });
+
+      final data = result.data;
+      if (data == null) {
+        return null;
+      }
+
+      return Map<String, dynamic>.from(data);
+    } catch (e) {
+      throw Exception('Failed to fetch product by image: $e');
+    }
+  }
 }

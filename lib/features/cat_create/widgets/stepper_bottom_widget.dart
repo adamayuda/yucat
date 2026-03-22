@@ -4,11 +4,13 @@ import 'package:yucat/config/themes/theme.dart';
 class StepperBottomWidget extends StatelessWidget {
   final int currentStep;
   final VoidCallback onNextStep;
+  final bool isSubmitting;
 
   const StepperBottomWidget({
     super.key,
     required this.currentStep,
     required this.onNextStep,
+    this.isSubmitting = false,
   });
 
   @override
@@ -19,7 +21,7 @@ class StepperBottomWidget extends StatelessWidget {
         children: [
           Expanded(
             child: ElevatedButton(
-              onPressed: onNextStep,
+              onPressed: isSubmitting ? null : onNextStep,
               style: ElevatedButton.styleFrom(
                 backgroundColor: DSColors.primary,
                 foregroundColor: DSColors.white,
@@ -30,10 +32,20 @@ class StepperBottomWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
                 ),
               ),
-              child: Text(
-                currentStep == 8 ? 'Create Profile' : 'Next',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
+              child: isSubmitting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: DSColors.white,
+                      ),
+                    )
+                  : Text(
+                      currentStep == 8 ? 'Create Profile' : 'Next',
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
             ),
           ),
         ],

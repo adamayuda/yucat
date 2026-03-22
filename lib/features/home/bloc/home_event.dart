@@ -29,14 +29,19 @@ class SearchByBarcodeEvent extends HomeEvent {
   List<Object?> get props => [barcode];
 }
 
-class BarcodeDetectedEvent extends HomeEvent {
-  final String barcode;
+class ImageCapturedEvent extends HomeEvent {
+  final String imageBase64;
+  final String mimeType;
   final BuildContext context;
 
-  const BarcodeDetectedEvent({required this.barcode, required this.context});
+  const ImageCapturedEvent({
+    required this.imageBase64,
+    required this.mimeType,
+    required this.context,
+  });
 
   @override
-  List<Object?> get props => [barcode, context];
+  List<Object?> get props => [imageBase64, mimeType, context];
 }
 
 class PaywallDismissedEvent extends HomeEvent {
@@ -46,11 +51,4 @@ class PaywallDismissedEvent extends HomeEvent {
 
   @override
   List<Object?> get props => [purchasedSubscription];
-}
-
-class ResetScannerEvent extends HomeEvent {
-  const ResetScannerEvent();
-
-  @override
-  List<Object?> get props => [];
 }

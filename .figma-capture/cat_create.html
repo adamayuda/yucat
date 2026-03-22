@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1800, initial-scale=1.0">
+  <title>YuCat - Create Cat Wizard (9 Steps)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f5f5;
+      display: flex; gap: 32px; padding: 40px; flex-wrap: wrap; justify-content: center;
+    }
+    .screen-group { display: flex; flex-direction: column; align-items: center; }
+    .phone-label { font-size: 14px; font-weight: 600; color: #4A4A4A; margin-bottom: 4px; }
+    .phone-state { font-size: 11px; color: #A2A2A2; margin-bottom: 8px; }
+    .phone {
+      width: 390px; height: 844px; background: #FFFFFF;
+      border-radius: 40px; overflow: hidden;
+      display: flex; flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    }
+    .status-bar {
+      height: 54px; display: flex; align-items: flex-end; justify-content: center;
+      padding-bottom: 8px; font-size: 15px; font-weight: 600; color: #4A4A4A; flex-shrink: 0;
+    }
+
+    /* Stepper Bar */
+    .stepper-bar {
+      height: 72px; display: flex; flex-direction: column; align-items: center;
+      padding: 8px 16px 0; flex-shrink: 0;
+    }
+    .stepper-top { display: flex; align-items: center; width: 100%; margin-bottom: 8px; }
+    .stepper-back { font-size: 24px; color: #686868; cursor: pointer; }
+    .stepper-track {
+      flex: 1; height: 8px; background: #F5E8FF; border-radius: 4px; margin: 0 12px; overflow: hidden;
+    }
+    .stepper-fill { height: 100%; background: #FF5FC9; border-radius: 4px; transition: width 0.3s; }
+    .stepper-text { font-size: 13px; color: #686868; font-weight: 500; }
+
+    .phone-content { flex: 1; overflow-y: auto; padding: 40px 40px 20px; display: flex; flex-direction: column; }
+
+    /* Step Icon */
+    .step-icon {
+      width: 80px; height: 80px; border-radius: 20px; background: #FEF5FE;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 24px;
+    }
+    .step-icon img { width: 48px; height: 48px; object-fit: contain; }
+
+    .step-title { font-size: 22px; font-weight: 700; color: #4A4A4A; margin-bottom: 24px; line-height: 1.3; }
+
+    /* Bottom Button */
+    .bottom-btn-area { padding: 0 40px 50px; flex-shrink: 0; }
+    .btn-next {
+      width: 100%; padding: 16px; border: none; border-radius: 12px;
+      background: #ED67CA; color: white; font-size: 16px; font-weight: 600;
+      font-family: 'Poppins', sans-serif; cursor: pointer;
+    }
+    .btn-next.final { background: #ED67CA; }
+
+    /* Text Input */
+    .text-input {
+      width: 100%; padding: 14px 16px; border: 1px solid #E6E7EB; border-radius: 12px;
+      font-size: 16px; font-family: 'Poppins', sans-serif; color: #4A4A4A; outline: none;
+    }
+    .text-input::placeholder { color: #A2A2A2; }
+    .text-input:focus { border-color: #FF61E5; }
+
+    /* Selection Options */
+    .option-grid { display: flex; flex-direction: column; gap: 12px; }
+    .option-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px; border: 1px solid #E6E7EB; border-radius: 12px; cursor: pointer;
+    }
+    .option-item.selected { background: #FEF5FE; border-color: #ED67CA; }
+    .option-item .material-icons { font-size: 24px; color: #ED67CA; }
+    .option-label { font-size: 16px; color: #4A4A4A; font-weight: 500; }
+
+    /* Number Input */
+    .number-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .number-label { font-size: 16px; color: #4A4A4A; font-weight: 500; width: 80px; }
+    .number-controls { display: flex; align-items: center; gap: 8px; }
+    .number-btn {
+      width: 40px; height: 40px; border-radius: 50%; border: 1px solid #E6E7EB;
+      display: flex; align-items: center; justify-content: center; background: white; cursor: pointer;
+    }
+    .number-btn .material-icons { font-size: 20px; color: #4A4A4A; }
+    .number-value {
+      width: 60px; text-align: center; font-size: 20px; font-weight: 600; color: #4A4A4A;
+      border: none; font-family: 'Poppins', sans-serif;
+    }
+
+    /* Photo placeholder */
+    .photo-circle {
+      width: 175px; height: 175px; border-radius: 50%; background: #F5F5F5;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px dashed #E6E7EB; margin: 0 auto 16px;
+    }
+    .photo-circle img { width: 48px; height: 48px; object-fit: contain; opacity: 0.5; }
+
+    /* Breed list */
+    .breed-search { margin-bottom: 16px; }
+    .breed-list { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; }
+    .breed-item {
+      padding: 14px 16px; border: 1px solid #E6E7EB; border-radius: 12px;
+      font-size: 15px; color: #4A4A4A; cursor: pointer;
+    }
+    .breed-item.selected { background: #FEF5FE; border-color: #ED67CA; font-weight: 600; }
+
+    /* Health conditions */
+    .health-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .health-chip {
+      padding: 10px 16px; border: 1px solid #E6E7EB; border-radius: 20px;
+      font-size: 14px; color: #4A4A4A; cursor: pointer;
+    }
+    .health-chip.selected { background: #FEF5FE; border-color: #ED67CA; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- STEP 0: Cat Name -->
+  <div class="screen-group">
+    <div class="phone-label">Step 1: Cat Name</div>
+    <div class="phone-state">CatNameStep</div>
+    <div class="phone">
+      <div class="status-bar">9:41</div>
+      <div class="stepper-bar">
+        <div class="stepper-top">
+          <span class="material-icons stepper-back">chevron_left</span>
+          <div class="stepper-track"><div class="stepper-fill" style="width:11.1%;"></div></div>
+        </div>
+        <span class="stepper-text">Step 1 of 9</span>
+      </div>
+      <div class="phone-content">
+        <div class="step-icon"><img src="/assets/images/cat_name.png" alt="cat name"></div>
+        <div class="step-title">What's your cat's name?</div>
+        <input class="text-input" type="text" placeholder="Enter your cat's name" value="Milo">
+      </div>
+      <div class="bottom-btn-area"><button class="btn-next">Next</button></div>
+    </div>
+  </div>
+
+  <!-- STEP 1: Profile Photo -->
+  <div class="screen-group">
+    <div class="phone-label">Step 2: Profile Photo</div>
+    <div class="phone-state">ProfilePhotoStep</div>
+    <div class="phone">
+      <div class="status-bar">9:41</div>
+      <div class="stepper-bar">
+        <div class="stepper-top">
+          <span class="material-icons stepper-back">chevron_left</span>
+          <div class="stepper-track"><div class="stepper-fill" style="width:22.2%;"></div></div>
+        </div>
+        <span class="stepper-text">Step 2 of 9</span>
+      </div>
+      <div class="phone-content" style="align-items:center;">
+        <div class="step-icon"><img src="/assets/images/Icons/camera.png" alt="camera"></div>
+        <div class="step-title" style="text-align:center;">Add a photo of your cat</div>
+        <div class="photo-circle">
+          <img src="/assets/images/Icons/camera.png" alt="camera">
+        </div>
+        <div style="font-size:14px;color:#A2A2A2;margin-top:8px;">Tap to upload a photo</div>
+      </div>
+      <div class="bottom-btn-area"><button class="btn-next">Next</button></div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Gender -->
+  <div class="screen-group">
+    <div class="phone-label">Step 3: Gender</div>
+    <div class="phone-state">GenderStep</div>
+    <div class="phone">
+      <div class="status-bar">9:41</div>
+      <div class="stepper-bar">
+        <div class="stepper-top">
+          <span class="material-icons stepper-back">chevron_left</span>
+          <div class="stepper-track"><div class="stepper-fill" style="width:33.3%;"></div></div>
+        </div>
+        <span class="stepper-text">Step 3 of 9</span>
+      </div>
+      <div class="phone-content">
+        <div class="step-icon"><img src="/assets/images/Icons/gender.png" alt="gender"></div>
+        <div class="step-title">What's your cat's gender?</div>
+        <div class="option-grid">
+          <div class="option-item selected">
+            <span class="material-icons">male</span>
+            <span class="option-label">Male</span>
+          </div>
+          <div class="option-item">
+            <span class="material-icons">female</span>
+            <span class="option-label">Female</span>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-btn-area"><button class="btn-next">Next</button></div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Age -->
+  <div class="screen-group">
+    <div class="phone-label">Step 4: Age</div>
+    <div class="phone-state">AgeStep</div>
+    <div class="phone">
+      <div class="status-bar">9:41</div>
+      <div class="stepper-bar">
+        <div class="stepper-top">
+          <span class="material-icons stepper-back">chevron_left</span>
+          <div class="stepper-track"><div class="stepper-fill" style="width:44.4%;"></div></div>
+        </div>
+        <span class="stepper-text">Step 4 of 9</span>
+      </div>
+      <div class="phone-content">
+        <div class="step-icon"><img src="/assets/images/Icons/cake.png" alt="cake"></div>
+        <div class="step-title">How old is your cat?</div>
+        <div class="number-row">
+          <span class="number-label">Years</span>
+          <div class="number-controls">
+            <div class="number-btn"><span class="material-icons">remove</span></div>
+            <span class="number-value">3</span>
+            <div class="number-btn"><span class="material-icons">add</span></div>
+          </div>
+        </div>
+        <div class="number-row">
+          <span class="number-label">Months</span>
+          <div class="number-controls">
+            <div class="number-btn"><span class="material-icons">remove</span></div>
+            <span class="number-value">6</span>
+            <div class="number-btn"><span class="material-icons">add</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-btn-area"><button class="btn-next">Next</button></div>
+    </div>
+  </div>
+
+  <!-- STEP 4: Activity Level -->
+  <div class="screen-group">
+    <div class="phone-label">Step 5: Activity Level</div>
+    <div class="phone-state">ActivityStep</div>
+    <div class="phone">
+      <div class="status-bar">9:41</div>
+      <div class="stepper-bar">
+        <div class="stepper-top">
+          <span class="material-icons stepper-back">chevron_left</span>
+          <div class="stepper-track"><div class="stepper-fill" style="width:55.5%;"></div></div>
+        </div>
+        <span class="stepper-text">Step 5 of 9</span>
+      </div>
+      <div class="phone-content">
+        <div class="step-icon"><img src="/assets/images/Icons/body%20cat%202.png" alt="activity"></div>
+        <div class="step-title">What's your cat's activity level?</div>
+        <div class="option-grid">
+          <div class="option-item">
+            <span class="option-label">Low</span>
+          </div>
+          <div class="option-item selected">
+            <span class="option-label">Medium</span>
+          </div>
+          <div class="option-item">
+            <span class="option-label">High</span>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-btn-area"><button class="btn-next">Next</button></div>
+    </div>
+  </div>
+
+  <!-- STEP 5: Neutered Status -->
+  <div class="screen-group">
+    <div class="phone-label">Step 6: Neutered Status</div>
+    <div class="phone-state">NeuteredStatusStep</div>
+    <div class="phone">
+      <div class="status-bar">9:41</div>
+      <div class="stepper-bar">
+        <div class="stepper-top">
+          <span class="material-icons stepper-back">chevron_left</span>
+          <div class="stepper-track"><div class="stepper-fill" style="width:66.6%;"></div></div>
+        </div>
+        <span class="stepper-text">Step 6 of 9</span>
+      </div>
+      <div class="phone-content">
+        <div class="step-icon"><img src="/assets/images/Icons/syringe.png" alt="syringe"></div>
+        <div class="step-title">What's your cat's neutered status?</div>
+        <div class="option-grid">
+          <div class="option-item">
+            <span class="option-label">Intact</span>
+          </div>
+          <div class="option-item selected">
+            <span class="option-label">Neutered / Spayed</span>
+          </div>
+          <div class="option-item">
+            <span class="option-label">Pregnant</span>
+          </div>
+          <div class="option-item">
+            <span class="option-label">Lactating</span>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-btn-area"><button class="btn-next">Next</button></div>
+    </div>
+  </div>
+
+  <!-- STEP 6: Coat Type -->
+  <div class="screen-group">
+    <div class="phone-label">Step 7: Coat Type</div>
+    <div class="phone-state">CoatStep</div>
+    <div class="phone">
+      <div class="status-bar">9:41</div>
+      <div class="stepper-bar">
+        <div class="stepper-top">
+          <span class="material-icons stepper-back">chevron_left</span>
+          <div class="stepper-track"><div class="stepper-fill" style="width:77.7%;"></div></div>
+        </div>
+        <span class="stepper-text">Step 7 of 9</span>
+      </div>
+      <div class="phone-content">
+        <div class="step-icon"><img src="/assets/images/Icons/hair.png" alt="hair"></div>
+        <div class="step-title">What's your cat's coat type?</div>
+        <div class="option-grid">
+          <div class="option-item selected">
+            <span class="option-label">Short hair</span>
+          </div>
+          <div class="option-item">
+            <span class="option-label">Long hair</span>
+          </div>
+          <div class="option-item">
+            <span class="option-label">Hairless</span>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-btn-area"><button class="btn-next">Next</button></div>
+    </div>
+  </div>
+
+  <!-- STEP 7: Health Conditions -->
+  <div class="screen-group">
+    <div class="phone-label">Step 8: Health Conditions</div>
+    <div class="phone-state">HealthConditionsStep</div>
+    <div class="phone">
+      <div class="status-bar">9:41</div>
+      <div class="stepper-bar">
+        <div class="stepper-top">
+          <span class="material-icons stepper-back">chevron_left</span>
+          <div class="stepper-track"><div class="stepper-fill" style="width:88.8%;"></div></div>
+        </div>
+        <span class="stepper-text">Step 8 of 9</span>
+      </div>
+      <div class="phone-content">
+        <div class="step-icon"><img src="/assets/images/Icons/heart.png" alt="heart"></div>
+        <div class="step-title">Any health conditions?</div>
+        <div class="health-grid">
+          <div class="health-chip selected">None</div>
+          <div class="health-chip">Urinary issues</div>
+          <div class="health-chip">Kidney disease</div>
+          <div class="health-chip">Sensitive stomach</div>
+          <div class="health-chip">Skin allergies</div>
+          <div class="health-chip">Food allergies</div>
+          <div class="health-chip">Diabetes</div>
+          <div class="health-chip">Dental problems</div>
+          <div class="health-chip">Hairball issues</div>
+          <div class="health-chip">Heart condition</div>
+          <div class="health-chip">Joint issues</div>
+        </div>
+      </div>
+      <div class="bottom-btn-area"><button class="btn-next">Next</button></div>
+    </div>
+  </div>
+
+  <!-- STEP 8: Breed -->
+  <div class="screen-group">
+    <div class="phone-label">Step 9: Breed</div>
+    <div class="phone-state">BreedStep</div>
+    <div class="phone">
+      <div class="status-bar">9:41</div>
+      <div class="stepper-bar">
+        <div class="stepper-top">
+          <span class="material-icons stepper-back">chevron_left</span>
+          <div class="stepper-track"><div class="stepper-fill" style="width:100%;"></div></div>
+        </div>
+        <span class="stepper-text">Step 9 of 9</span>
+      </div>
+      <div class="phone-content">
+        <div class="step-icon"><img src="/assets/images/Icons/breed.png" alt="breed"></div>
+        <div class="step-title">What breed is your cat?</div>
+        <div class="breed-search">
+          <input class="text-input" type="text" placeholder="Search breeds...">
+        </div>
+        <div class="breed-list">
+          <div class="breed-item">Other</div>
+          <div class="breed-item">Abyssinian</div>
+          <div class="breed-item">American Shorthair</div>
+          <div class="breed-item">Bengal</div>
+          <div class="breed-item">Birman</div>
+          <div class="breed-item selected">British Shorthair</div>
+          <div class="breed-item">Burmese</div>
+          <div class="breed-item">Devon Rex</div>
+          <div class="breed-item">Domestic Longhair</div>
+          <div class="breed-item">Domestic Shorthair</div>
+          <div class="breed-item">Exotic Shorthair</div>
+          <div class="breed-item">Maine Coon</div>
+          <div class="breed-item">Norwegian Forest Cat</div>
+          <div class="breed-item">Oriental Shorthair</div>
+          <div class="breed-item">Persian</div>
+          <div class="breed-item">Ragdoll</div>
+          <div class="breed-item">Russian Blue</div>
+          <div class="breed-item">Scottish Fold</div>
+          <div class="breed-item">Siamese</div>
+          <div class="breed-item">Sphynx</div>
+          <div class="breed-item">Tabby</div>
+          <div class="breed-item">Tonkinese</div>
+          <div class="breed-item">Turkish Angora</div>
+          <div class="breed-item">Tuxedo</div>
+        </div>
+      </div>
+      <div class="bottom-btn-area"><button class="btn-next final">Create Profile</button></div>
+    </div>
+  </div>
+
+</body>
+</html>

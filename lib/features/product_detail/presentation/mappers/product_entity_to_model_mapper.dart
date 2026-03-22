@@ -27,8 +27,8 @@ class ProductEntityToModelMapperImpl extends ProductEntityToModelMapper {
     );
   }
 
-  int _calculateCarbs(ProductEntity entity) => entity.carbs == 0
-      ? 100 -
+  double _calculateCarbs(ProductEntity entity) => entity.carbs == 0
+      ? 100.0 -
             entity.protein -
             entity.fat -
             entity.fiber -
@@ -36,6 +36,6 @@ class ProductEntityToModelMapperImpl extends ProductEntityToModelMapper {
             entity.ash
       : entity.carbs;
 
-  int _calculateCalories(ProductEntity entity) =>
+  double _calculateCalories(ProductEntity entity) =>
       entity.protein * 4 + entity.fat * 9 + entity.carbs * 4;
 }

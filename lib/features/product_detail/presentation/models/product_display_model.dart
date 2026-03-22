@@ -10,12 +10,12 @@ class ProductDisplayModel {
   final String? imageUrl;
   final List<String> pros;
   final List<String> cons;
-  final int protein;
-  final int moisture;
-  final int fat;
-  final int fiber;
-  final int carbs;
-  final int calories;
+  final double protein;
+  final double moisture;
+  final double fat;
+  final double fiber;
+  final double carbs;
+  final double calories;
 
   const ProductDisplayModel({
     required this.name,
@@ -27,12 +27,12 @@ class ProductDisplayModel {
     this.imageUrl,
     this.pros = const [],
     this.cons = const [],
-    this.protein = 0,
-    this.moisture = 0,
-    this.fat = 0,
-    this.fiber = 0,
-    this.carbs = 0,
-    this.calories = 0,
+    this.protein = 0.0,
+    this.moisture = 0.0,
+    this.fat = 0.0,
+    this.fiber = 0.0,
+    this.carbs = 0.0,
+    this.calories = 0.0,
   });
 
   String get scoreDisplay => '$score/$maxScore';

@@ -11,7 +11,12 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   @override
   Future<CustomerInfo?> getCustomerInfo({bool forceRefresh = false}) async {
     if (forceRefresh || _cachedCustomerInfo == null) {
-      _cachedCustomerInfo = await Purchases.getCustomerInfo();
+      try {
+        _cachedCustomerInfo = await Purchases.getCustomerInfo()
+            .timeout(const Duration(seconds: 5));
+      } catch (_) {
+        return null;
+      }
     }
 
     return _cachedCustomerInfo;

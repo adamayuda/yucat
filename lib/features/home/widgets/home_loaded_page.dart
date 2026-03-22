@@ -1,29 +1,16 @@
-import 'package:auto_route/auto_route.dart';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
-import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
-import 'package:yucat/config/routes/router.dart';
-import 'package:yucat/config/themes/theme.dart';
-import 'package:yucat/features/home/bloc/home_bloc.dart';
-import 'package:yucat/features/home/bloc/home_event.dart';
-import 'package:yucat/features/home/bloc/home_state.dart';
-import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
-import 'package:yucat/services/scan_tracking_service.dart';
-import 'package:yucat/service_locator.dart';
+import 'package:image_picker/image_picker.dart';
 
 class HomeLoadedPage extends StatefulWidget {
-  final Function(String) onBarcodeDetected;
-  final bool hasScanned;
-  // final HomeBloc bloc;
-  // final List<ProductDisplayModel>? searchResults;
+  final Function(String imageBase64, String mimeType) onImageCaptured;
 
-  HomeLoadedPage({
+  const HomeLoadedPage({
     super.key,
-    required this.onBarcodeDetected,
-    this.hasScanned = false,
+    required this.onImageCaptured,
   });
 
   @override
@@ -31,297 +18,188 @@ class HomeLoadedPage extends StatefulWidget {
 }
 
 class _HomeLoadedPageState extends State<HomeLoadedPage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late MobileScannerController _scannerController;
+    with WidgetsBindingObserver {
+  CameraController? _cameraController;
+  bool _isCameraInitialized = false;
+  bool _isTakingPicture = false;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat();
-    _scannerController = MobileScannerController();
+    WidgetsBinding.instance.addObserver(this);
+    _initCamera();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
-    _scannerController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    _cameraController?.dispose();
     super.dispose();
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Start or pause scanner after the widget tree is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _updateScannerState();
-    });
-  }
-
-  @override
-  void didUpdateWidget(HomeLoadedPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Handle changes to hasScanned
-    if (oldWidget.hasScanned != widget.hasScanned) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _updateScannerState();
-      });
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive) {
+      _disposeCamera();
+    } else if (state == AppLifecycleState.resumed) {
+      _initCamera();
     }
   }
 
-  void _updateScannerState() {
-    if (!mounted) return;
+  void _disposeCamera() {
+    _cameraController?.dispose();
+    _cameraController = null;
+    if (mounted) {
+      setState(() => _isCameraInitialized = false);
+    }
+  }
+
+  Future<void> _initCamera() async {
+    if (_isCameraInitialized) return;
+
+    final cameras = await availableCameras();
+    if (cameras.isEmpty || !mounted) return;
+
+    _cameraController = CameraController(
+      cameras.first,
+      ResolutionPreset.medium,
+      enableAudio: false,
+    );
+
     try {
-      if (widget.hasScanned) {
-        _scannerController.pause();
-      } else {
-        _scannerController.start();
+      await _cameraController!.initialize();
+      if (mounted) {
+        setState(() => _isCameraInitialized = true);
       }
     } catch (e) {
-      debugPrint('Error updating scanner state: $e');
+      debugPrint('Camera init error: $e');
     }
+  }
+
+  Future<void> _takePicture() async {
+    if (_isTakingPicture ||
+        _cameraController == null ||
+        !_cameraController!.value.isInitialized) {
+      return;
+    }
+
+    setState(() => _isTakingPicture = true);
+
+    try {
+      final xFile = await _cameraController!.takePicture();
+      final bytes = await File(xFile.path).readAsBytes();
+      final base64Image = base64Encode(bytes);
+      final mimeType = xFile.mimeType ?? 'image/jpeg';
+      widget.onImageCaptured(base64Image, mimeType);
+    } catch (e) {
+      debugPrint('Take picture error: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isTakingPicture = false);
+      }
+    }
+  }
+
+  Future<void> _pickFromGallery() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+
+    if (pickedFile == null) return;
+
+    final bytes = await File(pickedFile.path).readAsBytes();
+    final base64Image = base64Encode(bytes);
+    final mimeType = pickedFile.mimeType ?? 'image/jpeg';
+    widget.onImageCaptured(base64Image, mimeType);
   }
 
   @override
   Widget build(BuildContext context) {
-    return MobileScanner(
-      controller: _scannerController,
-      overlayBuilder: _overlayBuilder,
-      onDetect: onDetect,
-    );
-  }
-
-  void onDetect(BarcodeCapture capture) {
-    print('===============================================: $capture');
-    _scannerController.pause();
-
-    // if (widget.hasScanned) return; // Prevent multiple scans
-    // print('hasScanned: ${widget.hasScanned}');
-
-    final List<Barcode> barcodes = capture.barcodes;
-    for (final barcode in barcodes) {
-      if (barcode.rawValue != null) {
-        debugPrint('Scanned barcode: ${barcode.rawValue}');
-        // Stop scanning to prevent multiple calls
-        // widget._scannerController.start();
-
-        widget.onBarcodeDetected(barcode.rawValue!);
-        break;
-      }
-    }
-  }
-
-  Widget _overlayBuilder(BuildContext context, BoxConstraints constraints) {
-    final size = constraints.biggest;
-    // Rectangle for barcode scanning: wider than tall
-    final scanSize = Size(size.width * 0.8, size.width * 0.5);
-    return RepaintBoundary(
-      child: AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, child) {
-          return CustomPaint(
-            size: size,
-            painter: ScannerOverlayPainter(
-              scanSize: scanSize,
-              screenSize: size,
-              scanProgress: _animationController.value,
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // Camera preview
+          if (_isCameraInitialized && _cameraController != null)
+            Positioned.fill(
+              child: CameraPreview(_cameraController!),
             ),
-          );
-        },
+
+          // Bottom controls
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom + 20,
+                top: 24,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Gallery button (bottom left)
+                  SizedBox(
+                    width: 80,
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: _pickFromGallery,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.photo,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Shutter button (center)
+                  GestureDetector(
+                    onTap: _takePicture,
+                    child: Container(
+                      width: 76,
+                      height: 76,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 4,
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Spacer to balance layout
+                  const SizedBox(width: 80),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
-}
-
-class ScannerOverlayPainter extends CustomPainter {
-  final Size scanSize;
-  final Size screenSize;
-  final double scanProgress;
-
-  ScannerOverlayPainter({
-    required this.scanSize,
-    required this.screenSize,
-    required this.scanProgress,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Calculate the position of the scan square (centered)
-    final scanRect = Rect.fromCenter(
-      center: Offset(size.width / 2, size.height / 2),
-      width: scanSize.width,
-      height: scanSize.height,
-    );
-
-    // Draw full screen black overlay with opacity 0.5
-    final overlayPaint = Paint()
-      ..color = Colors.black.withOpacity(0.5)
-      ..style = PaintingStyle.fill;
-
-    // Create a path for the full screen
-    final fullScreenPath = Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    // Create a path for the scan square (rounded rectangle)
-    const radius = 30.0;
-    final scanSquarePath = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(scanRect, const Radius.circular(radius)),
-      );
-
-    // Cut out the scan square from the overlay
-    final overlayPath = Path.combine(
-      PathOperation.difference,
-      fullScreenPath,
-      scanSquarePath,
-    );
-
-    // Draw the overlay with cutout
-    canvas.drawPath(overlayPath, overlayPaint);
-
-    // Draw scanning line effect
-    final scanLineY = scanRect.top + (scanRect.height * scanProgress);
-
-    // Save canvas state and clip to the scan rectangle
-    canvas.save();
-    canvas.clipRRect(
-      RRect.fromRectAndRadius(scanRect, const Radius.circular(radius)),
-    );
-
-    final scanLinePaint = Paint()
-      ..color = Colors.white.withOpacity(0.8)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-
-    // Draw the scanning line
-    canvas.drawLine(
-      Offset(scanRect.left, scanLineY),
-      Offset(scanRect.right, scanLineY),
-      scanLinePaint,
-    );
-
-    // Draw gradient effect around the scanning line
-    final gradientPaint = Paint()
-      ..shader =
-          LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white.withOpacity(0.0),
-              Colors.white.withOpacity(0.3),
-              Colors.white.withOpacity(0.0),
-            ],
-            stops: const [0.0, 0.5, 1.0],
-          ).createShader(
-            Rect.fromLTWH(scanRect.left, scanLineY - 20, scanRect.width, 40),
-          )
-      ..style = PaintingStyle.fill;
-
-    canvas.drawRect(
-      Rect.fromLTWH(scanRect.left, scanLineY - 20, scanRect.width, 40),
-      gradientPaint,
-    );
-
-    // Restore canvas state
-    canvas.restore();
-
-    // Draw the corner borders
-    final borderPaint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 6
-      ..style = PaintingStyle.stroke;
-
-    const cornerLength = 40.0;
-
-    // Top-left
-    canvas.drawPath(
-      Path()
-        ..moveTo(scanRect.left, scanRect.top + radius)
-        ..quadraticBezierTo(
-          scanRect.left,
-          scanRect.top,
-          scanRect.left + radius,
-          scanRect.top,
-        )
-        ..lineTo(scanRect.left + cornerLength, scanRect.top),
-      borderPaint,
-    );
-    canvas.drawPath(
-      Path()
-        ..moveTo(scanRect.left, scanRect.top + radius)
-        ..lineTo(scanRect.left, scanRect.top + cornerLength),
-      borderPaint,
-    );
-
-    // Top-right
-    canvas.drawPath(
-      Path()
-        ..moveTo(scanRect.right - cornerLength, scanRect.top)
-        ..lineTo(scanRect.right - radius, scanRect.top)
-        ..quadraticBezierTo(
-          scanRect.right,
-          scanRect.top,
-          scanRect.right,
-          scanRect.top + radius,
-        ),
-      borderPaint,
-    );
-    canvas.drawPath(
-      Path()
-        ..moveTo(scanRect.right, scanRect.top + radius)
-        ..lineTo(scanRect.right, scanRect.top + cornerLength),
-      borderPaint,
-    );
-
-    // Bottom-left
-    canvas.drawPath(
-      Path()
-        ..moveTo(scanRect.left, scanRect.bottom - cornerLength)
-        ..lineTo(scanRect.left, scanRect.bottom - radius)
-        ..quadraticBezierTo(
-          scanRect.left,
-          scanRect.bottom,
-          scanRect.left + radius,
-          scanRect.bottom,
-        ),
-      borderPaint,
-    );
-    canvas.drawPath(
-      Path()
-        ..moveTo(scanRect.left + radius, scanRect.bottom)
-        ..lineTo(scanRect.left + cornerLength, scanRect.bottom),
-      borderPaint,
-    );
-
-    // Bottom-right
-    canvas.drawPath(
-      Path()
-        ..moveTo(scanRect.right - cornerLength, scanRect.bottom)
-        ..lineTo(scanRect.right - radius, scanRect.bottom)
-        ..quadraticBezierTo(
-          scanRect.right,
-          scanRect.bottom,
-          scanRect.right,
-          scanRect.bottom - radius,
-        ),
-      borderPaint,
-    );
-    canvas.drawPath(
-      Path()
-        ..moveTo(scanRect.right, scanRect.bottom - radius)
-        ..lineTo(scanRect.right, scanRect.bottom - cornerLength),
-      borderPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant ScannerOverlayPainter oldDelegate) =>
-      oldDelegate.scanSize != scanSize ||
-      oldDelegate.screenSize != screenSize ||
-      oldDelegate.scanProgress != scanProgress;
 }

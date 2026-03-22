@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class PaywallErrorWidget extends StatelessWidget {
-  const PaywallErrorWidget({super.key});
+  final String message;
+
+  const PaywallErrorWidget({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +18,18 @@ class PaywallErrorWidget extends StatelessWidget {
               height: 200,
             ),
             const SizedBox(height: 16),
-            const Text('Error'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Close'),
+            ),
           ],
         ),
       ),

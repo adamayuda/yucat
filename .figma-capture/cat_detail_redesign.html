@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>Cat Detail - YuCat Redesign</title>
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Satisfy&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #ED67CA;
+    --primary-vibrant: #FF5FC9;
+    --primary-focus: #FF61E5;
+    --primary-disabled: #EDAFDD;
+    --primary-surface: #FEF5FE;
+    --primary-light: #F5E8FF;
+    --primary-muted: #F9E9F5;
+    --black: #4A4A4A;
+    --dark-blue: #334156;
+    --body-text: #686868;
+    --placeholder: #A0A8B6;
+    --dark-grey: #A2A2A2;
+    --border: #E6E7EB;
+    --surface: #F9FAFB;
+    --white: #FFFFFF;
+    --green: #84E475;
+    --red: #E53935;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--surface);
+    width: 390px;
+    min-height: 844px;
+    margin: 0 auto;
+    color: var(--black);
+    overflow-x: hidden;
+  }
+
+  /* Top Section with gradient background */
+  .header-section {
+    background: linear-gradient(180deg, var(--primary-surface) 0%, var(--surface) 100%);
+    padding: 56px 20px 0;
+    position: relative;
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .back-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .back-btn svg { width: 20px; height: 20px; color: var(--black); }
+
+  .page-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--black);
+  }
+
+  .edit-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  /* Profile Avatar */
+  .profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 28px;
+  }
+
+  .avatar-container {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .avatar-ring {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-muted) 0%, var(--primary-light) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(237, 103, 202, 0.15);
+  }
+
+  .avatar-inner {
+    width: 124px;
+    height: 124px;
+    border-radius: 50%;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .avatar-inner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .avatar-placeholder img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+  }
+
+  .cat-name {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--dark-blue);
+    margin-bottom: 4px;
+  }
+
+  .cat-breed {
+    font-size: 14px;
+    color: var(--dark-grey);
+    font-weight: 400;
+  }
+
+  /* Quick Stats Row */
+  .stats-row {
+    display: flex;
+    gap: 10px;
+    padding: 0 20px;
+    margin-top: -8px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    flex: 1;
+    background: var(--white);
+    border-radius: 16px;
+    padding: 14px 10px;
+    text-align: center;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+
+  .stat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--primary-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+  }
+
+  .stat-icon img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+  }
+
+  .stat-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dark-blue);
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--dark-grey);
+    margin-top: 2px;
+  }
+
+  /* Profile Completion Bar */
+  .completion-section {
+    margin: 0 20px 20px;
+    background: var(--white);
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+
+  .completion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .completion-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--body-text);
+  }
+
+  .completion-percent {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--primary-surface);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 85%;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--primary-vibrant) 100%);
+    border-radius: 4px;
+  }
+
+  /* Info Section */
+  .info-section {
+    padding: 0 20px 16px;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dark-blue);
+    margin-bottom: 12px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .info-tile {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+  }
+
+  .info-tile.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .tile-icon {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 10px;
+    background: var(--primary-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tile-icon img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+  }
+
+  .tile-content {
+    flex: 1;
+  }
+
+  .tile-label {
+    font-size: 11px;
+    color: var(--dark-grey);
+    margin-bottom: 2px;
+  }
+
+  .tile-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark-blue);
+  }
+
+  /* Health Tags */
+  .health-section {
+    padding: 0 20px 16px;
+  }
+
+  .health-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .health-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--body-text);
+  }
+
+  .health-tag-icon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
+
+  /* Footer area */
+  .footer-section {
+    padding: 20px 20px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .delete-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--dark-grey);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header with gradient background -->
+<div class="header-section">
+  <div class="top-bar">
+    <div class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </div>
+    <span class="page-title">Cat Profile</span>
+    <div class="edit-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#ED67CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Profile — no badge, clean avatar -->
+  <div class="profile-section">
+    <div class="avatar-container">
+      <div class="avatar-ring">
+        <div class="avatar-inner">
+          <div class="avatar-placeholder">
+            <img src="../assets/images/Icons/face cat.png" alt="cat">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cat-name">Mochi</div>
+    <div class="cat-breed">British Shorthair</div>
+  </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon">
+      <img src="../assets/images/Icons/cake.png" alt="age">
+    </div>
+    <div class="stat-value">3 yrs</div>
+    <div class="stat-label">Age</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">
+      <img src="../assets/images/Icons/Weight.png" alt="weight">
+    </div>
+    <div class="stat-value">4.5 kg</div>
+    <div class="stat-label">Weight</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">
+      <img src="../assets/images/Icons/fire.png" alt="activity">
+    </div>
+    <div class="stat-value">High</div>
+    <div class="stat-label">Activity</div>
+  </div>
+</div>
+
+<!-- Profile Completion -->
+<div class="completion-section">
+  <div class="completion-header">
+    <span class="completion-title">Profile Completion</span>
+    <span class="completion-percent">85%</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill"></div>
+  </div>
+</div>
+
+<!-- Details Grid -->
+<div class="info-section">
+  <div class="section-title">Details</div>
+  <div class="info-grid">
+    <div class="info-tile">
+      <div class="tile-icon">
+        <img src="../assets/images/Icons/breed.png" alt="breed">
+      </div>
+      <div class="tile-content">
+        <div class="tile-label">Breed</div>
+        <div class="tile-value">British Shorthair</div>
+      </div>
+    </div>
+    <div class="info-tile">
+      <div class="tile-icon">
+        <img src="../assets/images/Icons/gender.png" alt="gender">
+      </div>
+      <div class="tile-content">
+        <div class="tile-label">Gender</div>
+        <div class="tile-value">Female</div>
+      </div>
+    </div>
+    <div class="info-tile">
+      <div class="tile-icon">
+        <img src="../assets/images/Icons/body cat 1.png" alt="age group">
+      </div>
+      <div class="tile-content">
+        <div class="tile-label">Age Group</div>
+        <div class="tile-value">Adult</div>
+      </div>
+    </div>
+    <div class="info-tile">
+      <div class="tile-icon">
+        <img src="../assets/images/Icons/analyse.png" alt="weight category">
+      </div>
+      <div class="tile-content">
+        <div class="tile-label">Weight Category</div>
+        <div class="tile-value">Normal</div>
+      </div>
+    </div>
+    <div class="info-tile">
+      <div class="tile-icon">
+        <img src="../assets/images/Icons/hair.png" alt="coat">
+      </div>
+      <div class="tile-content">
+        <div class="tile-label">Coat Type</div>
+        <div class="tile-value">Short Hair</div>
+      </div>
+    </div>
+    <div class="info-tile">
+      <div class="tile-icon">
+        <img src="../assets/images/Icons/syringe.png" alt="neutered">
+      </div>
+      <div class="tile-content">
+        <div class="tile-label">Status</div>
+        <div class="tile-value">Spayed</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Health Conditions -->
+<div class="health-section">
+  <div class="section-title">Health Conditions</div>
+  <div class="health-tags">
+    <div class="health-tag">
+      <img class="health-tag-icon" src="../assets/images/Icons/urine.png" alt="">
+      Urinary Sensitivity
+    </div>
+    <div class="health-tag">
+      <img class="health-tag-icon" src="../assets/images/Icons/wheat.png" alt="">
+      Food Allergies
+    </div>
+    <div class="health-tag">
+      <img class="health-tag-icon" src="../assets/images/Icons/food.png" alt="">
+      Sensitive Digestion
+    </div>
+  </div>
+</div>
+
+<!-- Footer: just a subtle delete text -->
+<div class="footer-section">
+  <span class="delete-text">Delete profile</span>
+</div>
+
+</body>
+</html>

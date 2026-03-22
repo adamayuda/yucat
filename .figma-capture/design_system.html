@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1400, initial-scale=1.0">
+  <title>YuCat - Design System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #FFFFFF;
+      color: #4A4A4A;
+      padding: 60px;
+    }
+
+    /* Page header */
+    .page-header {
+      margin-bottom: 56px;
+      padding-bottom: 32px;
+      border-bottom: 2px solid #F0F0F0;
+    }
+    .page-header h1 {
+      font-size: 40px; font-weight: 800; color: #4A4A4A;
+      margin-bottom: 8px;
+    }
+    .page-header .brand-name {
+      font-family: 'Satisfy', cursive;
+      font-size: 48px;
+      color: #ED67CA;
+    }
+    .page-header p {
+      font-size: 16px; color: #A2A2A2; margin-top: 8px;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 56px;
+    }
+    .section-title {
+      font-size: 24px; font-weight: 700; color: #4A4A4A;
+      margin-bottom: 8px;
+    }
+    .section-desc {
+      font-size: 14px; color: #A2A2A2; margin-bottom: 24px;
+    }
+
+    /* ========== COLORS ========== */
+    .color-grid {
+      display: flex; flex-wrap: wrap; gap: 20px;
+    }
+    .color-card {
+      width: 160px;
+    }
+    .color-swatch {
+      width: 160px; height: 100px;
+      border-radius: 16px;
+      margin-bottom: 10px;
+      border: 1px solid #F0F0F0;
+    }
+    .color-name { font-size: 14px; font-weight: 600; color: #4A4A4A; }
+    .color-hex { font-size: 12px; color: #A2A2A2; font-weight: 500; }
+    .color-token { font-size: 11px; color: #686868; font-family: monospace; margin-top: 2px; }
+
+    /* ========== TYPOGRAPHY ========== */
+    .type-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .type-row {
+      display: flex;
+      align-items: baseline;
+      padding: 20px 0;
+      border-bottom: 1px solid #F0F0F0;
+      gap: 24px;
+    }
+    .type-meta {
+      width: 240px; flex-shrink: 0;
+    }
+    .type-label { font-size: 13px; font-weight: 600; color: #4A4A4A; }
+    .type-specs { font-size: 11px; color: #A2A2A2; font-family: monospace; margin-top: 4px; }
+    .type-sample { flex: 1; }
+
+    /* ========== SPACING ========== */
+    .spacing-grid {
+      display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end;
+    }
+    .spacing-item {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .spacing-box {
+      background: #FEF5FE;
+      border: 2px solid #ED67CA;
+      border-radius: 4px;
+    }
+    .spacing-label { font-size: 12px; font-weight: 600; color: #4A4A4A; text-align: center; }
+    .spacing-value { font-size: 11px; color: #A2A2A2; font-family: monospace; text-align: center; }
+
+    /* ========== RADIUS ========== */
+    .radius-grid {
+      display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end;
+    }
+    .radius-item {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .radius-box {
+      width: 80px; height: 80px;
+      background: #FEF5FE;
+      border: 2px solid #ED67CA;
+    }
+    .radius-label { font-size: 12px; font-weight: 600; color: #4A4A4A; }
+    .radius-value { font-size: 11px; color: #A2A2A2; font-family: monospace; }
+
+    /* ========== SHADOWS ========== */
+    .shadow-grid {
+      display: flex; gap: 32px; flex-wrap: wrap;
+    }
+    .shadow-card {
+      width: 200px; height: 120px;
+      background: #FFFFFF;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 8px;
+    }
+    .shadow-name { font-size: 13px; font-weight: 600; color: #4A4A4A; }
+    .shadow-spec { font-size: 10px; color: #A2A2A2; font-family: monospace; text-align: center; }
+
+    /* ========== BUTTONS ========== */
+    .button-grid {
+      display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;
+    }
+    .button-group {
+      display: flex; flex-direction: column; gap: 8px; align-items: center;
+    }
+    .button-group-label { font-size: 11px; color: #A2A2A2; font-weight: 500; margin-bottom: 4px; }
+    .btn {
+      padding: 14px 32px; border-radius: 12px; font-size: 16px;
+      font-weight: 600; font-family: 'Poppins', sans-serif;
+      border: none; cursor: pointer; min-width: 180px; text-align: center;
+    }
+    .btn-primary { background: #ED67CA; color: #FFFFFF; }
+    .btn-primary-disabled { background: #EDAFDD; color: #FFFFFF; }
+    .btn-outline { background: #FFFFFF; color: #E53935; border: 1px solid #E53935; }
+    .btn-text { background: transparent; color: #ED67CA; border: none; }
+
+    /* ========== INPUTS ========== */
+    .input-grid {
+      display: flex; gap: 24px; flex-wrap: wrap;
+    }
+    .input-group {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .input-group-label { font-size: 11px; color: #A2A2A2; font-weight: 500; }
+    .input-field {
+      width: 280px; padding: 14px 16px;
+      border-radius: 12px; font-size: 16px;
+      font-family: 'Poppins', sans-serif; color: #4A4A4A;
+      outline: none;
+    }
+    .input-default { border: 1px solid #E6E7EB; background: #FFFFFF; }
+    .input-focused { border: 2px solid #FF61E5; background: #FFFFFF; }
+    .input-filled { border: 1px solid #DFDFE0; background: #DFDFE0; }
+
+    /* ========== ICONS ========== */
+    .icon-grid {
+      display: flex; flex-wrap: wrap; gap: 20px;
+    }
+    .icon-card {
+      width: 90px; display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+    }
+    .icon-box {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: #FEF5FE;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .icon-box img { width: 32px; height: 32px; object-fit: contain; }
+    .icon-name { font-size: 10px; color: #A2A2A2; text-align: center; word-break: break-word; }
+
+    /* ========== SELECTION STATES ========== */
+    .state-grid {
+      display: flex; gap: 20px; flex-wrap: wrap;
+    }
+    .state-card {
+      padding: 16px 24px; border-radius: 12px;
+      font-size: 15px; font-weight: 500; color: #4A4A4A;
+      min-width: 180px; text-align: center;
+    }
+    .state-default { border: 1px solid #E6E7EB; background: #FFFFFF; }
+    .state-selected { border: 1px solid #ED67CA; background: #FEF5FE; }
+    .state-chip { border-radius: 20px; padding: 10px 20px; font-size: 14px; }
+
+    /* Sub-section */
+    .subsection {
+      margin-bottom: 32px;
+    }
+    .subsection-title {
+      font-size: 16px; font-weight: 600; color: #686868;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== HEADER ==================== -->
+  <div class="page-header">
+    <span class="brand-name">YuCat</span>
+    <h1>Design System</h1>
+    <p>Colors, typography, spacing, components, and guidelines for the YuCat mobile app</p>
+  </div>
+
+  <!-- ==================== COLORS ==================== -->
+  <div class="section">
+    <div class="section-title">Colors</div>
+    <div class="section-desc">Core palette defined in DSColors (lib/config/themes/theme.dart)</div>
+
+    <div class="subsection">
+      <div class="subsection-title">Primary &amp; Brand</div>
+      <div class="color-grid">
+        <div class="color-card">
+          <div class="color-swatch" style="background:#ED67CA;border:none;"></div>
+          <div class="color-name">Primary</div>
+          <div class="color-hex">#ED67CA</div>
+          <div class="color-token">DSColors.primary</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#FF5FC9;border:none;"></div>
+          <div class="color-name">Primary Vibrant</div>
+          <div class="color-hex">#FF5FC9</div>
+          <div class="color-token">Stepper progress</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#FF61E5;border:none;"></div>
+          <div class="color-name">Primary Focus</div>
+          <div class="color-hex">#FF61E5</div>
+          <div class="color-token">Input focus border</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#EDAFDD;border:none;"></div>
+          <div class="color-name">Primary Disabled</div>
+          <div class="color-hex">#EDAFDD</div>
+          <div class="color-token">Button disabled</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#FEF5FE;border:none;"></div>
+          <div class="color-name">Primary Surface</div>
+          <div class="color-hex">#FEF5FE</div>
+          <div class="color-token">Selected bg</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#F5E8FF;border:none;"></div>
+          <div class="color-name">Primary Light</div>
+          <div class="color-hex">#F5E8FF</div>
+          <div class="color-token">Icon bg, stepper track</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#F9E9F5;border:none;"></div>
+          <div class="color-name">Primary Muted</div>
+          <div class="color-hex">#F9E9F5</div>
+          <div class="color-token">Dot indicator</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Neutrals</div>
+      <div class="color-grid">
+        <div class="color-card">
+          <div class="color-swatch" style="background:#4A4A4A;border:none;"></div>
+          <div class="color-name">Black</div>
+          <div class="color-hex">#4A4A4A</div>
+          <div class="color-token">DSColors.black</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#334156;border:none;"></div>
+          <div class="color-name">Dark Blue</div>
+          <div class="color-hex">#334156</div>
+          <div class="color-token">Breed text</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#686868;border:none;"></div>
+          <div class="color-name">Body Text</div>
+          <div class="color-hex">#686868</div>
+          <div class="color-token">Subtitle, stepper</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#7D7D82;border:none;"></div>
+          <div class="color-name">Input Dark Grey</div>
+          <div class="color-hex">#7D7D82</div>
+          <div class="color-token">DSColors.inputDarkGrey</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#A0A8B6;border:none;"></div>
+          <div class="color-name">Placeholder</div>
+          <div class="color-hex">#A0A8B6</div>
+          <div class="color-token">Input placeholder</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#A2A2A2;border:none;"></div>
+          <div class="color-name">Dark Grey</div>
+          <div class="color-hex">#A2A2A2</div>
+          <div class="color-token">DSColors.darkGrey</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#DFDFE0;"></div>
+          <div class="color-name">Input Light Grey</div>
+          <div class="color-hex">#DFDFE0</div>
+          <div class="color-token">DSColors.inputLightGrey</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#E6E7EB;"></div>
+          <div class="color-name">Border</div>
+          <div class="color-hex">#E6E7EB</div>
+          <div class="color-token">Input/card border</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#EEEEEE;"></div>
+          <div class="color-name">Light Grey</div>
+          <div class="color-hex">#EEEEEE</div>
+          <div class="color-token">DSColors.lightGrey</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#F9FAFB;"></div>
+          <div class="color-name">Surface</div>
+          <div class="color-hex">#F9FAFB</div>
+          <div class="color-token">Unselected bg</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#FFFFFF;"></div>
+          <div class="color-name">White</div>
+          <div class="color-hex">#FFFFFF</div>
+          <div class="color-token">DSColors.white</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Semantic</div>
+      <div class="color-grid">
+        <div class="color-card">
+          <div class="color-swatch" style="background:#84E475;border:none;"></div>
+          <div class="color-name">Green / Success</div>
+          <div class="color-hex">#84E475</div>
+          <div class="color-token">DSColors.green</div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background:#E53935;border:none;"></div>
+          <div class="color-name">Red / Danger</div>
+          <div class="color-hex">#E53935</div>
+          <div class="color-token">Delete, error</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TYPOGRAPHY ==================== -->
+  <div class="section">
+    <div class="section-title">Typography</div>
+    <div class="section-desc">Primary font: Poppins (Google Fonts) &middot; Display font: Satisfy (Google Fonts)</div>
+
+    <div class="type-row">
+      <div class="type-meta">
+        <div class="type-label">Brand / Display</div>
+        <div class="type-specs">Satisfy &middot; Regular</div>
+      </div>
+      <div class="type-sample" style="font-family:'Satisfy',cursive;font-size:36px;color:#ED67CA;">
+        YuCat
+      </div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <div class="type-label">Heading XL</div>
+        <div class="type-specs">Poppins &middot; 29px &middot; Bold (700)</div>
+      </div>
+      <div class="type-sample" style="font-size:29px;font-weight:700;">
+        Welcome to YuCat
+      </div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <div class="type-label">Heading L</div>
+        <div class="type-specs">Poppins &middot; 22px &middot; Bold (700)</div>
+      </div>
+      <div class="type-sample" style="font-size:22px;font-weight:700;">
+        What's your cat's name?
+      </div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <div class="type-label">Heading M</div>
+        <div class="type-specs">Poppins &middot; 20px &middot; Bold (700)</div>
+      </div>
+      <div class="type-sample" style="font-size:20px;font-weight:700;">
+        App Bar Title
+      </div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <div class="type-label">Section Title</div>
+        <div class="type-specs">Poppins &middot; 18px &middot; Bold (700)</div>
+      </div>
+      <div class="type-sample" style="font-size:18px;font-weight:700;">
+        Basic Information
+      </div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <div class="type-label">Body L</div>
+        <div class="type-specs">Poppins &middot; 16px &middot; SemiBold (600)</div>
+      </div>
+      <div class="type-sample" style="font-size:16px;font-weight:600;">
+        Button Label &middot; Menu Item
+      </div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <div class="type-label">Body M</div>
+        <div class="type-specs">Poppins &middot; 16px &middot; Regular (400)</div>
+      </div>
+      <div class="type-sample" style="font-size:16px;font-weight:400;color:#686868;">
+        Subtitle text and descriptions that provide more context
+      </div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <div class="type-label">Body S</div>
+        <div class="type-specs">Poppins &middot; 14px &middot; Medium (500)</div>
+      </div>
+      <div class="type-sample" style="font-size:14px;font-weight:500;color:#A2A2A2;">
+        Info label &middot; Secondary text
+      </div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <div class="type-label">Caption</div>
+        <div class="type-specs">Poppins &middot; 12px &middot; Medium (500)</div>
+      </div>
+      <div class="type-sample" style="font-size:12px;font-weight:500;color:#A2A2A2;">
+        Nav label &middot; Step counter &middot; Tag text
+      </div>
+    </div>
+    <div class="type-row" style="border-bottom:none;">
+      <div class="type-meta">
+        <div class="type-label">Overline</div>
+        <div class="type-specs">Poppins &middot; 11px &middot; Medium (500)</div>
+      </div>
+      <div class="type-sample" style="font-size:11px;font-weight:500;color:#A2A2A2;">
+        SMALLEST LABEL TEXT
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SPACING ==================== -->
+  <div class="section">
+    <div class="section-title">Spacing Scale</div>
+    <div class="section-desc">Defined in DSDimens (lib/config/themes/theme.dart)</div>
+    <div class="spacing-grid">
+      <div class="spacing-item">
+        <div class="spacing-box" style="width:4px;height:4px;"></div>
+        <div class="spacing-label">XXXS</div>
+        <div class="spacing-value">4px</div>
+      </div>
+      <div class="spacing-item">
+        <div class="spacing-box" style="width:8px;height:8px;"></div>
+        <div class="spacing-label">XXS</div>
+        <div class="spacing-value">8px</div>
+      </div>
+      <div class="spacing-item">
+        <div class="spacing-box" style="width:12px;height:12px;"></div>
+        <div class="spacing-label">XS</div>
+        <div class="spacing-value">12px</div>
+      </div>
+      <div class="spacing-item">
+        <div class="spacing-box" style="width:16px;height:16px;"></div>
+        <div class="spacing-label">S</div>
+        <div class="spacing-value">16px</div>
+      </div>
+      <div class="spacing-item">
+        <div class="spacing-box" style="width:20px;height:20px;"></div>
+        <div class="spacing-label">M</div>
+        <div class="spacing-value">20px</div>
+      </div>
+      <div class="spacing-item">
+        <div class="spacing-box" style="width:24px;height:24px;"></div>
+        <div class="spacing-label">L</div>
+        <div class="spacing-value">24px</div>
+      </div>
+      <div class="spacing-item">
+        <div class="spacing-box" style="width:28px;height:28px;"></div>
+        <div class="spacing-label">XL</div>
+        <div class="spacing-value">28px</div>
+      </div>
+      <div class="spacing-item">
+        <div class="spacing-box" style="width:32px;height:32px;"></div>
+        <div class="spacing-label">XXL</div>
+        <div class="spacing-value">32px</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== BORDER RADIUS ==================== -->
+  <div class="section">
+    <div class="section-title">Border Radius</div>
+    <div class="section-desc">Common radius values used across the app</div>
+    <div class="radius-grid">
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:8px;"></div>
+        <div class="radius-label">Small</div>
+        <div class="radius-value">8px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:12px;"></div>
+        <div class="radius-label">Medium</div>
+        <div class="radius-value">12px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:16px;"></div>
+        <div class="radius-label">Large</div>
+        <div class="radius-value">16px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:20px;"></div>
+        <div class="radius-label">Chip</div>
+        <div class="radius-value">20px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:24px;"></div>
+        <div class="radius-label">Card</div>
+        <div class="radius-value">24px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:40px;"></div>
+        <div class="radius-label">Full</div>
+        <div class="radius-value">50px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:50%;"></div>
+        <div class="radius-label">Circle</div>
+        <div class="radius-value">50%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SHADOWS ==================== -->
+  <div class="section">
+    <div class="section-title">Shadows</div>
+    <div class="section-desc">Elevation levels used in the app</div>
+    <div class="shadow-grid">
+      <div class="shadow-card" style="box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <div class="shadow-name">Subtle</div>
+        <div class="shadow-spec">0 2px 8px<br>rgba(0,0,0,0.06)</div>
+      </div>
+      <div class="shadow-card" style="box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
+        <div class="shadow-name">Card</div>
+        <div class="shadow-spec">0 4px 16px<br>rgba(0,0,0,0.08)</div>
+      </div>
+      <div class="shadow-card" style="box-shadow: 0 8px 32px rgba(0,0,0,0.12);">
+        <div class="shadow-name">Elevated</div>
+        <div class="shadow-spec">0 8px 32px<br>rgba(0,0,0,0.12)</div>
+      </div>
+      <div class="shadow-card" style="box-shadow: 0 4px 16px rgba(237,103,202,0.35);">
+        <div class="shadow-name">Primary Glow</div>
+        <div class="shadow-spec">0 4px 16px<br>rgba(237,103,202,0.35)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== BUTTONS ==================== -->
+  <div class="section">
+    <div class="section-title">Buttons</div>
+    <div class="section-desc">Button variants and states</div>
+    <div class="button-grid">
+      <div class="button-group">
+        <div class="button-group-label">Primary</div>
+        <div class="btn btn-primary">Next</div>
+      </div>
+      <div class="button-group">
+        <div class="button-group-label">Primary (Final)</div>
+        <div class="btn btn-primary">Create Profile</div>
+      </div>
+      <div class="button-group">
+        <div class="button-group-label">Disabled</div>
+        <div class="btn btn-primary-disabled">Next</div>
+      </div>
+      <div class="button-group">
+        <div class="button-group-label">Danger Outline</div>
+        <div class="btn btn-outline">Delete Profile</div>
+      </div>
+      <div class="button-group">
+        <div class="button-group-label">Text</div>
+        <div class="btn btn-text">Skip</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== INPUTS ==================== -->
+  <div class="section">
+    <div class="section-title">Inputs</div>
+    <div class="section-desc">Text field variants and states</div>
+    <div class="input-grid">
+      <div class="input-group">
+        <div class="input-group-label">Default</div>
+        <input class="input-field input-default" type="text" placeholder="Enter your cat's name">
+      </div>
+      <div class="input-group">
+        <div class="input-group-label">Focused</div>
+        <input class="input-field input-focused" type="text" value="Milo">
+      </div>
+      <div class="input-group">
+        <div class="input-group-label">Filled (Search)</div>
+        <input class="input-field input-filled" type="text" placeholder="Search breeds..." style="border-radius:50px;">
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SELECTION STATES ==================== -->
+  <div class="section">
+    <div class="section-title">Selection States</div>
+    <div class="section-desc">Option cards and chips for wizard steps</div>
+
+    <div class="subsection">
+      <div class="subsection-title">Option Cards</div>
+      <div class="state-grid">
+        <div class="state-card state-default">Unselected</div>
+        <div class="state-card state-selected">Selected</div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Chips</div>
+      <div class="state-grid">
+        <div class="state-card state-chip state-default">Unselected</div>
+        <div class="state-card state-chip state-selected">Selected</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ICONOGRAPHY ==================== -->
+  <div class="section">
+    <div class="section-title">Iconography</div>
+    <div class="section-desc">Custom icons from assets/images/Icons/</div>
+    <div class="icon-grid">
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/camera.png"></div>
+        <div class="icon-name">Camera</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/gender.png"></div>
+        <div class="icon-name">Gender</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/cake.png"></div>
+        <div class="icon-name">Cake</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/body%20cat%202.png"></div>
+        <div class="icon-name">Activity</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/syringe.png"></div>
+        <div class="icon-name">Syringe</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/hair.png"></div>
+        <div class="icon-name">Hair</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/heart.png"></div>
+        <div class="icon-name">Heart</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/breed.png"></div>
+        <div class="icon-name">Breed</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/search.png"></div>
+        <div class="icon-name">Search</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/analyse.png"></div>
+        <div class="icon-name">Analyse</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/egg.png"></div>
+        <div class="icon-name">Egg</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/water.png"></div>
+        <div class="icon-name">Water</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/butter.png"></div>
+        <div class="icon-name">Butter</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/fire.png"></div>
+        <div class="icon-name">Fire</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/wheat.png"></div>
+        <div class="icon-name">Wheat</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/green.png"></div>
+        <div class="icon-name">Green (Pro)</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/red.png"></div>
+        <div class="icon-name">Red (Con)</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/male.png"></div>
+        <div class="icon-name">Male</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/female.png"></div>
+        <div class="icon-name">Female</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/Weight.png"></div>
+        <div class="icon-name">Weight</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/foot.png"></div>
+        <div class="icon-name">Foot</div>
+      </div>
+      <div class="icon-card">
+        <div class="icon-box"><img src="/assets/images/Icons/food.png"></div>
+        <div class="icon-name">Food</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== NAV ICONS ==================== -->
+  <div class="section" style="margin-bottom:0;">
+    <div class="section-title">Navigation Icons</div>
+    <div class="section-desc">Bottom tab bar icons — active (colored) and inactive (gray) pairs</div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div style="display:flex;gap:16px;">
+          <div class="icon-card">
+            <div class="icon-box" style="background:#FEF5FE;"><img src="/assets/images/Search.png"></div>
+            <div class="icon-name">Active</div>
+          </div>
+          <div class="icon-card">
+            <div class="icon-box" style="background:#F5F5F5;"><img src="/assets/images/Search gray.png"></div>
+            <div class="icon-name">Inactive</div>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:#4A4A4A;">Search</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div style="display:flex;gap:16px;">
+          <div class="icon-card">
+            <div class="icon-box" style="background:#FEF5FE;"><img src="/assets/images/Scan.png"></div>
+            <div class="icon-name">Active</div>
+          </div>
+          <div class="icon-card">
+            <div class="icon-box" style="background:#F5F5F5;"><img src="/assets/images/Scan gray.png"></div>
+            <div class="icon-name">Inactive</div>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:#4A4A4A;">Scan</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div style="display:flex;gap:16px;">
+          <div class="icon-card">
+            <div class="icon-box" style="background:#FEF5FE;"><img src="/assets/images/My Cats.png"></div>
+            <div class="icon-name">Active</div>
+          </div>
+          <div class="icon-card">
+            <div class="icon-box" style="background:#F5F5F5;"><img src="/assets/images/My Cats gray.png"></div>
+            <div class="icon-name">Inactive</div>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:#4A4A4A;">My Cats</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

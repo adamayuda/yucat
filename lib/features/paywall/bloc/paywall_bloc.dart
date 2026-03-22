@@ -33,6 +33,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
 
     // Only show paywall on iOS
     if (!Platform.isIOS) {
+      debugPrint('PaywallBloc: Not iOS, skipping paywall');
       emit(
         const PaywallErrorState(message: 'Paywall is only available on iOS'),
       );
@@ -42,23 +43,24 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     emit(const PaywallLoadingState());
 
     try {
+      debugPrint('PaywallBloc: Checking subscription status...');
       final hasActiveSubscription = await _hasActiveSubscriptionUseCase();
+      debugPrint('PaywallBloc: hasActiveSubscription=$hasActiveSubscription');
 
-      if (hasActiveSubscription) {
-        emit(const PaywallAlreadySubscribedState());
-        return;
-      }
-
+      debugPrint('PaywallBloc: Fetching offerings...');
       Offerings? offerings;
       try {
         offerings = await Purchases.getOfferings();
+        debugPrint('PaywallBloc: Offerings fetched: ${offerings?.current?.identifier}');
       } on PlatformException catch (e) {
+        debugPrint('PaywallBloc: PlatformException getting offerings: $e');
         emit(PaywallErrorState(message: e.message ?? 'Unknown error occurred'));
         return;
       }
 
       // ignore: avoid_null_checks_equality_operators
       if (offerings == null) {
+        debugPrint('PaywallBloc: Offerings is null');
         emit(
           const PaywallErrorState(
             message: 'No offerings available at this time',
@@ -69,6 +71,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
 
       final currentOffering = offerings.current;
       if (currentOffering == null) {
+        debugPrint('PaywallBloc: Current offering is null');
         emit(
           const PaywallErrorState(
             message: 'No offerings available at this time',
@@ -76,6 +79,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
         );
         return;
       } else if (currentOffering.availablePackages.isEmpty) {
+        debugPrint('PaywallBloc: No available packages');
         emit(
           const PaywallErrorState(
             message:
@@ -85,6 +89,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
         return;
       } else {
         // Current offering is available with packages, show paywall via RevenueCatUI
+        debugPrint('PaywallBloc: Presenting paywall...');
         _paywallShownTime = DateTime.now();
 
         _logEventUsecase.call(

@@ -19,14 +19,14 @@ class SearchProductToDomainMapperImpl extends SearchProductToDomainMapper {
       final product = ProductEntity(
         name: hit['name']?.toString() ?? '',
         brand: hit['brand']?.toString() ?? '',
-        score: _parseInt(hit['score'], 0),
+        score: _parseDouble(hit['score']).toInt(),
         imageUrl: hit['imageUrl']?.toString() ?? '',
-        protein: _parseInt(hit['protein'], 0),
-        fat: _parseInt(hit['fat'], 0),
-        carbs: _parseInt(hit['carbs'], 0),
-        ash: _parseInt(hit['ash'], 0),
-        fiber: _parseInt(hit['fiber'], 0),
-        moisture: _parseInt(hit['moisture'], 0),
+        protein: _parseDouble(hit['protein']),
+        fat: _parseDouble(hit['fat']),
+        carbs: _parseDouble(hit['carbs']),
+        ash: _parseDouble(hit['ash']),
+        fiber: _parseDouble(hit['fiber']),
+        moisture: _parseDouble(hit['moisture']),
         pros: pros,
         cons: cons,
       );
@@ -44,10 +44,10 @@ class SearchProductToDomainMapperImpl extends SearchProductToDomainMapper {
     }
   }
 
-  int _parseInt(dynamic value, [int? defaultValue]) {
-    if (value == null) return defaultValue ?? 0;
-    if (value is int) return value;
-    if (value is String) return int.tryParse(value) ?? defaultValue ?? 0;
-    return defaultValue ?? 0;
+  double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
   }
 }

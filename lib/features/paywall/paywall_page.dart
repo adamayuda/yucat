@@ -72,8 +72,8 @@ class _PaywallPage extends State<PaywallPage> {
     switch (state) {
       case PaywallLoadingState():
         return PaywallLoadingWidget();
-      case PaywallErrorState():
-        return PaywallErrorWidget();
+      case PaywallErrorState(:final message):
+        return PaywallErrorWidget(message: message);
       case PaywallLoadedState():
         return PaywallLoadedWidget();
       default:

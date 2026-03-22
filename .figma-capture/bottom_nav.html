@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=900, initial-scale=1.0">
+  <title>YuCat - Bottom Navigation Bar Component</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #FEF5FE;
+      display: flex; flex-direction: column; gap: 48px; padding: 60px 40px; align-items: center;
+    }
+    .label { font-size: 14px; font-weight: 600; color: #4A4A4A; margin-bottom: 4px; }
+    .sublabel { font-size: 11px; color: #A2A2A2; margin-bottom: 16px; }
+    .group { display: flex; flex-direction: column; align-items: center; }
+
+    /* Nav wrapper */
+    .nav-wrapper {
+      width: 390px;
+      height: 120px;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    /* The bar */
+    .bottom-nav {
+      width: 390px;
+      height: 88px;
+      position: relative;
+      background: #FFFFFF;
+      border-radius: 24px;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      padding: 0 16px 12px;
+    }
+
+    /* Home indicator bar */
+    .home-indicator {
+      position: absolute;
+      bottom: 10px; left: 50%; transform: translateX(-50%);
+      width: 134px; height: 5px;
+      background: #D0D0D0; border-radius: 3px;
+    }
+
+    /* Nav items container */
+    .nav-items {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-around;
+    }
+
+    /* Nav item */
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      width: 64px;
+    }
+    .nav-item img { width: 26px; height: 26px; object-fit: contain; }
+    .nav-label {
+      font-size: 11px; font-weight: 500; color: #A2A2A2;
+    }
+    .nav-label.active { color: #ED67CA; }
+
+    /* Center spacer to make room for diamond */
+    .nav-center-spacer {
+      width: 72px; flex-shrink: 0;
+    }
+
+    /* Floating diamond button */
+    .fab-diamond {
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 64px; height: 64px;
+      z-index: 10;
+    }
+    .diamond-shape {
+      width: 64px; height: 64px;
+      background: #ED67CA;
+      border-radius: 16px;
+      transform: rotate(0deg);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 20px rgba(237,103,202,0.35);
+    }
+    .diamond-shape img {
+      width: 32px; height: 32px; object-fit: contain;
+      filter: brightness(0) invert(1);
+    }
+    .fab-label {
+      position: absolute;
+      bottom: -20px; left: 50%; transform: translateX(-50%);
+      font-size: 11px; font-weight: 500; color: #A2A2A2; white-space: nowrap;
+    }
+    .fab-label.active { color: #ED67CA; }
+  </style>
+</head>
+<body>
+
+  <!-- State 1: Search tab active -->
+  <div class="group">
+    <div class="label">Search Active</div>
+    <div class="sublabel">activeIndex: 0</div>
+    <div class="nav-wrapper">
+      <div class="fab-diamond">
+        <div class="diamond-shape">
+          <img src="/assets/images/Scan gray.png" alt="Scan">
+        </div>
+        <span class="fab-label">Scan</span>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-items">
+          <div class="nav-item">
+            <img src="/assets/images/Search.png" alt="Search">
+            <span class="nav-label active">Search</span>
+          </div>
+          <div class="nav-center-spacer"></div>
+          <div class="nav-item">
+            <img src="/assets/images/My Cats gray.png" alt="My Cats">
+            <span class="nav-label">My Cats</span>
+          </div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- State 2: Scan tab active -->
+  <div class="group">
+    <div class="label">Scan Active</div>
+    <div class="sublabel">activeIndex: 1</div>
+    <div class="nav-wrapper">
+      <div class="fab-diamond">
+        <div class="diamond-shape" style="box-shadow: 0 6px 24px rgba(237,103,202,0.5);">
+          <img src="/assets/images/Scan.png" alt="Scan">
+        </div>
+        <span class="fab-label active">Scan</span>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-items">
+          <div class="nav-item">
+            <img src="/assets/images/Search gray.png" alt="Search">
+            <span class="nav-label">Search</span>
+          </div>
+          <div class="nav-center-spacer"></div>
+          <div class="nav-item">
+            <img src="/assets/images/My Cats gray.png" alt="My Cats">
+            <span class="nav-label">My Cats</span>
+          </div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- State 3: My Cats tab active -->
+  <div class="group">
+    <div class="label">My Cats Active</div>
+    <div class="sublabel">activeIndex: 2</div>
+    <div class="nav-wrapper">
+      <div class="fab-diamond">
+        <div class="diamond-shape">
+          <img src="/assets/images/Scan gray.png" alt="Scan">
+        </div>
+        <span class="fab-label">Scan</span>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-items">
+          <div class="nav-item">
+            <img src="/assets/images/Search gray.png" alt="Search">
+            <span class="nav-label">Search</span>
+          </div>
+          <div class="nav-center-spacer"></div>
+          <div class="nav-item">
+            <img src="/assets/images/My Cats.png" alt="My Cats">
+            <span class="nav-label active">My Cats</span>
+          </div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

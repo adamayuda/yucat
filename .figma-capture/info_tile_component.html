@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=900, initial-scale=1.0">
+<title>InfoTile Component</title>
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Satisfy&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* === DESIGN SYSTEM TOKENS (from DS page 950:2) === */
+  :root {
+    /* Colors - Primary & Brand */
+    --ds-primary: #ED67CA;
+    --ds-primary-vibrant: #FF5FC9;
+    --ds-primary-focus: #FF61E5;
+    --ds-primary-disabled: #EDAFDD;
+    --ds-primary-surface: #FEF5FE;
+    --ds-primary-light: #F5E8FF;
+    --ds-primary-muted: #F9E9F5;
+
+    /* Colors - Neutrals */
+    --ds-black: #4A4A4A;
+    --ds-dark-blue: #334156;
+    --ds-body-text: #686868;
+    --ds-input-dark-grey: #7D7D82;
+    --ds-placeholder: #A0A8B6;
+    --ds-dark-grey: #A2A2A2;
+    --ds-input-light-grey: #DFDFE0;
+    --ds-border: #E6E7EB;
+    --ds-light-grey: #E0E0E0;
+    --ds-surface: #F9FAFB;
+    --ds-white: #FFFFFF;
+
+    /* Colors - Semantic */
+    --ds-green: #84E475;
+    --ds-red: #E53935;
+
+    /* Spacing Scale (DSDimens) */
+    --ds-xxxs: 4px;
+    --ds-xxs: 8px;
+    --ds-xs: 12px;
+    --ds-s: 16px;
+    --ds-m: 20px;
+    --ds-l: 24px;
+    --ds-xl: 28px;
+    --ds-xxl: 32px;
+
+    /* Border Radius */
+    --ds-radius-small: 8px;
+    --ds-radius-medium: 12px;
+    --ds-radius-large: 16px;
+    --ds-radius-card: 14px;
+    --ds-radius-circle: 9999px;
+
+    /* Shadows */
+    --ds-shadow-subtle: 0px 2px 8px rgba(0,0,0,0.06);
+    --ds-shadow-card: 0px 2px 8px rgba(0,0,0,0.03);
+    --ds-shadow-elevated: 0px 4px 16px rgba(0,0,0,0.08);
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--ds-white);
+    padding: 60px;
+    color: var(--ds-black);
+    width: 900px;
+  }
+
+  /* Page header matching DS page style */
+  .ds-header {
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 32px;
+    margin-bottom: 48px;
+  }
+
+  .ds-logo {
+    font-family: 'Satisfy', cursive;
+    font-size: 48px;
+    color: var(--ds-primary);
+    line-height: 1;
+  }
+
+  .ds-page-title {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--ds-black);
+    margin-top: 8px;
+  }
+
+  .ds-page-desc {
+    font-size: 16px;
+    color: var(--ds-dark-grey);
+    margin-top: 8px;
+  }
+
+  /* Section styling matching DS page */
+  .ds-section {
+    margin-bottom: 48px;
+  }
+
+  .ds-section-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ds-black);
+    margin-bottom: 4px;
+  }
+
+  .ds-section-desc {
+    font-size: 14px;
+    color: var(--ds-dark-grey);
+    margin-bottom: 24px;
+  }
+
+  .ds-subsection-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ds-dark-grey);
+    margin-bottom: 12px;
+  }
+
+  .ds-variant-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+
+  /* ===== InfoTile / Vertical ===== */
+  .info-tile-vertical {
+    background: var(--ds-white);
+    border-radius: var(--ds-radius-large); /* 16px */
+    padding: 14px 10px;
+    text-align: center;
+    border: 1px solid var(--ds-border);
+    box-shadow: var(--ds-shadow-card);
+    width: 110px;
+  }
+
+  .info-tile-vertical .tile-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--ds-primary-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--ds-xxs);
+  }
+
+  .info-tile-vertical .tile-icon-box img {
+    width: var(--ds-m); /* 20px */
+    height: var(--ds-m);
+    object-fit: contain;
+  }
+
+  .info-tile-vertical .tile-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ds-dark-blue);
+    line-height: 1.2;
+  }
+
+  .info-tile-vertical .tile-label {
+    font-size: 11px;
+    color: var(--ds-dark-grey);
+    margin-top: 2px;
+  }
+
+  /* ===== InfoTile / Horizontal ===== */
+  .info-tile-horizontal {
+    background: var(--ds-white);
+    border-radius: var(--ds-radius-card); /* 14px */
+    padding: var(--ds-s); /* 16px -> using closest DS token */
+    border: 1px solid var(--ds-border);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    box-shadow: 0px 1px 4px rgba(0,0,0,0.02);
+    width: 175px;
+  }
+
+  .info-tile-horizontal .tile-icon-box {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 10px;
+    background: var(--ds-primary-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .info-tile-horizontal .tile-icon-box img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+  }
+
+  .info-tile-horizontal .tile-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .info-tile-horizontal .tile-label {
+    font-size: 11px;
+    color: var(--ds-dark-grey);
+    margin-bottom: 2px;
+  }
+
+  .info-tile-horizontal .tile-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ds-dark-blue);
+  }
+
+  /* ===== Spec Table ===== */
+  .spec-table {
+    border-collapse: collapse;
+    font-size: 13px;
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .spec-table th {
+    text-align: left;
+    padding: var(--ds-xxs) var(--ds-m) var(--ds-xxs) 0;
+    font-weight: 600;
+    color: var(--ds-dark-blue);
+    border-bottom: 1px solid var(--ds-border);
+  }
+
+  .spec-table td {
+    padding: var(--ds-xxs) var(--ds-m) var(--ds-xxs) 0;
+    color: var(--ds-body-text);
+    border-bottom: 1px solid var(--ds-border);
+  }
+
+  .color-swatch {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-right: 6px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .token-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ds-primary);
+    background: var(--ds-primary-surface);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- DS-style header -->
+<div class="ds-header">
+  <div class="ds-logo">YuCat</div>
+  <div class="ds-page-title">InfoTile</div>
+  <div class="ds-page-desc">Reusable component for displaying a labeled value with an icon. Two orientation variants.</div>
+</div>
+
+<!-- Variant: Vertical -->
+<div class="ds-section">
+  <div class="ds-section-title">Variant: Vertical</div>
+  <div class="ds-section-desc">Used in the stats row (Age, Weight, Activity). Icon on top, value and label below.</div>
+  <div class="ds-subsection-label">Examples</div>
+  <div class="ds-variant-row">
+    <div class="info-tile-vertical">
+      <div class="tile-icon-box">
+        <img src="../assets/images/Icons/cake.png" alt="age">
+      </div>
+      <div class="tile-value">3 yrs</div>
+      <div class="tile-label">Age</div>
+    </div>
+    <div class="info-tile-vertical">
+      <div class="tile-icon-box">
+        <img src="../assets/images/Icons/Weight.png" alt="weight">
+      </div>
+      <div class="tile-value">4.5 kg</div>
+      <div class="tile-label">Weight</div>
+    </div>
+    <div class="info-tile-vertical">
+      <div class="tile-icon-box">
+        <img src="../assets/images/Icons/fire.png" alt="activity">
+      </div>
+      <div class="tile-value">High</div>
+      <div class="tile-label">Activity</div>
+    </div>
+  </div>
+</div>
+
+<!-- Variant: Horizontal -->
+<div class="ds-section">
+  <div class="ds-section-title">Variant: Horizontal</div>
+  <div class="ds-section-desc">Used in the details grid (Breed, Gender, Coat Type, etc.). Icon on left, label and value on right.</div>
+  <div class="ds-subsection-label">Examples</div>
+  <div class="ds-variant-row">
+    <div class="info-tile-horizontal">
+      <div class="tile-icon-box">
+        <img src="../assets/images/Icons/breed.png" alt="breed">
+      </div>
+      <div class="tile-content">
+        <div class="tile-label">Breed</div>
+        <div class="tile-value">British Shorthair</div>
+      </div>
+    </div>
+    <div class="info-tile-horizontal">
+      <div class="tile-icon-box">
+        <img src="../assets/images/Icons/gender.png" alt="gender">
+      </div>
+      <div class="tile-content">
+        <div class="tile-label">Gender</div>
+        <div class="tile-value">Female</div>
+      </div>
+    </div>
+    <div class="info-tile-horizontal">
+      <div class="tile-icon-box">
+        <img src="../assets/images/Icons/hair.png" alt="coat">
+      </div>
+      <div class="tile-content">
+        <div class="tile-label">Coat Type</div>
+        <div class="tile-value">Short Hair</div>
+      </div>
+    </div>
+    <div class="info-tile-horizontal">
+      <div class="tile-icon-box">
+        <img src="../assets/images/Icons/syringe.png" alt="status">
+      </div>
+      <div class="tile-content">
+        <div class="tile-label">Status</div>
+        <div class="tile-value">Spayed</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Specifications -->
+<div class="ds-section">
+  <div class="ds-section-title">Specifications</div>
+  <div class="ds-section-desc">Token mappings to the YuCat Design System (lib/config/themes/theme.dart)</div>
+  <table class="spec-table">
+    <tr>
+      <th>Property</th>
+      <th>Vertical</th>
+      <th>Horizontal</th>
+      <th>DS Token</th>
+    </tr>
+    <tr>
+      <td>Background</td>
+      <td><span class="color-swatch" style="background:#FFFFFF"></span>#FFFFFF</td>
+      <td><span class="color-swatch" style="background:#FFFFFF"></span>#FFFFFF</td>
+      <td><span class="token-tag">DSColors.white</span></td>
+    </tr>
+    <tr>
+      <td>Border</td>
+      <td>1px solid #E6E7EB</td>
+      <td>1px solid #E6E7EB</td>
+      <td><span class="token-tag">DSColors.border</span></td>
+    </tr>
+    <tr>
+      <td>Border Radius</td>
+      <td>16px (Large)</td>
+      <td>14px (Card)</td>
+      <td><span class="token-tag">DSDimens.sizeS</span> / <span class="token-tag">14px</span></td>
+    </tr>
+    <tr>
+      <td>Padding</td>
+      <td>14px 10px</td>
+      <td>16px</td>
+      <td><span class="token-tag">DSDimens.sizeS</span></td>
+    </tr>
+    <tr>
+      <td>Shadow</td>
+      <td>Card (0,2,8 @ 3%)</td>
+      <td>Subtle (0,1,4 @ 2%)</td>
+      <td><span class="token-tag">shadow-card</span></td>
+    </tr>
+    <tr>
+      <td>Icon Box</td>
+      <td>36x36, radius 10</td>
+      <td>34x34, radius 10</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Icon Box Color</td>
+      <td><span class="color-swatch" style="background:#FEF5FE"></span>#FEF5FE</td>
+      <td><span class="color-swatch" style="background:#FEF5FE"></span>#FEF5FE</td>
+      <td><span class="token-tag">DSColors.primarySurface</span></td>
+    </tr>
+    <tr>
+      <td>Value Font</td>
+      <td>Poppins 15px SemiBold</td>
+      <td>Poppins 13px SemiBold</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Label Font</td>
+      <td>Poppins 11px Regular</td>
+      <td>Poppins 11px Regular</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Value Color</td>
+      <td><span class="color-swatch" style="background:#334156"></span>#334156</td>
+      <td><span class="color-swatch" style="background:#334156"></span>#334156</td>
+      <td><span class="token-tag">DSColors.darkBlue</span></td>
+    </tr>
+    <tr>
+      <td>Label Color</td>
+      <td><span class="color-swatch" style="background:#A2A2A2"></span>#A2A2A2</td>
+      <td><span class="color-swatch" style="background:#A2A2A2"></span>#A2A2A2</td>
+      <td><span class="token-tag">DSColors.darkGrey</span></td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>

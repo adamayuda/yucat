@@ -52,26 +52,13 @@ class ScanTrackingService {
 
   /// Check if user can perform a scan (has subscription or hasn't reached limit)
   Future<bool> canPerformScan() async {
-    print('[ScanTrackingService] canPerformScan() called');
     final hasSubscription = await _hasActiveSubscriptionUseCase();
-    print('[ScanTrackingService] hasSubscription: $hasSubscription');
-
     if (hasSubscription) {
-      print(
-        '[ScanTrackingService] User has active subscription, allowing scan',
-      );
       return true;
     }
 
-    final currentCount = getFreeScansCount();
-    print(
-      '[ScanTrackingService] Free scans used: $currentCount/$_maxFreeScans',
-    );
     final hasReachedLimit = await hasReachedFreeScanLimit();
-    print('[ScanTrackingService] hasReachedFreeScanLimit: $hasReachedLimit');
-    final canScan = !hasReachedLimit;
-    print('[ScanTrackingService] canPerformScan result: $canScan');
-    return canScan;
+    return !hasReachedLimit;
   }
 
   /// Reset the free scan count (useful for testing or if user purchases subscription)

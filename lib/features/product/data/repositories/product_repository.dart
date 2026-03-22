@@ -57,4 +57,31 @@ class ProductRepositoryImpl implements ProductRepository {
     final productData = Map<String, dynamic>.from(productDataRaw);
     return _productToDomainMapper(productData);
   }
+
+  @override
+  Future<ProductEntity?> fetchProductByImage({
+    required String imageBase64,
+    required String mimeType,
+  }) async {
+    debugPrint('[ProductRepository] Fetching product by image');
+
+    final remoteData = await _remoteDataSource.fetchProductByImage(
+      imageBase64: imageBase64,
+      mimeType: mimeType,
+    );
+    if (remoteData == null) {
+      debugPrint('[ProductRepository] Product not found for image');
+      return null;
+    }
+    debugPrint('[ProductRepository] Product found for image');
+    final productDataRaw = remoteData['product'];
+    if (productDataRaw == null || productDataRaw is! Map) {
+      debugPrint(
+        '[ProductRepository] Product data not found in image response',
+      );
+      return null;
+    }
+    final productData = Map<String, dynamic>.from(productDataRaw);
+    return _productToDomainMapper(productData);
+  }
 }

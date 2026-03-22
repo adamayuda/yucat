@@ -18,22 +18,12 @@ class HomeHiddenState extends HomeState {
 }
 
 class HomeLoadedState extends HomeState {
-  final bool hasScanned;
+  final int _timestamp;
 
-  const HomeLoadedState({this.hasScanned = false});
-
-  @override
-  List<Object?> get props => [hasScanned];
-}
-
-class HomeSearchResultsState extends HomeState {
-  final List<ProductDisplayModel> products;
-  final String query;
-
-  const HomeSearchResultsState({required this.products, required this.query});
+  HomeLoadedState() : _timestamp = DateTime.now().microsecondsSinceEpoch;
 
   @override
-  List<Object?> get props => [products, query];
+  List<Object?> get props => [_timestamp];
 }
 
 class HomeErrorState extends HomeState {
@@ -65,22 +55,6 @@ class HomeScanLimitReachedState extends HomeState {
 
 class HomeShowPaywallState extends HomeState {
   const HomeShowPaywallState();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class HomeScanProcessedState extends HomeState {
-  final String barcode;
-
-  const HomeScanProcessedState({required this.barcode});
-
-  @override
-  List<Object?> get props => [barcode];
-}
-
-class HomeScanResetState extends HomeState {
-  const HomeScanResetState();
 
   @override
   List<Object?> get props => [];

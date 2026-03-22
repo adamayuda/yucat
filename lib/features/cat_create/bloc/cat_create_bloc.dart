@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
@@ -165,6 +164,15 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
     CatCreateCatEvent event,
     Emitter<CatCreateState> emit,
   ) async {
+    final currentState = state;
+    if (currentState is CatCreateLoadedState && currentState.isSubmitting) return;
+
+    emit(CatCreateLoadedState(
+      currentStep: (currentState as CatCreateLoadedState).currentStep,
+      cat: currentState.cat,
+      isSubmitting: true,
+    ));
+
     try {
       final user = _currentUserUsecase();
       final isEditMode = _originalCat != null;
@@ -225,7 +233,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
         );
       }
 
-      event.context.router.push(const CatListingRoute());
+      event.context.router.maybePop();
     } catch (e) {
       final isEditMode = _originalCat != null;
       _logEventUsecase.call(
@@ -236,6 +244,12 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
           'step_index': (state as CatCreateLoadedState).currentStep,
         },
       );
+
+      emit(CatCreateLoadedState(
+        currentStep: (state as CatCreateLoadedState).currentStep,
+        cat: (state as CatCreateLoadedState).cat,
+        isSubmitting: false,
+      ));
     }
   }
 

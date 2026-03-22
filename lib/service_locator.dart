@@ -54,6 +54,7 @@ import 'package:yucat/features/product/data/mappers/product_to_domain_mapper.dar
 import 'package:yucat/features/product/data/repositories/product_repository.dart';
 import 'package:yucat/features/product/domain/repositories/product_repository.dart';
 import 'package:yucat/features/product/domain/usecases/fetch_product_by_barcode_usecase.dart';
+import 'package:yucat/features/product/domain/usecases/fetch_product_by_image_usecase.dart';
 import 'package:yucat/features/search/data/datasources/algolia_search_datasource.dart';
 import 'package:yucat/features/search/data/mappers/search_product_to_domain_mapper.dart';
 import 'package:yucat/features/search/data/repositories/search_repository.dart';
@@ -215,6 +216,9 @@ Future<void> _registerUseCases() async {
   sl.registerSingleton<FetchProductByBarcodeUsecase>(
     FetchProductByBarcodeUsecase(productRepository: sl<ProductRepository>()),
   );
+  sl.registerSingleton<FetchProductByImageUsecase>(
+    FetchProductByImageUsecase(productRepository: sl<ProductRepository>()),
+  );
   sl.registerSingleton<GetCatsUsecase>(
     GetCatsUsecase(repository: sl<CatRepository>()),
   );
@@ -292,7 +296,7 @@ Future<void> _registerBlocs() async {
   );
   sl.registerBloc<HomeBloc>(
     () => HomeBloc(
-      fetchProductByBarcodeUsecase: sl<FetchProductByBarcodeUsecase>(),
+      fetchProductByImageUsecase: sl<FetchProductByImageUsecase>(),
       productEntityToModelMapper: sl<ProductEntityToModelMapper>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
       signinAnonymouslyUsecase: sl<SigninAnonymouslyUsecase>(),

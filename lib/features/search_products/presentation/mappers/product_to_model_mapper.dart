@@ -28,7 +28,7 @@ class ProductToModelMapperImpl extends ProductToModelMapper {
       fat: product.fat,
       fiber: product.fiber,
       carbs: product.carbs == 0
-          ? 100 -
+          ? 100.0 -
                 product.protein -
                 product.fat -
                 product.fiber -
