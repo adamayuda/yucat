@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
-import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/delete_cat_usecase.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
 
@@ -10,15 +9,12 @@ part 'cat_detail_state.dart';
 
 class CatDetailBloc extends Bloc<CatDetailEvent, CatDetailState> {
   final DeleteCatUsecase _deleteCatUsecase;
-  final LogScreenViewUsecase _logScreenViewUsecase;
   final LogEventUsecase _logEventUsecase;
 
   CatDetailBloc({
     required DeleteCatUsecase deleteCatUsecase,
-    required LogScreenViewUsecase logScreenViewUsecase,
     required LogEventUsecase logEventUsecase,
   })  : _deleteCatUsecase = deleteCatUsecase,
-        _logScreenViewUsecase = logScreenViewUsecase,
         _logEventUsecase = logEventUsecase,
         super(CatDetailInitialState()) {
     on<CatDetailInitialEvent>(_onCatDetailInitialEvent);

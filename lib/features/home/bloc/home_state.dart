@@ -20,10 +20,36 @@ class HomeHiddenState extends HomeState {
 class HomeLoadedState extends HomeState {
   final int _timestamp;
 
-  HomeLoadedState() : _timestamp = DateTime.now().microsecondsSinceEpoch;
+  /// Free-tier scans remaining (clamped to 0). `null` if not yet loaded.
+  final int? scansRemaining;
+
+  /// Maximum free-tier scans allowed.
+  final int? maxFreeScans;
+
+  /// Whether the user has an active premium subscription.
+  final bool isPremium;
+
+  /// Primary cat profile (the user's first cat) for the greeting card.
+  final String? primaryCatName;
+  final String? primaryCatPhotoUrl;
+
+  HomeLoadedState({
+    this.scansRemaining,
+    this.maxFreeScans,
+    this.isPremium = false,
+    this.primaryCatName,
+    this.primaryCatPhotoUrl,
+  }) : _timestamp = DateTime.now().microsecondsSinceEpoch;
 
   @override
-  List<Object?> get props => [_timestamp];
+  List<Object?> get props => [
+        _timestamp,
+        scansRemaining,
+        maxFreeScans,
+        isPremium,
+        primaryCatName,
+        primaryCatPhotoUrl,
+      ];
 }
 
 class HomeErrorState extends HomeState {

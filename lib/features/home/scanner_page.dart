@@ -1,23 +1,24 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/home/bloc/home_bloc.dart';
+import 'package:yucat/features/home/bloc/home_event.dart';
 
-class HomeLoadedPage extends StatefulWidget {
-  final Function(String imageBase64, String mimeType) onImageCaptured;
-
-  const HomeLoadedPage({
-    super.key,
-    required this.onImageCaptured,
-  });
+@RoutePage()
+class ScannerPage extends StatefulWidget {
+  const ScannerPage({super.key});
 
   @override
-  State<HomeLoadedPage> createState() => _HomeLoadedPageState();
+  State<ScannerPage> createState() => _ScannerPageState();
 }
 
-class _HomeLoadedPageState extends State<HomeLoadedPage>
+class _ScannerPageState extends State<ScannerPage>
     with WidgetsBindingObserver {
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
@@ -76,6 +77,16 @@ class _HomeLoadedPageState extends State<HomeLoadedPage>
     }
   }
 
+  void _onImageCaptured(String imageBase64, String mimeType) {
+    final bloc = context.read<HomeBloc>();
+    bloc.add(ImageCapturedEvent(
+      imageBase64: imageBase64,
+      mimeType: mimeType,
+      context: context,
+    ));
+    context.router.maybePop();
+  }
+
   Future<void> _takePicture() async {
     if (_isTakingPicture ||
         _cameraController == null ||
@@ -90,7 +101,7 @@ class _HomeLoadedPageState extends State<HomeLoadedPage>
       final bytes = await File(xFile.path).readAsBytes();
       final base64Image = base64Encode(bytes);
       final mimeType = xFile.mimeType ?? 'image/jpeg';
-      widget.onImageCaptured(base64Image, mimeType);
+      _onImageCaptured(base64Image, mimeType);
     } catch (e) {
       debugPrint('Take picture error: $e');
     } finally {
@@ -114,20 +125,27 @@ class _HomeLoadedPageState extends State<HomeLoadedPage>
     final bytes = await File(pickedFile.path).readAsBytes();
     final base64Image = base64Encode(bytes);
     final mimeType = pickedFile.mimeType ?? 'image/jpeg';
-    widget.onImageCaptured(base64Image, mimeType);
+    _onImageCaptured(base64Image, mimeType);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: DSColors.inkPrimary,
       body: Stack(
         children: [
-          // Camera preview
           if (_isCameraInitialized && _cameraController != null)
-            Positioned.fill(
-              child: CameraPreview(_cameraController!),
+            Positioned.fill(child: CameraPreview(_cameraController!)),
+
+          // Top close button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + DSDimens.sizeS,
+            left: DSDimens.sizeL,
+            child: _ChromeButton(
+              icon: Icons.close_rounded,
+              onTap: () => context.router.maybePop(),
             ),
+          ),
 
           // Bottom controls
           Positioned(
@@ -136,40 +154,18 @@ class _HomeLoadedPageState extends State<HomeLoadedPage>
             bottom: 0,
             child: Container(
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).padding.bottom + 20,
-                top: 24,
+                bottom: MediaQuery.of(context).padding.bottom + DSDimens.sizeM,
+                top: DSDimens.sizeL,
+                left: DSDimens.size3xl,
+                right: DSDimens.size3xl,
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Gallery button (bottom left)
-                  SizedBox(
-                    width: 80,
-                    child: Center(
-                      child: GestureDetector(
-                        onTap: _pickFromGallery,
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.4),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.photo,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                    ),
+                  _ChromeButton(
+                    icon: Icons.photo_outlined,
+                    onTap: _pickFromGallery,
                   ),
-
-                  // Shutter button (center)
                   GestureDetector(
                     onTap: _takePicture,
                     child: Container(
@@ -178,27 +174,52 @@ class _HomeLoadedPageState extends State<HomeLoadedPage>
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.white,
+                          color: DSColors.inkInverse,
                           width: 4,
                         ),
                       ),
                       padding: const EdgeInsets.all(4),
-                      child: Container(
-                        decoration: const BoxDecoration(
+                      child: const DecoratedBox(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white,
+                          color: DSColors.inkInverse,
                         ),
                       ),
                     ),
                   ),
-
-                  // Spacer to balance layout
-                  const SizedBox(width: 80),
+                  // Spacer to balance the shutter
+                  const SizedBox(width: 44),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ChromeButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _ChromeButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0x33FFFFFF),
+      shape: const CircleBorder(
+        side: BorderSide(color: Color(0x66FFFFFF), width: 1.5),
+      ),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Icon(icon, color: DSColors.inkInverse, size: 22),
+        ),
       ),
     );
   }

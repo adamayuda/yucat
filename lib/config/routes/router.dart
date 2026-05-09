@@ -8,6 +8,7 @@ import 'package:yucat/features/product_detail/presentation/models/product_displa
 import 'package:yucat/features/profile/profile_page.dart';
 import 'package:yucat/features/search_products/presentation/search_page.dart';
 import 'package:yucat/features/home/home_page.dart';
+import 'package:yucat/features/home/scanner_page.dart';
 import 'package:yucat/features/product_detail/presentation/product_detail_page.dart';
 import 'package:yucat/features/product_listing/presentation/product_listing_page.dart';
 import 'package:yucat/features/paywall/paywall_page.dart';
@@ -31,6 +32,11 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: HomeRoute.page, path: 'home'),
         AutoRoute(page: CatListingRoute.page, path: 'cats'),
       ],
+    ),
+    AutoRoute(
+      page: ScannerRoute.page,
+      path: '/scanner',
+      fullscreenDialog: true,
     ),
     AutoRoute(page: ProductDetailRoute.page, path: '/product-detail'),
     AutoRoute(page: ProductListingRoute.page, path: '/product-listing'),

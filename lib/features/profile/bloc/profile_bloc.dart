@@ -1,32 +1,43 @@
 // import 'package:event_bus/event_bus.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/features/profile/bloc/profile_event.dart';
 import 'package:yucat/features/profile/bloc/profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
-  final LogScreenViewUsecase _logScreenViewUsecase;
-  // final CurrentUserUsecase currentUserUsecase;
-  // final SignOutUsecase signOutUsecase;
-  // final DeleteAccountUsecase deleteAccountUsecase;
-  // final EventBus eventBus;
+  static const String _onboardingCompletedKey = 'onboarding_completed';
 
-  ProfileBloc({required LogScreenViewUsecase logScreenViewUsecase})
-    : _logScreenViewUsecase = logScreenViewUsecase,
-      super(ProfileHiddenState()) {
+  final SharedPreferences _prefs;
+
+  ProfileBloc({
+    required SharedPreferences prefs,
+  }) : _prefs = prefs,
+       super(ProfileHiddenState()) {
     on<ProfileInitialEvent>(_onProfileInitialEvent);
+    on<ResetOnboardingTapEvent>(_onResetOnboardingTapEvent);
   }
 
   Future<void> _onProfileInitialEvent(
     ProfileInitialEvent event,
     Emitter<ProfileState> emit,
   ) async {
-    // _logScreenViewUsecase.call(screenName: 'ProfileScreen');
     emit(ProfileLoadingState());
 
     // final user = currentUserUsecase.call();
 
     emit(ProfileLoadedState());
+  }
+
+  Future<void> _onResetOnboardingTapEvent(
+    ResetOnboardingTapEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    await _prefs.remove(_onboardingCompletedKey);
+    if (event.context.mounted) {
+      event.context.router.replaceAll([const OnBoardingRoute()]);
+    }
   }
 
   // Future<void> _onLogoutTapEvent(

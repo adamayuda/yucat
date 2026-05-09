@@ -1,41 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/presentation/components/ds_chip.dart';
+import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
-/// Health conditions step.
-///
-/// Exposes one of the following values:
-/// - "none"
-/// - "urinary_issues"
-/// - "kidney_disease"
-/// - "sensitive_stomach"
-/// - "skin_allergies"
-/// - "food_allergies"
-/// - "diabetes"
-/// - "dental_problems"
-/// - "hairball_issues"
-/// - "heart_condition"
-/// - "joint_issues"
 class HealthConditionsStep extends StatelessWidget {
-  /// Currently selected health condition values.
-  ///
-  /// Multiple values can be selected at the same time.
   final List<String> selectedHealthConditions;
-
-  /// Callback when the selected health conditions change.
   final ValueChanged<List<String>> onHealthConditionsChanged;
 
-  static const List<Map<String, String>> _options = [
-    {'value': 'none', 'label': 'None'},
-    {'value': 'urinary_issues', 'label': 'Urinary issues'},
-    {'value': 'kidney_disease', 'label': 'Kidney disease'},
-    {'value': 'sensitive_stomach', 'label': 'Sensitive stomach'},
-    {'value': 'skin_allergies', 'label': 'Skin allergies'},
-    {'value': 'food_allergies', 'label': 'Food allergies'},
-    {'value': 'diabetes', 'label': 'Diabetes'},
-    {'value': 'dental_problems', 'label': 'Dental problems'},
-    {'value': 'hairball_issues', 'label': 'Hairball issues'},
-    {'value': 'heart_condition', 'label': 'Heart condition'},
-    {'value': 'joint_issues', 'label': 'Joint or mobility issues'},
+  static const List<({String label, String value})> _options = [
+    (label: 'None', value: 'none'),
+    (label: 'Urinary issues', value: 'urinary_issues'),
+    (label: 'Kidney disease', value: 'kidney_disease'),
+    (label: 'Sensitive stomach', value: 'sensitive_stomach'),
+    (label: 'Skin allergies', value: 'skin_allergies'),
+    (label: 'Food allergies', value: 'food_allergies'),
+    (label: 'Diabetes', value: 'diabetes'),
+    (label: 'Dental problems', value: 'dental_problems'),
+    (label: 'Hairball issues', value: 'hairball_issues'),
+    (label: 'Heart condition', value: 'heart_condition'),
+    (label: 'Joint or mobility issues', value: 'joint_issues'),
   ];
 
   const HealthConditionsStep({
@@ -44,111 +27,58 @@ class HealthConditionsStep extends StatelessWidget {
     required this.onHealthConditionsChanged,
   });
 
+  void _toggle(String value) {
+    final isSelected = selectedHealthConditions.contains(value);
+    final current = List<String>.from(selectedHealthConditions);
+
+    if (value == 'none') {
+      if (isSelected) {
+        current.remove(value);
+      } else {
+        current
+          ..clear()
+          ..add(value);
+      }
+    } else {
+      current.remove('none');
+      if (isSelected) {
+        current.remove(value);
+      } else {
+        current.add(value);
+      }
+    }
+
+    onHealthConditionsChanged(current);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: DSColors.primaryLight,
-                  borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
-                ),
-                width: 40,
-                height: 40,
-                child: Image.asset(
-                  'assets/images/Icons/heart.png',
-                  fit: BoxFit.contain,
-                ),
-              ),
-              SizedBox(width: DSDimens.sizeS),
-              Expanded(
-                child: Text(
-                  'Any health considerations?',
-
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontSize: 29,
-                    fontWeight: FontWeight.bold,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const MascotSpeechBubble(
+          question: 'Any health considerations?',
+        ),
+        const SizedBox(height: DSDimens.sizeL),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 96),
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: DSDimens.sizeXxs,
+              runSpacing: DSDimens.sizeXxs,
+              children: [
+                for (final option in _options)
+                  DSChip(
+                    label: option.label,
+                    selected: selectedHealthConditions.contains(option.value),
+                    onTap: () => _toggle(option.value),
                   ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: DSDimens.sizeS),
-          Center(
-            child: Text(
-              'Allergies, sensitivities, or vet notes help refine scoring.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              ],
             ),
           ),
-
-          SizedBox(height: DSDimens.sizeS),
-
-          Column(
-            children: _options.map((option) {
-              final value = option['value']!;
-              final isSelected = selectedHealthConditions.contains(value);
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: InkWell(
-                  onTap: () {
-                    final current = List<String>.from(selectedHealthConditions);
-
-                    if (value == 'none') {
-                      // Selecting "none" clears all other conditions.
-                      if (isSelected) {
-                        current.remove(value);
-                      } else {
-                        current
-                          ..clear()
-                          ..add(value);
-                      }
-                    } else {
-                      // Selecting any specific condition deselects "none".
-                      current.remove('none');
-                      if (isSelected) {
-                        current.remove(value);
-                      } else {
-                        current.add(value);
-                      }
-                    }
-
-                    onHealthConditionsChanged(current);
-                  },
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? DSColors.primarySurface
-                          : DSColors.surface,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      option['label']!,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: DSColors.darkBlue,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

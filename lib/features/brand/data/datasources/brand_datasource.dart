@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class BrandDataSource {
   final FirebaseFirestore _firestore;
@@ -12,7 +13,7 @@ class BrandDataSource {
 
       return querySnapshot;
     } catch (e) {
-      print('Error fetching brands: $e');
+      debugPrint('Error fetching brands: $e');
       return null;
     }
   }

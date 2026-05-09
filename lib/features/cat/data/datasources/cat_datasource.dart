@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 
 class CatDataSource {
   final FirebaseFirestore _firestore;
@@ -24,7 +25,7 @@ class CatDataSource {
 
       return querySnapshot;
     } catch (e) {
-      print('Error fetching cats: $e');
+      debugPrint('Error fetching cats: $e');
       return null;
     }
   }
@@ -66,7 +67,7 @@ class CatDataSource {
 
       return docRef;
     } catch (e) {
-      print('Error creating cat: $e');
+      debugPrint('Error creating cat: $e');
       return null;
     }
   }
@@ -84,7 +85,7 @@ class CatDataSource {
       final downloadUrl = await ref.getDownloadURL();
       return downloadUrl;
     } catch (e) {
-      print('Error uploading cat profile image: $e');
+      debugPrint('Error uploading cat profile image: $e');
       return null;
     }
   }
@@ -98,7 +99,7 @@ class CatDataSource {
         'profileImageUrl': profileImageUrl,
       });
     } catch (e) {
-      print('Error updating cat profile image URL: $e');
+      debugPrint('Error updating cat profile image URL: $e');
       rethrow;
     }
   }
@@ -118,10 +119,10 @@ class CatDataSource {
         }
       } catch (e) {
         // Ignore if image doesn't exist or can't be deleted
-        print('Error deleting cat profile image: $e');
+        debugPrint('Error deleting cat profile image: $e');
       }
     } catch (e) {
-      print('Error deleting cat: $e');
+      debugPrint('Error deleting cat: $e');
       rethrow;
     }
   }
@@ -133,7 +134,7 @@ class CatDataSource {
     try {
       await _firestore.collection('cats').doc(catId).update(catData);
     } catch (e) {
-      print('Error updating cat: $e');
+      debugPrint('Error updating cat: $e');
       rethrow;
     }
   }

@@ -1,14 +1,20 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:yucat/config/routes/router.dart';
-import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
+import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 
 /// Screen names for each tab index, matching [MainPage] tab order.
 const _tabScreenNames = [
   SearchRoute.name,
   HomeRoute.name,
   CatListingRoute.name,
+];
+
+const _tabItems = [
+  DSBottomNavItem(icon: Icons.search_rounded, label: 'Search'),
+  DSBottomNavItem(icon: Icons.home_rounded, label: 'Home'),
+  DSBottomNavItem(icon: Icons.pets_rounded, label: 'My cats'),
 ];
 
 class BottomNavBar extends StatelessWidget {
@@ -23,54 +29,13 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      backgroundColor: DSColors.white,
-      currentIndex: tabsRouter.activeIndex,
+    return DSBottomNav(
+      items: _tabItems,
+      activeIndex: tabsRouter.activeIndex,
       onTap: (index) {
         tabsRouter.setActiveIndex(index);
         logScreenViewUsecase(screenName: _tabScreenNames[index]);
       },
-      items: [
-        BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/images/Search gray.png',
-            width: 32,
-            height: 32,
-          ),
-          activeIcon: Image.asset(
-            'assets/images/Search.png',
-            width: 32,
-            height: 32,
-          ),
-          label: 'Search',
-        ),
-        BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/images/Scan gray.png',
-            width: 32,
-            height: 32,
-          ),
-          activeIcon: Image.asset(
-            'assets/images/Scan.png',
-            width: 32,
-            height: 32,
-          ),
-          label: 'Scan',
-        ),
-        BottomNavigationBarItem(
-          icon: Image.asset(
-            'assets/images/My Cats gray.png',
-            width: 32,
-            height: 32,
-          ),
-          activeIcon: Image.asset(
-            'assets/images/My Cats.png',
-            width: 32,
-            height: 32,
-          ),
-          label: 'My Cats',
-        ),
-      ],
     );
   }
 }

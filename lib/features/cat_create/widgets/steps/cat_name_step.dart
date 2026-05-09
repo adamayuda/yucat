@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
 class CatNameStep extends StatelessWidget {
   final TextEditingController nameController;
@@ -13,88 +14,55 @@ class CatNameStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: DSColors.primaryLight,
-                  borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
-                ),
-                width: 40,
-                height: 40,
-                child: Image.asset(
-                  'assets/images/cat_name.png',
-                  fit: BoxFit.contain,
-                ),
-              ),
-              SizedBox(width: DSDimens.sizeS),
-              Expanded(
-                child: Text(
-                  'What\'s your cat\'s name?',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontSize: 29,
-                    fontWeight: FontWeight.bold,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const MascotSpeechBubble(
+          question: 'What\'s your cat\'s name?',
+        ),
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Name your cat',
+                  style: DSTextStyles.bodyLg.copyWith(
+                    color: DSColors.inkTertiary,
                   ),
                 ),
-              ),
-            ],
-          ),
-
-          // Center(
-          //   child: Text(
-          //     'This helps us personalize recommendations.',
-          //     style: Theme.of(
-          //       context,
-          //     ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-          //   ),
-          // ),
-          SizedBox(height: DSDimens.sizeS),
-          TextFormField(
-            key: nameFieldKey,
-            controller: nameController,
-            style: const TextStyle(
-              color: DSColors.placeholder,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+                const SizedBox(height: DSDimens.sizeXs),
+                TextFormField(
+                  key: nameFieldKey,
+                  controller: nameController,
+                  textAlign: TextAlign.center,
+                  autofocus: true,
+                  cursorColor: DSColors.coralAccent,
+                  style: DSTextStyles.displayLg,
+                  decoration: const InputDecoration(
+                    hintText: 'Caramel',
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    focusedErrorBorder: InputBorder.none,
+                    filled: false,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a cat name';
+                    }
+                    return null;
+                  },
+                  textInputAction: TextInputAction.done,
+                ),
+              ],
             ),
-            decoration: InputDecoration(
-              hintText: 'Enter your cat\'s name',
-              hintStyle: const TextStyle(
-                color: DSColors.placeholder,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-              filled: true,
-              fillColor: DSColors.white,
-              contentPadding: const EdgeInsets.only(
-                left: 24,
-                top: 16,
-                bottom: 16,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-                borderSide: BorderSide(color: DSColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-                borderSide: BorderSide(color: DSColors.primaryFocus),
-              ),
-            ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Please enter a cat name';
-              }
-              return null;
-            },
-            textInputAction: TextInputAction.done,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

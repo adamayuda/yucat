@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 sealed class PaywallEvent extends Equatable {
   const PaywallEvent();
@@ -9,4 +10,25 @@ sealed class PaywallEvent extends Equatable {
 
 class PaywallInitialEvent extends PaywallEvent {
   const PaywallInitialEvent();
+}
+
+class PaywallPackageSelectedEvent extends PaywallEvent {
+  final Package package;
+
+  const PaywallPackageSelectedEvent({required this.package});
+
+  @override
+  List<Object?> get props => [package.identifier];
+}
+
+class PaywallPurchaseEvent extends PaywallEvent {
+  const PaywallPurchaseEvent();
+}
+
+class PaywallRestoreEvent extends PaywallEvent {
+  const PaywallRestoreEvent();
+}
+
+class PaywallDismissEvent extends PaywallEvent {
+  const PaywallDismissEvent();
 }

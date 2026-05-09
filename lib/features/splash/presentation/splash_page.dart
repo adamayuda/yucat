@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/splash/presentation/bloc/splash_bloc.dart';
 
 @RoutePage()
@@ -31,26 +32,34 @@ class _SplashPage extends State<SplashPage> {
   Widget build(BuildContext context) {
     return BlocBuilder<SplashBloc, SplashState>(
       bloc: _bloc,
-      builder: (context, state) => _onStateChangeBuilder(state),
+      builder: (context, state) => const _SplashContent(),
     );
-  }
-
-  Widget _onStateChangeBuilder(SplashState state) {
-    switch (state) {
-      case SplashLoadingState():
-        return const SplashLoading();
-    }
   }
 }
 
-class SplashLoading extends StatelessWidget {
-  const SplashLoading({super.key});
+class _SplashContent extends StatelessWidget {
+  const _SplashContent();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Image.asset('assets/images/icon.png', width: 200, height: 200),
+      backgroundColor: DSColors.tintLavender,
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/icon.png',
+                width: 140,
+                height: 140,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: DSDimens.sizeS),
+              Text('YuCat', style: DSTextStyles.displayHero),
+            ],
+          ),
+        ),
       ),
     );
   }

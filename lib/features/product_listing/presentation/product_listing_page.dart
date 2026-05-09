@@ -4,7 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_listing/presentation/bloc/product_listing_bloc.dart';
-import 'package:yucat/presentation/top_app_bar/top_app_bar.dart';
+import 'package:yucat/features/search_products/presentation/widgets/product_row_card.dart';
+import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/widgets/app_loading_widget.dart';
 
 @RoutePage()
@@ -28,162 +29,81 @@ class _ProductListingPage extends State<ProductListingPage> {
   }
 
   @override
-  void dispose() {
-    // Don't close the bloc here - it's provided at the app level
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProductListingBloc, ProductListingState>(
-      bloc: _bloc,
-      buildWhen: (previous, current) => previous != current,
-      builder: (context, state) => _onStateChangeBuilder(state),
+    return Scaffold(
+      backgroundColor: DSColors.tintLavender,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            DSAppBar.modal(
+              title: widget.brandName,
+              onBack: () => Navigator.of(context).pop(),
+            ),
+            Expanded(
+              child: BlocBuilder<ProductListingBloc, ProductListingState>(
+                bloc: _bloc,
+                buildWhen: (previous, current) => previous != current,
+                builder: (context, state) => switch (state) {
+                  ProductListingLoadingState() => const AppLoadingWidget(),
+                  ProductListingLoadedState(:final products) => _ProductList(
+                      products: products,
+                      onTap: (product) => _bloc.add(
+                        NavigateToProductDetailEvent(
+                          product: product,
+                          context: context,
+                        ),
+                      ),
+                    ),
+                  _ => const SizedBox.shrink(),
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
-  }
-
-  Widget _onStateChangeBuilder(ProductListingState state) {
-    switch (state) {
-      case ProductListingLoadingState():
-        return Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(kToolbarHeight),
-            child: TopAppBar(
-              title: widget.brandName,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          body: const AppLoadingWidget(),
-        );
-      case ProductListingLoadedState():
-        return Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(kToolbarHeight),
-            child: TopAppBar(
-              title: widget.brandName,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          body: Column(
-            children: [
-              if (state.products.isNotEmpty) ...[
-                Expanded(
-                  child: ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: DSDimens.sizeS),
-                    itemCount: state.products.length,
-                    itemBuilder: (context, index) {
-                      return _ProductCard(
-                        product: state.products[index],
-                        onTap: () {
-                          _bloc.add(
-                            NavigateToProductDetailEvent(
-                              product: state.products[index],
-                              context: context,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ],
-          ),
-        );
-
-      default:
-        return Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(kToolbarHeight),
-            child: TopAppBar(
-              title: widget.brandName,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          body: const SizedBox.shrink(),
-        );
-    }
   }
 }
 
-class _ProductCard extends StatelessWidget {
-  final ProductDisplayModel product;
-  final VoidCallback? onTap;
+class _ProductList extends StatelessWidget {
+  final List<ProductDisplayModel> products;
+  final void Function(ProductDisplayModel) onTap;
 
-  const _ProductCard({required this.product, this.onTap});
+  const _ProductList({required this.products, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(DSDimens.sizeS),
-      child: Container(
-        margin: EdgeInsets.only(bottom: DSDimens.sizeXxs),
-        decoration: BoxDecoration(
-          color: DSColors.white,
-          borderRadius: BorderRadius.circular(DSDimens.sizeS),
+    if (products.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(DSDimens.sizeL),
+          child: Text(
+            'No products found for this brand.',
+            textAlign: TextAlign.center,
+            style: DSTextStyles.bodyMd,
+          ),
         ),
-        child: ListTile(
-          onTap: onTap,
-          contentPadding: EdgeInsets.all(DSDimens.sizeXxs),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(DSDimens.sizeS),
-          ),
-          splashColor: DSColors.lightGrey.withOpacity(0.3),
-          leading: Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: DSColors.lightGrey,
-              borderRadius: BorderRadius.circular(DSDimens.sizeS),
-            ),
-            child: (product.imageUrl != null && product.imageUrl!.isNotEmpty)
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(DSDimens.sizeS),
-                    child: Image.network(product.imageUrl!, fit: BoxFit.cover),
-                  )
-                : Icon(Icons.image, color: DSColors.darkGrey),
-          ),
-          title: Text(
-            product.name,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: DSDimens.sizeXxxs),
-              Text(
-                product.brand,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: DSColors.darkGrey),
-              ),
-              SizedBox(height: DSDimens.sizeXxxs),
-              Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: product.ratingColor.color,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  SizedBox(width: DSDimens.sizeXs),
-                  Text(
-                    '${product.scoreDisplay} ${product.ratingText}',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: DSColors.black),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          trailing: Icon(Icons.chevron_right, color: DSColors.darkGrey),
-        ),
+      );
+    }
+    final bottomInset = MediaQuery.of(context).padding.bottom + DSDimens.sizeL;
+    return ListView.separated(
+      padding: EdgeInsets.fromLTRB(
+        DSDimens.sizeL,
+        DSDimens.sizeXxs,
+        DSDimens.sizeL,
+        bottomInset,
       ),
+      itemCount: products.length,
+      separatorBuilder: (_, __) => const SizedBox(height: DSDimens.sizeXs),
+      itemBuilder: (context, index) {
+        final product = products[index];
+        return ProductRowCard(
+          product: product,
+          onTap: () => onTap(product),
+        );
+      },
     );
   }
 }

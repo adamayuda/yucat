@@ -1,12 +1,14 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/home/bloc/home_bloc.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
-import 'package:yucat/features/home/widgets/home_loaded_page.dart';
+import 'package:yucat/features/home/widgets/home_dashboard_page.dart';
 import 'package:yucat/features/home/widgets/home_loading_page.dart';
+import 'package:yucat/presentation/components/ds_state_view.dart';
 
 @RoutePage()
 class HomePage extends StatefulWidget {
@@ -32,6 +34,19 @@ class _HomePage extends State<HomePage> {
     _bloc.close();
   }
 
+  void _openScanner() {
+    context.router.push(const ScannerRoute());
+  }
+
+  void _openSearch() {
+    final tabsRouter = AutoTabsRouter.of(context);
+    tabsRouter.setActiveIndex(0);
+  }
+
+  void _openPaywall() {
+    context.router.push(const PaywallRoute());
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
@@ -44,60 +59,33 @@ class _HomePage extends State<HomePage> {
     switch (state) {
       case HomeLoadingState():
         return Scaffold(
-          backgroundColor: DSColors.white,
+          backgroundColor: DSColors.tintLavender,
           body: const HomeLoadingWidget(),
         );
-      case HomeLoadedState():
-        return HomeLoadedPage(
-          onImageCaptured: (imageBase64, mimeType) {
-            _bloc.add(ImageCapturedEvent(
-              imageBase64: imageBase64,
-              mimeType: mimeType,
-              context: context,
-            ));
-          },
+      case HomeLoadedState(
+          :final scansRemaining,
+          :final maxFreeScans,
+          :final isPremium,
+          :final primaryCatName,
+          :final primaryCatPhotoUrl,
+        ):
+        return HomeDashboardPage(
+          scansRemaining: scansRemaining,
+          maxFreeScans: maxFreeScans,
+          isPremium: isPremium,
+          primaryCatName: primaryCatName,
+          primaryCatPhotoUrl: primaryCatPhotoUrl,
+          onScanTap: _openScanner,
+          onSearchTap: _openSearch,
+          onUpgradeTap: _openPaywall,
         );
       case HomeErrorState():
         return Scaffold(
-          backgroundColor: DSColors.white,
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/Illustrations/Error.gif',
-                    width: 200,
-                    height: 200,
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    state.message,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: DSColors.darkGrey,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => _bloc.add(HomeInitialEvent()),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: DSColors.primary,
-                        foregroundColor: DSColors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text('Try Again'),
-                    ),
-                  ),
-                ],
-              ),
+          backgroundColor: DSColors.tintLavender,
+          body: SafeArea(
+            child: DSStateView.error(
+              body: state.message,
+              onCtaPressed: () => _bloc.add(HomeInitialEvent()),
             ),
           ),
         );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/presentation/components/ds_state_view.dart';
 
 class CatListingErrorWidget extends StatelessWidget {
   final String message;
@@ -13,25 +13,10 @@ class CatListingErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/Illustrations/Error.gif',
-            width: 200,
-            height: 200,
-          ),
-          SizedBox(height: DSDimens.sizeM),
-          Text(
-            'Error: $message',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: Colors.red),
-          ),
-          SizedBox(height: DSDimens.sizeM),
-          ElevatedButton(onPressed: onPressed, child: const Text('Retry')),
-        ],
+    return SafeArea(
+      child: DSStateView.error(
+        body: message,
+        onCtaPressed: onPressed,
       ),
     );
   }

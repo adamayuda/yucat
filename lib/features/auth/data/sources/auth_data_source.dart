@@ -1,11 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthFirebaseDataSource {
   Future<void> signInAnonymously() async {
     try {
       await FirebaseAuth.instance.signInAnonymously();
     } on FirebaseAuthException catch (e) {
-      print("error");
+      debugPrint('signInAnonymously error: $e');
     }
   }
 

@@ -6,11 +6,13 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/search_products/presentation/bloc/search_bloc.dart';
-import 'package:yucat/features/search_products/presentation/widgets/search_discover_loaded_page.dart';
-import 'package:yucat/features/search_products/presentation/widgets/search_discover_loading_page.dart';
-import 'package:yucat/service_locator.dart';
-import 'package:yucat/presentation/top_app_bar/top_app_bar.dart';
+import 'package:yucat/features/search_products/presentation/widgets/product_row_card.dart';
+import 'package:yucat/features/search_products/presentation/widgets/search_brand_strip.dart';
+import 'package:yucat/features/search_products/presentation/widgets/search_text_field.dart';
+import 'package:yucat/presentation/components/ds_app_bar.dart';
+import 'package:yucat/presentation/components/ds_state_view.dart';
 import 'package:yucat/presentation/widgets/app_loading_widget.dart';
+import 'package:yucat/service_locator.dart';
 
 @RoutePage()
 class SearchPage extends StatefulWidget {
@@ -38,6 +40,10 @@ class _SearchPage extends State<SearchPage> {
     _bloc.close();
   }
 
+  void _onQueryChanged(String value) {
+    _bloc.add(SearchQueryEvent(query: value));
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<SearchBloc, SearchState>(
@@ -46,7 +52,6 @@ class _SearchPage extends State<SearchPage> {
           current is SearchNavigateToProductDetailState,
       listener: (context, state) {
         if (state is SearchNavigateToProductDetailState) {
-          // Convert ProductEntity to ProductModel with all nutritional data
           final productEntityToModelMapper = sl<ProductEntityToModelMapper>();
           final productDetailModel = productEntityToModelMapper(
             state.productEntity,
@@ -59,320 +64,120 @@ class _SearchPage extends State<SearchPage> {
         buildWhen: (previous, current) =>
             previous != current &&
             current is! SearchNavigateToProductDetailState,
-        builder: (context, state) => _onStateChangeBuilder(state),
+        builder: (context, state) => _buildScaffold(state),
       ),
     );
   }
 
-  Widget _onStateChangeBuilder(SearchState state) {
-    switch (state) {
-      case SearchDiscoverLoadingState():
-        return const SearchDiscoverLoadingPage();
-      case SearchDiscoverLoadedState(:final brands):
-        return Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(kToolbarHeight),
-            child: TopAppBar(
-              title: 'Search',
-              hideBackButton: true,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  Widget _buildScaffold(SearchState state) {
+    return Scaffold(
+      backgroundColor: DSColors.tintLavender,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            DSAppBar.tab(title: 'Search'),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                DSDimens.sizeL,
+                0,
+                DSDimens.sizeL,
+                DSDimens.sizeS,
+              ),
+              child: SearchTextField(
+                controller: _searchController,
+                onChanged: _onQueryChanged,
+              ),
             ),
-          ),
-          body: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(
-                  left: DSDimens.sizeS,
-                  right: DSDimens.sizeS,
-                  bottom: DSDimens.sizeS,
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search for a cat food',
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  onChanged: (value) {
-                    _bloc.add(SearchQueryEvent(query: value));
-                  },
-                ),
-              ),
-              SearchDiscoverLoadedPage(brands: brands),
-            ],
-          ),
-        );
-      case SearchLoadingState():
-        return Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(kToolbarHeight),
-            child: TopAppBar(
-              title: 'Search',
-              hideBackButton: true,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          body: const AppLoadingWidget(),
-        );
-      case SearchLoadedState():
-        return Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(kToolbarHeight),
-            child: TopAppBar(
-              title: 'Search',
-              hideBackButton: true,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ),
-          body: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(
-                  left: DSDimens.sizeS,
-                  right: DSDimens.sizeS,
-                  bottom: DSDimens.sizeS,
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search for a cat food',
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  onChanged: (value) {
-                    _bloc.add(SearchQueryEvent(query: value));
-                  },
-                ),
-              ),
-              if (state.isLoading)
-                const Expanded(child: AppLoadingWidget())
-              else if (state.products.isNotEmpty) ...[
-                Expanded(
-                  child: ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: DSDimens.sizeS),
-                    itemCount: state.products.length,
-                    itemBuilder: (context, index) {
-                      return _ProductCard(
-                        product: state.products[index],
-                        onTap: () {
-                          _bloc.add(
-                            NavigateToProductDetailEvent(
-                              product: state.products[index],
-                              context: context,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ],
-          ),
-        );
-      case SearchHiddenState():
-        // Show search bar even in hidden state
-        return Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(kToolbarHeight),
-            child: TopAppBar(title: '', hideBackButton: true),
-          ),
-          body: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(DSDimens.sizeS),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search for a cat food',
-                    filled: true,
-                    prefixIcon: const Icon(Icons.search),
-                  ),
-                  onChanged: (value) {
-                    _bloc.add(SearchQueryEvent(query: value));
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      case SearchErrorState():
-        return Scaffold(
-          // appBar: PreferredSize(
-          //   preferredSize: Size.fromHeight(kToolbarHeight),
-          //   child: TopAppBar(title: 'Search', hideBackButton: true),
-          // ),
-          body: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(DSDimens.sizeS),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search for a cat food',
-                    filled: true,
-                    prefixIcon: const Icon(Icons.search),
-                  ),
-                  onChanged: (value) {
-                    _bloc.add(SearchQueryEvent(query: value));
-                  },
-                ),
-              ),
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/images/Illustrations/Error.gif',
-                        width: 200,
-                        height: 200,
-                      ),
-                      SizedBox(height: 16),
-                      Text('Error occurred. Please try again.'),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      default:
-        // Default case - show search bar
-        return Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(kToolbarHeight),
-            child: TopAppBar(title: '', hideBackButton: true),
-          ),
-          body: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(DSDimens.sizeS),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search for a cat food',
-                    filled: true,
-                    prefixIcon: const Icon(Icons.search),
-                  ),
-                  onChanged: (value) {
-                    _bloc.add(SearchQueryEvent(query: value));
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-    }
+            Expanded(child: _buildBody(state)),
+          ],
+        ),
+      ),
+    );
   }
 
-  // void _dispatch(SearchEvent event) => _bloc.add(event);
+  Widget _buildBody(SearchState state) {
+    return switch (state) {
+      SearchDiscoverLoadingState() => const AppLoadingWidget(),
+      SearchDiscoverLoadedState(:final brands) => SearchBrandStrip(
+          brands: brands,
+        ),
+      SearchLoadingState() => const AppLoadingWidget(),
+      SearchLoadedState(:final isLoading, :final products) => _ResultsList(
+          isLoading: isLoading,
+          products: products,
+          onTap: (product) => _bloc.add(
+            NavigateToProductDetailEvent(product: product, context: context),
+          ),
+        ),
+      SearchErrorState() => _SearchError(
+          onRetry: () => _bloc.add(SearchInitialEvent()),
+        ),
+      _ => const SizedBox.shrink(),
+    };
+  }
 }
 
-class _ProductCard extends StatelessWidget {
-  final ProductDisplayModel product;
-  final VoidCallback? onTap;
+class _ResultsList extends StatelessWidget {
+  final bool isLoading;
+  final List<ProductDisplayModel> products;
+  final void Function(ProductDisplayModel) onTap;
 
-  const _ProductCard({required this.product, this.onTap});
+  const _ResultsList({
+    required this.isLoading,
+    required this.products,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(DSDimens.sizeS),
-      child: Container(
-        margin: EdgeInsets.only(bottom: DSDimens.sizeXxs),
-        decoration: BoxDecoration(
-          color: DSColors.white,
-          borderRadius: BorderRadius.circular(DSDimens.sizeS),
+    if (isLoading) {
+      return const AppLoadingWidget();
+    }
+    if (products.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(DSDimens.sizeL),
+          child: Text(
+            'No products match your search.',
+            textAlign: TextAlign.center,
+            style: DSTextStyles.bodyMd,
+          ),
         ),
-        child: ListTile(
-          onTap: onTap,
-          contentPadding: EdgeInsets.all(DSDimens.sizeXxs),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(DSDimens.sizeS),
-          ),
-          splashColor: DSColors.lightGrey.withOpacity(0.3),
-          leading: Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: DSColors.lightGrey,
-              borderRadius: BorderRadius.circular(DSDimens.sizeS),
-            ),
-            child: (product.imageUrl != null && product.imageUrl!.isNotEmpty)
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(DSDimens.sizeS),
-                    child: Image.network(product.imageUrl!, fit: BoxFit.cover),
-                  )
-                : Icon(Icons.image, color: DSColors.darkGrey),
-          ),
-          title: Text(
-            product.name,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: DSDimens.sizeXxxs),
-              Text(
-                product.brand,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: DSColors.darkGrey),
-              ),
-              SizedBox(height: DSDimens.sizeXxxs),
-              Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: product.ratingColor.color,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  SizedBox(width: DSDimens.sizeXs),
-                  Text(
-                    '${product.scoreDisplay} ${product.ratingText}',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: DSColors.black),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          trailing: Icon(Icons.chevron_right, color: DSColors.darkGrey),
-        ),
+      );
+    }
+    final bottomInset = MediaQuery.of(context).padding.bottom + 96;
+    return ListView.separated(
+      padding: EdgeInsets.fromLTRB(
+        DSDimens.sizeL,
+        DSDimens.sizeXxs,
+        DSDimens.sizeL,
+        bottomInset,
       ),
+      itemCount: products.length,
+      separatorBuilder: (_, __) => const SizedBox(height: DSDimens.sizeXs),
+      itemBuilder: (context, index) {
+        final product = products[index];
+        return ProductRowCard(
+          product: product,
+          onTap: () => onTap(product),
+        );
+      },
+    );
+  }
+}
+
+class _SearchError extends StatelessWidget {
+  final VoidCallback onRetry;
+
+  const _SearchError({required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return DSStateView.error(
+      body: 'Something went wrong while searching.',
+      onCtaPressed: onRetry,
     );
   }
 }

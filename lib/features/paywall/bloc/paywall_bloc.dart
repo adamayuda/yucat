@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
-import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
@@ -19,161 +18,198 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   PaywallBloc({
     required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
     required LogEventUsecase logEventUsecase,
-  }) : _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
-       _logEventUsecase = logEventUsecase,
-       super(const PaywallInitialState()) {
-    on<PaywallInitialEvent>(_onPaywallInitialEvent);
+  })  : _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
+        _logEventUsecase = logEventUsecase,
+        super(const PaywallInitialState()) {
+    on<PaywallInitialEvent>(_onInitial);
+    on<PaywallPackageSelectedEvent>(_onPackageSelected);
+    on<PaywallPurchaseEvent>(_onPurchase);
+    on<PaywallRestoreEvent>(_onRestore);
+    on<PaywallDismissEvent>(_onDismiss);
   }
 
-  Future<void> _onPaywallInitialEvent(
+  Future<void> _onInitial(
     PaywallInitialEvent event,
     Emitter<PaywallState> emit,
   ) async {
-    debugPrint('PaywallBloc _onPaywallInitialEvent');
-
-    // Only show paywall on iOS
     if (!Platform.isIOS) {
-      debugPrint('PaywallBloc: Not iOS, skipping paywall');
-      emit(
-        const PaywallErrorState(message: 'Paywall is only available on iOS'),
-      );
+      emit(const PaywallErrorState(
+        message: 'Subscriptions are only available on iOS.',
+      ));
       return;
     }
 
     emit(const PaywallLoadingState());
 
+    if (await _hasActiveSubscriptionUseCase()) {
+      emit(const PaywallAlreadySubscribedState());
+      return;
+    }
+
+    final Offerings offerings;
     try {
-      debugPrint('PaywallBloc: Checking subscription status...');
-      final hasActiveSubscription = await _hasActiveSubscriptionUseCase();
-      debugPrint('PaywallBloc: hasActiveSubscription=$hasActiveSubscription');
+      offerings = await Purchases.getOfferings();
+    } on PlatformException catch (e) {
+      emit(PaywallErrorState(message: e.message ?? 'Could not load plans.'));
+      return;
+    }
 
-      debugPrint('PaywallBloc: Fetching offerings...');
-      Offerings? offerings;
-      try {
-        offerings = await Purchases.getOfferings();
-        debugPrint('PaywallBloc: Offerings fetched: ${offerings?.current?.identifier}');
-      } on PlatformException catch (e) {
-        debugPrint('PaywallBloc: PlatformException getting offerings: $e');
-        emit(PaywallErrorState(message: e.message ?? 'Unknown error occurred'));
-        return;
-      }
+    final current = offerings.current;
+    if (current == null || current.availablePackages.isEmpty) {
+      emit(const PaywallErrorState(
+        message: 'No subscription plans are available right now.',
+      ));
+      return;
+    }
 
-      // ignore: avoid_null_checks_equality_operators
-      if (offerings == null) {
-        debugPrint('PaywallBloc: Offerings is null');
-        emit(
-          const PaywallErrorState(
-            message: 'No offerings available at this time',
-          ),
-        );
-        return;
-      }
+    final packages = current.availablePackages;
+    final selected = current.annual ?? current.monthly ?? packages.first;
 
-      final currentOffering = offerings.current;
-      if (currentOffering == null) {
-        debugPrint('PaywallBloc: Current offering is null');
-        emit(
-          const PaywallErrorState(
-            message: 'No offerings available at this time',
-          ),
-        );
-        return;
-      } else if (currentOffering.availablePackages.isEmpty) {
-        debugPrint('PaywallBloc: No available packages');
-        emit(
-          const PaywallErrorState(
-            message:
-                'No subscription packages available. Please configure products in RevenueCat dashboard.',
-          ),
-        );
-        return;
-      } else {
-        // Current offering is available with packages, show paywall via RevenueCatUI
-        debugPrint('PaywallBloc: Presenting paywall...');
-        _paywallShownTime = DateTime.now();
+    _paywallShownTime = DateTime.now();
+    _logEventUsecase.call(
+      eventName: 'Paywall Shown',
+      properties: {
+        'trigger': 'manual',
+        'offering': current.identifier,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
 
+    emit(PaywallLoadedState(
+      currentOffering: current,
+      packages: packages,
+      selectedPackage: selected,
+    ));
+  }
+
+  void _onPackageSelected(
+    PaywallPackageSelectedEvent event,
+    Emitter<PaywallState> emit,
+  ) {
+    final current = state;
+    if (current is! PaywallLoadedState) return;
+    emit(current.copyWith(selectedPackage: event.package));
+  }
+
+  Future<void> _onPurchase(
+    PaywallPurchaseEvent event,
+    Emitter<PaywallState> emit,
+  ) async {
+    final current = state;
+    if (current is! PaywallLoadedState || current.isPurchasing) return;
+
+    emit(current.copyWith(isPurchasing: true));
+
+    try {
+      await Purchases.purchase(
+        PurchaseParams.package(current.selectedPackage),
+      );
+      await Purchases.syncPurchases();
+
+      final isActive =
+          await _hasActiveSubscriptionUseCase(forceRefresh: true);
+
+      if (isActive) {
         _logEventUsecase.call(
-          eventName: 'Paywall Shown',
+          eventName: 'Subscription Completed',
           properties: {
-            'trigger': 'manual',
+            'package_id': current.selectedPackage.identifier,
+            'package_type': current.selectedPackage.packageType.name,
+            'price': current.selectedPackage.storeProduct.price,
+            'currency':
+                current.selectedPackage.storeProduct.currencyCode,
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
+        _logPaywallDismissed(ctaTapped: true);
+        emit(const PaywallSuccessState(purchasedSubscription: true));
+      } else {
+        emit(current.copyWith(
+          isPurchasing: false,
+          transientError: 'Purchase did not complete. Please try again.',
+          errorTick: current.errorTick + 1,
+        ));
+      }
+    } on PlatformException catch (e) {
+      final code = PurchasesErrorHelper.getErrorCode(e);
+      if (code == PurchasesErrorCode.purchaseCancelledError) {
+        emit(current.copyWith(isPurchasing: false));
+        return;
+      }
+      emit(current.copyWith(
+        isPurchasing: false,
+        transientError: e.message ?? 'Purchase failed. Please try again.',
+        errorTick: current.errorTick + 1,
+      ));
+    } catch (e) {
+      debugPrint('PaywallBloc.purchase error: $e');
+      emit(current.copyWith(
+        isPurchasing: false,
+        transientError: 'Something went wrong. Please try again.',
+        errorTick: current.errorTick + 1,
+      ));
+    }
+  }
 
-        final paywallResult = await RevenueCatUI.presentPaywall();
-        debugPrint('Paywall result: $paywallResult');
+  Future<void> _onRestore(
+    PaywallRestoreEvent event,
+    Emitter<PaywallState> emit,
+  ) async {
+    final current = state;
+    if (current is! PaywallLoadedState || current.isPurchasing) return;
 
-        final timeViewedSeconds = _paywallShownTime != null
-            ? DateTime.now().difference(_paywallShownTime!).inSeconds
-            : null;
+    emit(current.copyWith(isPurchasing: true));
 
-        // After paywall is dismissed, sync and check if user purchased subscription
-        try {
-          await Purchases.syncPurchases();
+    try {
+      await Purchases.restorePurchases();
+      final isActive =
+          await _hasActiveSubscriptionUseCase(forceRefresh: true);
 
-          final hasActiveSubscription = await _hasActiveSubscriptionUseCase(
-            forceRefresh: true,
-          );
-
-          if (hasActiveSubscription) {
-            _logEventUsecase.call(
-              eventName: 'Subscription Completed',
-              properties: {
-                'timestamp': DateTime.now().toIso8601String(),
-              },
-            );
-          }
-
-          _logEventUsecase.call(
-            eventName: 'Paywall Dismissed',
-            properties: {
-              'time_viewed_seconds': timeViewedSeconds,
-              'cta_tapped': hasActiveSubscription,
-              'timestamp': DateTime.now().toIso8601String(),
-            },
-          );
-
-          emit(
-            PaywallSuccessState(purchasedSubscription: hasActiveSubscription),
-          );
-        } catch (e) {
-          debugPrint('Error checking subscription after paywall: $e');
-          try {
-            final hasActiveSubscription = await _hasActiveSubscriptionUseCase(
-              forceRefresh: true,
-            );
-
-            _logEventUsecase.call(
-              eventName: 'Paywall Dismissed',
-              properties: {
-                'time_viewed_seconds': timeViewedSeconds,
-                'cta_tapped': hasActiveSubscription,
-                'timestamp': DateTime.now().toIso8601String(),
-              },
-            );
-
-            emit(
-              PaywallSuccessState(purchasedSubscription: hasActiveSubscription),
-            );
-          } catch (e2) {
-            debugPrint('Error getting customer info: $e2');
-
-            _logEventUsecase.call(
-              eventName: 'Paywall Dismissed',
-              properties: {
-                'time_viewed_seconds': timeViewedSeconds,
-                'cta_tapped': false,
-                'timestamp': DateTime.now().toIso8601String(),
-              },
-            );
-
-            emit(PaywallSuccessState(purchasedSubscription: false));
-          }
-        }
+      if (isActive) {
+        _logEventUsecase.call(
+          eventName: 'Subscription Restored',
+          properties: {
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
+        _logPaywallDismissed(ctaTapped: true);
+        emit(const PaywallSuccessState(purchasedSubscription: true));
+      } else {
+        emit(current.copyWith(
+          isPurchasing: false,
+          transientError: 'No active subscription found.',
+          errorTick: current.errorTick + 1,
+        ));
       }
     } catch (e) {
-      debugPrint('Error showing paywall: $e');
-      emit(PaywallErrorState(message: 'Error: ${e.toString()}'));
+      debugPrint('PaywallBloc.restore error: $e');
+      emit(current.copyWith(
+        isPurchasing: false,
+        transientError: 'Could not restore purchases. Please try again.',
+        errorTick: current.errorTick + 1,
+      ));
     }
+  }
+
+  void _onDismiss(
+    PaywallDismissEvent event,
+    Emitter<PaywallState> emit,
+  ) {
+    _logPaywallDismissed(ctaTapped: false);
+    emit(const PaywallSuccessState(purchasedSubscription: false));
+  }
+
+  void _logPaywallDismissed({required bool ctaTapped}) {
+    final timeViewedSeconds = _paywallShownTime != null
+        ? DateTime.now().difference(_paywallShownTime!).inSeconds
+        : null;
+    _logEventUsecase.call(
+      eventName: 'Paywall Dismissed',
+      properties: {
+        'time_viewed_seconds': timeViewedSeconds,
+        'cta_tapped': ctaTapped,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
   }
 }

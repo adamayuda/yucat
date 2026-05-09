@@ -1,11 +1,20 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/onboarding/bloc/onboarding_bloc.dart';
-import 'package:yucat/features/onboarding/widgets/onboarding_content.dart';
+import 'package:yucat/features/onboarding/widgets/add_cat_intro_screen.dart';
+import 'package:yucat/features/onboarding/widgets/attribution_details_screen.dart';
+import 'package:yucat/features/onboarding/widgets/attribution_screen.dart';
+import 'package:yucat/features/onboarding/widgets/domain_pitch_screen.dart';
+import 'package:yucat/features/onboarding/widgets/social_proof_screen.dart';
+import 'package:yucat/features/onboarding/widgets/success_screen.dart';
+import 'package:yucat/features/onboarding/widgets/value_prop_slide.dart';
+import 'package:yucat/features/onboarding/widgets/welcome_screen.dart';
+import 'package:yucat/features/onboarding/widgets/why_yucat_screen.dart';
+import 'package:yucat/presentation/components/ds_dot_indicator.dart';
+import 'package:yucat/presentation/components/ds_pill_button.dart';
+import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
 @RoutePage()
 class OnBoardingPage extends StatefulWidget {
@@ -17,8 +26,13 @@ class OnBoardingPage extends StatefulWidget {
 
 class _OnBoardingPage extends State<OnBoardingPage> {
   late OnBoardingBloc _bloc;
-
   final PageController _pageController = PageController();
+
+  static const _carouselNames = [
+    'cat_product_scanner',
+    'personalized_for_your_cat',
+    'browse_catalog',
+  ];
 
   @override
   void initState() {
@@ -39,158 +53,147 @@ class _OnBoardingPage extends State<OnBoardingPage> {
     return BlocBuilder<OnBoardingBloc, OnBoardingState>(
       bloc: _bloc,
       buildWhen: (previous, current) => previous != current,
-      builder: (context, state) => _onStateChangeBuilder(state),
+      builder: (context, state) => switch (state) {
+        OnBoardingLoadingState() => const SizedBox.shrink(),
+        OnBoardingReadyState(
+          :final phase,
+          :final currentPage,
+          :final selectedSource,
+        ) =>
+          _buildPhase(phase, currentPage, selectedSource),
+      },
     );
   }
 
-  Widget _onStateChangeBuilder(OnBoardingState state) {
-    switch (state) {
-      case OnBoardingLoadingState():
-        return const SizedBox.shrink();
-      case OnBoardingReadyState(:final currentPage):
-        return _buildOnboarding(currentPage);
+  Widget _buildPhase(
+    OnBoardingPhase phase,
+    int currentPage,
+    String? selectedSource,
+  ) {
+    switch (phase) {
+      case OnBoardingPhase.welcome:
+        return WelcomeScreen(
+          onGetStarted: () => _bloc.add(const OnBoardingGetStartedEvent()),
+          onRestorePurchases: () =>
+              _bloc.add(const OnBoardingRestorePurchasesEvent()),
+        );
+      case OnBoardingPhase.valueCarousel:
+        return _buildCarousel(currentPage);
+      case OnBoardingPhase.attribution:
+        return AttributionScreen(
+          initialSelection: selectedSource,
+          onSelect: (source) =>
+              _bloc.add(OnBoardingAttributionSelectedEvent(source)),
+          onSkip: () => _bloc.add(const OnBoardingAttributionSkippedEvent()),
+          onBack: () => _bloc.add(const OnBoardingPreviousPhaseEvent()),
+        );
+      case OnBoardingPhase.attributionDetails:
+        return AttributionDetailsScreen(
+          onSubmit: (text) =>
+              _bloc.add(OnBoardingAttributionDetailsSubmittedEvent(text)),
+          onBack: () => _bloc.add(const OnBoardingPreviousPhaseEvent()),
+        );
+      case OnBoardingPhase.socialProof:
+        return SocialProofScreen(
+          onNext: () => _bloc.add(const OnBoardingAdvancePhaseEvent()),
+          onBack: () => _bloc.add(const OnBoardingPreviousPhaseEvent()),
+        );
+      case OnBoardingPhase.whyYucat:
+        return WhyYucatScreen(
+          onNext: () => _bloc.add(const OnBoardingAdvancePhaseEvent()),
+          onBack: () => _bloc.add(const OnBoardingPreviousPhaseEvent()),
+        );
+      case OnBoardingPhase.domainPitch:
+        return DomainPitchScreen(
+          onNext: () => _bloc.add(const OnBoardingAdvancePhaseEvent()),
+          onBack: () => _bloc.add(const OnBoardingPreviousPhaseEvent()),
+        );
+      case OnBoardingPhase.addCatIntro:
+        return AddCatIntroScreen(
+          onAddCat: () =>
+              _bloc.add(OnBoardingCompletedEvent(context: context)),
+          onBack: () => _bloc.add(const OnBoardingPreviousPhaseEvent()),
+        );
+      case OnBoardingPhase.success:
+        return SuccessScreen(
+          onStart: () =>
+              _bloc.add(OnBoardingFinalizedEvent(context: context)),
+        );
     }
   }
 
-  Future<void> _onGetStarted() async {
-    _bloc.add(OnBoardingCompletedEvent(context: context));
-  }
+  Widget _buildCarousel(int currentPage) {
+    final isLast = currentPage == _carouselNames.length - 1;
 
-  void _onSkip() {
-    _bloc.add(OnBoardingSkipEvent(context: context));
-  }
-
-  void _onPageChanged(int page) {
-    const pageNames = [
-      'welcome',
-      'cat_product_scanner',
-      'join_community',
-      'add_new_cat',
-    ];
-    final pageName = page < pageNames.length
-        ? pageNames[page]
-        : 'onboarding_$page';
-    _bloc.add(OnBoardingPageChangedEvent(page, pageName));
-  }
-
-  Widget _buildOnboarding(int currentPage) {
-    final theme = Theme.of(context);
-
-    final pages = [
-      const OnboardingContent(
-        image: 'assets/images/Illustrations/Hey, welcome!.gif',
-        title: 'Hey, welcome!',
-        subtitle:
-            'Scan any cat food barcode to instantly see ingredients and nutrition quality.',
-      ),
-      const OnboardingContent(
+    final slides = [
+      const ValuePropSlide(
         image: 'assets/images/Illustrations/Scanning barcode_1.gif',
-        title: 'Cat product scanner',
-        subtitle: "Scan any cat food barcode and see what's inside",
+        title: 'Scan any cat food',
+        subtitle: 'Point your camera at any barcode and see what\'s inside.',
+        tint: DSColors.tintAsh,
       ),
-      const OnboardingContent(
+      const ValuePropSlide(
         image: 'assets/images/Illustrations/Join the Community.gif',
-        title: 'Join the Community',
+        title: 'Personalized\nto your cat',
         subtitle:
-            "Create your cat's profile to explore trusted product ratings and connect with passionate cat owners.",
+            'Assessment matches your cat\'s age, weight, breed, and health.',
+        tint: DSColors.tintMint,
       ),
-      const OnboardingContent(
+      const ValuePropSlide(
         image: 'assets/images/Illustrations/Add new cat.gif',
-        title: 'Add New Cat',
-        subtitle: "Let's create your profile. This will ony take a minute!",
+        title: 'Or browse\nthe catalog',
+        subtitle: 'Search thousands of products by brand or name.',
+        tint: DSColors.tintSand,
       ),
     ];
 
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
+    final activeTint = [
+      DSColors.tintAsh,
+      DSColors.tintMint,
+      DSColors.tintSand,
+    ][currentPage];
+
+    return AnimatedContainer(
+      duration: DSMotion.durMed,
+      curve: DSMotion.curveStandard,
+      color: activeTint,
+      child: OnboardingScaffold(
+        background: activeTint,
+        onBack: currentPage == 0
+            ? () => _bloc.add(const OnBoardingBackToWelcomeEvent())
+            : () => _pageController.previousPage(
+                  duration: DSMotion.durMed,
+                  curve: DSMotion.curveStandard,
+                ),
+        footer: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Column(
-              children: [
-                Expanded(
-                  child: PageView(
-                    controller: _pageController,
-                    onPageChanged: (page) => _onPageChanged(page),
-                    children: pages,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: DSDimens.sizeL),
-                  child: SizedBox(
-                    height: 60,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        if (currentPage == pages.length - 1)
-                          SizedBox(
-                            width: double.infinity,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: DSDimens.sizeL,
-                              ),
-                              child: ElevatedButton(
-                                onPressed: _onGetStarted,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: DSColors.primary,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: DSDimens.sizeS,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      DSDimens.sizeXxs,
-                                    ),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Start',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SmoothPageIndicator(
-                                controller: _pageController,
-                                count: pages.length,
-                                effect: const WormEffect(
-                                  dotColor: DSColors.primaryMuted,
-                                  activeDotColor: DSColors.primary,
-                                  dotHeight: 14,
-                                  dotWidth: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+            DSDotIndicator(
+              controller: _pageController,
+              count: slides.length,
             ),
-            if (currentPage == pages.length - 1)
-              Positioned(
-                top: DSDimens.sizeS,
-                right: DSDimens.sizeL,
-                child: TextButton(
-                  onPressed: _onSkip,
-                  child: Text(
-                    'Skip',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: 16,
-                      color: DSColors.bodyText,
-                    ),
-                  ),
-                ),
-              ),
+            const SizedBox(height: DSDimens.sizeL),
+            DSPillButton(
+              label: isLast ? 'Continue' : 'Next',
+              onPressed: () {
+                if (isLast) {
+                  _bloc.add(const OnBoardingValueCarouselCompletedEvent());
+                } else {
+                  _pageController.nextPage(
+                    duration: DSMotion.durMed,
+                    curve: DSMotion.curveStandard,
+                  );
+                }
+              },
+            ),
           ],
+        ),
+        child: PageView(
+          controller: _pageController,
+          onPageChanged: (page) => _bloc.add(
+            OnBoardingPageChangedEvent(page, _carouselNames[page]),
+          ),
+          children: slides,
         ),
       ),
     );

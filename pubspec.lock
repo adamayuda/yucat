@@ -1000,14 +1000,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "9.9.6"
-  purchases_ui_flutter:
-    dependency: "direct main"
-    description:
-      name: purchases_ui_flutter
-      sha256: "3de810f74a77adb37f69a7b037576c56079fcfa6c27d30648c666ff922e16719"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.9.6"
   shared_preferences:
     dependency: "direct main"
     description:

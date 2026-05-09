@@ -1,16 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:yucat/config/themes/theme.dart';
-import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
 import 'package:yucat/features/cat_create/mappers/cat_model_to_create_mapper.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_create_model.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
-import 'package:yucat/features/cat_create/widgets/stepper_bar_widget.dart';
-import 'package:yucat/features/cat_create/widgets/stepper_bottom_widget.dart';
 import 'package:yucat/features/cat_create/widgets/steps/activity_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/age_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/breed_step.dart';
@@ -20,7 +15,10 @@ import 'package:yucat/features/cat_create/widgets/steps/gender_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/health_conditions_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/neutered_status_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/profile_photo_step.dart';
+import 'package:yucat/presentation/components/wizard_step_shell.dart';
 import 'package:yucat/service_locator.dart';
+
+const _totalSteps = 9;
 
 @RoutePage()
 class CreateCatPage extends StatefulWidget {
@@ -68,13 +66,11 @@ class _CreateCatPageState extends State<CreateCatPage> {
   ];
 
   late CatCreateBloc _bloc;
-  late CurrentUserUsecase _currentUserUsecase;
 
   @override
   void initState() {
     super.initState();
     _bloc = context.read<CatCreateBloc>();
-    _currentUserUsecase = sl<CurrentUserUsecase>();
 
     // Convert CatModel to CatCreateModel if editing
     CatCreateModel? catCreateModel;
@@ -172,56 +168,28 @@ class _CreateCatPageState extends State<CreateCatPage> {
     required CatCreateModel cat,
     required bool isSubmitting,
   }) {
-    return Scaffold(
-      backgroundColor: DSColors.white,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight * 1.5 + 8),
-        child: AppBar(
-          backgroundColor: DSColors.white,
-          scrolledUnderElevation: 0,
-          surfaceTintColor: Colors.transparent,
-          automaticallyImplyLeading: false,
-          titleSpacing: 0,
-          flexibleSpace: SafeArea(
-            child: SizedBox(
-              width: double.infinity,
-              child: StepperBarWidget(
-                currentStep: currentStep,
-                onPreviousStep: () => _goToPreviousStep(currentStep),
-              ),
-            ),
-          ),
-        ),
-      ),
-      body: Column(
+    final isLast = currentStep == _totalSteps - 1;
+    final isHealthStep = currentStep == 7;
+    final isBreedStep = currentStep == 8;
+    final isEditing = widget.cat != null;
+    final hasHealthSelection = cat.healthConditions.isNotEmpty;
+    final finalCtaLabel = isEditing ? 'Save changes' : 'Create profile';
+    return WizardStepShell(
+      currentStep: currentStep,
+      totalSteps: _totalSteps,
+      ctaLabel: isLast ? finalCtaLabel : 'Next',
+      altCtaLabel: isHealthStep ? 'None of these' : null,
+      hasSelection: isHealthStep ? hasHealthSelection : true,
+      isSubmitting: isSubmitting,
+      useCloseIcon: currentStep == 0,
+      floatingNext: isHealthStep || isBreedStep,
+      onBack: () => _goToPreviousStep(currentStep),
+      onNext: isLast ? _handleSubmit : () => _goToNextStep(step: currentStep),
+      child: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
         children: [
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 62),
-              child: PageView(
-                controller: _pageController,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  _buildStepWrapper(0, cat),
-                  _buildStepWrapper(1, cat),
-                  _buildStepWrapper(2, cat),
-                  _buildStepWrapper(3, cat),
-                  _buildStepWrapper(4, cat),
-                  _buildStepWrapper(5, cat),
-                  _buildStepWrapper(6, cat),
-                  _buildStepWrapper(7, cat),
-                  _buildStepWrapper(8, cat),
-                ],
-              ),
-            ),
-          ),
-          StepperBottomWidget(
-            currentStep: currentStep,
-            isSubmitting: isSubmitting,
-            onNextStep: currentStep == 8
-                ? _handleSubmit
-                : () => _goToNextStep(step: currentStep),
-          ),
+          for (var i = 0; i < _totalSteps; i++) _buildStepContent(i, cat),
         ],
       ),
     );
@@ -232,29 +200,6 @@ class _CreateCatPageState extends State<CreateCatPage> {
     if (currentState is CatCreateLoadedState) {
       _bloc.add(CatCreateCatEvent(cat: currentState.cat, context: context));
     }
-  }
-
-  Widget _buildStepWrapper(int stepIndex, CatCreateModel cat) {
-    return SingleChildScrollView(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minHeight:
-              MediaQuery.of(context).size.height -
-              kToolbarHeight * 1.5 -
-              MediaQuery.of(context).padding.top -
-              MediaQuery.of(context).padding.bottom -
-              100, // Approximate space for bottom button
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          // mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildStepContent(stepIndex, cat),
-            SizedBox(height: DSDimens.sizeXl),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildStepContent(int stepIndex, CatCreateModel cat) {

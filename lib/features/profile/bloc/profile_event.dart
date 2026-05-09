@@ -28,3 +28,12 @@ class LoginTapEvent extends ProfileEvent {
   @override
   List<Object?> get props => [context];
 }
+
+class ResetOnboardingTapEvent extends ProfileEvent {
+  final BuildContext context;
+
+  const ResetOnboardingTapEvent({required this.context});
+
+  @override
+  List<Object?> get props => [context];
+}

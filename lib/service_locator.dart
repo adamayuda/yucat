@@ -274,7 +274,6 @@ Future<void> _registerBlocs() async {
     () => ProductListingBloc(
       searchByBrandUsecase: sl<SearchByBrandUsecase>(),
       productToModelMapper: sl<ProductToModelMapper>(),
-      logScreenViewUsecase: sl<LogScreenViewUsecase>(),
     ),
   );
   sl.registerBloc<OnBoardingBloc>(
@@ -288,7 +287,6 @@ Future<void> _registerBlocs() async {
     () => SearchBloc(
       searchByQueryUsecase: sl<SearchByQueryUsecase>(),
       productToModelMapper: sl<ProductToModelMapper>(),
-      logScreenViewUsecase: sl<LogScreenViewUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
       getBrandsUsecase: sl<GetBrandsUsecase>(),
       brandToModelMapper: sl<BrandToModelMapper>(),
@@ -301,17 +299,19 @@ Future<void> _registerBlocs() async {
       currentUserUsecase: sl<CurrentUserUsecase>(),
       signinAnonymouslyUsecase: sl<SigninAnonymouslyUsecase>(),
       scanTrackingService: sl<ScanTrackingService>(),
-      logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+      hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
+      getCatsUsecase: sl<GetCatsUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
       prefs: sl<SharedPreferences>(),
     ),
   );
   sl.registerBloc<ProfileBloc>(
-    () => ProfileBloc(logScreenViewUsecase: sl<LogScreenViewUsecase>()),
+    () => ProfileBloc(
+      prefs: sl<SharedPreferences>(),
+    ),
   );
   sl.registerBloc<ProductDetailBloc>(
     () => ProductDetailBloc(
-      logScreenViewUsecase: sl<LogScreenViewUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
@@ -320,14 +320,12 @@ Future<void> _registerBlocs() async {
       getCatsUsecase: sl<GetCatsUsecase>(),
       catEntityToModelMapper: sl<CatEntityToModelMapper>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
-      logScreenViewUsecase: sl<LogScreenViewUsecase>(),
       catTrackingService: sl<CatTrackingService>(),
     ),
   );
   sl.registerBloc<CatDetailBloc>(
     () => CatDetailBloc(
       deleteCatUsecase: sl<DeleteCatUsecase>(),
-      logScreenViewUsecase: sl<LogScreenViewUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
     ),
   );

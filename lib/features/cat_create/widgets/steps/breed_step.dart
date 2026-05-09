@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/presentation/components/ds_option_row.dart';
+import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
 class BreedStep extends StatefulWidget {
   final String? selectedBreed;
@@ -47,7 +49,6 @@ class _BreedStepState extends State<BreedStep> {
           .toList();
     }
 
-    // Ensure "Other" is always first
     if (filtered.contains('Other')) {
       filtered.remove('Other');
       filtered.insert(0, 'Other');
@@ -58,103 +59,64 @@ class _BreedStepState extends State<BreedStep> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: DSColors.primaryLight,
-                  borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
-                ),
-                width: 40,
-                height: 40,
-                child: Image.asset(
-                  'assets/images/Icons/breed.png',
-                  fit: BoxFit.contain,
-                ),
-              ),
-              SizedBox(width: DSDimens.sizeS),
-              Expanded(
-                child: Text(
-                  'What breed is your cat?',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontSize: 29,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: DSDimens.sizeS),
-          TextField(
-            controller: _searchController,
-            style: const TextStyle(
-              color: DSColors.placeholder,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+    final breeds = _filteredBreeds;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const MascotSpeechBubble(
+          question: 'What breed is your cat?',
+        ),
+        const SizedBox(height: DSDimens.sizeL),
+        TextField(
+          controller: _searchController,
+          cursorColor: DSColors.inkPrimary,
+          style: DSTextStyles.bodyLg,
+          decoration: InputDecoration(
+            hintText: 'Search breeds…',
+            hintStyle: DSTextStyles.bodyLg.copyWith(
+              color: DSColors.inkTertiary,
             ),
-            decoration: InputDecoration(
-              hintText: 'Search breeds...',
-              hintStyle: const TextStyle(
-                color: DSColors.placeholder,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-              filled: true,
-              fillColor: DSColors.white,
-              contentPadding: const EdgeInsets.only(
-                left: 24,
-                top: 16,
-                bottom: 16,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-                borderSide: BorderSide(color: DSColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(DSDimens.sizeXs),
-                borderSide: BorderSide(color: DSColors.primaryFocus),
+            prefixIcon: const Icon(
+              Icons.search_rounded,
+              color: DSColors.inkTertiary,
+            ),
+            filled: true,
+            fillColor: DSColors.surfaceCard,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: DSDimens.sizeS,
+              vertical: DSDimens.sizeS,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(DSRadii.lg),
+              borderSide: BorderSide(color: DSColors.surfaceCardDim),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(DSRadii.lg),
+              borderSide: const BorderSide(
+                color: DSColors.inkPrimary,
+                width: 2,
               ),
             ),
           ),
-          SizedBox(height: DSDimens.sizeS),
-          Column(
-            children: _filteredBreeds.map((breed) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: InkWell(
-                  onTap: () => widget.onBreedSelected(breed),
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      color: widget.selectedBreed == breed
-                          ? DSColors.primarySurface
-                          : DSColors.surface,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      breed,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: DSColors.darkBlue,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
+        ),
+        const SizedBox(height: DSDimens.sizeS),
+        Expanded(
+          child: ListView.separated(
+            padding: const EdgeInsets.only(bottom: 96),
+            itemCount: breeds.length,
+            separatorBuilder: (_, __) =>
+                const SizedBox(height: DSDimens.sizeXs),
+            itemBuilder: (context, index) {
+              final breed = breeds[index];
+              return DSOptionRow(
+                label: breed,
+                selected: widget.selectedBreed == breed,
+                onTap: () => widget.onBreedSelected(breed),
               );
-            }).toList(),
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

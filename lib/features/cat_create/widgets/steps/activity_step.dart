@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/presentation/components/ds_option_row.dart';
+import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
 class ActivityStep extends StatelessWidget {
   final String? activityLevel;
   final ValueChanged<String?> onActivityLevelChanged;
+
+  static const List<({String label, String value, IconData icon})> _options = [
+    (label: 'Low', value: 'low', icon: Icons.bedtime_rounded),
+    (label: 'Medium', value: 'medium', icon: Icons.directions_walk_rounded),
+    (label: 'High', value: 'high', icon: Icons.directions_run_rounded),
+  ];
 
   const ActivityStep({
     super.key,
@@ -13,84 +21,31 @@ class ActivityStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: DSColors.primaryLight,
-                  borderRadius: BorderRadius.circular(DSDimens.sizeXxs),
-                ),
-                width: 40,
-                height: 40,
-                child: Image.asset(
-                  'assets/images/Icons/body cat 2.png',
-                  fit: BoxFit.contain,
-                ),
-              ),
-              SizedBox(width: DSDimens.sizeS),
-              Expanded(
-                child: Text(
-                  'How active is your cat?',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontSize: 29,
-                    fontWeight: FontWeight.bold,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const MascotSpeechBubble(
+          question: 'How active is your cat?',
+        ),
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final option in _options) ...[
+                  DSOptionRow(
+                    label: option.label,
+                    leadingIcon: option.icon,
+                    selected: activityLevel == option.value,
+                    onTap: () => onActivityLevelChanged(option.value),
                   ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: DSDimens.sizeS),
-          Center(
-            child: Text(
-              'Activity helps us understand calorie needs.',
-
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+                  const SizedBox(height: DSDimens.sizeXs),
+                ],
+              ],
             ),
           ),
-          SizedBox(height: DSDimens.sizeS),
-
-          Column(
-            children: ['Low', 'Medium', 'High'].map((level) {
-              final value = level.toLowerCase();
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: InkWell(
-                  onTap: () => onActivityLevelChanged(value),
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      color: activityLevel == value
-                          ? DSColors.primarySurface
-                          : DSColors.surface,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      level,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: DSColors.darkBlue,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

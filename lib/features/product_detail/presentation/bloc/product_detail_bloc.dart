@@ -2,20 +2,16 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/product_display_model.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
-import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 
 part 'product_detail_event.dart';
 part 'product_detail_state.dart';
 
 class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
-  final LogScreenViewUsecase _logScreenViewUsecase;
   final LogEventUsecase _logEventUsecase;
 
   ProductDetailBloc({
-    required LogScreenViewUsecase logScreenViewUsecase,
     required LogEventUsecase logEventUsecase,
-  }) : _logScreenViewUsecase = logScreenViewUsecase,
-       _logEventUsecase = logEventUsecase,
+  }) : _logEventUsecase = logEventUsecase,
        super(ProductDetailHiddenState()) {
     on<ProductDetailInitialEvent>(_onProductDetailInitialEvent);
   }

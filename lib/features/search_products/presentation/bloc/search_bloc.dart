@@ -5,12 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
-import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
+import 'package:yucat/features/product/domain/entities/product_entity.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/search/domain/usecases/search_by_query_usecase.dart';
 import 'package:yucat/features/search_products/presentation/mappers/brand_to_model_mapper.dart';
 import 'package:yucat/features/search_products/presentation/mappers/product_to_model_mapper.dart';
-import 'package:yucat/features/product/domain/entities/product_entity.dart';
 import 'package:yucat/features/search_products/presentation/models/brand_display_model.dart';
 import 'package:yucat/features/brand/domain/usecases/get_brands_usecase.dart';
 
@@ -20,25 +19,19 @@ part 'search_state.dart';
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final SearchByQueryUsecase _searchByQueryUsecase;
   final ProductToModelMapper _productToModelMapper;
-  final LogScreenViewUsecase _logScreenViewUsecase;
   final LogEventUsecase _logEventUsecase;
   final GetBrandsUsecase _getBrandsUsecase;
   final BrandToModelMapper _brandToModelMapper;
-  // Store ProductEntity list to preserve nutritional data
-  List<ProductEntity> _productEntities = [];
-  // Store brands list to show initial state when query is too short
   List<BrandDisplayModel> _brands = [];
 
   SearchBloc({
     required SearchByQueryUsecase searchByQueryUsecase,
     required ProductToModelMapper productToModelMapper,
-    required LogScreenViewUsecase logScreenViewUsecase,
     required LogEventUsecase logEventUsecase,
     required GetBrandsUsecase getBrandsUsecase,
     required BrandToModelMapper brandToModelMapper,
   }) : _searchByQueryUsecase = searchByQueryUsecase,
        _productToModelMapper = productToModelMapper,
-       _logScreenViewUsecase = logScreenViewUsecase,
        _logEventUsecase = logEventUsecase,
        _getBrandsUsecase = getBrandsUsecase,
        _brandToModelMapper = brandToModelMapper,
@@ -53,7 +46,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     SearchInitialEvent event,
     Emitter<SearchState> emit,
   ) async {
-    // _logScreenViewUsecase.call(screenName: 'SearchScreen');
     emit(SearchDiscoverLoadingState());
     final brands = await _getBrandsUsecase.call();
     final mappedBrands = _brandToModelMapper(brands);
@@ -107,8 +99,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
     try {
       final products = await _searchByQueryUsecase.call(query: event.query);
-      // Store ProductEntity list for later use in navigation
-      _productEntities = products;
       final mappedProducts = products
           .map((product) => _productToModelMapper(product))
           .toList();

@@ -1,4 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/foundation.dart';
 
 abstract class AnalyticsFirebaseDataSource {
   Future<void> logEvent({
@@ -67,12 +68,9 @@ class AnalyticsFirebaseDataSourceImpl extends AnalyticsFirebaseDataSource {
     required String searchTerm,
   }) async {
     try {
-      final result = await FirebaseAnalytics.instance.logSearch(
-        searchTerm: searchTerm,
-      );
-      print('result');
+      await FirebaseAnalytics.instance.logSearch(searchTerm: searchTerm);
     } catch (e) {
-      print(e);
+      debugPrint('logSearch error: $e');
     }
   }
 }

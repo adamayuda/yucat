@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yucat/config/routes/router.dart';
+import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
@@ -22,7 +22,6 @@ class _PaywallPage extends State<PaywallPage> {
 
   @override
   void initState() {
-    debugPrint('PaywallPage initState');
     super.initState();
     _bloc = context.read<PaywallBloc>();
     _bloc.add(const PaywallInitialEvent());
@@ -33,14 +32,12 @@ class _PaywallPage extends State<PaywallPage> {
     return BlocConsumer<PaywallBloc, PaywallState>(
       bloc: _bloc,
       listenWhen: _listenWhen,
-      listener: _onStateChangeListener,
+      listener: _onStateChange,
       buildWhen: _buildWhen,
-      builder: (context, state) {
-        return Scaffold(
-          backgroundColor: Colors.transparent,
-          body: _onStateChangeBuilder(state),
-        );
-      },
+      builder: (context, state) => Scaffold(
+        backgroundColor: Colors.transparent,
+        body: _onStateChangeBuilder(state),
+      ),
     );
   }
 
@@ -50,11 +47,16 @@ class _PaywallPage extends State<PaywallPage> {
   }
 
   bool _listenWhen(PaywallState previous, PaywallState current) {
-    return current is PaywallSuccessState ||
-        current is PaywallAlreadySubscribedState;
+    if (current is PaywallSuccessState) return true;
+    if (current is PaywallAlreadySubscribedState) return true;
+    if (previous is PaywallLoadedState && current is PaywallLoadedState) {
+      return current.transientError != null &&
+          current.errorTick != previous.errorTick;
+    }
+    return false;
   }
 
-  void _onStateChangeListener(BuildContext context, PaywallState state) {
+  void _onStateChange(BuildContext context, PaywallState state) {
     switch (state) {
       case PaywallSuccessState():
         Navigator.of(context).pop(state.purchasedSubscription);
@@ -62,22 +64,25 @@ class _PaywallPage extends State<PaywallPage> {
       case PaywallAlreadySubscribedState():
         Navigator.of(context).pop(true);
         break;
+      case PaywallLoadedState(:final transientError) when transientError != null:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(transientError),
+            backgroundColor: DSColors.inkPrimary,
+          ),
+        );
+        break;
       default:
-        Navigator.of(context).pop(false);
         break;
     }
   }
 
   Widget _onStateChangeBuilder(PaywallState state) {
-    switch (state) {
-      case PaywallLoadingState():
-        return PaywallLoadingWidget();
-      case PaywallErrorState(:final message):
-        return PaywallErrorWidget(message: message);
-      case PaywallLoadedState():
-        return PaywallLoadedWidget();
-      default:
-        return const SizedBox();
-    }
+    return switch (state) {
+      PaywallLoadingState() => const PaywallLoadingWidget(),
+      PaywallErrorState(:final message) => PaywallErrorWidget(message: message),
+      PaywallLoadedState() => PaywallLoadedWidget(state: state, bloc: _bloc),
+      _ => const SizedBox(),
+    };
   }
 }

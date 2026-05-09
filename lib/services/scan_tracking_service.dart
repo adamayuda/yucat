@@ -7,6 +7,16 @@ class ScanTrackingService {
   // static const String _entitlementID = 'yucat pro';
   static const int _maxFreeScans = 3;
 
+  /// Maximum free-tier scans allowed before paywall.
+  int get maxFreeScans => _maxFreeScans;
+
+  /// Remaining free scans (clamped to 0). Pure read — does not increment.
+  int getRemainingScans() {
+    final used = getFreeScansCount();
+    final remaining = _maxFreeScans - used;
+    return remaining < 0 ? 0 : remaining;
+  }
+
   final SharedPreferences _prefs;
   final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
   final LogEventUsecase _logEventUsecase;

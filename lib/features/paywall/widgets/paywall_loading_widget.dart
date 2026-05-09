@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/widgets/app_loading_widget.dart';
 
 class PaywallLoadingWidget extends StatelessWidget {
@@ -6,8 +7,9 @@ class PaywallLoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: AppLoadingWidget(),
+    return Container(
+      color: DSColors.tintMint,
+      child: const SafeArea(child: AppLoadingWidget()),
     );
   }
 }

@@ -3,10 +3,11 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
+import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
-import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/signin_anonymously_usecase.dart';
+import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
 import 'package:yucat/features/product/domain/usecases/fetch_product_by_image_usecase.dart';
@@ -19,8 +20,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final CurrentUserUsecase _currentUserUsecase;
   final SigninAnonymouslyUsecase _signinAnonymouslyUsecase;
   final ScanTrackingService _scanTrackingService;
-  // ignore: unused_field
-  final LogScreenViewUsecase _logScreenViewUsecase;
+  final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
+  final GetCatsUsecase _getCatsUsecase;
   final LogEventUsecase _logEventUsecase;
   // ignore: unused_field
   final SharedPreferences _prefs;
@@ -32,7 +33,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required CurrentUserUsecase currentUserUsecase,
     required SigninAnonymouslyUsecase signinAnonymouslyUsecase,
     required ScanTrackingService scanTrackingService,
-    required LogScreenViewUsecase logScreenViewUsecase,
+    required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
+    required GetCatsUsecase getCatsUsecase,
     required LogEventUsecase logEventUsecase,
     required SharedPreferences prefs,
   }) : _fetchProductByImageUsecase = fetchProductByImageUsecase,
@@ -40,7 +42,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
        _currentUserUsecase = currentUserUsecase,
        _signinAnonymouslyUsecase = signinAnonymouslyUsecase,
        _scanTrackingService = scanTrackingService,
-       _logScreenViewUsecase = logScreenViewUsecase,
+       _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
+       _getCatsUsecase = getCatsUsecase,
        _logEventUsecase = logEventUsecase,
        _prefs = prefs,
        super(HomeHiddenState()) {
@@ -54,12 +57,38 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   ) async {
     emit(HomeLoadingState());
 
-    final user = _currentUserUsecase();
-    if (user == null) {
+    final currentUser = _currentUserUsecase();
+    if (currentUser == null) {
       await _signinAnonymouslyUsecase();
     }
 
-    emit(HomeLoadedState());
+    final user = _currentUserUsecase();
+
+    final isPremium = await _hasActiveSubscriptionUseCase();
+    final scansRemaining = _scanTrackingService.getRemainingScans();
+    final maxFreeScans = _scanTrackingService.maxFreeScans;
+
+    String? primaryCatName;
+    String? primaryCatPhotoUrl;
+    if (user != null) {
+      try {
+        final cats = await _getCatsUsecase(userId: user.uid);
+        if (cats.isNotEmpty) {
+          primaryCatName = cats.first.name;
+          primaryCatPhotoUrl = cats.first.profileImageUrl;
+        }
+      } catch (_) {
+        // Greeting falls back to generic copy on read failure.
+      }
+    }
+
+    emit(HomeLoadedState(
+      scansRemaining: scansRemaining,
+      maxFreeScans: maxFreeScans,
+      isPremium: isPremium,
+      primaryCatName: primaryCatName,
+      primaryCatPhotoUrl: primaryCatPhotoUrl,
+    ));
   }
 
   Future<void> _onImageCapturedEvent(
@@ -83,7 +112,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       );
 
       if (purchasedSubscription != true) {
-        emit(HomeLoadedState());
+        add(HomeInitialEvent());
         return;
       }
     }
@@ -123,7 +152,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       event.context.router.push(
         ProductDetailRoute(product: productDetailModel),
       );
-      emit(HomeLoadedState());
+      add(HomeInitialEvent());
     } catch (e) {
       _logEventUsecase.call(
         eventName: 'Product Image Scan Failed',

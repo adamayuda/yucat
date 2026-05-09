@@ -17,6 +17,8 @@ class MainPage extends StatelessWidget {
         final tabsRouter = AutoTabsRouter.of(context);
 
         return Scaffold(
+          extendBody: true,
+          backgroundColor: Colors.transparent,
           body: child,
           bottomNavigationBar: BottomNavBar(
             tabsRouter: tabsRouter,

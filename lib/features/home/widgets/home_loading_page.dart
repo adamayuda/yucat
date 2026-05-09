@@ -12,25 +12,25 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
     with SingleTickerProviderStateMixin {
   final List<LoadingStep> _steps = [
     const LoadingStep(
-      icon: Icons.qr_code_scanner,
+      icon: Icons.qr_code_scanner_rounded,
       title: 'Scanning barcode',
       description: 'Reading product code...',
       gifPath: 'assets/images/Illustrations/Scanning barcode_1.gif',
     ),
     const LoadingStep(
-      icon: Icons.cloud_download,
+      icon: Icons.cloud_download_rounded,
       title: 'Fetching product data',
       description: 'Retrieving information...',
       gifPath: 'assets/images/Illustrations/Fetching product data_2.gif',
     ),
     const LoadingStep(
-      icon: Icons.science,
+      icon: Icons.science_rounded,
       title: 'Analyzing ingredients',
       description: 'Processing nutritional data...',
       gifPath: 'assets/images/Illustrations/Analyzing ingredients_3.gif',
     ),
     const LoadingStep(
-      icon: Icons.assignment,
+      icon: Icons.assignment_rounded,
       title: 'Preparing results',
       description: 'Almost ready...',
       gifPath: 'assets/images/Illustrations/Almost ready_4.gif',
@@ -75,7 +75,7 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: Colors.white,
+      color: DSColors.tintLavender,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeXl),
@@ -97,56 +97,54 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
               const SizedBox(height: DSDimens.sizeXl),
               IntrinsicWidth(
                 child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: List.generate(_steps.length, (index) {
-                  final step = _steps[index];
-                  final isCompleted = index < _currentStepIndex;
-                  final isCurrent = index == _currentStepIndex;
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: List.generate(_steps.length, (index) {
+                    final step = _steps[index];
+                    final isCompleted = index < _currentStepIndex;
+                    final isCurrent = index == _currentStepIndex;
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: DSDimens.sizeS),
-                    child: Row(
-                      children: [
-                        _buildStepIndicator(
-                          isCompleted: isCompleted,
-                          isCurrent: isCurrent,
-                          step: step,
-                        ),
-                        const SizedBox(width: DSDimens.sizeS),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                step.title,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: isCurrent
-                                      ? FontWeight.w600
-                                      : FontWeight.w500,
-                                  color: isCompleted || isCurrent
-                                      ? DSColors.darkBlue
-                                      : DSColors.darkGrey,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                isCompleted ? 'Done' : step.description,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: isCompleted
-                                      ? DSColors.primary
-                                      : DSColors.darkGrey,
-                                ),
-                              ),
-                            ],
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: DSDimens.sizeS),
+                      child: Row(
+                        children: [
+                          _buildStepIndicator(
+                            isCompleted: isCompleted,
+                            isCurrent: isCurrent,
+                            step: step,
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-              ),
+                          const SizedBox(width: DSDimens.sizeS),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  step.title,
+                                  style: DSTextStyles.bodyLg.copyWith(
+                                    fontWeight: isCurrent
+                                        ? FontWeight.w600
+                                        : FontWeight.w500,
+                                    color: isCompleted || isCurrent
+                                        ? DSColors.inkPrimary
+                                        : DSColors.inkTertiary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  isCompleted ? 'Done' : step.description,
+                                  style: DSTextStyles.caption.copyWith(
+                                    color: isCompleted
+                                        ? DSColors.accentSuccess
+                                        : DSColors.inkSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ),
               ),
             ],
           ),
@@ -161,10 +159,19 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
     required LoadingStep step,
   }) {
     if (isCompleted) {
-      return Image.asset(
-        'assets/images/Icons/green.png',
+      return Container(
         width: 28,
         height: 28,
+        decoration: const BoxDecoration(
+          color: DSColors.accentSuccess,
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: const Icon(
+          Icons.check_rounded,
+          size: 16,
+          color: DSColors.inkInverse,
+        ),
       );
     }
 
@@ -174,11 +181,12 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
         child: Container(
           width: 28,
           height: 28,
-          decoration: BoxDecoration(
-            color: DSColors.primarySurface,
+          decoration: const BoxDecoration(
+            color: DSColors.surfaceCard,
             shape: BoxShape.circle,
           ),
-          child: Icon(step.icon, size: 16, color: DSColors.primary),
+          alignment: Alignment.center,
+          child: Icon(step.icon, size: 16, color: DSColors.inkPrimary),
         ),
       );
     }
@@ -186,11 +194,12 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
     return Container(
       width: 28,
       height: 28,
-      decoration: BoxDecoration(
-        color: DSColors.inputLightGrey,
+      decoration: const BoxDecoration(
+        color: DSColors.surfaceCardDim,
         shape: BoxShape.circle,
       ),
-      child: Icon(step.icon, size: 16, color: DSColors.darkGrey),
+      alignment: Alignment.center,
+      child: Icon(step.icon, size: 16, color: DSColors.inkTertiary),
     );
   }
 }
