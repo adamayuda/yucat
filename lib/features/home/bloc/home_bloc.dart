@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +14,7 @@ import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
 import 'package:yucat/features/product/domain/usecases/fetch_product_by_image_usecase.dart';
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
+import 'package:yucat/services/review_prompt_service.dart';
 import 'package:yucat/services/scan_tracking_service.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
@@ -20,6 +23,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final CurrentUserUsecase _currentUserUsecase;
   final SigninAnonymouslyUsecase _signinAnonymouslyUsecase;
   final ScanTrackingService _scanTrackingService;
+  final ReviewPromptService _reviewPromptService;
   final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
   final GetCatsUsecase _getCatsUsecase;
   final LogEventUsecase _logEventUsecase;
@@ -33,6 +37,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required CurrentUserUsecase currentUserUsecase,
     required SigninAnonymouslyUsecase signinAnonymouslyUsecase,
     required ScanTrackingService scanTrackingService,
+    required ReviewPromptService reviewPromptService,
     required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
     required GetCatsUsecase getCatsUsecase,
     required LogEventUsecase logEventUsecase,
@@ -42,6 +47,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
        _currentUserUsecase = currentUserUsecase,
        _signinAnonymouslyUsecase = signinAnonymouslyUsecase,
        _scanTrackingService = scanTrackingService,
+       _reviewPromptService = reviewPromptService,
        _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
        _getCatsUsecase = getCatsUsecase,
        _logEventUsecase = logEventUsecase,
@@ -82,12 +88,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
     }
 
+    final currentStreak = _scanTrackingService.getCurrentStreak();
+
     emit(HomeLoadedState(
       scansRemaining: scansRemaining,
       maxFreeScans: maxFreeScans,
       isPremium: isPremium,
       primaryCatName: primaryCatName,
       primaryCatPhotoUrl: primaryCatPhotoUrl,
+      currentStreak: currentStreak,
     ));
   }
 
@@ -147,6 +156,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           'source': 'image',
           'timestamp': DateTime.now().toIso8601String(),
         },
+      );
+
+      await _scanTrackingService.recordSuccessfulScan();
+      await _reviewPromptService.recordScan();
+      // Fire-and-forget; the service applies its own gating.
+      unawaited(
+        _reviewPromptService.maybePrompt(trigger: 'post_scan'),
       );
 
       event.context.router.push(

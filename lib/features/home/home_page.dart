@@ -68,6 +68,7 @@ class _HomePage extends State<HomePage> {
           :final isPremium,
           :final primaryCatName,
           :final primaryCatPhotoUrl,
+          :final currentStreak,
         ):
         return HomeDashboardPage(
           scansRemaining: scansRemaining,
@@ -75,6 +76,7 @@ class _HomePage extends State<HomePage> {
           isPremium: isPremium,
           primaryCatName: primaryCatName,
           primaryCatPhotoUrl: primaryCatPhotoUrl,
+          currentStreak: currentStreak,
           onScanTap: _openScanner,
           onSearchTap: _openSearch,
           onUpgradeTap: _openPaywall,

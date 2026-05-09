@@ -13,15 +13,16 @@ class PerCatScore {
   });
 }
 
-// TODO: replace this client-side derivation with a real per-cat score
-// emitted by the assessment domain layer (CatProductAssessment.score).
+/// Color-buckets the assessment's numeric score into a `ProductRatingColor`
+/// for the ring widget. The score itself is computed inside
+/// `cat_product_assessment.dart` from the same rules that produce the
+/// pros/cons text.
 PerCatScore derivePerCatScore(CatProductAssessment assessment) {
-  final raw = 70 + assessment.pros.length * 6 - assessment.cons.length * 12;
-  final clamped = raw.clamp(0, 100);
-  final color = clamped >= 70
+  final score = assessment.score;
+  final color = score >= 70
       ? ProductRatingColor.green
-      : clamped >= 50
+      : score >= 50
           ? ProductRatingColor.yellow
           : ProductRatingColor.red;
-  return PerCatScore(score: clamped, maxScore: 100, ratingColor: color);
+  return PerCatScore(score: score, maxScore: 100, ratingColor: color);
 }

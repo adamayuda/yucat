@@ -66,6 +66,7 @@ import 'package:yucat/features/search_products/presentation/mappers/brand_to_mod
 import 'package:yucat/features/search_products/presentation/mappers/product_to_model_mapper.dart';
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
 import 'package:yucat/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:yucat/services/review_prompt_service.dart';
 import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/services/cat_tracking_service.dart';
 
@@ -257,6 +258,12 @@ Future<void> _registerServices() async {
       logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
+  sl.registerSingleton<ReviewPromptService>(
+    ReviewPromptService(
+      prefs: sl<SharedPreferences>(),
+      logEventUsecase: sl<LogEventUsecase>(),
+    ),
+  );
 }
 
 extension BlocProviderRegistration on GetIt {
@@ -299,6 +306,7 @@ Future<void> _registerBlocs() async {
       currentUserUsecase: sl<CurrentUserUsecase>(),
       signinAnonymouslyUsecase: sl<SigninAnonymouslyUsecase>(),
       scanTrackingService: sl<ScanTrackingService>(),
+      reviewPromptService: sl<ReviewPromptService>(),
       hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
       getCatsUsecase: sl<GetCatsUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),

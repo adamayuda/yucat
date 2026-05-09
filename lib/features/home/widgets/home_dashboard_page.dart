@@ -4,6 +4,7 @@ import 'package:yucat/features/home/widgets/dashboard_link_card.dart';
 import 'package:yucat/features/home/widgets/greeting_card.dart';
 import 'package:yucat/features/home/widgets/scan_counter_card.dart';
 import 'package:yucat/features/home/widgets/scan_hero_card.dart';
+import 'package:yucat/features/home/widgets/streak_card.dart';
 
 class HomeDashboardPage extends StatelessWidget {
   final int? scansRemaining;
@@ -11,6 +12,7 @@ class HomeDashboardPage extends StatelessWidget {
   final bool isPremium;
   final String? primaryCatName;
   final String? primaryCatPhotoUrl;
+  final int currentStreak;
   final VoidCallback onScanTap;
   final VoidCallback onSearchTap;
   final VoidCallback onUpgradeTap;
@@ -22,6 +24,7 @@ class HomeDashboardPage extends StatelessWidget {
     required this.isPremium,
     required this.primaryCatName,
     required this.primaryCatPhotoUrl,
+    required this.currentStreak,
     required this.onScanTap,
     required this.onSearchTap,
     required this.onUpgradeTap,
@@ -53,6 +56,8 @@ class HomeDashboardPage extends StatelessWidget {
               isPremium: isPremium,
               onUpgradeTap: isPremium ? null : onUpgradeTap,
             ),
+            const SizedBox(height: DSDimens.sizeS),
+            StreakCard(currentStreak: currentStreak),
             const SizedBox(height: DSDimens.sizeS),
             DashboardLinkCard(
               icon: Icons.search_rounded,

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 import 'package:yucat/presentation/components/ds_quote_card.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
-// TODO(open #5): replace the source citation with a real reference
-// (e.g. AVMA, WSAVA) once chosen. See design/design.md §12.
+const _wsavaUrl =
+    'https://wsava.org/global-guidelines/global-nutrition-guidelines/';
 
 class DomainPitchScreen extends StatelessWidget {
   final VoidCallback onNext;
@@ -17,6 +18,13 @@ class DomainPitchScreen extends StatelessWidget {
     required this.onBack,
   });
 
+  Future<void> _openSource() async {
+    final uri = Uri.parse(_wsavaUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.inAppWebView);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return OnboardingScaffold(
@@ -27,26 +35,16 @@ class DomainPitchScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: DSDimens.sizeS),
-          RichText(
+          Text(
+            "What's in\nthe bowl\nmatters",
             textAlign: TextAlign.center,
-            text: TextSpan(
-              style: DSTextStyles.displayLg,
-              children: [
-                const TextSpan(text: '1 in 3\ncats are\n'),
-                TextSpan(
-                  text: 'overweight',
-                  style: DSTextStyles.displayLg.copyWith(
-                    color: DSColors.accentDanger,
-                  ),
-                ),
-              ],
-            ),
+            style: DSTextStyles.displayLg,
           ),
           const SizedBox(height: DSDimens.sizeL),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeS),
             child: Text(
-              'Diet is the #1 factor cat parents can change. Choosing the right food makes a real difference.',
+              'From kittenhood through senior years, food drives weight, coat, and longevity. The right diet is the biggest lever you have.',
               textAlign: TextAlign.center,
               style: DSTextStyles.bodyLg.copyWith(
                 color: DSColors.inkSecondary,
@@ -55,13 +53,11 @@ class DomainPitchScreen extends StatelessWidget {
           ),
           const Spacer(),
           DSQuoteCard(
-            sourceTitle: 'Veterinary research',
+            sourceTitle: 'WSAVA',
             body:
-                'shows that personalized diets help maintain healthy weight and reduce diet-related issues.',
-            sourceLinkLabel: 'Source of recommendations',
-            onSourceTap: () {
-              // Real link wired when source is finalized (open #5).
-            },
+                'publishes Global Nutrition Guidelines that frame nutrition as a primary factor in feline health and longevity.',
+            sourceLinkLabel: 'Read the guidelines',
+            onSourceTap: _openSource,
           ),
           const SizedBox(height: DSDimens.sizeS),
         ],

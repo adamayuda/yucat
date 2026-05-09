@@ -287,10 +287,11 @@ See `/Users/adam.ayuda/.claude/plans/lets-update-claude-md-with-fluffy-liskov.md
 1. ~~**Display typeface**~~ — **Sora ExtraBold** shipped.
 2. ~~**Body typeface**~~ — **Poppins** kept.
 3. ~~**Selection accent**~~ — **Green** (`accentSuccess #36C078`) for selection ✓; coral (`coralAccent #FF7A59`) reserved for emphasis (chips, slider, "BEST VALUE" tag).
+4. ~~**Social-proof stat (C0)**~~ — **APOP** (Association for Pet Obesity Prevention) — "61% of US cats are overweight or obese". Sourced + linked to `petobesityprevention.org`.
+5. ~~**Domain pitch source (C2)**~~ — **WSAVA Global Nutrition Guidelines** — linked to `wsava.org/global-guidelines/global-nutrition-guidelines/`. Editorial copy points at the guidelines rather than fabricating a direct quote.
 6. ~~**Cat illustration style**~~ — **GIF animations** ship today (`assets/images/Illustrations/`: Welcome, Add new cat, Loading, Error, plus the 4 multi-step home loader frames). Hand-drawn vectors deferred.
 7. ~~**Push notifications**~~ — **Deferred**. Reminders phase out of v1.
 
 ### Still open
 
-4. **Social-proof stat (C0)** — what stat do we have data for? Currently a placeholder pill. If none, replace with editorial copy.
-5. **Domain pitch source (C2)** — which vet org / study do we cite (Royal Canin? AVMA? a real paper)? Currently a placeholder citation.
+_None._

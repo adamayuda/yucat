@@ -4,7 +4,9 @@ import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 
 class ScanTrackingService {
   static const String _freeScansCountKey = 'free_scans_count';
-  // static const String _entitlementID = 'yucat pro';
+  static const String _streakLastScanDateKey = 'streak_last_scan_date';
+  static const String _streakCurrentKey = 'streak_current';
+  static const String _streakLongestKey = 'streak_longest';
   static const int _maxFreeScans = 3;
 
   /// Maximum free-tier scans allowed before paywall.
@@ -75,4 +77,80 @@ class ScanTrackingService {
   Future<void> resetFreeScansCount() async {
     await _prefs.remove(_freeScansCountKey);
   }
+
+  // -- Scan streak --
+
+  /// Current streak length in days. 0 if user hasn't scanned today and the
+  /// previous streak (if any) is broken.
+  int getCurrentStreak() {
+    final stored = _prefs.getInt(_streakCurrentKey) ?? 0;
+    if (stored == 0) return 0;
+    final last = _readLastScanDate();
+    if (last == null) return 0;
+    final today = _today();
+    final daysSince = today.difference(last).inDays;
+    if (daysSince <= 1) return stored; // today or yesterday — still alive
+    return 0; // streak has expired
+  }
+
+  /// Longest streak ever achieved.
+  int getLongestStreak() => _prefs.getInt(_streakLongestKey) ?? 0;
+
+  /// Records a successful scan and advances/resets the streak. Returns the
+  /// new current streak length so callers can react (e.g., milestone toast).
+  Future<int> recordSuccessfulScan() async {
+    final today = _today();
+    final last = _readLastScanDate();
+    final stored = _prefs.getInt(_streakCurrentKey) ?? 0;
+
+    int next;
+    if (last == null) {
+      next = 1;
+    } else {
+      final daysSince = today.difference(last).inDays;
+      if (daysSince == 0) {
+        next = stored == 0 ? 1 : stored; // already counted today
+      } else if (daysSince == 1) {
+        next = stored + 1; // consecutive day
+      } else {
+        next = 1; // gap broke the streak
+      }
+    }
+
+    await _prefs.setInt(_streakCurrentKey, next);
+    await _prefs.setString(_streakLastScanDateKey, _formatDate(today));
+
+    final longest = getLongestStreak();
+    if (next > longest) {
+      await _prefs.setInt(_streakLongestKey, next);
+      _logEventUsecase.call(
+        eventName: 'Streak Milestone',
+        properties: {
+          'streak_days': next,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+    }
+    return next;
+  }
+
+  DateTime _today() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  DateTime? _readLastScanDate() {
+    final raw = _prefs.getString(_streakLastScanDateKey);
+    if (raw == null) return null;
+    final parts = raw.split('-');
+    if (parts.length != 3) return null;
+    final year = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final day = int.tryParse(parts[2]);
+    if (year == null || month == null || day == null) return null;
+    return DateTime(year, month, day);
+  }
+
+  String _formatDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }

@@ -33,12 +33,16 @@ class HomeLoadedState extends HomeState {
   final String? primaryCatName;
   final String? primaryCatPhotoUrl;
 
+  /// Current scan-day streak. 0 when broken or never started.
+  final int currentStreak;
+
   HomeLoadedState({
     this.scansRemaining,
     this.maxFreeScans,
     this.isPremium = false,
     this.primaryCatName,
     this.primaryCatPhotoUrl,
+    this.currentStreak = 0,
   }) : _timestamp = DateTime.now().microsecondsSinceEpoch;
 
   @override
@@ -49,6 +53,7 @@ class HomeLoadedState extends HomeState {
         isPremium,
         primaryCatName,
         primaryCatPhotoUrl,
+        currentStreak,
       ];
 }
 

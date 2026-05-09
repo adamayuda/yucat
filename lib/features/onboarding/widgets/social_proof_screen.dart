@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 import 'package:yucat/presentation/components/ds_stat_pill.dart';
-import 'package:yucat/presentation/components/line_chart_card.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
-// TODO(open #4): replace placeholder copy with a real, sourced stat
-// once data is available. See design/design.md §12.
+const _apopUrl = 'https://www.petobesityprevention.org/';
 
 class SocialProofScreen extends StatelessWidget {
   final VoidCallback onNext;
@@ -17,6 +16,13 @@ class SocialProofScreen extends StatelessWidget {
     required this.onNext,
     required this.onBack,
   });
+
+  Future<void> _openSource() async {
+    final uri = Uri.parse(_apopUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.inAppWebView);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +39,28 @@ class SocialProofScreen extends StatelessWidget {
             textAlign: TextAlign.left,
             style: DSTextStyles.displayLg,
           ),
+          const SizedBox(height: DSDimens.sizeS),
+          Text(
+            'Diet shapes weight, energy, and long-term health. YuCat helps you spot the differences before they reach the bowl.',
+            style: DSTextStyles.bodyLg.copyWith(color: DSColors.inkSecondary),
+          ),
           const SizedBox(height: DSDimens.size3xl),
-          const LineChartCard(),
-          const SizedBox(height: DSDimens.sizeL),
           DSStatPill(
-            stat: '2×',
-            description: 'Cat parents who use YuCat report happier mealtimes',
+            stat: '61%',
+            description: 'of US cats are overweight or obese',
             background: DSColors.surfaceCard,
-            icon: Icons.trending_up_rounded,
+            icon: Icons.monitor_weight_rounded,
+          ),
+          const SizedBox(height: DSDimens.sizeXxs),
+          GestureDetector(
+            onTap: _openSource,
+            child: Text(
+              'Source: APOP — 2022 Pet Obesity Prevalence Survey',
+              style: DSTextStyles.caption.copyWith(
+                color: DSColors.inkSecondary,
+                decoration: TextDecoration.underline,
+              ),
+            ),
           ),
           const Spacer(),
         ],
