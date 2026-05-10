@@ -47,3 +47,16 @@ app.*.map.json
 # Design reference (large PNG screenshots — keep local)
 design/*
 !design/design.md
+
+# Firebase Functions (Node)
+functions/node_modules/
+functions/lib/
+functions/.env
+functions/.env.*
+functions/firebase-debug.log
+functions/firebase-debug.*.log
+
+# Firebase emulator runtime artifacts
+firebase-debug.log
+firebase-debug.*.log
+.firebase/
