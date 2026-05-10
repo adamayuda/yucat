@@ -61,6 +61,11 @@ class CatAssessmentSection extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: DSDimens.sizeXxs),
+        Text(
+          "Personalized scores based on each cat's profile.",
+          style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkSecondary),
+        ),
         const SizedBox(height: DSDimens.sizeS),
         for (var i = 0; i < cats.length; i++) ...[
           if (i > 0) const SizedBox(height: DSDimens.sizeS),

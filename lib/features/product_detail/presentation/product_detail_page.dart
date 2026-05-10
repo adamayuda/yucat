@@ -198,6 +198,8 @@ class _LoadedBody extends StatelessWidget {
           description: product.description,
         ),
         const SizedBox(height: DSDimens.sizeL),
+        NutritionGridCard(product: product),
+        const SizedBox(height: DSDimens.sizeL),
         FutureBuilder<List<CatEntity>>(
           future: catsFuture,
           builder: (context, snapshot) {
@@ -214,8 +216,6 @@ class _LoadedBody extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: DSDimens.sizeL),
-        NutritionGridCard(product: product),
       ],
     );
   }

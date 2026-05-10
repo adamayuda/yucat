@@ -36,7 +36,6 @@ class _CreateCatPageState extends State<CreateCatPage> {
 
   bool _useDefaultPhoto = false;
   final ImagePicker _imagePicker = ImagePicker();
-  final PageController _pageController = PageController();
 
   static const List<String> _breeds = [
     'Other',
@@ -87,9 +86,6 @@ class _CreateCatPageState extends State<CreateCatPage> {
   }
 
   void _onNameChanged() {
-    // Rebuild to update PageView physics when name changes
-    setState(() {});
-
     final currentState = _bloc.state;
     if (currentState is CatCreateLoadedState) {
       final updatedCat = currentState.cat.copyWith(
@@ -102,7 +98,6 @@ class _CreateCatPageState extends State<CreateCatPage> {
   @override
   void dispose() {
     _nameController.dispose();
-    _pageController.dispose();
     super.dispose();
   }
 
@@ -131,29 +126,10 @@ class _CreateCatPageState extends State<CreateCatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<CatCreateBloc, CatCreateState>(
+    return BlocBuilder<CatCreateBloc, CatCreateState>(
       bloc: _bloc,
-      listenWhen: (previous, current) => _listenWhen(previous, current),
-      listener: (context, state) => _onStateChangeListener(state),
       builder: (context, state) => _onStateChangeBuilder(state),
     );
-  }
-
-  bool _listenWhen(CatCreateState previous, CatCreateState current) {
-    if (current is! CatCreateLoadedState || previous is! CatCreateLoadedState) {
-      return false;
-    }
-    return current.currentStep != previous.currentStep;
-  }
-
-  void _onStateChangeListener(CatCreateState state) {
-    if (state is CatCreateLoadedState) {
-      _pageController.animateToPage(
-        state.currentStep,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
   }
 
   Widget _onStateChangeBuilder(CatCreateState state) {
@@ -185,9 +161,9 @@ class _CreateCatPageState extends State<CreateCatPage> {
       floatingNext: isHealthStep || isBreedStep,
       onBack: () => _goToPreviousStep(currentStep),
       onNext: isLast ? _handleSubmit : () => _goToNextStep(step: currentStep),
-      child: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
+      child: IndexedStack(
+        index: currentStep,
+        sizing: StackFit.expand,
         children: [
           for (var i = 0; i < _totalSteps; i++) _buildStepContent(i, cat),
         ],
@@ -255,7 +231,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
         );
       case 2:
         return GenderStep(
-          key: const ValueKey('step_3'),
+          key: const ValueKey('step_2'),
           gender: cat.gender,
           onGenderChanged: (value) {
             final currentState = _bloc.state;
@@ -267,7 +243,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
         );
       case 3:
         return AgeStep(
-          key: const ValueKey('step_2'),
+          key: const ValueKey('step_3'),
           age: cat.age,
           onAgeChanged: (value) {
             final currentState = _bloc.state;

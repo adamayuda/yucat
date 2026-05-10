@@ -11,56 +11,46 @@ class NutritionGridCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DSCard(
-      padding: const EdgeInsets.all(DSDimens.sizeL),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(
+        horizontal: DSDimens.sizeS,
+        vertical: DSDimens.sizeS,
+      ),
+      child: Row(
         children: [
-          Text('Nutrition', style: DSTextStyles.titleMd),
-          const SizedBox(height: DSDimens.sizeS),
-          Row(
-            children: [
-              Expanded(
-                child: _MacroCell(
-                  iconAsset: 'assets/images/Icons/egg.png',
-                  label: 'Protein',
-                  value: '${product.protein.toStringAsFixed(1)}%',
-                ),
-              ),
-              Expanded(
-                child: _MacroCell(
-                  iconAsset: 'assets/images/Icons/butter.png',
-                  label: 'Fat',
-                  value: '${product.fat.toStringAsFixed(1)}%',
-                ),
-              ),
-              Expanded(
-                child: _MacroCell(
-                  iconAsset: 'assets/images/Icons/water.png',
-                  label: 'Moisture',
-                  value: '${product.moisture.toStringAsFixed(1)}%',
-                ),
-              ),
-            ],
+          Expanded(
+            child: _MacroCell(
+              iconAsset: 'assets/images/Icons/egg.png',
+              label: 'Protein',
+              value: '${product.protein.toStringAsFixed(1)}%',
+            ),
           ),
-          const SizedBox(height: DSDimens.sizeS),
-          Row(
-            children: [
-              Expanded(
-                child: _MacroCell(
-                  iconAsset: 'assets/images/Icons/fire.png',
-                  label: 'Fiber',
-                  value: '${product.fiber.toStringAsFixed(1)}%',
-                ),
-              ),
-              Expanded(
-                child: _MacroCell(
-                  iconAsset: 'assets/images/Icons/wheat.png',
-                  label: 'Carbs',
-                  value: '${product.carbs.toStringAsFixed(1)}%',
-                ),
-              ),
-              const Expanded(child: SizedBox.shrink()),
-            ],
+          Expanded(
+            child: _MacroCell(
+              iconAsset: 'assets/images/Icons/butter.png',
+              label: 'Fat',
+              value: '${product.fat.toStringAsFixed(1)}%',
+            ),
+          ),
+          Expanded(
+            child: _MacroCell(
+              iconAsset: 'assets/images/Icons/water.png',
+              label: 'Moisture',
+              value: '${product.moisture.toStringAsFixed(1)}%',
+            ),
+          ),
+          Expanded(
+            child: _MacroCell(
+              iconAsset: 'assets/images/Icons/fire.png',
+              label: 'Fiber',
+              value: '${product.fiber.toStringAsFixed(1)}%',
+            ),
+          ),
+          Expanded(
+            child: _MacroCell(
+              iconAsset: 'assets/images/Icons/wheat.png',
+              label: 'Carbs',
+              value: '${product.carbs.toStringAsFixed(1)}%',
+            ),
           ),
         ],
       ),
@@ -82,28 +72,32 @@ class _MacroCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 44,
-          height: 44,
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
             color: DSColors.tintLavender,
-            borderRadius: BorderRadius.circular(DSRadii.md),
+            borderRadius: BorderRadius.circular(DSRadii.sm),
           ),
           alignment: Alignment.center,
-          child: Image.asset(iconAsset, width: 24, height: 24),
+          child: Image.asset(iconAsset, width: 18, height: 18),
         ),
-        const SizedBox(height: DSDimens.sizeXxs),
+        const SizedBox(height: DSDimens.sizeXxxs),
         Text(
           value,
-          style: DSTextStyles.bodyLg.copyWith(
+          style: DSTextStyles.caption.copyWith(
             color: DSColors.inkPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),
         Text(
           label,
-          style: DSTextStyles.caption.copyWith(color: DSColors.inkSecondary),
+          style: DSTextStyles.caption.copyWith(
+            color: DSColors.inkSecondary,
+            fontSize: 10,
+          ),
         ),
       ],
     );

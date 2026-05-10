@@ -138,7 +138,7 @@ class _FloatingNextLayout extends StatelessWidget {
           left: 0,
           right: 0,
           bottom: DSDimens.sizeS,
-          child: button,
+          child: Center(child: button),
         ),
       ],
     );
