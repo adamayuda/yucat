@@ -18,11 +18,21 @@ class ProductDetailHiddenState extends ProductDetailState {
 
 class ProductDetailLoadedState extends ProductDetailState {
   final ProductDisplayModel product;
+  final bool isSaved;
 
-  const ProductDetailLoadedState({required this.product});
+  const ProductDetailLoadedState({
+    required this.product,
+    this.isSaved = false,
+  });
+
+  ProductDetailLoadedState copyWith({bool? isSaved}) =>
+      ProductDetailLoadedState(
+        product: product,
+        isSaved: isSaved ?? this.isSaved,
+      );
 
   @override
-  List<Object?> get props => [product];
+  List<Object?> get props => [product, isSaved];
 }
 
 class ProductDetailErrorState extends ProductDetailState {

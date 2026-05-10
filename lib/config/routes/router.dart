@@ -6,6 +6,7 @@ import 'package:yucat/features/cat_detail/presentation/cat_detail_page.dart';
 import 'package:yucat/features/onboarding/onboarding_page.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/profile/profile_page.dart';
+import 'package:yucat/features/saved_products/presentation/saved_products_page.dart';
 import 'package:yucat/features/search_products/presentation/search_page.dart';
 import 'package:yucat/features/home/home_page.dart';
 import 'package:yucat/features/home/scanner_page.dart';
@@ -41,6 +42,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: ProductDetailRoute.page, path: '/product-detail'),
     AutoRoute(page: ProductListingRoute.page, path: '/product-listing'),
     AutoRoute(page: ProfileRoute.page, path: '/profile'),
+    AutoRoute(page: SavedProductsRoute.page, path: '/saved-products'),
     AutoRoute(
       page: CreateCatRoute.page,
       path: '/cats/create',

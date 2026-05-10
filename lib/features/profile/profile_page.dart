@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/profile/bloc/profile_bloc.dart';
 import 'package:yucat/features/profile/bloc/profile_event.dart';
@@ -46,6 +47,8 @@ class _ProfilePage extends State<ProfilePage> {
         ProfileLoadedState() => _ProfileLoadedState(
             onResetOnboardingTap: () =>
                 _bloc.add(ResetOnboardingTapEvent(context: context)),
+            onSavedProductsTap: () =>
+                context.router.push(const SavedProductsRoute()),
           ),
         _ => const Scaffold(
             backgroundColor: DSColors.tintLavender,
@@ -58,8 +61,12 @@ class _ProfilePage extends State<ProfilePage> {
 
 class _ProfileLoadedState extends StatelessWidget {
   final VoidCallback onResetOnboardingTap;
+  final VoidCallback onSavedProductsTap;
 
-  const _ProfileLoadedState({required this.onResetOnboardingTap});
+  const _ProfileLoadedState({
+    required this.onResetOnboardingTap,
+    required this.onSavedProductsTap,
+  });
 
   Future<void> _launchUri(BuildContext context, Uri uri,
       {String? errorMessage, LaunchMode mode = LaunchMode.platformDefault}) async {
@@ -105,6 +112,12 @@ class _ProfileLoadedState extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     child: Column(
                       children: [
+                        _ProfileMenuItem(
+                          icon: Icons.bookmark_outline_rounded,
+                          label: 'Saved products',
+                          onTap: onSavedProductsTap,
+                        ),
+                        const _MenuDivider(),
                         _ProfileMenuItem(
                           icon: Icons.mail_outline_rounded,
                           label: 'Contact us',

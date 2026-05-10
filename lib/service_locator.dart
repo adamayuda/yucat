@@ -49,6 +49,13 @@ import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
 import 'package:yucat/features/product_detail/presentation/bloc/product_detail_bloc.dart';
 import 'package:yucat/features/product_listing/presentation/bloc/product_listing_bloc.dart';
 import 'package:yucat/features/profile/bloc/profile_bloc.dart';
+import 'package:yucat/features/saved_products/data/repositories/saved_products_repository_impl.dart';
+import 'package:yucat/features/saved_products/domain/repositories/saved_products_repository.dart';
+import 'package:yucat/features/saved_products/domain/usecases/get_saved_products_usecase.dart';
+import 'package:yucat/features/saved_products/domain/usecases/is_product_saved_usecase.dart';
+import 'package:yucat/features/saved_products/domain/usecases/save_product_usecase.dart';
+import 'package:yucat/features/saved_products/domain/usecases/unsave_product_usecase.dart';
+import 'package:yucat/features/saved_products/presentation/bloc/saved_products_bloc.dart';
 import 'package:yucat/features/product/data/datasources/product_remote_datasource.dart';
 import 'package:yucat/features/product/data/mappers/product_to_domain_mapper.dart';
 import 'package:yucat/features/product/data/repositories/product_repository.dart';
@@ -181,6 +188,9 @@ Future<void> _registerRepositories() async {
     AuthRepositoryImpl(dataSource: sl<AuthFirebaseDataSource>()),
   );
   sl.registerSingleton<SubscriptionRepository>(SubscriptionRepositoryImpl());
+  sl.registerSingleton<SavedProductsRepository>(
+    SavedProductsRepositoryImpl(prefs: sl<SharedPreferences>()),
+  );
 }
 
 Future<void> _registerUseCases() async {
@@ -234,6 +244,18 @@ Future<void> _registerUseCases() async {
   );
   sl.registerSingleton<HasActiveSubscriptionUseCase>(
     HasActiveSubscriptionUseCase(repository: sl<SubscriptionRepository>()),
+  );
+  sl.registerSingleton<GetSavedProductsUsecase>(
+    GetSavedProductsUsecase(repository: sl<SavedProductsRepository>()),
+  );
+  sl.registerSingleton<IsProductSavedUsecase>(
+    IsProductSavedUsecase(repository: sl<SavedProductsRepository>()),
+  );
+  sl.registerSingleton<SaveProductUsecase>(
+    SaveProductUsecase(repository: sl<SavedProductsRepository>()),
+  );
+  sl.registerSingleton<UnsaveProductUsecase>(
+    UnsaveProductUsecase(repository: sl<SavedProductsRepository>()),
   );
 }
 
@@ -315,6 +337,14 @@ Future<void> _registerBlocs() async {
   sl.registerBloc<ProductDetailBloc>(
     () => ProductDetailBloc(
       logEventUsecase: sl<LogEventUsecase>(),
+      isProductSavedUsecase: sl<IsProductSavedUsecase>(),
+      saveProductUsecase: sl<SaveProductUsecase>(),
+      unsaveProductUsecase: sl<UnsaveProductUsecase>(),
+    ),
+  );
+  sl.registerBloc<SavedProductsBloc>(
+    () => SavedProductsBloc(
+      getSavedProductsUsecase: sl<GetSavedProductsUsecase>(),
     ),
   );
   sl.registerBloc<CatListingBloc>(

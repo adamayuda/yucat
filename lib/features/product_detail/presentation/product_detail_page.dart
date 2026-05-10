@@ -61,20 +61,38 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            DSAppBar.modal(
-              onBack: () => Navigator.of(context).pop(),
-              actions: [
-                _CircleIconButton(
-                  icon: Icons.bookmark_border_rounded,
-                  // TODO: wire saved-products bookmark
-                  onPressed: () {},
-                ),
-                _CircleIconButton(
-                  icon: Icons.more_horiz_rounded,
-                  // TODO: wire overflow menu (report, share)
-                  onPressed: () {},
-                ),
-              ],
+            BlocBuilder<ProductDetailBloc, ProductDetailState>(
+              bloc: _bloc,
+              buildWhen: (previous, current) =>
+                  previous is! ProductDetailLoadedState ||
+                  current is! ProductDetailLoadedState ||
+                  previous.isSaved != current.isSaved,
+              builder: (context, state) {
+                final isSaved = state is ProductDetailLoadedState
+                    ? state.isSaved
+                    : false;
+                return DSAppBar.modal(
+                  onBack: () => Navigator.of(context).pop(),
+                  actions: [
+                    _CircleIconButton(
+                      icon: isSaved
+                          ? Icons.bookmark_rounded
+                          : Icons.bookmark_border_rounded,
+                      iconColor: isSaved
+                          ? DSColors.accentSuccess
+                          : DSColors.inkPrimary,
+                      onPressed: () => _bloc.add(
+                        const ProductDetailToggleSavedEvent(),
+                      ),
+                    ),
+                    _CircleIconButton(
+                      icon: Icons.more_horiz_rounded,
+                      // TODO: wire overflow menu (report, share)
+                      onPressed: () {},
+                    ),
+                  ],
+                );
+              },
             ),
             Expanded(
               child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
@@ -107,9 +125,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
 class _CircleIconButton extends StatelessWidget {
   final IconData icon;
+  final Color? iconColor;
   final VoidCallback onPressed;
 
-  const _CircleIconButton({required this.icon, required this.onPressed});
+  const _CircleIconButton({
+    required this.icon,
+    required this.onPressed,
+    this.iconColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +153,11 @@ class _CircleIconButton extends StatelessWidget {
           child: SizedBox(
             width: 36,
             height: 36,
-            child: Icon(icon, color: DSColors.inkPrimary, size: 18),
+            child: Icon(
+              icon,
+              color: iconColor ?? DSColors.inkPrimary,
+              size: 18,
+            ),
           ),
         ),
       ),

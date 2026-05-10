@@ -12,3 +12,10 @@ class ProductDetailInitialEvent extends ProductDetailEvent {
   @override
   List<Object?> get props => [product];
 }
+
+class ProductDetailToggleSavedEvent extends ProductDetailEvent {
+  const ProductDetailToggleSavedEvent();
+
+  @override
+  List<Object?> get props => [];
+}

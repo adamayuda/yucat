@@ -256,6 +256,22 @@ class ProfileRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [SavedProductsPage]
+class SavedProductsRoute extends PageRouteInfo<void> {
+  const SavedProductsRoute({List<PageRouteInfo>? children})
+    : super(SavedProductsRoute.name, initialChildren: children);
+
+  static const String name = 'SavedProductsRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const SavedProductsPage();
+    },
+  );
+}
+
+/// generated route for
 /// [ScannerPage]
 class ScannerRoute extends PageRouteInfo<void> {
   const ScannerRoute({List<PageRouteInfo>? children})

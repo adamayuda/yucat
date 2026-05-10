@@ -78,7 +78,8 @@ Grouped by area (each lives under `lib/features/<name>/`):
 - **brand**: Data-only feature (no presentation layer) backing brand search
 - **product**: Calls the `fetchProductByImageV2` Cloud Function and maps the response to `ProductEntity`
 - **product_listing**: Product list (e.g. by brand or search results)
-- **product_detail**: Product detail with cat-specific assessment
+- **product_detail**: Product detail with cat-specific assessment; bookmark icon toggles save state via `SavedProductsRepository`
+- **saved_products**: User-saved product bookmarks. Toggle from `ProductDetailPage`; list page accessible from Profile. Storage: `SharedPreferences` key `saved_products_v1`. Identity is `${brand}__${name}` (lowercased, trimmed). Analytics: `Product Saved` / `Product Unsaved`.
 
 **Monetization**
 - **paywall**: RevenueCat-driven subscription flow (custom slide-up route)
@@ -210,10 +211,10 @@ All dependencies are registered in `lib/service_locator.dart` using GetIt. The i
 4. FirebaseFunctions (region `us-central1`)
 5. DataSources — `BrandDataSource`, `AnalyticsDataSource`, `AlgoliaSearchDataSource`, `RemoteSearchDataSource`, `AuthDataSource`, `CatDataSource`
 6. Mappers — Brand, Product (multiple variants), SearchProduct, Cat (entity ↔ document, entity ↔ model)
-7. Repositories — Brand, Analytics, Product, Search, Cat, Auth, Subscription
-8. UseCases — search/brand, log-event, fetch-product, cat CRUD, auth, subscription
-9. Services — `ScanTrackingService`, `CatTrackingService` (free-tier counters + analytics)
-10. BLoCs (registered as factories) — Splash, OnBoarding, Search, Home, Profile, ProductListing, ProductDetail, CatListing, CatDetail, CatCreate, Paywall
+7. Repositories — Brand, Analytics, Product, Search, Cat, Auth, Subscription, SavedProducts
+8. UseCases — search/brand, log-event, fetch-product-by-image, cat CRUD, auth, subscription, saved-products (get/isSaved/save/unsave)
+9. Services — `ScanTrackingService`, `CatTrackingService`, `ReviewPromptService`
+10. BLoCs (registered as factories) — Splash, OnBoarding, Search, Home, Profile, ProductListing, ProductDetail, CatListing, CatDetail, CatCreate, Paywall, SavedProducts
 
 **Important**: BLoCs are registered using a custom `registerBloc` extension that creates both the BLoC factory and a matching `BlocProvider` factory (which is why `provider` is a direct dependency).
 
@@ -224,7 +225,7 @@ Uses AutoRoute with declarative routing in `lib/config/routes/router.dart`. Rout
 Structure:
 - **Boot flow**: `SplashRoute` → `OnBoardingRoute` → `MainRoute`
 - **`MainRoute`** is a tabbed shell with three children: `SearchRoute`, `HomeRoute` (dashboard), `CatListingRoute`. `MainPage` uses `extendBody: true` + transparent Scaffold bg so each tab's `tintLavender` extends behind the floating bottom nav.
-- **Stacked / modal routes**: `ScannerRoute` (full-screen camera, opened from Home), `ProductDetailRoute`, `ProductListingRoute`, `CatDetailRoute`, `CreateCatRoute` (fullscreen dialog), `ProfileRoute`, `PaywallRoute` (custom slide-up + `opaque: false` transition)
+- **Stacked / modal routes**: `ScannerRoute` (full-screen camera, opened from Home), `ProductDetailRoute`, `ProductListingRoute`, `CatDetailRoute`, `CreateCatRoute` (fullscreen dialog), `ProfileRoute`, `SavedProductsRoute` (opened from Profile), `PaywallRoute` (custom slide-up + `opaque: false` transition)
 - **Screen-view analytics** auto-emitted via `AnalyticsRouteObserver` (`lib/config/routes/analytics_route_observer.dart`). `OnBoardingRoute` and `CreateCatRoute` are excluded — they handle their own multi-step PageView tracking inside the bloc.
 
 ## Themes & Design System
