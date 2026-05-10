@@ -29,6 +29,10 @@ class ProductToDomainMapperImpl extends ProductToDomainMapper {
         moisture: _parseDouble(product['moisture']),
         pros: pros,
         cons: cons,
+        isAiIdentified: product['isAiIdentified'] == true,
+        format: product['format']?.toString() ?? '',
+        packageSize: product['packageSize']?.toString() ?? '',
+        description: product['description']?.toString() ?? '',
       );
     } catch (e) {
       // Return a default entity if mapping fails to prevent app crash

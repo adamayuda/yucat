@@ -24,6 +24,10 @@ class ProductEntityToModelMapperImpl extends ProductEntityToModelMapper {
       maxScore: 100,
       ratingText: '',
       calories: _calculateCalories(entity),
+      isAiIdentified: entity.isAiIdentified,
+      format: entity.format,
+      packageSize: entity.packageSize,
+      description: entity.description,
     );
   }
 

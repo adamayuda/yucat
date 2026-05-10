@@ -160,9 +160,16 @@ class _LoadedBody extends StatelessWidget {
         bottomInset,
       ),
       children: [
-        ProductHeroCard(product: product),
+        ProductHeroCard(
+          product: product,
+          formatLine: product.formatLine,
+          aiIdentified: product.isAiIdentified,
+        ),
         const SizedBox(height: DSDimens.sizeL),
-        AnalysisCard(product: product),
+        AnalysisCard(
+          product: product,
+          description: product.description,
+        ),
         const SizedBox(height: DSDimens.sizeL),
         FutureBuilder<List<CatEntity>>(
           future: catsFuture,

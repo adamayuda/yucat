@@ -16,6 +16,10 @@ class ProductDisplayModel {
   final double fiber;
   final double carbs;
   final double calories;
+  final bool isAiIdentified;
+  final String format;
+  final String packageSize;
+  final String description;
 
   const ProductDisplayModel({
     required this.name,
@@ -33,9 +37,20 @@ class ProductDisplayModel {
     this.fiber = 0.0,
     this.carbs = 0.0,
     this.calories = 0.0,
+    this.isAiIdentified = false,
+    this.format = '',
+    this.packageSize = '',
+    this.description = '',
   });
 
   String get scoreDisplay => '$score/$maxScore';
+
+  /// Subtitle segment for the hero card: "Wet pâté · 85g pouch", or just one
+  /// of them, or empty when neither is set.
+  String? get formatLine {
+    final parts = [format, packageSize].where((s) => s.isNotEmpty).toList();
+    return parts.isEmpty ? null : parts.join(' · ');
+  }
 }
 
 enum ProductRatingColor { red, yellow, green }

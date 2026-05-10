@@ -11,6 +11,10 @@ class ProductEntity {
   final double ash;
   final List<String> pros;
   final List<String> cons;
+  final bool isAiIdentified;
+  final String format;
+  final String packageSize;
+  final String description;
 
   const ProductEntity({
     required this.name,
@@ -25,5 +29,9 @@ class ProductEntity {
     this.ash = 0.0,
     this.pros = const [],
     this.cons = const [],
+    this.isAiIdentified = false,
+    this.format = '',
+    this.packageSize = '',
+    this.description = '',
   });
 }
