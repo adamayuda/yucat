@@ -21,50 +21,47 @@ class _WhyCard {
 
 const _cards = [
   _WhyCard(
-    title: 'Just scan a barcode',
-    icon: Icons.qr_code_scanner_rounded,
-    background: DSColors.tintLavender,
+    title: 'Scan any cat food bag',
+    icon: Icons.camera_alt_rounded,
+    background: DSColors.tintSky,
     iconColor: DSColors.accentInfo,
-    rotation: -0.05,
+    rotation: -0.06,
   ),
   _WhyCard(
-    title: 'Personalized to your cat',
-    icon: Icons.pets_rounded,
+    title: 'Verdict tailored to your cat',
+    icon: Icons.check_circle_rounded,
+    background: DSColors.inkPrimary,
+    iconColor: DSColors.accentSuccess,
+    rotation: 0.05,
+  ),
+  _WhyCard(
+    title: 'Track what works for your cat',
+    icon: Icons.favorite_rounded,
     background: DSColors.tintCoral,
     iconColor: DSColors.accentDanger,
-    rotation: 0.04,
-  ),
-  _WhyCard(
-    title: 'Backed by vet research',
-    icon: Icons.local_hospital_rounded,
-    background: DSColors.tintMint,
-    iconColor: DSColors.accentSuccess,
     rotation: -0.03,
   ),
 ];
 
 class WhyYucatScreen extends StatelessWidget {
   final VoidCallback onNext;
-  final VoidCallback onBack;
 
   const WhyYucatScreen({
     super.key,
     required this.onNext,
-    required this.onBack,
   });
 
   @override
   Widget build(BuildContext context) {
     return OnboardingScaffold(
       background: DSColors.tintSky,
-      onBack: onBack,
       footer: DSPillButton(label: 'Let\'s go', onPressed: onNext),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: DSDimens.sizeS),
           Text(
-            'Why YuCat\nworks',
+            "Why YuCat's\nunique approach\nworks",
             textAlign: TextAlign.center,
             style: DSTextStyles.displayLg,
           ),
@@ -99,6 +96,7 @@ class _WhyCardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = card.background == DSColors.inkPrimary;
     return Container(
       padding: const EdgeInsets.all(DSDimens.sizeL),
       decoration: BoxDecoration(
@@ -121,7 +119,9 @@ class _WhyCardView extends StatelessWidget {
           Expanded(
             child: Text(
               card.title,
-              style: DSTextStyles.headlineMd,
+              style: DSTextStyles.headlineMd.copyWith(
+                color: isDark ? DSColors.inkInverse : DSColors.inkPrimary,
+              ),
             ),
           ),
         ],

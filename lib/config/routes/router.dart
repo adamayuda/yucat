@@ -43,10 +43,12 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: ProductListingRoute.page, path: '/product-listing'),
     AutoRoute(page: ProfileRoute.page, path: '/profile'),
     AutoRoute(page: SavedProductsRoute.page, path: '/saved-products'),
-    AutoRoute(
+    CustomRoute(
       page: CreateCatRoute.page,
       path: '/cats/create',
-      fullscreenDialog: true,
+      durationInMilliseconds: 280,
+      reverseDurationInMilliseconds: 280,
+      transitionsBuilder: TransitionsBuilders.slideLeftWithFade,
     ),
     AutoRoute(page: CatDetailRoute.page, path: '/cats/detail'),
     CustomRoute(

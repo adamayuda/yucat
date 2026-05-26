@@ -121,58 +121,58 @@ class DSMotion {
 }
 
 class DSTextStyles {
-  static TextStyle get displayHero => GoogleFonts.sora(
-    fontSize: 40,
-    height: 44 / 40,
-    fontWeight: FontWeight.w800,
+  static TextStyle get displayHero => GoogleFonts.lilitaOne(
+    fontSize: 44,
+    height: 46 / 44,
+    fontWeight: FontWeight.w400,
     color: DSColors.inkPrimary,
     letterSpacing: -0.5,
   );
 
-  static TextStyle get displayLg => GoogleFonts.sora(
-    fontSize: 32,
-    height: 38 / 32,
-    fontWeight: FontWeight.w800,
+  static TextStyle get displayLg => GoogleFonts.lilitaOne(
+    fontSize: 36,
+    height: 38 / 36,
+    fontWeight: FontWeight.w400,
     color: DSColors.inkPrimary,
     letterSpacing: -0.3,
   );
 
-  static TextStyle get headlineMd => GoogleFonts.sora(
-    fontSize: 22,
-    height: 28 / 22,
+  static TextStyle get headlineMd => GoogleFonts.lilitaOne(
+    fontSize: 24,
+    height: 28 / 24,
+    fontWeight: FontWeight.w400,
+    color: DSColors.inkPrimary,
+  );
+
+  static TextStyle get titleMd => GoogleFonts.dmSans(
+    fontSize: 18,
+    height: 24 / 18,
     fontWeight: FontWeight.w700,
     color: DSColors.inkPrimary,
   );
 
-  static TextStyle get titleMd => GoogleFonts.poppins(
-    fontSize: 18,
-    height: 24 / 18,
-    fontWeight: FontWeight.w600,
-    color: DSColors.inkPrimary,
-  );
-
-  static TextStyle get bodyLg => GoogleFonts.poppins(
+  static TextStyle get bodyLg => GoogleFonts.dmSans(
     fontSize: 16,
     height: 24 / 16,
     fontWeight: FontWeight.w500,
     color: DSColors.inkPrimary,
   );
 
-  static TextStyle get bodyMd => GoogleFonts.poppins(
+  static TextStyle get bodyMd => GoogleFonts.dmSans(
     fontSize: 14,
     height: 20 / 14,
     fontWeight: FontWeight.w400,
     color: DSColors.inkSecondary,
   );
 
-  static TextStyle get label => GoogleFonts.poppins(
+  static TextStyle get label => GoogleFonts.dmSans(
     fontSize: 13,
     height: 16 / 13,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w600,
     color: DSColors.inkPrimary,
   );
 
-  static TextStyle get caption => GoogleFonts.poppins(
+  static TextStyle get caption => GoogleFonts.dmSans(
     fontSize: 11,
     height: 14 / 11,
     fontWeight: FontWeight.w500,
@@ -185,7 +185,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: DSColors.white,
-      fontFamily: GoogleFonts.poppins().fontFamily,
+      fontFamily: GoogleFonts.dmSans().fontFamily,
       textTheme: TextTheme(
         displaySmall: TextStyle(fontFamily: GoogleFonts.satisfy().fontFamily),
       ).apply(bodyColor: DSColors.black),

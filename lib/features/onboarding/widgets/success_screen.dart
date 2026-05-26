@@ -6,7 +6,14 @@ import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 class SuccessScreen extends StatelessWidget {
   final VoidCallback onStart;
 
-  const SuccessScreen({super.key, required this.onStart});
+  /// At-a-glance chips describing the cat the user just created.
+  final List<String> summary;
+
+  const SuccessScreen({
+    super.key,
+    required this.onStart,
+    this.summary = const [],
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +55,44 @@ class SuccessScreen extends StatelessWidget {
               ),
             ),
           ),
+          if (summary.isNotEmpty) ...[
+            const SizedBox(height: DSDimens.sizeL),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: DSDimens.sizeXxs,
+              runSpacing: DSDimens.sizeXxs,
+              children: [
+                for (final chip in summary) _SummaryChip(label: chip),
+              ],
+            ),
+          ],
           const Spacer(flex: 2),
         ],
+      ),
+    );
+  }
+}
+
+class _SummaryChip extends StatelessWidget {
+  final String label;
+
+  const _SummaryChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: DSDimens.sizeS,
+        vertical: DSDimens.sizeXxs,
+      ),
+      decoration: BoxDecoration(
+        color: DSColors.surfaceCard,
+        borderRadius: BorderRadius.circular(DSRadii.pill),
+        boxShadow: DSShadows.e1,
+      ),
+      child: Text(
+        label,
+        style: DSTextStyles.label.copyWith(fontWeight: FontWeight.w600),
       ),
     );
   }

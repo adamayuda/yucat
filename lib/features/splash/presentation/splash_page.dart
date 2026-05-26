@@ -42,23 +42,11 @@ class _SplashContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: DSColors.tintLavender,
       body: SafeArea(
         child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                'assets/images/icon.png',
-                width: 140,
-                height: 140,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(height: DSDimens.sizeS),
-              Text('YuCat', style: DSTextStyles.displayHero),
-            ],
-          ),
+          child: Text('🐱', style: TextStyle(fontSize: 96)),
         ),
       ),
     );

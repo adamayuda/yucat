@@ -2,13 +2,19 @@ part of 'onboarding_bloc.dart';
 
 enum OnBoardingPhase {
   welcome,
-  valueCarousel,
+  scanDemo,
   attribution,
   attributionDetails,
-  socialProof,
+  proofChart,
   whyYucat,
-  domainPitch,
-  addCatIntro,
+  nutritionFact,
+  profileIntro,
+  profilePhoto,
+  profileName,
+  rating,
+  notifPrimer,
+  reminders,
+  healthIntro,
   success,
 }
 
@@ -23,25 +29,45 @@ class OnBoardingLoadingState extends OnBoardingState {
 
 class OnBoardingReadyState extends OnBoardingState {
   final OnBoardingPhase phase;
-  final int currentPage;
   final String? selectedSource;
+
+  /// Onboarding-seeded values handed to the wizard so it can skip the
+  /// matching steps when launched from the onboarding flow.
+  final String? seededName;
+  final String? seededPhotoPath;
+
+  /// At-a-glance chips for the created cat, returned by the wizard and
+  /// shown on the success screen. Empty until the wizard completes.
+  final List<String> catSummary;
 
   const OnBoardingReadyState({
     this.phase = OnBoardingPhase.welcome,
-    this.currentPage = 0,
     this.selectedSource,
+    this.seededName,
+    this.seededPhotoPath,
+    this.catSummary = const [],
   });
 
   @override
-  List<Object?> get props => [phase, currentPage, selectedSource];
+  List<Object?> get props => [
+        phase,
+        selectedSource,
+        seededName,
+        seededPhotoPath,
+        catSummary,
+      ];
 
   OnBoardingReadyState copyWith({
     OnBoardingPhase? phase,
-    int? currentPage,
     String? selectedSource,
+    String? seededName,
+    String? seededPhotoPath,
+    List<String>? catSummary,
   }) => OnBoardingReadyState(
     phase: phase ?? this.phase,
-    currentPage: currentPage ?? this.currentPage,
     selectedSource: selectedSource ?? this.selectedSource,
+    seededName: seededName ?? this.seededName,
+    seededPhotoPath: seededPhotoPath ?? this.seededPhotoPath,
+    catSummary: catSummary ?? this.catSummary,
   );
 }

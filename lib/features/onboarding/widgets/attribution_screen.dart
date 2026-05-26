@@ -13,27 +13,24 @@ class _AttributionOption {
 }
 
 const _options = [
-  _AttributionOption('influencer', '⭐', 'From influencer'),
+  _AttributionOption('influencer', '⭐', 'From an influencer'),
   _AttributionOption('instagram', '📸', 'Instagram'),
   _AttributionOption('tiktok', '🎵', 'TikTok'),
   _AttributionOption('youtube', '📺', 'YouTube'),
-  _AttributionOption('vet', '🩺', 'My vet'),
   _AttributionOption('app_store', '🍎', 'App Store search'),
-  _AttributionOption('friend', '👋', 'Friend or family'),
+  _AttributionOption('friend', '👋', 'Friends/family'),
 ];
 
 class AttributionScreen extends StatefulWidget {
   final String? initialSelection;
   final void Function(String source) onSelect;
   final VoidCallback onSkip;
-  final VoidCallback onBack;
 
   const AttributionScreen({
     super.key,
     required this.initialSelection,
     required this.onSelect,
     required this.onSkip,
-    required this.onBack,
   });
 
   @override
@@ -55,7 +52,6 @@ class _AttributionScreenState extends State<AttributionScreen> {
 
     return OnboardingScaffold(
       background: DSColors.tintAsh,
-      onBack: widget.onBack,
       footer: hasSelection
           ? DSPillButton(
               label: 'Next',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
@@ -16,34 +17,46 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OnboardingScaffold(
-      background: DSColors.tintSky,
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFFDDE9F6), Color(0xFFF7E9EE)],
+      ),
       footer: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           DSPillButton(label: 'Get started', onPressed: onGetStarted),
           const SizedBox(height: DSDimens.sizeXxs),
           DSTextLink(
-            label: 'Restore purchases',
+            label: 'I already have an account',
             onPressed: onRestorePurchases,
+          ),
+          const SizedBox(height: DSDimens.sizeXxs),
+          Text(
+            "By continuing you're accepting our\nTerms of Use and Privacy Notice",
+            textAlign: TextAlign.center,
+            style: DSTextStyles.caption,
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Spacer(flex: 1),
-          SizedBox(
-            height: 220,
-            child: Image.asset(
-              'assets/images/Illustrations/Hey, welcome!.gif',
+          Center(
+            child: Lottie.asset(
+              'assets/images/Illustrations/lottie.json',
+              height: 260,
               fit: BoxFit.contain,
             ),
           ),
-          const SizedBox(height: DSDimens.size3xl),
+          const SizedBox(height: DSDimens.sizeM),
           Text(
-            'Find food\nthat fits\nyour cat',
-            textAlign: TextAlign.center,
-            style: DSTextStyles.displayHero,
+            'Decode\nevery\ncat food\nlabel',
+            style: DSTextStyles.displayHero.copyWith(
+              fontSize: 64,
+              height: 0.95,
+            ),
           ),
           const Spacer(flex: 2),
         ],

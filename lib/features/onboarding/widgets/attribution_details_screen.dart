@@ -5,12 +5,10 @@ import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
 class AttributionDetailsScreen extends StatefulWidget {
   final void Function(String? text) onSubmit;
-  final VoidCallback onBack;
 
   const AttributionDetailsScreen({
     super.key,
     required this.onSubmit,
-    required this.onBack,
   });
 
   @override
@@ -41,7 +39,6 @@ class _AttributionDetailsScreenState extends State<AttributionDetailsScreen> {
   Widget build(BuildContext context) {
     return OnboardingScaffold(
       background: DSColors.tintAsh,
-      onBack: widget.onBack,
       footer: _hasText
           ? DSPillButton(
               label: 'Next',

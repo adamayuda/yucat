@@ -8,7 +8,7 @@ YuCat is a Flutter mobile application (iOS-focused) that helps cat owners evalua
 
 ## Technology Stack
 
-- **Framework**: Flutter 3.32.8 with Dart 3.8.1
+- **Framework**: Flutter 3.41.9 with Dart 3.11.5 (pinned via FVM — see `.fvmrc`)
 - **State Management**: BLoC pattern (`flutter_bloc ^9.1.1`); `provider ^6.1.5+1` is also used in DI for BlocProvider factories
 - **Dependency Injection**: GetIt ^9.0.5
 - **Navigation**: AutoRoute ^9.2.2

@@ -21,8 +21,10 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
     'Gender',
     'Age',
     'Activity',
+    'ActivityFact',
     'NeuteredStatus',
     'Coat',
+    'CoatFact',
     'HealthConditions',
     'Breed',
   ];
@@ -68,7 +70,8 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
     Emitter<CatCreateState> emit,
   ) {
     final currentState = state;
-    if (currentState is CatCreateLoadedState && currentState.currentStep < 8) {
+    if (currentState is CatCreateLoadedState &&
+        currentState.currentStep < _stepNames.length - 1) {
       final nextStep = event.step + 1;
 
       _logEventUsecase.call(
@@ -125,8 +128,11 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
   ) async {
     _creationStartTime = DateTime.now();
 
-    final isEditMode = event.cat != null;
-    _originalCat = event.cat;
+    // Edit mode is signalled by an existing Firestore id on the incoming
+    // model. A non-null model without an id is just seeded values (e.g.
+    // name + photo collected during onboarding) — still a creation.
+    final isEditMode = event.cat?.id != null;
+    _originalCat = isEditMode ? event.cat : null;
 
     _logEventUsecase.call(
       eventName: isEditMode ? 'Cat Edit Started' : 'Cat Creation Started',
@@ -233,7 +239,9 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
         );
       }
 
-      event.context.router.maybePop();
+      // Return a short profile summary so callers (e.g. onboarding) can
+      // surface it on a success screen.
+      event.context.router.maybePop(_buildCatSummary(event.cat));
     } catch (e) {
       final isEditMode = _originalCat != null;
       _logEventUsecase.call(
@@ -251,6 +259,32 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
         isSubmitting: false,
       ));
     }
+  }
+
+  /// Builds the at-a-glance chips shown on the post-creation success screen
+  /// (e.g. "Adult · Female · Bengal · Medium activity · 1 health note").
+  List<String> _buildCatSummary(CatCreateModel cat) {
+    String cap(String v) =>
+        v.isEmpty ? v : '${v[0].toUpperCase()}${v.substring(1)}';
+
+    final chips = <String>[];
+    final age = cat.age;
+    if (age != null) {
+      chips.add(age < 12 ? 'Kitten' : (age < 120 ? 'Adult' : 'Senior'));
+    }
+    if (cat.gender != null) chips.add(cap(cat.gender!));
+    if (cat.breed != null && cat.breed != 'Other') chips.add(cat.breed!);
+    if (cat.activityLevel != null) {
+      chips.add('${cap(cat.activityLevel!)} activity');
+    }
+    final conditions =
+        cat.healthConditions.where((c) => c != 'none').toList();
+    if (conditions.isNotEmpty) {
+      chips.add(
+        '${conditions.length} health note${conditions.length == 1 ? '' : 's'}',
+      );
+    }
+    return chips;
   }
 
   List<String> _getChangedFields(CatCreateModel updatedCat) {

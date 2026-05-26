@@ -6,11 +6,15 @@ import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 class NeuteredStatusStep extends StatelessWidget {
   /// One of: "intact", "neutered", "pregnant", "lactating"
   final String? status;
+  final String? gender;
   final ValueChanged<String?> onStatusChanged;
 
-  static const List<({String label, String value, String emoji})> _options = [
+  static const _baseOptions = [
     (label: 'Intact', value: 'intact', emoji: '🐱'),
     (label: 'Neutered / Spayed', value: 'neutered', emoji: '✂️'),
+  ];
+
+  static const _femaleOnlyOptions = [
     (label: 'Pregnant', value: 'pregnant', emoji: '🤰'),
     (label: 'Lactating', value: 'lactating', emoji: '🍼'),
   ];
@@ -18,23 +22,26 @@ class NeuteredStatusStep extends StatelessWidget {
   const NeuteredStatusStep({
     super.key,
     required this.status,
+    required this.gender,
     required this.onStatusChanged,
   });
 
   @override
   Widget build(BuildContext context) {
+    final options = [
+      ..._baseOptions,
+      if (gender == 'female') ..._femaleOnlyOptions,
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const MascotSpeechBubble(
-          question: 'Is your cat neutered?',
-        ),
+        const MascotSpeechBubble(question: 'Is your cat neutered or spayed?'),
         Expanded(
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                for (final option in _options) ...[
+                for (final option in options) ...[
                   DSOptionRow(
                     label: option.label,
                     leadingEmoji: option.emoji,

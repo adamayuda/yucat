@@ -5,6 +5,9 @@ enum DSOptionRowAccent { success, danger }
 
 class DSOptionRow extends StatelessWidget {
   final String label;
+
+  /// Optional secondary line shown under [label] (e.g. an example or hint).
+  final String? description;
   final String? leadingEmoji;
   final IconData? leadingIcon;
   final bool selected;
@@ -16,6 +19,7 @@ class DSOptionRow extends StatelessWidget {
     super.key,
     required this.label,
     required this.onTap,
+    this.description,
     this.leadingEmoji,
     this.leadingIcon,
     this.selected = false,
@@ -66,11 +70,26 @@ class DSOptionRow extends StatelessWidget {
                   Icon(leadingIcon, size: 22, color: DSColors.inkPrimary),
                 const SizedBox(width: DSDimens.sizeXs),
                 Expanded(
-                  child: Text(
-                    label,
-                    style: DSTextStyles.titleMd.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        label,
+                        style: DSTextStyles.titleMd.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (description != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          description!,
+                          style: DSTextStyles.caption.copyWith(
+                            color: DSColors.inkSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 if (selected)

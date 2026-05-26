@@ -3,60 +3,68 @@ import 'package:yucat/config/themes/theme.dart';
 
 class OnboardingScaffold extends StatelessWidget {
   final Color background;
+  final Gradient? gradient;
   final Widget child;
   final Widget? footer;
-  final VoidCallback? onBack;
   final Widget? topRightAction;
 
   const OnboardingScaffold({
     super.key,
     required this.child,
     this.background = DSColors.tintAsh,
+    this.gradient,
     this.footer,
-    this.onBack,
     this.topRightAction,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
-          child: Column(
-            children: [
-              SizedBox(
-                height: 48,
-                child: Row(
-                  children: [
-                    if (onBack != null) _BackChip(onTap: onBack!),
-                    const Spacer(),
-                    if (topRightAction != null) topRightAction!,
-                  ],
-                ),
+    final body = SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 48,
+              child: Row(
+                children: [
+                  const Spacer(),
+                  if (topRightAction != null) topRightAction!,
+                ],
               ),
-              Expanded(child: child),
-              if (footer != null)
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: DSDimens.sizeS,
-                    bottom: DSDimens.sizeS,
-                  ),
-                  child: footer,
+            ),
+            Expanded(child: child),
+            if (footer != null)
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: DSDimens.sizeS,
+                  bottom: DSDimens.sizeS,
                 ),
-            ],
-          ),
+                child: footer,
+              ),
+          ],
         ),
       ),
     );
+
+    if (gradient != null) {
+      return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: DecoratedBox(
+          decoration: BoxDecoration(gradient: gradient),
+          child: body,
+        ),
+      );
+    }
+
+    return Scaffold(backgroundColor: background, body: body);
   }
 }
 
-class _BackChip extends StatelessWidget {
+class BackChip extends StatelessWidget {
   final VoidCallback onTap;
 
-  const _BackChip({required this.onTap});
+  const BackChip({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

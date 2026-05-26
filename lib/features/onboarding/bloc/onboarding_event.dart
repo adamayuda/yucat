@@ -34,13 +34,6 @@ class OnBoardingRestorePurchasesEvent extends OnBoardingEvent {
   List<Object?> get props => [];
 }
 
-class OnBoardingValueCarouselCompletedEvent extends OnBoardingEvent {
-  const OnBoardingValueCarouselCompletedEvent();
-
-  @override
-  List<Object?> get props => [];
-}
-
 class OnBoardingAttributionSelectedEvent extends OnBoardingEvent {
   final String source;
 
@@ -98,12 +91,20 @@ class OnBoardingFinalizedEvent extends OnBoardingEvent {
   List<Object?> get props => [context];
 }
 
-class OnBoardingPageChangedEvent extends OnBoardingEvent {
-  final int page;
-  final String pageName;
+class OnBoardingPhotoSeededEvent extends OnBoardingEvent {
+  final String? photoPath;
 
-  const OnBoardingPageChangedEvent(this.page, this.pageName);
+  const OnBoardingPhotoSeededEvent(this.photoPath);
 
   @override
-  List<Object?> get props => [page, pageName];
+  List<Object?> get props => [photoPath];
+}
+
+class OnBoardingNameSeededEvent extends OnBoardingEvent {
+  final String name;
+
+  const OnBoardingNameSeededEvent(this.name);
+
+  @override
+  List<Object?> get props => [name];
 }

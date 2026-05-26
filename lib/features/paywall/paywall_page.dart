@@ -5,6 +5,7 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
+import 'package:yucat/features/paywall/widgets/paywall_account_screen.dart';
 import 'package:yucat/features/paywall/widgets/paywall_error_widget.dart';
 import 'package:yucat/features/paywall/widgets/paywall_loaded_widget.dart';
 import 'package:yucat/features/paywall/widgets/paywall_loading_widget.dart';
@@ -56,10 +57,21 @@ class _PaywallPage extends State<PaywallPage> {
     return false;
   }
 
-  void _onStateChange(BuildContext context, PaywallState state) {
+  Future<void> _onStateChange(BuildContext context, PaywallState state) async {
     switch (state) {
       case PaywallSuccessState():
-        Navigator.of(context).pop(state.purchasedSubscription);
+        final navigator = Navigator.of(context);
+        // After a successful subscription, surface the account-creation
+        // handoff (a mock for now) before dismissing the paywall.
+        if (state.purchasedSubscription) {
+          await navigator.push(
+            MaterialPageRoute<void>(
+              builder: (_) => const PaywallAccountScreen(),
+              fullscreenDialog: true,
+            ),
+          );
+        }
+        navigator.pop(state.purchasedSubscription);
         break;
       case PaywallAlreadySubscribedState():
         Navigator.of(context).pop(true);

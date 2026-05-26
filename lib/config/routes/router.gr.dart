@@ -66,12 +66,22 @@ class CatListingRoute extends PageRouteInfo<void> {
 /// generated route for
 /// [CreateCatPage]
 class CreateCatRoute extends PageRouteInfo<CreateCatRouteArgs> {
-  CreateCatRoute({Key? key, CatModel? cat, List<PageRouteInfo>? children})
-    : super(
-        CreateCatRoute.name,
-        args: CreateCatRouteArgs(key: key, cat: cat),
-        initialChildren: children,
-      );
+  CreateCatRoute({
+    Key? key,
+    CatModel? cat,
+    String? seededName,
+    String? seededPhotoPath,
+    List<PageRouteInfo>? children,
+  }) : super(
+         CreateCatRoute.name,
+         args: CreateCatRouteArgs(
+           key: key,
+           cat: cat,
+           seededName: seededName,
+           seededPhotoPath: seededPhotoPath,
+         ),
+         initialChildren: children,
+       );
 
   static const String name = 'CreateCatRoute';
 
@@ -81,21 +91,35 @@ class CreateCatRoute extends PageRouteInfo<CreateCatRouteArgs> {
       final args = data.argsAs<CreateCatRouteArgs>(
         orElse: () => const CreateCatRouteArgs(),
       );
-      return CreateCatPage(key: args.key, cat: args.cat);
+      return CreateCatPage(
+        key: args.key,
+        cat: args.cat,
+        seededName: args.seededName,
+        seededPhotoPath: args.seededPhotoPath,
+      );
     },
   );
 }
 
 class CreateCatRouteArgs {
-  const CreateCatRouteArgs({this.key, this.cat});
+  const CreateCatRouteArgs({
+    this.key,
+    this.cat,
+    this.seededName,
+    this.seededPhotoPath,
+  });
 
   final Key? key;
 
   final CatModel? cat;
 
+  final String? seededName;
+
+  final String? seededPhotoPath;
+
   @override
   String toString() {
-    return 'CreateCatRouteArgs{key: $key, cat: $cat}';
+    return 'CreateCatRouteArgs{key: $key, cat: $cat, seededName: $seededName, seededPhotoPath: $seededPhotoPath}';
   }
 }
 

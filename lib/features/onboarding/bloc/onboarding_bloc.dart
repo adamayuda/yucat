@@ -33,13 +33,13 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     on<OnBoardingGetStartedEvent>(_onOnBoardingGetStartedEvent);
     on<OnBoardingBackToWelcomeEvent>(_onOnBoardingBackToWelcomeEvent);
     on<OnBoardingRestorePurchasesEvent>(_onOnBoardingRestorePurchasesEvent);
-    on<OnBoardingPageChangedEvent>(_onOnBoardingPageChangedEvent);
-    on<OnBoardingValueCarouselCompletedEvent>(_onOnBoardingValueCarouselCompletedEvent);
     on<OnBoardingAttributionSelectedEvent>(_onOnBoardingAttributionSelectedEvent);
     on<OnBoardingAttributionDetailsSubmittedEvent>(_onOnBoardingAttributionDetailsSubmittedEvent);
     on<OnBoardingAttributionSkippedEvent>(_onOnBoardingAttributionSkippedEvent);
     on<OnBoardingAdvancePhaseEvent>(_onOnBoardingAdvancePhaseEvent);
     on<OnBoardingPreviousPhaseEvent>(_onOnBoardingPreviousPhaseEvent);
+    on<OnBoardingPhotoSeededEvent>(_onOnBoardingPhotoSeededEvent);
+    on<OnBoardingNameSeededEvent>(_onOnBoardingNameSeededEvent);
     on<OnBoardingCompletedEvent>(_onOnBoardingCompletedEvent);
     on<OnBoardingFinalizedEvent>(_onOnBoardingFinalizedEvent);
   }
@@ -81,14 +81,11 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
 
     _logScreenViewUsecase.call(
       screenName: 'OnBoardingRoute',
-      index: 1,
-      name: 'value_carousel_1',
+      index: _phaseIndex(OnBoardingPhase.scanDemo),
+      name: 'scan_demo',
     );
 
-    emit(const OnBoardingReadyState(
-      phase: OnBoardingPhase.valueCarousel,
-      currentPage: 0,
-    ));
+    emit(const OnBoardingReadyState(phase: OnBoardingPhase.scanDemo));
   }
 
   void _onOnBoardingBackToWelcomeEvent(
@@ -109,34 +106,6 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     // Real RevenueCat restore flow lands later; no-op for now.
   }
 
-  void _onOnBoardingPageChangedEvent(
-    OnBoardingPageChangedEvent event,
-    Emitter<OnBoardingState> emit,
-  ) {
-    _stepsViewed = event.page + 2;
-
-    _logScreenViewUsecase.call(
-      screenName: 'OnBoardingRoute',
-      index: event.page + 1,
-      name: event.pageName,
-    );
-
-    final current = _readyState();
-    emit(current.copyWith(currentPage: event.page));
-  }
-
-  void _onOnBoardingValueCarouselCompletedEvent(
-    OnBoardingValueCarouselCompletedEvent event,
-    Emitter<OnBoardingState> emit,
-  ) {
-    _logScreenViewUsecase.call(
-      screenName: 'OnBoardingRoute',
-      index: 4,
-      name: 'attribution',
-    );
-    emit(_readyState().copyWith(phase: OnBoardingPhase.attribution));
-  }
-
   void _onOnBoardingAttributionSelectedEvent(
     OnBoardingAttributionSelectedEvent event,
     Emitter<OnBoardingState> emit,
@@ -151,14 +120,12 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
 
     final next = event.source == _influencerSource
         ? OnBoardingPhase.attributionDetails
-        : OnBoardingPhase.socialProof;
+        : OnBoardingPhase.proofChart;
 
     _logScreenViewUsecase.call(
       screenName: 'OnBoardingRoute',
-      index: next == OnBoardingPhase.attributionDetails ? 5 : 6,
-      name: next == OnBoardingPhase.attributionDetails
-          ? 'attribution_details'
-          : 'social_proof',
+      index: _phaseIndex(next),
+      name: next.name,
     );
 
     emit(_readyState().copyWith(
@@ -178,7 +145,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
-    emit(_readyState().copyWith(phase: OnBoardingPhase.socialProof));
+    emit(_readyState().copyWith(phase: OnBoardingPhase.proofChart));
   }
 
   void _onOnBoardingAttributionSkippedEvent(
@@ -189,7 +156,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       eventName: 'Onboarding Attribution Skipped',
       properties: {'timestamp': DateTime.now().toIso8601String()},
     );
-    emit(_readyState().copyWith(phase: OnBoardingPhase.socialProof));
+    emit(_readyState().copyWith(phase: OnBoardingPhase.proofChart));
   }
 
   void _onOnBoardingAdvancePhaseEvent(
@@ -198,9 +165,16 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
   ) {
     final current = _readyState();
     final next = switch (current.phase) {
-      OnBoardingPhase.socialProof => OnBoardingPhase.whyYucat,
-      OnBoardingPhase.whyYucat => OnBoardingPhase.domainPitch,
-      OnBoardingPhase.domainPitch => OnBoardingPhase.addCatIntro,
+      OnBoardingPhase.scanDemo => OnBoardingPhase.attribution,
+      OnBoardingPhase.proofChart => OnBoardingPhase.whyYucat,
+      OnBoardingPhase.whyYucat => OnBoardingPhase.nutritionFact,
+      OnBoardingPhase.nutritionFact => OnBoardingPhase.profileIntro,
+      OnBoardingPhase.profileIntro => OnBoardingPhase.profilePhoto,
+      OnBoardingPhase.profilePhoto => OnBoardingPhase.profileName,
+      OnBoardingPhase.profileName => OnBoardingPhase.rating,
+      OnBoardingPhase.rating => OnBoardingPhase.notifPrimer,
+      OnBoardingPhase.notifPrimer => OnBoardingPhase.reminders,
+      OnBoardingPhase.reminders => OnBoardingPhase.healthIntro,
       _ => current.phase,
     };
     if (next != current.phase) {
@@ -219,18 +193,39 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
   ) {
     final current = _readyState();
     final prev = switch (current.phase) {
-      OnBoardingPhase.attribution => OnBoardingPhase.valueCarousel,
+      OnBoardingPhase.scanDemo => OnBoardingPhase.welcome,
+      OnBoardingPhase.attribution => OnBoardingPhase.scanDemo,
       OnBoardingPhase.attributionDetails => OnBoardingPhase.attribution,
-      OnBoardingPhase.socialProof =>
+      OnBoardingPhase.proofChart =>
         current.selectedSource == _influencerSource
             ? OnBoardingPhase.attributionDetails
             : OnBoardingPhase.attribution,
-      OnBoardingPhase.whyYucat => OnBoardingPhase.socialProof,
-      OnBoardingPhase.domainPitch => OnBoardingPhase.whyYucat,
-      OnBoardingPhase.addCatIntro => OnBoardingPhase.domainPitch,
+      OnBoardingPhase.whyYucat => OnBoardingPhase.proofChart,
+      OnBoardingPhase.nutritionFact => OnBoardingPhase.whyYucat,
+      OnBoardingPhase.profileIntro => OnBoardingPhase.nutritionFact,
+      OnBoardingPhase.profilePhoto => OnBoardingPhase.profileIntro,
+      OnBoardingPhase.profileName => OnBoardingPhase.profilePhoto,
+      OnBoardingPhase.rating => OnBoardingPhase.profileName,
+      OnBoardingPhase.notifPrimer => OnBoardingPhase.rating,
+      OnBoardingPhase.reminders => OnBoardingPhase.notifPrimer,
+      OnBoardingPhase.healthIntro => OnBoardingPhase.reminders,
       _ => current.phase,
     };
     emit(current.copyWith(phase: prev));
+  }
+
+  void _onOnBoardingPhotoSeededEvent(
+    OnBoardingPhotoSeededEvent event,
+    Emitter<OnBoardingState> emit,
+  ) {
+    emit(_readyState().copyWith(seededPhotoPath: event.photoPath));
+  }
+
+  void _onOnBoardingNameSeededEvent(
+    OnBoardingNameSeededEvent event,
+    Emitter<OnBoardingState> emit,
+  ) {
+    emit(_readyState().copyWith(seededName: event.name));
   }
 
   int _phaseIndex(OnBoardingPhase phase) {
@@ -246,9 +241,21 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     // when the user taps "Start scanning" on E0 (see _onOnBoardingFinalizedEvent).
     await _prefs.setBool(_onboardingCompletedKey, true);
 
-    await event.context.router.push(CreateCatRoute());
+    final current = _readyState();
 
-    emit(_readyState().copyWith(phase: OnBoardingPhase.success));
+    // The wizard returns an at-a-glance profile summary when it pops.
+    final result = await event.context.router.push(
+      CreateCatRoute(
+        seededName: current.seededName,
+        seededPhotoPath: current.seededPhotoPath,
+      ),
+    );
+    final catSummary = result is List<String> ? result : const <String>[];
+
+    emit(_readyState().copyWith(
+      phase: OnBoardingPhase.success,
+      catSummary: catSummary,
+    ));
 
     _logScreenViewUsecase.call(
       screenName: 'OnBoardingRoute',
@@ -275,6 +282,10 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       },
     );
 
-    event.context.router.replace(const MainRoute());
+    // Show the paywall as the final beat of onboarding. Whether the user
+    // converts or dismisses, we land them on the main app after.
+    final router = event.context.router;
+    await router.push(const PaywallRoute());
+    await router.replace(const MainRoute());
   }
 }
