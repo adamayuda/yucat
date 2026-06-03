@@ -3,7 +3,7 @@ description: "A new Flutter project."
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.1.0+2
+version: 1.1.0+5
 
 environment:
   sdk: ^3.8.1
@@ -38,6 +38,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   firebase_analytics: ^11.6.0
   lottie: ^3.0.0
+  flutter_svg: ^2.0.0
   mixpanel_flutter: ^2.5.0
   camera: ^0.11.2+1
   in_app_review: ^2.0.10
@@ -59,3 +60,8 @@ flutter:
     - assets/images/
     - assets/images/Icons/
     - assets/images/Illustrations/
+
+  fonts:
+    - family: BricolageGrotesque
+      fonts:
+        - asset: assets/fonts/BricolageGrotesque-Variable.ttf

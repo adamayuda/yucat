@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -150,15 +149,14 @@ class _ProfileLoadedState extends StatelessWidget {
                             errorMessage: 'Could not open Terms & Conditions',
                           ),
                         ),
-                        if (kDebugMode) ...[
-                          const _MenuDivider(),
-                          _ProfileMenuItem(
-                            icon: Icons.refresh_rounded,
-                            label: 'Reset onboarding',
-                            sublabel: 'Debug only',
-                            onTap: onResetOnboardingTap,
-                          ),
-                        ],
+                        // TODO: remove before App Store release — TestFlight-only debug affordance.
+                        const _MenuDivider(),
+                        _ProfileMenuItem(
+                          icon: Icons.refresh_rounded,
+                          label: 'Reset onboarding',
+                          sublabel: 'Debug only',
+                          onTap: onResetOnboardingTap,
+                        ),
                       ],
                     ),
                   ),

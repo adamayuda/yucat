@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
-import 'package:yucat/presentation/components/ds_pill_button.dart';
-import 'package:yucat/presentation/components/ds_stat_pill.dart';
-import 'package:yucat/presentation/components/line_chart_card.dart';
-import 'package:yucat/presentation/components/onboarding_scaffold.dart';
+import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 
 class ProofChartScreen extends StatelessWidget {
   final VoidCallback onNext;
@@ -15,38 +13,86 @@ class ProofChartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OnboardingScaffold(
-      background: DSColors.tintMint,
-      footer: DSPillButton(label: 'Next', onPressed: onNext),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final width = MediaQuery.sizeOf(context).width;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFEFEEF5),
+      body: Stack(
         children: [
-          const SizedBox(height: DSDimens.sizeS),
-          Text(
-            'Find the right\nfood faster',
-            style: DSTextStyles.displayLg,
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/onboarding-4-bg.png',
+              fit: BoxFit.cover,
+            ),
           ),
-          const SizedBox(height: DSDimens.sizeS),
-          Text(
-            'Scan by scan, YuCat homes in on what fits your cat — instead of guessing brand to brand.',
-            style: DSTextStyles.bodyLg.copyWith(color: DSColors.inkSecondary),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Clear the back chip overlaid by onboarding_page.dart.
+                  const SizedBox(height: 48),
+                  Text(
+                    'YuCat provides\nlong-term results',
+                    textAlign: TextAlign.center,
+                    style: DSTextStyles.displayLg,
+                  ),
+                  const Spacer(),
+                  SvgPicture.asset(
+                    'assets/images/onboarding-graph.svg',
+                    width: width * 0.82,
+                  ),
+                  const Spacer(),
+                  // TODO: replace placeholder stat with a real, cited figure.
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: DSDimens.sizeS,
+                      vertical: DSDimens.sizeS,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDFEFE1),
+                      borderRadius: BorderRadius.circular(DSRadii.lg),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/images/onboarding-arrow-up.svg',
+                          width: 22,
+                        ),
+                        const SizedBox(width: DSDimens.sizeXs),
+                        Expanded(
+                          child: Text.rich(
+                            TextSpan(
+                              style: DSTextStyles.bodyMd.copyWith(
+                                color: DSColors.inkSecondary,
+                              ),
+                              children: const [
+                                TextSpan(
+                                  text: '76% YuCat users ',
+                                  style: TextStyle(
+                                    color: DSColors.inkPrimary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text:
+                                      'find a better-fit food in under 2 weeks',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  OnboardingFloatingButton(label: 'Next', onPressed: onNext),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: DSDimens.size3xl),
-          const LineChartCard(
-            yourLabel: 'With YuCat',
-            theirsLabel: 'Guessing',
-            yourTagText: 'YuCat',
-            xAxisLabel: 'Bags scanned',
-          ),
-          const SizedBox(height: DSDimens.sizeL),
-          // TODO: replace placeholder stat with a real, cited figure.
-          DSStatPill(
-            stat: '76%',
-            description: 'of cats are on a better-fit food within 2 weeks',
-            background: DSColors.surfaceCard,
-            icon: Icons.trending_up_rounded,
-          ),
-          const Spacer(),
         ],
       ),
     );

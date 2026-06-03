@@ -136,7 +136,8 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 |---|---|---|
 | `OnboardingScaffold` | `onboarding_scaffold.dart` | Tinted bg + optional back chip + content + footer slot. Onboarding A–D screens. |
 | `WizardStepShell` | `wizard_step_shell.dart` | Top nav (× back + progress bar) + content + sticky CTA. Modes: bottom-anchored (default) or `floatingNext` overlay. Optional `altCtaLabel` ("None of these" on HealthConditions). |
-| `DSPillButton` | `ds_pill_button.dart` | Black-pill primary CTA with chevron. Variants: `primary` (black/inkInverse), `secondary` (white/inkPrimary). Props: `loading`, `leadingIcon`, `showChevron`. Companion: `DSTextLink` for inline secondary text links. |
+| `DSPillButton` | `ds_pill_button.dart` | Black-pill primary CTA with chevron. Variants: `primary` (black/inkInverse), `secondary` (white/inkPrimary). Props: `loading`, `leadingIcon`, `showChevron`, `verticalPadding`. Companion: `DSTextLink` for inline secondary text links. |
+| `OnboardingFloatingButton` | `onboarding_floating_button.dart` | Wraps `DSPillButton` with a consistent bottom margin. Placed as the LAST child of a survey screen's content column (preceding `Spacer`/`Expanded` pushes it down) so the CTA sits bottom-anchored at the same height across onboarding screens 2–4 (scan / attribution / proof chart). |
 | `DSCard` | `ds_card.dart` | White surface, `DSRadii.xl`, `e2` shadow. Optional `onTap` ripple. Base for nearly every grouping. |
 | `DSChip` | `ds_chip.dart` | Tinted soft pill with optional leading icon. Used for emphasis chips on stat/quote screens. |
 | `DSOptionRow` | `ds_option_row.dart` | White pill row, optional emoji/icon + label + radio indicator. Variants: `accent: success` (green ✓) / `danger` (coral ✗ — HealthConditions step). |

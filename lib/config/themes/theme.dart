@@ -57,6 +57,9 @@ class DSColors {
   // Brand (logo only — do not use as UI primary)
   static const Color brandPink = Color(0xFFED67CA);
 
+  // Logo / splash background (matches the pink baked into logo.svg)
+  static const Color splashPink = Color(0xFFFDD4DD);
+
   // Coral selection accent (chips, slider, selected card border)
   static const Color coralAccent = Color(0xFFFF7A59);
   static const Color coralSurface = Color(0xFFFFF1ED);
@@ -121,28 +124,29 @@ class DSMotion {
 }
 
 class DSTextStyles {
-  static TextStyle get displayHero => GoogleFonts.lilitaOne(
-    fontSize: 44,
-    height: 46 / 44,
-    fontWeight: FontWeight.w400,
-    color: DSColors.inkPrimary,
-    letterSpacing: -0.5,
-  );
+  /// Bundled variable font (see `pubspec.yaml` `fonts:`).
+  static const String _titleFamily = 'BricolageGrotesque';
 
-  static TextStyle get displayLg => GoogleFonts.lilitaOne(
-    fontSize: 36,
-    height: 38 / 36,
-    fontWeight: FontWeight.w400,
-    color: DSColors.inkPrimary,
-    letterSpacing: -0.3,
-  );
+  /// Shared title/display style — Bricolage Grotesque, heavy + condensed.
+  /// All headings use this; only the [size] varies.
+  static TextStyle title(double size, {Color color = DSColors.inkPrimary}) =>
+      TextStyle(
+        fontFamily: _titleFamily,
+        fontSize: size,
+        height: 0.92,
+        letterSpacing: size * -0.013,
+        color: color,
+        fontVariations: const [
+          FontVariation('wght', 800), // heaviest
+          FontVariation('wdth', 75), // condensed
+        ],
+      );
 
-  static TextStyle get headlineMd => GoogleFonts.lilitaOne(
-    fontSize: 24,
-    height: 28 / 24,
-    fontWeight: FontWeight.w400,
-    color: DSColors.inkPrimary,
-  );
+  static TextStyle get displayHero => title(44);
+
+  static TextStyle get displayLg => title(36);
+
+  static TextStyle get headlineMd => title(24);
 
   static TextStyle get titleMd => GoogleFonts.dmSans(
     fontSize: 18,

@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/splash/presentation/bloc/splash_bloc.dart';
 
@@ -42,11 +43,14 @@ class _SplashContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: DSColors.tintLavender,
+    return Scaffold(
+      backgroundColor: DSColors.splashPink,
       body: SafeArea(
         child: Center(
-          child: Text('🐱', style: TextStyle(fontSize: 96)),
+          child: SvgPicture.asset(
+            'assets/images/logo.svg',
+            width: 220,
+          ),
         ),
       ),
     );

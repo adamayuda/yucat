@@ -10,6 +10,7 @@ class DSPillButton extends StatelessWidget {
   final bool showChevron;
   final bool loading;
   final IconData? leadingIcon;
+  final double verticalPadding;
 
   const DSPillButton({
     super.key,
@@ -19,6 +20,7 @@ class DSPillButton extends StatelessWidget {
     this.showChevron = true,
     this.loading = false,
     this.leadingIcon,
+    this.verticalPadding = DSDimens.sizeS,
   });
 
   @override
@@ -37,9 +39,9 @@ class DSPillButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(DSRadii.pill),
           onTap: disabled ? null : onPressed,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
+            padding: EdgeInsets.symmetric(
               horizontal: DSDimens.sizeXxl,
-              vertical: DSDimens.sizeS,
+              vertical: verticalPadding,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/ds_option_row.dart';
-import 'package:yucat/presentation/components/ds_pill_button.dart';
+import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
 class _AttributionOption {
@@ -51,22 +51,13 @@ class _AttributionScreenState extends State<AttributionScreen> {
     final hasSelection = _selected != null;
 
     return OnboardingScaffold(
-      background: DSColors.tintAsh,
-      footer: hasSelection
-          ? DSPillButton(
-              label: 'Next',
-              onPressed: () => widget.onSelect(_selected!),
-            )
-          : DSPillButton(
-              label: 'Skip',
-              onPressed: widget.onSkip,
-            ),
+      background: const Color(0xFFEFEEF5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: DSDimens.sizeS),
           Text(
-            'How did you\nhear about us?',
+            'How did you hear\nabout us?',
             textAlign: TextAlign.center,
             style: DSTextStyles.displayLg,
           ),
@@ -87,6 +78,12 @@ class _AttributionScreenState extends State<AttributionScreen> {
                 );
               },
             ),
+          ),
+          OnboardingFloatingButton(
+            label: hasSelection ? 'Next' : 'Skip',
+            onPressed: hasSelection
+                ? () => widget.onSelect(_selected!)
+                : widget.onSkip,
           ),
         ],
       ),

@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
-import 'package:yucat/presentation/components/ds_dot_indicator.dart';
-import 'package:yucat/presentation/components/ds_pill_button.dart';
-import 'package:yucat/presentation/components/onboarding_scaffold.dart';
+import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 
-/// Social-proof screen — App Store rating + a carousel of reviews.
+/// Social-proof screen — App Store rating + a stack of reviews.
 ///
 /// Presentational only. The native review modal is intentionally not
 /// triggered here: Apple discourages onboarding-time prompts and the
 /// app already has a scan-gated `ReviewPromptService` for high-intent
 /// moments.
 // TODO(feature): optionally wire a "Rate YuCat" deep-link to the App Store.
-class RatingScreen extends StatefulWidget {
+class RatingScreen extends StatelessWidget {
   final VoidCallback onNext;
 
   const RatingScreen({
@@ -20,7 +18,79 @@ class RatingScreen extends StatefulWidget {
   });
 
   @override
-  State<RatingScreen> createState() => _RatingScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // Matches the cream gradient in onboarding-7-bg.png so the header art
+      // (which fades to transparent at its base) blends into the background.
+      backgroundColor: const Color(0xFFFFF8EA),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Decorative header: mascot, scattered stars and the laurel wreaths
+            // that flank the stats. Pinned full-width at the top.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Image.asset(
+                'assets/images/onboarding-7-bg.png',
+                fit: BoxFit.fitWidth,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Clear the back chip + the mascot art at the top.
+                  const SizedBox(height: 116),
+                  Text(
+                    'Help us grow',
+                    style: DSTextStyles.caption.copyWith(
+                      color: DSColors.inkSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: DSDimens.sizeXxs),
+                  Text(
+                    'Give us rating',
+                    textAlign: TextAlign.center,
+                    style: DSTextStyles.displayLg,
+                  ),
+                  const SizedBox(height: DSDimens.sizeXxl),
+                  // Stats sit between the laurel wreaths drawn in the header.
+                  const Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: DSDimens.sizeXxl),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _StatBlock(value: '4.8', label: 'average rating'),
+                        Spacer(),
+                        _PeopleBlock(),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: DSDimens.sizeXxl),
+                  Expanded(
+                    child: ListView.separated(
+                      padding: const EdgeInsets.only(bottom: DSDimens.sizeS),
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: _reviews.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: DSDimens.sizeS),
+                      itemBuilder: (_, i) => _ReviewCard(review: _reviews[i]),
+                    ),
+                  ),
+                  OnboardingFloatingButton(label: 'Next', onPressed: onNext),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _Review {
@@ -40,8 +110,15 @@ const _reviews = [
     headline: 'Exactly what I needed!',
     body:
         "I scanned my cat's kibble and finally understood what was in it. "
-        'Switched brands the same week.',
+        'Switched brands the same week and never looked back.',
     author: 'Felicia',
+  ),
+  _Review(
+    headline: 'Loving this app!!!',
+    body:
+        'Amazing app, so easy to use. I just upload pictures of the food and '
+        'it tells me everything great!',
+    author: 'Joshua_la',
   ),
   _Review(
     headline: 'A senior-cat lifesaver',
@@ -50,108 +127,7 @@ const _reviews = [
         'in one afternoon.',
     author: 'Sophie',
   ),
-  _Review(
-    headline: 'Finally, a clear answer',
-    body:
-        "Two cats, two very different needs. Now I know which food actually "
-        'fits each of them.',
-    author: 'Priya',
-  ),
 ];
-
-class _RatingScreenState extends State<RatingScreen> {
-  final PageController _controller = PageController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return OnboardingScaffold(
-      background: DSColors.tintSand,
-      footer: DSPillButton(label: 'Next', onPressed: widget.onNext),
-      child: Stack(
-        children: [
-          // hero emoji at top
-          const Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Center(child: Text('🤩', style: TextStyle(fontSize: 72))),
-          ),
-          // scattered star decorations
-          const Positioned(
-            top: 12,
-            left: 16,
-            child: Text('⭐', style: TextStyle(fontSize: 22)),
-          ),
-          const Positioned(
-            top: 60,
-            right: 30,
-            child: Text('⭐', style: TextStyle(fontSize: 16)),
-          ),
-          const Positioned(
-            top: 100,
-            left: 24,
-            child: Text('⭐', style: TextStyle(fontSize: 14)),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 96),
-              Text(
-                'Help us grow',
-                style: DSTextStyles.caption.copyWith(
-                  color: DSColors.inkSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: DSDimens.sizeXxs),
-              Text(
-                'Give us a rating',
-                textAlign: TextAlign.center,
-                style: DSTextStyles.displayLg,
-              ),
-              const SizedBox(height: DSDimens.size3xl),
-              Row(
-                children: const [
-                  Expanded(
-                    child: _StatBlock(value: '4.8', label: 'average rating'),
-                  ),
-                  SizedBox(width: DSDimens.sizeS),
-                  Expanded(
-                    child: _StatBlock(value: '2M+', label: 'cat parents'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: DSDimens.sizeS),
-              SizedBox(
-                height: 170,
-                child: PageView(
-                  controller: _controller,
-                  children: [
-                    for (final r in _reviews) _ReviewCard(review: r),
-                  ],
-                ),
-              ),
-              const SizedBox(height: DSDimens.sizeXs),
-              Center(
-                child: DSDotIndicator(
-                  controller: _controller,
-                  count: _reviews.length,
-                ),
-              ),
-              const Spacer(),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _StatBlock extends StatelessWidget {
   final String value;
@@ -161,29 +137,65 @@ class _StatBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: DSDimens.sizeL,
-        horizontal: DSDimens.sizeS,
-      ),
-      decoration: BoxDecoration(
-        color: DSColors.surfaceCard,
-        borderRadius: BorderRadius.circular(DSRadii.xl),
-        boxShadow: DSShadows.e2,
-      ),
-      child: Column(
-        children: [
-          Text(value, style: DSTextStyles.displayLg),
-          const SizedBox(height: DSDimens.sizeXxxs),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: DSTextStyles.caption.copyWith(
-              color: DSColors.inkSecondary,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(value, style: DSTextStyles.displayLg),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: DSTextStyles.caption.copyWith(color: DSColors.inkSecondary),
+        ),
+      ],
+    );
+  }
+}
+
+class _PeopleBlock extends StatelessWidget {
+  const _PeopleBlock();
+
+  static const _faces = ['👩', '🧑', '👧'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          height: 36,
+          width: 36.0 + (_faces.length - 1) * 22,
+          child: Stack(
+            children: [
+              for (var i = 0; i < _faces.length; i++)
+                Positioned(
+                  left: i * 22.0,
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: DSColors.surfaceCard,
+                      border: Border.all(
+                        color: const Color(0xFFFFF8EA),
+                        width: 2,
+                      ),
+                    ),
+                    child: Text(
+                      _faces[i],
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: DSDimens.sizeXxxs),
+        Text(
+          '2M+ people',
+          style: DSTextStyles.caption.copyWith(color: DSColors.inkSecondary),
+        ),
+      ],
     );
   }
 }
@@ -196,7 +208,7 @@ class _ReviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(DSDimens.sizeS),
+      padding: const EdgeInsets.all(DSDimens.sizeM),
       decoration: BoxDecoration(
         color: DSColors.surfaceCard,
         borderRadius: BorderRadius.circular(DSRadii.lg),
@@ -205,35 +217,32 @@ class _ReviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: List.generate(
-              5,
-              (_) => const Icon(
-                Icons.star_rounded,
-                size: 16,
-                color: DSColors.coralAccent,
-              ),
-            ),
-          ),
+          Text(review.headline, style: DSTextStyles.titleMd),
           const SizedBox(height: DSDimens.sizeXxs),
-          Text(
-            review.headline,
-            style: DSTextStyles.titleMd,
+          Row(
+            children: [
+              ...List.generate(
+                5,
+                (_) => const Icon(
+                  Icons.star_rounded,
+                  size: 16,
+                  color: DSColors.coralAccent,
+                ),
+              ),
+              const SizedBox(width: DSDimens.sizeXs),
+              Text(
+                review.author,
+                style: DSTextStyles.caption.copyWith(
+                  color: DSColors.inkSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: DSDimens.sizeXxxs),
-          Expanded(
-            child: Text(
-              review.body,
-              style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkSecondary),
-            ),
-          ),
-          const SizedBox(height: DSDimens.sizeXxxs),
+          const SizedBox(height: DSDimens.sizeXs),
           Text(
-            review.author,
-            style: DSTextStyles.caption.copyWith(
-              color: DSColors.inkTertiary,
-              fontWeight: FontWeight.w600,
-            ),
+            review.body,
+            style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkSecondary),
           ),
         ],
       ),
