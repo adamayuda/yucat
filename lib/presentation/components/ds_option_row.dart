@@ -102,12 +102,9 @@ class DSOptionRow extends StatelessWidget {
                   Container(
                     width: 22,
                     height: 22,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: DSColors.inkTertiary,
-                        width: 2,
-                      ),
+                      color: Color(0xFFE5E3EC),
                     ),
                   ),
               ],

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
 class ProfileIntroScreen extends StatelessWidget {
   final VoidCallback onNext;
+
+  static const Color _background = Color(0xFFEFEEF5);
+  static const Color _quoteSurface = Color(0xFFE5E4EB);
 
   const ProfileIntroScreen({
     super.key,
@@ -14,18 +18,16 @@ class ProfileIntroScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OnboardingScaffold(
-      background: DSColors.tintAsh,
+      background: _background,
       footer: DSPillButton(label: 'Next', onPressed: onNext),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Spacer(flex: 1),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('👋', style: TextStyle(fontSize: 56)),
-              Text('👋', style: TextStyle(fontSize: 56)),
-            ],
+          const Spacer(flex: 2),
+          // Upper-left paw
+          Align(
+            alignment: const Alignment(-0.5, 0),
+            child: SvgPicture.asset('assets/images/cat-paw.svg', width: 72),
           ),
           const SizedBox(height: DSDimens.size3xl),
           Text(
@@ -33,31 +35,44 @@ class ProfileIntroScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: DSTextStyles.displayHero,
           ),
+          const SizedBox(height: DSDimens.size3xl),
+          // Lower-right paw (horizontally flipped)
+          Align(
+            alignment: const Alignment(0.5, 0),
+            child: Transform.flip(
+              flipX: true,
+              child: SvgPicture.asset('assets/images/cat-paw.svg', width: 72),
+            ),
+          ),
           const Spacer(flex: 2),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: DSDimens.sizeS,
-              vertical: DSDimens.sizeXs,
-            ),
-            decoration: BoxDecoration(
-              color: DSColors.surfaceCardDim,
-              borderRadius: BorderRadius.circular(DSRadii.pill),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '2 min',
-                  style: DSTextStyles.displayLg.copyWith(fontSize: 22),
-                ),
-                const SizedBox(width: DSDimens.sizeXs),
-                Flexible(
-                  child: Text(
-                    'A quick profile unlocks\ntailored verdicts on every bag',
-                    style: DSTextStyles.bodyMd,
-                  ),
-                ),
-              ],
+          _QuoteCard(),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuoteCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(DSDimens.sizeS),
+      decoration: BoxDecoration(
+        color: ProfileIntroScreen._quoteSurface,
+        borderRadius: BorderRadius.circular(DSRadii.lg),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            '2 min',
+            style: DSTextStyles.displayLg.copyWith(fontSize: 22),
+          ),
+          const SizedBox(width: DSDimens.sizeS),
+          Expanded(
+            child: Text(
+              'A quick profile unlocks tailored verdicts on every bag',
+              style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkPrimary),
             ),
           ),
         ],

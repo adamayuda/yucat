@@ -15,25 +15,25 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
       icon: Icons.qr_code_scanner_rounded,
       title: 'Scanning barcode',
       description: 'Reading product code...',
-      gifPath: 'assets/images/Illustrations/Scanning barcode_1.gif',
+      gifPath: 'assets/images/Illustrations/loading-scanning.gif',
     ),
     const LoadingStep(
       icon: Icons.cloud_download_rounded,
       title: 'Fetching product data',
       description: 'Retrieving information...',
-      gifPath: 'assets/images/Illustrations/Fetching product data_2.gif',
+      gifPath: 'assets/images/Illustrations/loading-fetching.gif',
     ),
     const LoadingStep(
       icon: Icons.science_rounded,
       title: 'Analyzing ingredients',
       description: 'Processing nutritional data...',
-      gifPath: 'assets/images/Illustrations/Analyzing ingredients_3.gif',
+      gifPath: 'assets/images/Illustrations/loading-analyzing.gif',
     ),
     const LoadingStep(
       icon: Icons.assignment_rounded,
       title: 'Preparing results',
       description: 'Almost ready...',
-      gifPath: 'assets/images/Illustrations/Almost ready_4.gif',
+      gifPath: 'assets/images/Illustrations/loading-almost-ready.gif',
     ),
   ];
 

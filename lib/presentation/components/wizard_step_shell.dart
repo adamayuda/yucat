@@ -12,6 +12,11 @@ class WizardStepShell extends StatelessWidget {
   final bool isSubmitting;
   final bool ctaEnabled;
   final Color background;
+
+  /// Optional full-screen gradient painted behind the entire step (nav row,
+  /// content, and CTA). When set, [background] is used only for the
+  /// floating-next fade overlay; the Scaffold itself is transparent.
+  final Gradient? backgroundGradient;
   final bool useCloseIcon;
 
   /// Optional alternate label shown when [hasSelection] is `false`.
@@ -35,6 +40,7 @@ class WizardStepShell extends StatelessWidget {
     this.isSubmitting = false,
     this.ctaEnabled = true,
     this.background = DSColors.tintLavender,
+    this.backgroundGradient,
     this.useCloseIcon = false,
     this.altCtaLabel,
     this.hasSelection = true,
@@ -54,10 +60,8 @@ class WizardStepShell extends StatelessWidget {
       onPressed: (ctaEnabled && !isSubmitting) ? onNext : null,
     );
 
-    return Scaffold(
-      backgroundColor: background,
-      body: SafeArea(
-        child: Padding(
+    final body = SafeArea(
+      child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
           child: Column(
             children: [
@@ -93,7 +97,17 @@ class WizardStepShell extends StatelessWidget {
             ],
           ),
         ),
-      ),
+    );
+
+    return Scaffold(
+      backgroundColor:
+          backgroundGradient != null ? Colors.transparent : background,
+      body: backgroundGradient != null
+          ? DecoratedBox(
+              decoration: BoxDecoration(gradient: backgroundGradient),
+              child: SizedBox.expand(child: body),
+            )
+          : body,
     );
   }
 }

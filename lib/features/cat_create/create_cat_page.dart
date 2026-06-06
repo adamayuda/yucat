@@ -18,6 +18,7 @@ import 'package:yucat/features/cat_create/widgets/steps/health_conditions_step.d
 import 'package:yucat/features/cat_create/widgets/steps/interstitial_fact_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/neutered_status_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/profile_photo_step.dart';
+import 'package:yucat/features/cat_create/widgets/steps/water_intake_fact_step.dart';
 import 'package:yucat/features/cat_create/widgets/medical_disclaimer_sheet.dart';
 import 'package:yucat/presentation/components/wizard_step_shell.dart';
 import 'package:yucat/service_locator.dart';
@@ -218,6 +219,13 @@ class _CreateCatPageState extends State<CreateCatPage> {
       background: _seededFromOnboarding
           ? DSColors.tintSky
           : DSColors.tintLavender,
+      backgroundGradient: currentStep == 5
+          ? const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFA5CAFF), Color(0xFFEFEEF5)],
+            )
+          : null,
       ctaLabel: isLast
           ? finalCtaLabel
           : isFactStep
@@ -345,16 +353,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
           },
         );
       case 5:
-        return const InterstitialFactStep(
-          key: ValueKey('step_5'),
-          icon: Icons.pets_rounded,
-          accent: DSColors.accentInfo,
-          headline:
-              'Active cats burn ~30% more calories than couch dwellers',
-          highlight: '~30% more calories',
-          body:
-              'We factor activity into every verdict so portions and calorie density match your cat\'s real needs.',
-        );
+        return const WaterIntakeFactStep(key: ValueKey('step_5'));
       case 6:
         return NeuteredStatusStep(
           key: const ValueKey('step_6'),

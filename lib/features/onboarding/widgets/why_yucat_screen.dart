@@ -12,15 +12,17 @@ class WhyYucatScreen extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFCAD8FF),
+      backgroundColor: const Color(0xFFEFEEF5),
       body: Stack(
+        fit: StackFit.expand,
         children: [
-          // Stretch the gradient bg to fill the full screen width and height
-          // (BoxFit.fill) so no Scaffold color peeks on any device aspect.
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/onboarding-5-bg.png',
-              fit: BoxFit.fill,
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFFCAD8FF), Color(0xFFEFEEF5)],
+              ),
             ),
           ),
           SafeArea(
@@ -50,7 +52,10 @@ class WhyYucatScreen extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  OnboardingFloatingButton(label: "Let's go", onPressed: onNext),
+                  OnboardingFloatingButton(
+                    label: "Let's go",
+                    onPressed: onNext,
+                  ),
                 ],
               ),
             ),

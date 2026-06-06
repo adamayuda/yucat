@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/onboarding/bloc/onboarding_bloc.dart';
 import 'package:yucat/features/onboarding/widgets/attribution_details_screen.dart';
@@ -31,6 +32,7 @@ class OnBoardingPage extends StatefulWidget {
 class _OnBoardingPage extends State<OnBoardingPage> {
   late OnBoardingBloc _bloc;
   late final PageController _pageController;
+  bool _assetsWarmed = false;
 
   @override
   void initState() {
@@ -38,6 +40,18 @@ class _OnBoardingPage extends State<OnBoardingPage> {
     _bloc = context.read<OnBoardingBloc>();
     _pageController = PageController();
     _bloc.add(OnBoardingInitialEvent(context: context));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_assetsWarmed) return;
+    _assetsWarmed = true;
+
+    // Warm the flutter_svg compile cache so the proof-chart graph doesn't
+    // compile on the frame the page slides in (which caused visible jank).
+    const loader = SvgAssetLoader('assets/images/onboarding-graph.svg');
+    svg.cache.putIfAbsent(loader.cacheKey(null), () => loader.loadBytes(null));
   }
 
   @override

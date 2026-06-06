@@ -192,7 +192,7 @@ class _EmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const DSStateView.empty(
-      illustrationAsset: 'assets/images/Illustrations/Add new cat.gif',
+      illustrationAsset: 'assets/images/Illustrations/empty-state.gif',
       headline: 'No saved products yet',
       body: 'Tap the bookmark on a product detail page to save it here.',
     );

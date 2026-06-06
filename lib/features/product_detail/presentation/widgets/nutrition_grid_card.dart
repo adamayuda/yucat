@@ -19,35 +19,35 @@ class NutritionGridCard extends StatelessWidget {
         children: [
           Expanded(
             child: _MacroCell(
-              iconAsset: 'assets/images/Icons/egg.png',
+              iconAsset: 'assets/images/Icons/nutrient-protein.png',
               label: 'Protein',
               value: '${product.protein.toStringAsFixed(1)}%',
             ),
           ),
           Expanded(
             child: _MacroCell(
-              iconAsset: 'assets/images/Icons/butter.png',
+              iconAsset: 'assets/images/Icons/nutrient-fat.png',
               label: 'Fat',
               value: '${product.fat.toStringAsFixed(1)}%',
             ),
           ),
           Expanded(
             child: _MacroCell(
-              iconAsset: 'assets/images/Icons/water.png',
+              iconAsset: 'assets/images/Icons/nutrient-moisture.png',
               label: 'Moisture',
               value: '${product.moisture.toStringAsFixed(1)}%',
             ),
           ),
           Expanded(
             child: _MacroCell(
-              iconAsset: 'assets/images/Icons/fire.png',
+              iconAsset: 'assets/images/Icons/nutrient-fiber.png',
               label: 'Fiber',
               value: '${product.fiber.toStringAsFixed(1)}%',
             ),
           ),
           Expanded(
             child: _MacroCell(
-              iconAsset: 'assets/images/Icons/wheat.png',
+              iconAsset: 'assets/images/Icons/nutrient-carbs.png',
               label: 'Carbs',
               value: '${product.carbs.toStringAsFixed(1)}%',
             ),

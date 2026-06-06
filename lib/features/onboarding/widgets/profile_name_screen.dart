@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
@@ -63,64 +64,90 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
 
     return OnboardingScaffold(
       background: DSColors.tintAsh,
-      footer: DSPillButton(
-        label: 'Next',
-        onPressed: hasName
-            ? () => widget.onNext(_controller.text.trim())
-            : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      footer: Row(
         children: [
-          const SizedBox(height: DSDimens.sizeS),
-          Text(
-            "What's your\ncat's name?",
-            textAlign: TextAlign.center,
-            style: DSTextStyles.displayHero,
+          _SuggestButton(onTap: _randomize),
+          const Spacer(),
+          DSPillButton(
+            label: 'Next',
+            onPressed: hasName
+                ? () {
+                    FocusScope.of(context).unfocus();
+                    widget.onNext(_controller.text.trim());
+                  }
+                : null,
           ),
-          const Spacer(flex: 1),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: DSDimens.sizeL,
-              vertical: DSDimens.sizeS,
+        ],
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Mascot peeking in from the top-right corner, clipped by the screen
+          // edges (bleeds off the top and the right past the scaffold padding).
+          Positioned(
+            top: -DSDimens.size4xl,
+            right: -DSDimens.size3xl,
+            child: SvgPicture.asset(
+              'assets/images/cat-side.svg',
+              width: 190,
             ),
-            decoration: BoxDecoration(
-              color: DSColors.surfaceCard,
-              borderRadius: BorderRadius.circular(DSRadii.lg),
-              boxShadow: DSShadows.e1,
-            ),
-            child: TextField(
-              controller: _controller,
-              autofocus: true,
-              textAlign: TextAlign.center,
-              textCapitalization: TextCapitalization.words,
-              style: DSTextStyles.displayLg,
-              cursorColor: DSColors.accentInfo,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Mochi',
-                hintStyle: DSTextStyles.displayLg.copyWith(
-                  color: DSColors.inkTertiary,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Spacer(flex: 2),
+              Text(
+                'Name your cat',
+                textAlign: TextAlign.center,
+                style: DSTextStyles.titleMd.copyWith(
+                  color: DSColors.inkSecondary,
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: DSDimens.sizeL),
-          TextButton.icon(
-            onPressed: _randomize,
-            icon: const Text('🎲', style: TextStyle(fontSize: 18)),
-            label: Text(
-              'Suggest a name',
-              style: DSTextStyles.label.copyWith(
-                fontWeight: FontWeight.w600,
+              const SizedBox(height: DSDimens.sizeXs),
+              TextField(
+                controller: _controller,
+                autofocus: true,
+                textAlign: TextAlign.center,
+                textCapitalization: TextCapitalization.words,
+                style: DSTextStyles.displayHero,
+                cursorColor: DSColors.accentInfo,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Mochi',
+                  hintStyle: DSTextStyles.displayHero.copyWith(
+                    color: DSColors.inkTertiary,
+                  ),
+                ),
               ),
-            ),
-            style: TextButton.styleFrom(
-              foregroundColor: DSColors.inkPrimary,
-            ),
+              const Spacer(flex: 3),
+            ],
           ),
-          const Spacer(flex: 2),
         ],
+      ),
+    );
+  }
+}
+
+class _SuggestButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _SuggestButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: DSColors.surfaceCardDim,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: const SizedBox(
+          width: 48,
+          height: 48,
+          child: Center(
+            child: Text('🎲', style: TextStyle(fontSize: 20)),
+          ),
+        ),
       ),
     );
   }

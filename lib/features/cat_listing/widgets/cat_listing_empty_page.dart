@@ -10,7 +10,7 @@ class CatListingEmptyWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: DSStateView.empty(
-        illustrationAsset: 'assets/images/Illustrations/Add new cat.gif',
+        illustrationAsset: 'assets/images/Illustrations/empty-state.gif',
         headline: 'No cats yet',
         body: "Create a profile so YuCat can match food to your cat's needs.",
         ctaLabel: 'Add my cat',

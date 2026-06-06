@@ -20,9 +20,14 @@ class ProofChartScreen extends StatelessWidget {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/onboarding-4-bg.png',
-              fit: BoxFit.cover,
+            child: const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFFE3FFDD), Color(0xFFEFEEF5)],
+                ),
+              ),
             ),
           ),
           SafeArea(
