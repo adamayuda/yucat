@@ -17,11 +17,11 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
   static const _createCatScreenName = 'CreateCatRoute';
   static const _stepNames = [
     'CatName',
-    'ProfilePhoto',
     'Gender',
+    'ProfilePhoto',
     'Age',
     'Activity',
-    'ActivityFact',
+    'WaterIntakeFact',
     'NeuteredStatus',
     'Coat',
     'CoatFact',
@@ -143,11 +143,19 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
       },
     );
 
+    // Land directly on the requested starting step. Emitting step 0 first
+    // (then jumping) would make the PageView animate toward the name step and
+    // desync the controller from the bloc on the seeded onboarding path.
     emit(
       CatCreateLoadedState(
-        currentStep: 0,
+        currentStep: event.initialStep,
         cat: event.cat ?? const CatCreateModel(name: '', neutered: false),
       ),
+    );
+    _logScreenViewUsecase.call(
+      screenName: _createCatScreenName,
+      index: event.initialStep,
+      name: _stepNames[event.initialStep],
     );
   }
 

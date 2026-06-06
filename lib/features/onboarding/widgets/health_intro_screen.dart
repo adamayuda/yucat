@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
@@ -8,15 +9,16 @@ import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 class HealthIntroScreen extends StatelessWidget {
   final VoidCallback onAddCat;
 
-  const HealthIntroScreen({
-    super.key,
-    required this.onAddCat,
-  });
+  const HealthIntroScreen({super.key, required this.onAddCat});
 
   @override
   Widget build(BuildContext context) {
     return OnboardingScaffold(
-      background: DSColors.tintSky,
+      gradient: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFFDFE6FD), Color(0xFFEFEEF5)],
+      ),
       footer: DSPillButton(label: "Let's go", onPressed: onAddCat),
       child: Stack(
         children: [
@@ -25,29 +27,57 @@ class HealthIntroScreen extends StatelessWidget {
             children: [
               const SizedBox(height: DSDimens.sizeS),
               Text(
-                'Now tell us\nabout your cat\'s\nhealth',
+                "Now tell us\nabout your cat's\nhealth",
                 textAlign: TextAlign.center,
                 style: DSTextStyles.displayHero,
               ),
               const Spacer(flex: 2),
-              const Text('😺', style: TextStyle(fontSize: 110)),
+              SvgPicture.asset('assets/images/cat-thinking.svg', height: 280),
               const Spacer(flex: 1),
             ],
           ),
-          const Positioned(
-            top: 200,
-            left: 30,
-            child: _ThoughtBubble(emoji: '🎂'),
+          // Floating thought clouds above the mascot — spaced apart and
+          // staggered, the meat sitting higher than the apple.
+          Positioned(
+            top: 220,
+            left: 28,
+            child: ExcludeSemantics(
+              child: SvgPicture.asset(
+                'assets/images/apple-cloud.svg',
+                width: 93,
+              ),
+            ),
           ),
-          const Positioned(
-            top: 170,
-            right: 24,
-            child: _ThoughtBubble(emoji: '⚖️'),
+          Positioned(
+            top: 168,
+            right: 12,
+            child: ExcludeSemantics(
+              child: SvgPicture.asset(
+                'assets/images/meat-cloud.svg',
+                width: 141,
+              ),
+            ),
           ),
+          // Scattered, rotated question marks flanking the cat.
           const Positioned(
-            top: 280,
-            left: 60,
-            child: _ThoughtBubble(emoji: '🏥'),
+            top: 300,
+            left: 12,
+            child: _Mark(
+              text: '?',
+              color: Color(0xFF408AF2),
+              size: 70,
+              rotation: -0.32,
+            ),
+          ),
+          Positioned(
+            top: 270,
+            right: 10,
+            child: _Mark(
+              text: '?',
+              color: const Color(0xFF5FC9C1).withValues(alpha: 0.4),
+              size: 40,
+              rotation: 0.35,
+            ),
           ),
         ],
       ),
@@ -55,27 +85,30 @@ class HealthIntroScreen extends StatelessWidget {
   }
 }
 
-class _ThoughtBubble extends StatelessWidget {
-  final String emoji;
-  const _ThoughtBubble({required this.emoji});
+/// A decorative colored glyph (e.g. a question mark) pinned near the mascot.
+class _Mark extends StatelessWidget {
+  final String text;
+  final Color color;
+  final double size;
+  final double rotation;
+
+  const _Mark({
+    required this.text,
+    required this.color,
+    required this.size,
+    this.rotation = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 78,
-      height: 68,
-      decoration: BoxDecoration(
-        color: DSColors.surfaceCard,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(34),
-          topRight: Radius.circular(34),
-          bottomLeft: Radius.circular(34),
-          bottomRight: Radius.circular(16),
+    return ExcludeSemantics(
+      child: Transform.rotate(
+        angle: rotation,
+        child: Text(
+          text,
+          style: DSTextStyles.displayLg.copyWith(color: color, fontSize: size),
         ),
-        boxShadow: DSShadows.e1,
       ),
-      alignment: Alignment.center,
-      child: Text(emoji, style: const TextStyle(fontSize: 28)),
     );
   }
 }

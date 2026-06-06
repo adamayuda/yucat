@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart' show CupertinoPicker, FixedExtentScrollController;
+import 'package:flutter/cupertino.dart'
+    show CupertinoPicker, FixedExtentScrollController;
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
@@ -9,34 +10,41 @@ class AgeStep extends StatefulWidget {
 
   const AgeStep({super.key, required this.age, required this.onAgeChanged});
 
-  static const int minMonths = 0;
-  static const int maxMonths = 240;
+  /// Age is stored as a flat month count. The two-column picker splits it into
+  /// years (0–[maxYears]) and months (0–11).
+  static const int maxYears = 25;
 
   @override
   State<AgeStep> createState() => _AgeStepState();
 }
 
 class _AgeStepState extends State<AgeStep> {
-  late FixedExtentScrollController _controller;
+  late FixedExtentScrollController _yearsController;
+  late FixedExtentScrollController _monthsController;
+  late int _years;
+  late int _months;
 
   @override
   void initState() {
     super.initState();
-    final initial = (widget.age ?? 18).clamp(
-      AgeStep.minMonths,
-      AgeStep.maxMonths,
-    );
-    _controller = FixedExtentScrollController(initialItem: initial);
+    final initialMonths = (widget.age ?? 18).clamp(0, AgeStep.maxYears * 12 + 11);
+    _years = initialMonths ~/ 12;
+    _months = initialMonths % 12;
+    _yearsController = FixedExtentScrollController(initialItem: _years);
+    _monthsController = FixedExtentScrollController(initialItem: _months);
     if (widget.age == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        widget.onAgeChanged(initial);
+        widget.onAgeChanged(_totalMonths);
       });
     }
   }
 
+  int get _totalMonths => _years * 12 + _months;
+
   @override
   void dispose() {
-    _controller.dispose();
+    _yearsController.dispose();
+    _monthsController.dispose();
     super.dispose();
   }
 
@@ -55,70 +63,68 @@ class _AgeStepState extends State<AgeStep> {
 
   @override
   Widget build(BuildContext context) {
-    final current = (widget.age ?? 18).clamp(
-      AgeStep.minMonths,
-      AgeStep.maxMonths,
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const MascotSpeechBubble(question: 'How old is your cat?'),
         Expanded(
           child: Center(
-            child: Stack(
-              alignment: Alignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // selection band
-                Container(
-                  height: 56,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: DSDimens.size3xl,
-                  ),
-                  decoration: BoxDecoration(
-                    color: DSColors.surfaceCardDim,
-                    borderRadius: BorderRadius.circular(DSRadii.lg),
-                  ),
+                Row(
+                  children: [
+                    Expanded(child: _columnHeader('Years')),
+                    Expanded(child: _columnHeader('Months')),
+                  ],
                 ),
-                SizedBox(
-                  height: 220,
-                  child: CupertinoPicker.builder(
-                    scrollController: _controller,
-                    itemExtent: 56,
-                    selectionOverlay: const SizedBox.shrink(),
-                    childCount: AgeStep.maxMonths + 1,
-                    onSelectedItemChanged: (index) =>
-                        widget.onAgeChanged(index),
-                    itemBuilder: (context, index) {
-                      final isCenter = index == current;
-                      return Center(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Text(
-                              '$index',
-                              style: DSTextStyles.displayHero.copyWith(
-                                fontSize: isCenter ? 48 : 28,
-                                color: isCenter
-                                    ? DSColors.inkPrimary
-                                    : DSColors.inkTertiary,
-                              ),
+                const SizedBox(height: DSDimens.sizeXs),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // shared selection band behind both wheels
+                    Container(
+                      height: 56,
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: DSDimens.sizeL,
+                      ),
+                      decoration: BoxDecoration(
+                        color: DSColors.surfaceCardDim,
+                        borderRadius: BorderRadius.circular(DSRadii.lg),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 220,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _wheel(
+                              controller: _yearsController,
+                              count: AgeStep.maxYears + 1,
+                              current: _years,
+                              unit: 'yr',
+                              onChanged: (value) {
+                                setState(() => _years = value);
+                                widget.onAgeChanged(_totalMonths);
+                              },
                             ),
-                            if (isCenter) ...[
-                              const SizedBox(width: 6),
-                              Text(
-                                'mo',
-                                style: DSTextStyles.bodyMd.copyWith(
-                                  color: DSColors.inkSecondary,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                          ),
+                          Expanded(
+                            child: _wheel(
+                              controller: _monthsController,
+                              count: 12,
+                              current: _months,
+                              unit: 'mo',
+                              onChanged: (value) {
+                                setState(() => _months = value);
+                                widget.onAgeChanged(_totalMonths);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -137,7 +143,7 @@ class _AgeStepState extends State<AgeStep> {
               const SizedBox(width: DSDimens.sizeXxs),
               Expanded(
                 child: Text(
-                  _stageLabel(current),
+                  _stageLabel(_totalMonths),
                   style: DSTextStyles.bodyMd,
                 ),
               ),
@@ -146,6 +152,58 @@ class _AgeStepState extends State<AgeStep> {
         ),
         const SizedBox(height: DSDimens.sizeS),
       ],
+    );
+  }
+
+  Widget _columnHeader(String label) {
+    return Text(
+      label,
+      textAlign: TextAlign.center,
+      style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkTertiary),
+    );
+  }
+
+  Widget _wheel({
+    required FixedExtentScrollController controller,
+    required int count,
+    required int current,
+    required String unit,
+    required ValueChanged<int> onChanged,
+  }) {
+    return CupertinoPicker.builder(
+      scrollController: controller,
+      itemExtent: 56,
+      selectionOverlay: const SizedBox.shrink(),
+      childCount: count,
+      onSelectedItemChanged: onChanged,
+      itemBuilder: (context, index) {
+        final isCenter = index == current;
+        return Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '$index',
+                style: DSTextStyles.displayHero.copyWith(
+                  fontSize: isCenter ? 44 : 26,
+                  color: isCenter ? DSColors.inkPrimary : DSColors.inkTertiary,
+                ),
+              ),
+              if (isCenter) ...[
+                const SizedBox(width: 6),
+                Text(
+                  unit,
+                  style: DSTextStyles.bodyMd.copyWith(
+                    color: DSColors.inkSecondary,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }

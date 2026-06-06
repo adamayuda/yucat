@@ -13,6 +13,9 @@ class DSOptionRow extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   final bool showTrailingRadio;
+
+  /// Size of the trailing radio / selected check indicator.
+  final double trailingSize;
   final DSOptionRowAccent accent;
 
   const DSOptionRow({
@@ -24,6 +27,7 @@ class DSOptionRow extends StatelessWidget {
     this.leadingIcon,
     this.selected = false,
     this.showTrailingRadio = false,
+    this.trailingSize = 22,
     this.accent = DSOptionRowAccent.success,
   });
 
@@ -96,12 +100,12 @@ class DSOptionRow extends StatelessWidget {
                   Icon(
                     Icons.check_circle,
                     color: _accentColor,
-                    size: 22,
+                    size: trailingSize,
                   )
                 else if (showTrailingRadio)
                   Container(
-                    width: 22,
-                    height: 22,
+                    width: trailingSize,
+                    height: trailingSize,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Color(0xFFE5E3EC),

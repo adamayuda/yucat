@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/presentation/components/ds_option_row.dart';
 import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
 class ProfilePhotoStep extends StatelessWidget {
@@ -23,6 +25,15 @@ class ProfilePhotoStep extends StatelessWidget {
     required this.onRemovePhoto,
   });
 
+  Future<void> _pick(BuildContext context) async {
+    final source = await _showPhotoSourceSheet(context);
+    if (source == null) return;
+    final image = await imagePicker.pickImage(source: source);
+    if (image != null) {
+      onPhotoSelected(File(image.path));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -34,53 +45,81 @@ class ProfilePhotoStep extends StatelessWidget {
         Expanded(
           child: Center(
             child: GestureDetector(
-              onTap: () async {
-                final XFile? image = await imagePicker.pickImage(
-                  source: ImageSource.gallery,
-                );
-                if (image != null) {
-                  onPhotoSelected(File(image.path));
-                }
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 175,
-                    height: 175,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: DSColors.surfaceCardDim,
+              onTap: () => _pick(context),
+              child: profilePhoto != null
+                  ? ClipOval(
+                      child: Image.file(
+                        profilePhoto!,
+                        width: 187,
+                        height: 187,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : SvgPicture.asset(
+                      'assets/images/upload-photo.svg',
+                      width: 187,
                     ),
-                    child: profilePhoto != null
-                        ? ClipOval(
-                            child: Image.file(
-                              profilePhoto!,
-                              width: 175,
-                              height: 175,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : const Icon(
-                            Icons.camera_alt_rounded,
-                            size: 64,
-                            color: DSColors.inkTertiary,
-                          ),
-                  ),
-                  const SizedBox(height: DSDimens.sizeS),
-                  Text(
-                    profilePhoto != null ? 'Tap to change' : 'Tap to upload',
-                    style: DSTextStyles.bodyLg.copyWith(
-                      color: DSColors.inkSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
         ),
       ],
     );
   }
+}
+
+/// Lets the user pick where the cat photo comes from. Resolves to the chosen
+/// [ImageSource], or `null` if the sheet is dismissed.
+Future<ImageSource?> _showPhotoSourceSheet(BuildContext context) {
+  return showModalBottomSheet<ImageSource>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (sheetContext) => Container(
+      decoration: const BoxDecoration(
+        color: DSColors.surfaceCard,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(DSRadii.xl)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            DSDimens.sizeL,
+            DSDimens.sizeS,
+            DSDimens.sizeL,
+            DSDimens.sizeL,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: DSColors.surfaceCardDim,
+                    borderRadius: BorderRadius.circular(DSRadii.pill),
+                  ),
+                ),
+              ),
+              const SizedBox(height: DSDimens.sizeL),
+              Text('Add a photo', style: DSTextStyles.titleMd),
+              const SizedBox(height: DSDimens.sizeS),
+              DSOptionRow(
+                leadingIcon: Icons.camera_alt_rounded,
+                label: 'Take a photo',
+                onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
+              ),
+              const SizedBox(height: DSDimens.sizeXs),
+              DSOptionRow(
+                leadingIcon: Icons.photo_library_rounded,
+                label: 'Upload from library',
+                onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }

@@ -62,11 +62,18 @@ class HealthConditionsStep extends StatelessWidget {
         const SizedBox(height: DSDimens.sizeL),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 96),
+            padding: const EdgeInsets.fromLTRB(
+              DSDimens.sizeL,
+              0,
+              DSDimens.sizeL,
+              96,
+            ),
+            // The Wrap fills the width and centres each row, so the chip block
+            // sits horizontally centred on the screen.
             child: Wrap(
               alignment: WrapAlignment.center,
-              spacing: DSDimens.sizeXxs,
-              runSpacing: DSDimens.sizeXxs,
+              spacing: DSDimens.sizeXxxs,
+              runSpacing: DSDimens.sizeXxxs,
               children: [
                 for (final option in _options)
                   DSChip(

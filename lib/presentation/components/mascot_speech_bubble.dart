@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 
 class MascotSpeechBubble extends StatelessWidget {
@@ -10,7 +11,7 @@ class MascotSpeechBubble extends StatelessWidget {
   const MascotSpeechBubble({
     super.key,
     required this.question,
-    this.mascotAsset,
+    this.mascotAsset = 'assets/images/cat-icon-profile.svg',
     this.fallbackIcon = Icons.pets,
     this.avatarBackground = DSColors.tintLavender,
   });
@@ -34,7 +35,7 @@ class MascotSpeechBubble extends StatelessWidget {
           alignment: Alignment.center,
           child: mascotAsset != null
               ? ClipOval(
-                  child: Image.asset(
+                  child: SvgPicture.asset(
                     mascotAsset!,
                     width: _avatarSize,
                     height: _avatarSize,

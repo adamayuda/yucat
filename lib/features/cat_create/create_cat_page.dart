@@ -15,7 +15,8 @@ import 'package:yucat/features/cat_create/widgets/steps/cat_name_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/coat_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/gender_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/health_conditions_step.dart';
-import 'package:yucat/features/cat_create/widgets/steps/interstitial_fact_step.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:yucat/features/cat_create/widgets/steps/coat_fact_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/neutered_status_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/profile_photo_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/water_intake_fact_step.dart';
@@ -28,6 +29,10 @@ const _totalSteps = 11;
 
 /// Step indices that are non-input "did you know" interstitials.
 const _factSteps = {5, 8};
+
+/// The full-bleed hydration interstitial — its glasses band paints edge-to-edge
+/// (no shell padding), so it is excluded from the per-step horizontal inset.
+const _waterFactStep = 5;
 
 @RoutePage()
 class CreateCatPage extends StatefulWidget {
@@ -84,17 +89,17 @@ class _CreateCatPageState extends State<CreateCatPage> {
 
   late CatCreateBloc _bloc;
 
-  /// Whether the wizard was launched from onboarding with name (and
-  /// optionally photo) already collected. When true the wizard starts at
-  /// the gender step and the name/photo steps are not part of the journey.
+  /// Whether the wizard was launched from onboarding with the name already
+  /// collected. When true the wizard starts at the gender step and the name
+  /// step is not part of the journey (the photo step still follows gender).
   bool get _seededFromOnboarding =>
       widget.cat == null &&
       widget.seededName != null &&
       widget.seededName!.isNotEmpty;
 
-  /// First step the user sees. Skip the name + photo steps if those values
-  /// were already collected in onboarding.
-  int get _initialStep => _seededFromOnboarding ? 2 : 0;
+  /// First step the user sees. Skip the name step if it was already collected
+  /// in onboarding; the photo step (after gender) is always part of the flow.
+  int get _initialStep => _seededFromOnboarding ? 1 : 0;
 
   @override
   void initState() {
@@ -118,8 +123,9 @@ class _CreateCatPageState extends State<CreateCatPage> {
       _nameController.text = catCreateModel.name;
     }
 
-    _bloc.add(CatCreateInitialEvent(cat: catCreateModel));
-    _bloc.add(CatCreateStepChangedEvent(step: _initialStep));
+    _bloc.add(
+      CatCreateInitialEvent(cat: catCreateModel, initialStep: _initialStep),
+    );
     // Listen to name field changes to update swipe physics
     _nameController.addListener(_onNameChanged);
   }
@@ -205,7 +211,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
     required bool isSubmitting,
   }) {
     final isLast = currentStep == _totalSteps - 1;
-    final isPhotoStep = currentStep == 1;
+    final isPhotoStep = currentStep == 2;
     final isHealthStep = currentStep == 9;
     final isBreedStep = currentStep == 10;
     final isFactStep = _factSteps.contains(currentStep);
@@ -216,9 +222,8 @@ class _CreateCatPageState extends State<CreateCatPage> {
     return WizardStepShell(
       currentStep: currentStep - _initialStep,
       totalSteps: _totalSteps - _initialStep,
-      background: _seededFromOnboarding
-          ? DSColors.tintSky
-          : DSColors.tintLavender,
+      background: DSColors.tintCloud,
+      backgroundChild: _buildFactBackdrop(context),
       backgroundGradient: currentStep == 5
           ? const LinearGradient(
               begin: Alignment.topCenter,
@@ -243,6 +248,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
               : true,
       isSubmitting: isSubmitting,
       useCloseIcon: !_seededFromOnboarding && currentStep == _initialStep,
+      showProgress: !isFactStep,
       floatingNext: isHealthStep || isBreedStep,
       onBack: () => _goToPreviousStep(currentStep),
       onNext: isLast ? _handleSubmit : () => _goToNextStep(step: currentStep),
@@ -250,7 +256,18 @@ class _CreateCatPageState extends State<CreateCatPage> {
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
         children: [
-          for (var i = 0; i < _totalSteps; i++) _buildStepContent(i, cat),
+          // The shell no longer pads the content, so each step gets its own
+          // horizontal inset — except the water fact step, which paints its
+          // glasses band edge-to-edge and insets its own text.
+          for (var i = 0; i < _totalSteps; i++)
+            if (i == _waterFactStep)
+              _buildStepContent(i, cat)
+            else
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+                child: _buildStepContent(i, cat),
+              ),
         ],
       ),
     );
@@ -263,6 +280,41 @@ class _CreateCatPageState extends State<CreateCatPage> {
     }
   }
 
+  /// Full-screen sunburst backdrop for the coat fact step (step 8), driven by
+  /// the [PageController] so it slides in/out edge-to-edge in lock-step with
+  /// that page — behind the status bar, nav row and CTA — and stays off-screen
+  /// (so it never tints the neighbouring steps) the rest of the time.
+  Widget _buildFactBackdrop(BuildContext context) {
+    const factIndex = 8;
+    final width = MediaQuery.sizeOf(context).width;
+    return AnimatedBuilder(
+      animation: _pageController,
+      builder: (context, _) {
+        var page = _initialStep.toDouble();
+        if (_pageController.hasClients &&
+            _pageController.position.haveDimensions) {
+          page = _pageController.page ?? page;
+        }
+        final delta = page - factIndex;
+        if (delta.abs() >= 1) return const SizedBox.shrink();
+        return ClipRect(
+          child: Transform.translate(
+            offset: Offset(-delta * width, 0),
+            child: ColoredBox(
+              color: const Color(0xFFFBEAC2),
+              child: SvgPicture.asset(
+                'assets/images/bg-light.svg',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildStepContent(int stepIndex, CatCreateModel cat) {
     switch (stepIndex) {
       case 0:
@@ -272,8 +324,20 @@ class _CreateCatPageState extends State<CreateCatPage> {
           nameFieldKey: _nameFieldKey,
         );
       case 1:
-        return ProfilePhotoStep(
+        return GenderStep(
           key: const ValueKey('step_1'),
+          gender: cat.gender,
+          onGenderChanged: (value) {
+            final currentState = _bloc.state;
+            if (currentState is CatCreateLoadedState) {
+              final updatedCat = currentState.cat.copyWith(gender: value);
+              _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
+            }
+          },
+        );
+      case 2:
+        return ProfilePhotoStep(
+          key: const ValueKey('step_2'),
           profilePhoto: cat.profileImageFile,
           useDefaultPhoto: _useDefaultPhoto,
           imagePicker: _imagePicker,
@@ -310,18 +374,6 @@ class _CreateCatPageState extends State<CreateCatPage> {
               final updatedCat = currentState.cat.copyWith(
                 profileImageFile: null,
               );
-              _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
-            }
-          },
-        );
-      case 2:
-        return GenderStep(
-          key: const ValueKey('step_2'),
-          gender: cat.gender,
-          onGenderChanged: (value) {
-            final currentState = _bloc.state;
-            if (currentState is CatCreateLoadedState) {
-              final updatedCat = currentState.cat.copyWith(gender: value);
               _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
             }
           },
@@ -383,16 +435,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
           },
         );
       case 8:
-        return const InterstitialFactStep(
-          key: ValueKey('step_8'),
-          icon: Icons.brush_rounded,
-          accent: DSColors.accentDanger,
-          headline: 'Long-haired cats need more omega-3 for a healthy coat',
-          highlight: 'more omega-3',
-          body:
-              'We flag foods with the right balance of fatty acids — and warn when hairball risk is high.',
-          citation: '[Veterinary nutrition source]',
-        );
+        return const CoatFactStep(key: ValueKey('step_8'));
       case 9:
         return HealthConditionsStep(
           key: const ValueKey('step_9'),

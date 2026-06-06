@@ -15,13 +15,16 @@ class DSChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = selected ? DSColors.coralAccent : DSColors.border;
+    // Unselected chips show no visible outline (white border + soft shadow);
+    // selecting only swaps the border + dot to coral — constant 1.5 width keeps
+    // the chip size fixed so the others never reflow.
+    final borderColor = selected ? DSColors.coralAccent : DSColors.surfaceCard;
     final dotColor = selected ? DSColors.coralAccent : DSColors.inputLightGrey;
     return Material(
       color: DSColors.surfaceCard,
-      borderRadius: BorderRadius.circular(DSRadii.pill),
+      borderRadius: BorderRadius.circular(DSRadii.lg),
       child: InkWell(
-        borderRadius: BorderRadius.circular(DSRadii.pill),
+        borderRadius: BorderRadius.circular(DSRadii.lg),
         onTap: onTap,
         child: AnimatedContainer(
           duration: DSMotion.durFast,
@@ -32,8 +35,11 @@ class DSChip extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: DSColors.surfaceCard,
-            borderRadius: BorderRadius.circular(DSRadii.pill),
-            border: Border.all(color: borderColor, width: selected ? 1.5 : 1),
+            borderRadius: BorderRadius.circular(DSRadii.lg),
+            // Constant border width so selecting only changes the colour — a
+            // width change would grow the chip (the border adds layout padding)
+            // and reflow every other chip.
+            border: Border.all(color: borderColor, width: 1.5),
             boxShadow: selected ? null : DSShadows.e1,
           ),
           child: Row(

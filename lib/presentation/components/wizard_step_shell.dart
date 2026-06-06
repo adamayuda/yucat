@@ -17,6 +17,11 @@ class WizardStepShell extends StatelessWidget {
   /// content, and CTA). When set, [background] is used only for the
   /// floating-next fade overlay; the Scaffold itself is transparent.
   final Gradient? backgroundGradient;
+
+  /// Optional widget painted full-screen behind everything (status bar, nav
+  /// row, content and CTA) — e.g. a decorative SVG backdrop for a step that
+  /// wants to bleed edge-to-edge.
+  final Widget? backgroundChild;
   final bool useCloseIcon;
 
   /// Optional alternate label shown when [hasSelection] is `false`.
@@ -29,6 +34,11 @@ class WizardStepShell extends StatelessWidget {
   /// Use for steps whose content can overflow (long lists, chip wraps).
   final bool floatingNext;
 
+  /// Whether to show the step progress bar next to the back button. Hidden on
+  /// non-input interstitials ("did you know" facts), which only show the back
+  /// chevron.
+  final bool showProgress;
+
   const WizardStepShell({
     super.key,
     required this.currentStep,
@@ -39,12 +49,14 @@ class WizardStepShell extends StatelessWidget {
     required this.onBack,
     this.isSubmitting = false,
     this.ctaEnabled = true,
-    this.background = DSColors.tintLavender,
+    this.background = DSColors.tintCloud,
     this.backgroundGradient,
+    this.backgroundChild,
     this.useCloseIcon = false,
     this.altCtaLabel,
     this.hasSelection = true,
     this.floatingNext = false,
+    this.showProgress = true,
   });
 
   @override
@@ -60,101 +72,103 @@ class WizardStepShell extends StatelessWidget {
       onPressed: (ctaEnabled && !isSubmitting) ? onNext : null,
     );
 
+    // The step content's ancestor chain is kept identical across every step
+    // variation: the background (solid vs gradient) and the CTA placement
+    // (inline vs floating) are toggled WITHOUT inserting or removing widgets
+    // above [child]. If the tree above [child] changed shape per step, the
+    // PageView's element would be rebuilt and its PageController would snap
+    // back to its initial page — making earlier steps reappear.
+    // Only the nav row and CTA are horizontally inset — the step content is
+    // full-bleed so steps can paint edge-to-edge (e.g. the water glasses band).
+    // Steps that want padded content add it themselves.
     final body = SafeArea(
-      child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
-          child: Column(
-            children: [
-              const SizedBox(height: DSDimens.sizeXxs),
-              Row(
-                children: [
-                  _NavIcon(
-                    icon: useCloseIcon ? Icons.close : Icons.chevron_left,
-                    onTap: onBack,
-                  ),
+      child: Column(
+        children: [
+          const SizedBox(height: DSDimens.sizeXxs),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+            child: Row(
+              children: [
+                _NavIcon(
+                  icon: useCloseIcon ? Icons.close : Icons.chevron_left,
+                  onTap: onBack,
+                ),
+                if (showProgress) ...[
                   const SizedBox(width: DSDimens.sizeS),
                   Expanded(child: _ProgressBar(progress: progress)),
                 ],
-              ),
-              const SizedBox(height: DSDimens.sizeL),
-              Expanded(
-                child: floatingNext
-                    ? _FloatingNextLayout(
-                        background: background,
-                        button: button,
-                        child: child,
-                      )
-                    : child,
-              ),
-              if (!floatingNext)
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: DSDimens.sizeS,
-                    bottom: DSDimens.sizeS,
-                  ),
-                  child: button,
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
+          const SizedBox(height: DSDimens.sizeL),
+          Expanded(
+            child: Stack(
+              children: [
+                // Always the first Stack child so its element is stable.
+                Positioned.fill(child: child),
+                if (floatingNext)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: 96,
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              background.withValues(alpha: 0),
+                              background,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (floatingNext)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: DSDimens.sizeS,
+                    child: Center(child: button),
+                  ),
+              ],
+            ),
+          ),
+          if (!floatingNext)
+            Padding(
+              padding: const EdgeInsets.only(
+                top: DSDimens.sizeS,
+                bottom: DSDimens.sizeS,
+              ),
+              child: button,
+            ),
+        ],
+      ),
     );
 
     return Scaffold(
-      backgroundColor:
-          backgroundGradient != null ? Colors.transparent : background,
-      body: backgroundGradient != null
-          ? DecoratedBox(
-              decoration: BoxDecoration(gradient: backgroundGradient),
-              child: SizedBox.expand(child: body),
-            )
-          : body,
-    );
-  }
-}
-
-class _FloatingNextLayout extends StatelessWidget {
-  final Color background;
-  final Widget button;
-  final Widget child;
-
-  const _FloatingNextLayout({
-    required this.background,
-    required this.button,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned.fill(child: child),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 96,
-          child: IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    background.withValues(alpha: 0),
-                    background,
-                  ],
-                ),
-              ),
+      backgroundColor: Colors.transparent,
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          color: backgroundGradient == null ? background : null,
+          gradient: backgroundGradient,
+        ),
+        // The Stack is always present (even when [backgroundChild] is null) so
+        // the tree shape above the step content stays constant across step
+        // rebuilds — otherwise the PageView element would be recreated and snap.
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: backgroundChild ?? const SizedBox.shrink(),
             ),
-          ),
+            SizedBox.expand(child: body),
+          ],
         ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: DSDimens.sizeS,
-          child: Center(child: button),
-        ),
-      ],
+      ),
     );
   }
 }

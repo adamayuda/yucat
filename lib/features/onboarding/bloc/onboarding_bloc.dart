@@ -169,8 +169,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       OnBoardingPhase.proofChart => OnBoardingPhase.whyYucat,
       OnBoardingPhase.whyYucat => OnBoardingPhase.nutritionFact,
       OnBoardingPhase.nutritionFact => OnBoardingPhase.profileIntro,
-      OnBoardingPhase.profileIntro => OnBoardingPhase.profilePhoto,
-      OnBoardingPhase.profilePhoto => OnBoardingPhase.profileName,
+      OnBoardingPhase.profileIntro => OnBoardingPhase.profileName,
       OnBoardingPhase.profileName => OnBoardingPhase.rating,
       OnBoardingPhase.rating => OnBoardingPhase.notifPrimer,
       OnBoardingPhase.notifPrimer => OnBoardingPhase.reminders,
@@ -203,8 +202,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       OnBoardingPhase.whyYucat => OnBoardingPhase.proofChart,
       OnBoardingPhase.nutritionFact => OnBoardingPhase.whyYucat,
       OnBoardingPhase.profileIntro => OnBoardingPhase.nutritionFact,
-      OnBoardingPhase.profilePhoto => OnBoardingPhase.profileIntro,
-      OnBoardingPhase.profileName => OnBoardingPhase.profilePhoto,
+      OnBoardingPhase.profileName => OnBoardingPhase.profileIntro,
       OnBoardingPhase.rating => OnBoardingPhase.profileName,
       OnBoardingPhase.notifPrimer => OnBoardingPhase.rating,
       OnBoardingPhase.reminders => OnBoardingPhase.notifPrimer,
@@ -236,25 +234,33 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     OnBoardingCompletedEvent event,
     Emitter<OnBoardingState> emit,
   ) async {
-    // D0 "Add my cat" → push wizard, persist completion flag, then on
-    // wizard pop emit success phase so E0 renders. Final analytics fires
-    // when the user taps "Start scanning" on E0 (see _onOnBoardingFinalizedEvent).
-    await _prefs.setBool(_onboardingCompletedKey, true);
-
+    // D0 "Add my cat" → push wizard, then on completion persist the
+    // completion flag and emit the success phase so E0 renders. Final
+    // analytics fires when the user taps "Start scanning" on E0 (see
+    // _onOnBoardingFinalizedEvent).
     final current = _readyState();
 
-    // The wizard returns an at-a-glance profile summary when it pops.
+    // The wizard returns an at-a-glance profile summary when it completes.
+    // Backing out of the first step pops with no result (null) — in that
+    // case we stay on the health-intro screen rather than jumping to success.
     final result = await event.context.router.push(
       CreateCatRoute(
         seededName: current.seededName,
         seededPhotoPath: current.seededPhotoPath,
       ),
     );
-    final catSummary = result is List<String> ? result : const <String>[];
+    if (result is! List<String>) {
+      // Wizard dismissed via back — the onboarding PageView is still on the
+      // health-intro screen underneath, so no phase change is needed.
+      return;
+    }
+
+    // Only mark onboarding complete once a cat profile was actually created.
+    await _prefs.setBool(_onboardingCompletedKey, true);
 
     emit(_readyState().copyWith(
       phase: OnBoardingPhase.success,
-      catSummary: catSummary,
+      catSummary: result,
     ));
 
     _logScreenViewUsecase.call(

@@ -13,7 +13,9 @@ class WaterIntakeFactStep extends StatelessWidget {
   const WaterIntakeFactStep({super.key});
 
   /// Body height of the short glasses; the pour glass scales to match its cup.
-  static const double _glassHeight = 116;
+  /// Kept modest so the band + headline + body comfortably fit the step height
+  /// (the pour glass renders ~2.8× taller, so this drives the whole band).
+  static const double _glassHeight = 100;
 
   /// glass-pouring.svg is 101×305; ~108px of that (the cup) sits at the bottom,
   /// so render it at the natural ratio to keep cups aligned across the row.
@@ -36,13 +38,19 @@ class WaterIntakeFactStep extends StatelessWidget {
       children: [
         const Spacer(flex: 1),
         // Full-bleed glasses band — overflows the shell's horizontal padding so
-        // the outer glasses clip at the true screen edges.
-        OverflowBox(
-          maxWidth: double.infinity,
-          alignment: Alignment.center,
-          child: SizedBox(
-            height: _pourHeight,
+        // the outer glasses clip at the true screen edges. The SizedBox bounds
+        // the band height (the OverflowBox would otherwise try to fill the
+        // Column's unbounded vertical space and fail layout); the OverflowBox
+        // then lets the row paint wider than the screen.
+        SizedBox(
+          height: _pourHeight,
+          child: OverflowBox(
+            maxWidth: double.infinity,
+            alignment: Alignment.center,
             child: Row(
+              // Size to the glasses, not the unbounded width the OverflowBox
+              // grants — a default (max) Row would demand an infinite width.
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -59,30 +67,34 @@ class WaterIntakeFactStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: DSDimens.size3xl),
-        if (hasHighlight)
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(text: parts[0]),
-                TextSpan(
-                  text: _highlight,
-                  style: const TextStyle(color: DSColors.accentInfo),
+        // The glasses band above is full-bleed; the text insets itself since the
+        // shell no longer pads step content.
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+          child: hasHighlight
+              ? Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: parts[0]),
+                      TextSpan(
+                        text: _highlight,
+                        style: const TextStyle(color: DSColors.accentInfo),
+                      ),
+                      TextSpan(text: parts[1]),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                  style: DSTextStyles.displayLg,
+                )
+              : Text(
+                  _headline,
+                  textAlign: TextAlign.center,
+                  style: DSTextStyles.displayLg,
                 ),
-                TextSpan(text: parts[1]),
-              ],
-            ),
-            textAlign: TextAlign.center,
-            style: DSTextStyles.displayLg,
-          )
-        else
-          Text(
-            _headline,
-            textAlign: TextAlign.center,
-            style: DSTextStyles.displayLg,
-          ),
+        ),
         const SizedBox(height: DSDimens.sizeS),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeS),
+          padding: const EdgeInsets.symmetric(horizontal: DSDimens.size3xl),
           child: Text(
             _body,
             textAlign: TextAlign.center,

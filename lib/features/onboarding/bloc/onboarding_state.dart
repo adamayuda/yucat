@@ -9,7 +9,6 @@ enum OnBoardingPhase {
   whyYucat,
   nutritionFact,
   profileIntro,
-  profilePhoto,
   profileName,
   rating,
   notifPrimer,

@@ -105,7 +105,7 @@ These are the parts that are slowest to recover from code — keep them current.
 |---|---|---|
 | `id` | `String?` | Firestore doc id |
 | `name` | `String` | Required |
-| `age` | `int?` | Years |
+| `age` | `int?` | Months (0–311; e.g. 30 = 2yr 6mo). Display via `ageGroup` or `_formatAge` |
 | `weight` | `double?` | Kg |
 | `gender` | `String?` | |
 | `breed` | `String?` | Maine Coon, Persian, Siamese, Sphynx, British Shorthair, Bengal, … |

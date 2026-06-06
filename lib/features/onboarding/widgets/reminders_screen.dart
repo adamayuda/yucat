@@ -103,6 +103,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                   leadingEmoji: _options[i].emoji,
                   label: _options[i].label,
                   showTrailingRadio: true,
+                  trailingSize: 18,
                   selected: _selected.contains(i),
                   onTap: () => setState(() {
                     if (!_selected.add(i)) _selected.remove(i);

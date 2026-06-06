@@ -11,7 +11,6 @@ import 'package:yucat/features/onboarding/widgets/notif_primer_screen.dart';
 import 'package:yucat/features/onboarding/widgets/nutrition_fact_screen.dart';
 import 'package:yucat/features/onboarding/widgets/profile_intro_screen.dart';
 import 'package:yucat/features/onboarding/widgets/profile_name_screen.dart';
-import 'package:yucat/features/onboarding/widgets/profile_photo_screen.dart';
 import 'package:yucat/features/onboarding/widgets/proof_chart_screen.dart';
 import 'package:yucat/features/onboarding/widgets/rating_screen.dart';
 import 'package:yucat/features/onboarding/widgets/reminders_screen.dart';
@@ -83,7 +82,8 @@ class _OnBoardingPage extends State<OnBoardingPage> {
         if (state is! OnBoardingReadyState) {
           return const SizedBox.shrink();
         }
-        final showBack = state.phase != OnBoardingPhase.welcome &&
+        final showBack =
+            state.phase != OnBoardingPhase.welcome &&
             state.phase != OnBoardingPhase.success;
         return Stack(
           children: [
@@ -95,7 +95,6 @@ class _OnBoardingPage extends State<OnBoardingPage> {
                 OnBoardingPhase.values[index],
                 state.selectedSource,
                 state.seededName,
-                state.seededPhotoPath,
                 state.catSummary,
               ),
             ),
@@ -109,8 +108,8 @@ class _OnBoardingPage extends State<OnBoardingPage> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: BackChip(
-                        onTap: () => _bloc
-                            .add(const OnBoardingPreviousPhaseEvent()),
+                        onTap: () =>
+                            _bloc.add(const OnBoardingPreviousPhaseEvent()),
                       ),
                     ),
                   ),
@@ -126,7 +125,6 @@ class _OnBoardingPage extends State<OnBoardingPage> {
     OnBoardingPhase phase,
     String? selectedSource,
     String? seededName,
-    String? seededPhotoPath,
     List<String> catSummary,
   ) {
     switch (phase) {
@@ -168,14 +166,6 @@ class _OnBoardingPage extends State<OnBoardingPage> {
         return ProfileIntroScreen(
           onNext: () => _bloc.add(const OnBoardingAdvancePhaseEvent()),
         );
-      case OnBoardingPhase.profilePhoto:
-        return ProfilePhotoScreen(
-          photoPath: seededPhotoPath,
-          onPhotoSelected: (path) =>
-              _bloc.add(OnBoardingPhotoSeededEvent(path)),
-          onNext: () => _bloc.add(const OnBoardingAdvancePhaseEvent()),
-          onSkip: () => _bloc.add(const OnBoardingAdvancePhaseEvent()),
-        );
       case OnBoardingPhase.profileName:
         return ProfileNameScreen(
           initialName: seededName,
@@ -198,14 +188,12 @@ class _OnBoardingPage extends State<OnBoardingPage> {
         );
       case OnBoardingPhase.healthIntro:
         return HealthIntroScreen(
-          onAddCat: () =>
-              _bloc.add(OnBoardingCompletedEvent(context: context)),
+          onAddCat: () => _bloc.add(OnBoardingCompletedEvent(context: context)),
         );
       case OnBoardingPhase.success:
         return SuccessScreen(
           summary: catSummary,
-          onStart: () =>
-              _bloc.add(OnBoardingFinalizedEvent(context: context)),
+          onStart: () => _bloc.add(OnBoardingFinalizedEvent(context: context)),
         );
     }
   }

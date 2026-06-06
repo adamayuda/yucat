@@ -43,6 +43,7 @@ class DSColors {
   static const Color tintCoral = Color(0xFFF4D9D6);
   static const Color tintSand = Color(0xFFFAEBC8);
   static const Color tintAsh = Color(0xFFEFEEF0);
+  static const Color tintCloud = Color(0xFFEFEEF5);
 
   // Card surfaces
   static const Color surfaceCard = Color(0xFFFFFFFF);
