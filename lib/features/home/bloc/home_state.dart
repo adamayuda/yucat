@@ -20,12 +20,6 @@ class HomeHiddenState extends HomeState {
 class HomeLoadedState extends HomeState {
   final int _timestamp;
 
-  /// Free-tier scans remaining (clamped to 0). `null` if not yet loaded.
-  final int? scansRemaining;
-
-  /// Maximum free-tier scans allowed.
-  final int? maxFreeScans;
-
   /// Whether the user has an active premium subscription.
   final bool isPremium;
 
@@ -37,8 +31,6 @@ class HomeLoadedState extends HomeState {
   final int currentStreak;
 
   HomeLoadedState({
-    this.scansRemaining,
-    this.maxFreeScans,
     this.isPremium = false,
     this.primaryCatName,
     this.primaryCatPhotoUrl,
@@ -48,8 +40,6 @@ class HomeLoadedState extends HomeState {
   @override
   List<Object?> get props => [
         _timestamp,
-        scansRemaining,
-        maxFreeScans,
         isPremium,
         primaryCatName,
         primaryCatPhotoUrl,
@@ -73,20 +63,4 @@ class HomeNavigateToProductDetailState extends HomeState {
 
   @override
   List<Object?> get props => [product];
-}
-
-class HomeScanLimitReachedState extends HomeState {
-  final String barcode;
-
-  const HomeScanLimitReachedState({required this.barcode});
-
-  @override
-  List<Object?> get props => [barcode];
-}
-
-class HomeShowPaywallState extends HomeState {
-  const HomeShowPaywallState();
-
-  @override
-  List<Object?> get props => [];
 }

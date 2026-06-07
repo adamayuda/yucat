@@ -12,17 +12,13 @@ class WhyYucatScreen extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFEFEEF5),
+      backgroundColor: DSColors.tintCloud,
       body: Stack(
         fit: StackFit.expand,
         children: [
           const DecoratedBox(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFFCAD8FF), Color(0xFFEFEEF5)],
-              ),
+              gradient: DSGradients.onboardingWhyYucat,
             ),
           ),
           SafeArea(

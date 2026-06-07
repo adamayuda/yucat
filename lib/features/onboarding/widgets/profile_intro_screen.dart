@@ -7,7 +7,7 @@ import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 class ProfileIntroScreen extends StatelessWidget {
   final VoidCallback onNext;
 
-  static const Color _background = Color(0xFFEFEEF5);
+  static const Color _background = DSColors.tintCloud;
   static const Color _quoteSurface = Color(0xFFE5E4EB);
 
   const ProfileIntroScreen({

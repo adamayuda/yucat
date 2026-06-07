@@ -33,6 +33,9 @@ YuCat's pink `#ED67CA` is **demoted** from primary UI color to brand mark only (
 | `tintCoral` | `#F4D9D6` | Domain pitch, reminders (deferred) |
 | `tintSand` | `#FAEBC8` | Rating ask, reviews |
 | `tintAsh` | `#EFEEF0` | Surveys, neutral / form-heavy phases |
+| `tintCloud` | `#EFEEF5` | Onboarding neutral backgrounds + gradient base |
+| `tintBlueSoft` | `#E7EEFA` | Soft pastel gradient endpoint / highlighted surface |
+| `tintCoralSoft` | `#F8CDC6` | Soft pastel gradient endpoint / highlighted surface |
 
 ### Foreground / ink
 
@@ -58,6 +61,10 @@ YuCat's pink `#ED67CA` is **demoted** from primary UI color to brand mark only (
 | `accentDanger` | `#E5564B` | Errors, destructive, "other apps" line |
 | `accentInfo` | `#3F8CDB` | Info highlights |
 | `brandPink` | `#ED67CA` | Logo / splash glyph only — **never** UI-primary |
+| `paywallAccent` | `#EC6A6A` | Paywall-only accent (selection, badges) — feature-scoped, replaces green within the paywall |
+| `paywallAccentSoft` | `#FBE6E6` | Paywall highlighted backgrounds |
+
+Paywall badges use the `DSGradients.paywallBadge` left→right pink gradient (`#E85C5C → #F4A2A2`).
 
 ---
 

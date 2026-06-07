@@ -45,6 +45,15 @@ class DSColors {
   static const Color tintAsh = Color(0xFFEFEEF0);
   static const Color tintCloud = Color(0xFFEFEEF5);
 
+  // Soft pastel tints (onboarding gradient endpoints / highlighted surfaces)
+  static const Color tintBlueSoft = Color(0xFFE7EEFA);
+  static const Color tintCoralSoft = Color(0xFFF8CDC6);
+  static const Color tintSkyBright = Color(0xFFF7FBFE);
+  static const Color tintMintSoft = Color(0xFFDFEFE1);
+  static const Color tintSandSoft = Color(0xFFF8EADA);
+  static const Color tintCream = Color(0xFFFFF4DC);
+  static const Color tintGreySoft = Color(0xFFE2DFE8);
+
   // Card surfaces
   static const Color surfaceCard = Color(0xFFFFFFFF);
   static const Color surfaceCardDim = Color(0xFFF5F5F8);
@@ -64,9 +73,82 @@ class DSColors {
   // Coral selection accent (chips, slider, selected card border)
   static const Color coralAccent = Color(0xFFFF7A59);
   static const Color coralSurface = Color(0xFFFFF1ED);
+
+  // Paywall accent (feature-scoped — matches the paywall hero gradient and
+  // replaces the app's green success accent within the paywall only)
+  static const Color paywallAccent = Color(0xFFEC6A6A);
+  static const Color paywallAccentSoft = Color(0xFFFBE6E6);
+}
+
+class DSGradients {
+  /// Left→right pink gradient for the paywall "Plus" badges.
+  static const LinearGradient paywallBadge = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [Color(0xFFE85C5C), Color(0xFFF4A2A2)],
+  );
+
+  /// Coral wash behind the paywall hero (covered by the cloud illustration).
+  static const LinearGradient paywallHero = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFF09595), Color(0xFFF4B6B6)],
+  );
+
+  // --- Onboarding section backgrounds ---
+  // Each fades a section accent into the neutral page tint (DSColors.tintCloud).
+
+  static const LinearGradient onboardingWhyYucat = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFCAD8FF), DSColors.tintCloud],
+  );
+
+  static const LinearGradient onboardingProofChart = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFE3FFDD), DSColors.tintCloud],
+  );
+
+  static const LinearGradient onboardingHealthIntro = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFDFE6FD), DSColors.tintCloud],
+  );
+
+  static const LinearGradient onboardingSuccess = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFE5FEDE), DSColors.tintCloud],
+  );
+
+  static const LinearGradient onboardingReminders = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFFEF8E6), DSColors.tintCloud],
+  );
+
+  static const LinearGradient onboardingNotifPrimer = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      DSColors.tintCoralSoft,
+      DSColors.tintCoral,
+      Color(0xFFF3EEEC),
+    ],
+    stops: [0.0, 0.45, 1.0],
+  );
+
+  /// Blue wash behind the cat-create water-intake fact step.
+  static const LinearGradient catCreateBackground = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFA5CAFF), DSColors.tintCloud],
+  );
 }
 
 class DSDimens {
+  static const double sizeXxxxs = 2;
   static const double sizeXxxs = 4;
   static const double sizeXxs = 8;
   static const double sizeXs = 12;

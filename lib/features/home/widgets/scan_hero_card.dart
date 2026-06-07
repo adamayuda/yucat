@@ -36,7 +36,7 @@ class ScanHeroCard extends StatelessWidget {
                 Text('Scan a product', style: DSTextStyles.headlineMd),
                 const SizedBox(height: DSDimens.sizeXxxs),
                 Text(
-                  'Tap to scan a barcode',
+                  'Take a photo of the package',
                   style: DSTextStyles.bodyMd.copyWith(
                     color: DSColors.inkSecondary,
                   ),

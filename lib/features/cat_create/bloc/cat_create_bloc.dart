@@ -39,6 +39,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
 
   DateTime? _creationStartTime;
   CatCreateModel? _originalCat;
+  int _errorTick = 0;
 
   CatCreateBloc({
     required CreateCatUsecase createCatUsecase,
@@ -225,6 +226,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
           weightCategory: event.cat.weightCategory,
           activityLevel: event.cat.activityLevel,
           coatType: event.cat.coatType,
+          gender: event.cat.gender,
           healthConditions: event.cat.healthConditions,
         );
 
@@ -238,6 +240,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
             'name': event.cat.name,
             'age_group': event.cat.ageGroup,
             'breed': event.cat.breed,
+            'gender': event.cat.gender,
             'has_health_conditions': event.cat.healthConditions.isNotEmpty,
             'health_conditions': event.cat.healthConditions,
             'neutered': event.cat.neutered,
@@ -262,10 +265,15 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
         },
       );
 
+      _errorTick++;
       emit(CatCreateLoadedState(
         currentStep: (state as CatCreateLoadedState).currentStep,
         cat: (state as CatCreateLoadedState).cat,
         isSubmitting: false,
+        transientError: isEditMode
+            ? "Couldn't save your changes. Please try again."
+            : "Couldn't create the profile. Please try again.",
+        errorTick: _errorTick,
       ));
     }
   }

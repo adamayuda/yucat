@@ -25,6 +25,7 @@ abstract class CatRepository {
     String? weightCategory,
     String? activityLevel,
     String? coatType,
+    String? gender,
     List<String>? healthConditions,
   });
   Future<void> deleteCat({required String catId});

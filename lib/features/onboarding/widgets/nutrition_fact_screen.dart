@@ -38,7 +38,7 @@ class NutritionFactScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FBFE),
+      backgroundColor: DSColors.tintSkyBright,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
@@ -53,7 +53,7 @@ class NutritionFactScreen extends StatelessWidget {
                 height: 168,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFE7EEFA),
+                  color: DSColors.tintBlueSoft,
                 ),
                 alignment: Alignment.center,
                 child: SvgPicture.asset(
@@ -95,7 +95,7 @@ class NutritionFactScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(DSDimens.sizeL),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE7EEFA),
+                  color: DSColors.tintBlueSoft,
                   borderRadius: BorderRadius.circular(DSRadii.xl),
                 ),
                 child: Row(

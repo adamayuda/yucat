@@ -9,28 +9,38 @@ import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
 class ProfilePhotoStep extends StatelessWidget {
   final File? profilePhoto;
-  final bool useDefaultPhoto;
   final ImagePicker imagePicker;
   final ValueChanged<File> onPhotoSelected;
-  final VoidCallback onUseDefault;
-  final VoidCallback onRemovePhoto;
 
   const ProfilePhotoStep({
     super.key,
     required this.profilePhoto,
-    required this.useDefaultPhoto,
     required this.imagePicker,
     required this.onPhotoSelected,
-    required this.onUseDefault,
-    required this.onRemovePhoto,
   });
 
   Future<void> _pick(BuildContext context) async {
     final source = await _showPhotoSourceSheet(context);
     if (source == null) return;
-    final image = await imagePicker.pickImage(source: source);
-    if (image != null) {
-      onPhotoSelected(File(image.path));
+    try {
+      final image = await imagePicker.pickImage(source: source);
+      if (image != null) {
+        onPhotoSelected(File(image.path));
+      }
+    } catch (_) {
+      if (!context.mounted) return;
+      final isCamera = source == ImageSource.camera;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              isCamera
+                  ? "Couldn't access the camera. Check permissions in Settings."
+                  : "Couldn't open your photos. Check permissions in Settings.",
+            ),
+          ),
+        );
     }
   }
 

@@ -29,6 +29,8 @@ class _Testimonial {
   });
 }
 
+// Per-person avatar gradients are intentionally inline (one-off decorative art,
+// not reused) — not promoted to DSColors tokens.
 const _testimonials = [
   _Testimonial(
     quote:

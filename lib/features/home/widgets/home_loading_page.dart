@@ -13,8 +13,8 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
   final List<LoadingStep> _steps = [
     const LoadingStep(
       icon: Icons.qr_code_scanner_rounded,
-      title: 'Scanning barcode',
-      description: 'Reading product code...',
+      title: 'Scanning product',
+      description: 'Identifying the product...',
       gifPath: 'assets/images/Illustrations/loading-scanning.gif',
     ),
     const LoadingStep(

@@ -1,6 +1,8 @@
 import 'dart:io';
 
-class CatCreateModel {
+import 'package:equatable/equatable.dart';
+
+class CatCreateModel extends Equatable {
   final String? id;
   final String name;
   final int? age;
@@ -70,4 +72,23 @@ class CatCreateModel {
       healthConditions: healthConditions ?? this.healthConditions,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        id,
+        name,
+        age,
+        ageGroup,
+        weight,
+        neutered,
+        profileImageFile,
+        profileImageUrl,
+        neuteredStatus,
+        breed,
+        gender,
+        weightCategory,
+        activityLevel,
+        coatType,
+        healthConditions,
+      ];
 }

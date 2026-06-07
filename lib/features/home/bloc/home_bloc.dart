@@ -71,8 +71,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final user = _currentUserUsecase();
 
     final isPremium = await _hasActiveSubscriptionUseCase();
-    final scansRemaining = _scanTrackingService.getRemainingScans();
-    final maxFreeScans = _scanTrackingService.maxFreeScans;
 
     String? primaryCatName;
     String? primaryCatPhotoUrl;
@@ -91,8 +89,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final currentStreak = _scanTrackingService.getCurrentStreak();
 
     emit(HomeLoadedState(
-      scansRemaining: scansRemaining,
-      maxFreeScans: maxFreeScans,
       isPremium: isPremium,
       primaryCatName: primaryCatName,
       primaryCatPhotoUrl: primaryCatPhotoUrl,
@@ -111,20 +107,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
-
-    // Check if user can perform scan
-    final canScan = await _scanTrackingService.canPerformScan();
-
-    if (!canScan) {
-      final purchasedSubscription = await event.context.router.push<bool>(
-        PaywallRoute(),
-      );
-
-      if (purchasedSubscription != true) {
-        add(HomeInitialEvent());
-        return;
-      }
-    }
 
     emit(HomeLoadingState());
 

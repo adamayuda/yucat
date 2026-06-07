@@ -5,12 +5,10 @@ import 'package:yucat/presentation/components/ds_pill_button.dart';
 
 class WelcomeScreen extends StatelessWidget {
   final VoidCallback onGetStarted;
-  final VoidCallback onRestorePurchases;
 
   const WelcomeScreen({
     super.key,
     required this.onGetStarted,
-    required this.onRestorePurchases,
   });
 
   @override
@@ -75,11 +73,6 @@ class WelcomeScreen extends StatelessWidget {
                         verticalPadding: DSDimens.sizeXs,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: DSDimens.sizeXxs),
-                  DSTextLink(
-                    label: 'I already have an account',
-                    onPressed: onRestorePurchases,
                   ),
                   const SizedBox(height: DSDimens.sizeXxs),
                   Text(

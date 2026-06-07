@@ -357,7 +357,6 @@ Future<void> _registerBlocs() async {
       getCatsUsecase: sl<GetCatsUsecase>(),
       catEntityToModelMapper: sl<CatEntityToModelMapper>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
-      catTrackingService: sl<CatTrackingService>(),
     ),
   );
   sl.registerBloc<CatDetailBloc>(

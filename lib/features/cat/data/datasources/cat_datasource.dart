@@ -43,6 +43,7 @@ class CatDataSource {
     String? weightCategory,
     String? activityLevel,
     String? coatType,
+    String? gender,
     List<String>? healthConditions,
   }) async {
     try {
@@ -59,6 +60,7 @@ class CatDataSource {
         'weight_category': weightCategory,
         'activity_level': activityLevel,
         'coat_type': coatType,
+        'gender': gender,
         if (healthConditions != null && healthConditions.isNotEmpty)
           'health_conditions': healthConditions,
       };

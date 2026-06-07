@@ -20,15 +20,6 @@ class SearchEvent extends HomeEvent {
   List<Object?> get props => [query, context];
 }
 
-class SearchByBarcodeEvent extends HomeEvent {
-  final String barcode;
-
-  const SearchByBarcodeEvent({required this.barcode});
-
-  @override
-  List<Object?> get props => [barcode];
-}
-
 class ImageCapturedEvent extends HomeEvent {
   final String imageBase64;
   final String mimeType;

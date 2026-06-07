@@ -22,6 +22,7 @@ class CreateCatUsecase {
     String? weightCategory,
     String? activityLevel,
     String? coatType,
+    String? gender,
     List<String>? healthConditions,
   }) async {
     if (name.trim().isEmpty) {
@@ -41,6 +42,7 @@ class CreateCatUsecase {
       weightCategory: weightCategory,
       activityLevel: activityLevel,
       coatType: coatType,
+      gender: gender,
       healthConditions: healthConditions,
     );
 
@@ -74,6 +76,7 @@ class CreateCatUsecase {
         weightCategory: result.entity.weightCategory,
         activityLevel: result.entity.activityLevel,
         coatType: result.entity.coatType,
+        gender: result.entity.gender,
         healthConditions: result.entity.healthConditions,
       );
     }

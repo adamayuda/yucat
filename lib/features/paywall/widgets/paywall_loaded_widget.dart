@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yucat/config/themes/theme.dart';
-import 'package:yucat/features/paywall/paywall_colors.dart';
 import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
@@ -236,11 +235,7 @@ class _Hero extends StatelessWidget {
                   const Positioned.fill(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Color(0xFFF09595), Color(0xFFF4B6B6)],
-                        ),
+                        gradient: DSGradients.paywallHero,
                       ),
                     ),
                   ),
@@ -288,7 +283,7 @@ class _Hero extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      gradient: kPaywallAccentGradient,
+                      gradient: DSGradients.paywallBadge,
                       borderRadius: BorderRadius.circular(DSRadii.sm),
                     ),
                     child: Text(
@@ -310,7 +305,7 @@ class _Hero extends StatelessWidget {
                     TextSpan(
                       text: 'exactly',
                       style: DSTextStyles.displayLg.copyWith(
-                        color: kPaywallAccent,
+                        color: DSColors.paywallAccent,
                       ),
                     ),
                     const TextSpan(text: "\nwhat's in the bowl"),

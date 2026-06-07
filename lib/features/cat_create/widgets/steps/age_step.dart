@@ -192,7 +192,7 @@ class _AgeStepState extends State<AgeStep> {
                 ),
               ),
               if (isCenter) ...[
-                const SizedBox(width: 6),
+                const SizedBox(width: DSDimens.sizeXxxs),
                 Text(
                   unit,
                   style: DSTextStyles.bodyMd.copyWith(

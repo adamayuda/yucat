@@ -27,13 +27,6 @@ class OnBoardingBackToWelcomeEvent extends OnBoardingEvent {
   List<Object?> get props => [];
 }
 
-class OnBoardingRestorePurchasesEvent extends OnBoardingEvent {
-  const OnBoardingRestorePurchasesEvent();
-
-  @override
-  List<Object?> get props => [];
-}
-
 class OnBoardingAttributionSelectedEvent extends OnBoardingEvent {
   final String source;
 

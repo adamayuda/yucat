@@ -21,6 +21,7 @@ class CatModelToCreateMapperImpl extends CatModelToCreateMapper {
       weightCategory: model.weightCategory,
       activityLevel: model.activityLevel,
       coatType: model.coatType,
+      gender: model.gender,
       healthConditions: model.healthConditions ?? [],
     );
   }

@@ -16,7 +16,7 @@ class SuccessScreen extends StatelessWidget {
     this.summary,
   });
 
-  static const _bg = Color(0xFFEFEEF5);
+  static const _bg = DSColors.tintCloud;
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +27,7 @@ class SuccessScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       body: DecoratedBox(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFE5FEDE), _bg],
-          ),
+          gradient: DSGradients.onboardingSuccess,
         ),
         child: Stack(
           children: [
@@ -309,7 +305,7 @@ class _SummaryRow extends StatelessWidget {
                   color: DSColors.inkTertiary,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: DSDimens.sizeXxxxs),
               Text(
                 value,
                 style: DSTextStyles.titleMd.copyWith(

@@ -43,10 +43,6 @@ class _HomePage extends State<HomePage> {
     tabsRouter.setActiveIndex(0);
   }
 
-  void _openPaywall() {
-    context.router.push(PaywallRoute());
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
@@ -63,23 +59,18 @@ class _HomePage extends State<HomePage> {
           body: const HomeLoadingWidget(),
         );
       case HomeLoadedState(
-          :final scansRemaining,
-          :final maxFreeScans,
           :final isPremium,
           :final primaryCatName,
           :final primaryCatPhotoUrl,
           :final currentStreak,
         ):
         return HomeDashboardPage(
-          scansRemaining: scansRemaining,
-          maxFreeScans: maxFreeScans,
           isPremium: isPremium,
           primaryCatName: primaryCatName,
           primaryCatPhotoUrl: primaryCatPhotoUrl,
           currentStreak: currentStreak,
           onScanTap: _openScanner,
           onSearchTap: _openSearch,
-          onUpgradeTap: _openPaywall,
         );
       case HomeErrorState():
         return Scaffold(

@@ -16,17 +16,13 @@ class ProofChartScreen extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFEFEEF5),
+      backgroundColor: DSColors.tintCloud,
       body: Stack(
         children: [
           Positioned.fill(
             child: const DecoratedBox(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFE3FFDD), Color(0xFFEFEEF5)],
-                ),
+                gradient: DSGradients.onboardingProofChart,
               ),
             ),
           ),
@@ -57,7 +53,7 @@ class ProofChartScreen extends StatelessWidget {
                       vertical: DSDimens.sizeS,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDFEFE1),
+                      color: DSColors.tintMintSoft,
                       borderRadius: BorderRadius.circular(DSRadii.lg),
                     ),
                     child: Row(

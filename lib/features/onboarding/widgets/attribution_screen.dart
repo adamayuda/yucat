@@ -51,7 +51,7 @@ class _AttributionScreenState extends State<AttributionScreen> {
     final hasSelection = _selected != null;
 
     return OnboardingScaffold(
-      background: const Color(0xFFEFEEF5),
+      background: DSColors.tintCloud,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

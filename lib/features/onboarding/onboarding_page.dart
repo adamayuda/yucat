@@ -133,8 +133,6 @@ class _OnBoardingPage extends State<OnBoardingPage> {
       case OnBoardingPhase.welcome:
         return WelcomeScreen(
           onGetStarted: () => _bloc.add(const OnBoardingGetStartedEvent()),
-          onRestorePurchases: () =>
-              _bloc.add(const OnBoardingRestorePurchasesEvent()),
         );
       case OnBoardingPhase.scanDemo:
         return ScanDemoScreen(

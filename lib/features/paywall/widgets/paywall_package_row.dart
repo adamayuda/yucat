@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:yucat/config/themes/theme.dart';
-import 'package:yucat/features/paywall/paywall_colors.dart';
 import 'package:yucat/features/paywall/utils/paywall_format.dart';
 
 class PaywallPackageRow extends StatelessWidget {
@@ -32,11 +31,11 @@ class PaywallPackageRow extends StatelessWidget {
       curve: DSMotion.curveStandard,
       decoration: BoxDecoration(
         color: selected
-            ? kPaywallAccentSoft
+            ? DSColors.paywallAccentSoft
             : DSColors.surfaceCard,
         borderRadius: BorderRadius.circular(DSRadii.xl),
         border: Border.all(
-          color: selected ? kPaywallAccent : Colors.transparent,
+          color: selected ? DSColors.paywallAccent : Colors.transparent,
           width: 2,
         ),
         boxShadow: selected ? null : DSShadows.e1,
@@ -65,7 +64,7 @@ class PaywallPackageRow extends StatelessWidget {
                         children: [
                           Text(period, style: DSTextStyles.titleMd),
                           if (perMonth != null) ...[
-                            const SizedBox(height: 2),
+                            const SizedBox(height: DSDimens.sizeXxxxs),
                             Text(
                               perMonth,
                               style: DSTextStyles.bodyMd.copyWith(
@@ -87,11 +86,11 @@ class PaywallPackageRow extends StatelessWidget {
                           ),
                         ),
                         if (savings != null) ...[
-                          const SizedBox(height: 2),
+                          const SizedBox(height: DSDimens.sizeXxxxs),
                           Text(
                             savings,
                             style: DSTextStyles.caption.copyWith(
-                              color: kPaywallAccent,
+                              color: DSColors.paywallAccent,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -117,7 +116,7 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = accent ? kPaywallAccent : DSColors.surfaceCardDim;
+    final bg = accent ? DSColors.paywallAccent : DSColors.surfaceCardDim;
     final fg = accent ? DSColors.inkInverse : DSColors.inkSecondary;
     return Container(
       padding: const EdgeInsets.symmetric(

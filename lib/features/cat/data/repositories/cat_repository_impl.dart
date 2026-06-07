@@ -57,6 +57,7 @@ class CatRepositoryImpl implements CatRepository {
     String? weightCategory,
     String? activityLevel,
     String? coatType,
+    String? gender,
     List<String>? healthConditions,
   }) async {
     final docRef = await _dataSource.createCat(
@@ -72,6 +73,7 @@ class CatRepositoryImpl implements CatRepository {
       weightCategory: weightCategory,
       activityLevel: activityLevel,
       coatType: coatType,
+      gender: gender,
       healthConditions: healthConditions,
     );
 
@@ -95,6 +97,7 @@ class CatRepositoryImpl implements CatRepository {
       weightCategory: weightCategory,
       activityLevel: activityLevel,
       coatType: coatType,
+      gender: gender,
       healthConditions: healthConditions,
     );
 

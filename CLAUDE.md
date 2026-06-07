@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-YuCat is a Flutter mobile application (iOS-focused) that helps cat owners evaluate cat food products. Users can scan product barcodes, search for products, create cat profiles, and receive personalized product assessments based on their cat's specific characteristics (age, weight, breed, health conditions, etc.).
+YuCat is a Flutter mobile application (iOS-focused) that helps cat owners evaluate cat food products. Users can scan a product by photographing its package, search for products, create cat profiles, and receive personalized product assessments based on their cat's specific characteristics (age, weight, breed, health conditions, etc.).
 
 ## Technology Stack
 
@@ -16,8 +16,8 @@ YuCat is a Flutter mobile application (iOS-focused) that helps cat owners evalua
 - **Search**: Algolia (`algolia ^1.1.2`, `algoliasearch ^1.41.0`); search input debounced with `easy_debounce`
 - **Subscriptions**: RevenueCat (`purchases_flutter`, iOS only) — custom paywall UI on top of the SDK; the `purchases_ui_flutter` drop-in is **not** used
 - **Analytics**: Firebase Analytics + Mixpanel
-- **Device features**: `mobile_scanner ^7.1.3` (barcode), `image_picker` (cat photos), `camera`
-- **UI**: `google_fonts` (Sora display + Poppins body), `lottie` (animations), `smooth_page_indicator`, `url_launcher`
+- **Device features**: `camera` + `image_picker` (product-image scan and cat photos)
+- **UI**: Bricolage Grotesque (bundled variable font — display/headings) + DM Sans (body, via `google_fonts`); `lottie` (animations), `smooth_page_indicator`, `url_launcher`
 
 ## Architecture
 
@@ -120,7 +120,7 @@ These are the parts that are slowest to recover from code — keep them current.
 
 **Product entity** — nutrient fields used by the assessment: `protein`, `fat`, `carbs`, `fiber`, `moisture`, `ash` (`calories` lives on `ProductDisplayModel`, not the domain entity). Plus `name`, `brand`, `score`, `imageUrl`, `pros: List<String>`, `cons: List<String>`, and the V2-era display fields: `isAiIdentified: bool` (powers the "AI IDENTIFIED" hero pill — true for any image-scanned product), `format` (display string e.g. "Wet pâté", joined with `packageSize` into `ProductDisplayModel.formatLine` for the hero subtitle), `packageSize` (e.g. "85g pouch"), `description` (2-3 sentence nutrition-focused narrative shown under the verdict headline in `AnalysisCard`).
 
-**Cat-create wizard** (`lib/features/cat_create/`) — the canonical step order is the `_stepNames` list in `cat_create_bloc.dart` (9 steps): **CatName → ProfilePhoto → Gender → Age → Activity → NeuteredStatus → Coat → HealthConditions → Breed**. Step widgets live in `widgets/steps/`. Step completion and abandonment are emitted as analytics events. The wizard has two contexts: first-launch onboarding (Phase D, anchored CTA "Create profile") and standalone re-edit (CTA "Save changes" — branched in `create_cat_page.dart` on `widget.cat != null`). The bloc detects edit mode via `_originalCat != null` and routes to `UpdateCatUsecase` instead of `CreateCatUsecase`.
+**Cat-create wizard** (`lib/features/cat_create/`) — the canonical step order is the `_stepNames` list in `cat_create_bloc.dart` (11 steps: 9 input + 2 "did you know" interstitials): **CatName → Gender → ProfilePhoto → Age → Activity → WaterIntakeFact → NeuteredStatus → Coat → CoatFact → HealthConditions → Breed**. The `WaterIntakeFact` (index 5) and `CoatFact` (index 8) steps are non-input interstitials — excluded from the progress bar and shown with a "Got it" CTA. Step widgets live in `widgets/steps/`. Step completion and abandonment are emitted as analytics events. The wizard has two contexts: first-launch onboarding (Phase D, anchored CTA "Create profile"; the name is seeded so the flow starts at the Gender step) and standalone re-edit (CTA "Save changes" — branched in `create_cat_page.dart` on `widget.cat != null`). The bloc detects edit mode via `_originalCat != null` and routes to `UpdateCatUsecase` instead of `CreateCatUsecase`.
 
 ### Product Assessment Logic
 
@@ -235,7 +235,7 @@ Structure:
 - **`DSColors`** — section tints (`tintLavender` / `tintSky` / `tintMint` / `tintCoral` / `tintSand` / `tintAsh`), ink (`inkPrimary` / `inkSecondary` / `inkTertiary` / `inkInverse`), surfaces (`surfaceCard` / `surfaceCardDim`), accents (`accentSuccess` / `accentSuccessSoft` / `accentDanger` / `accentInfo`), `coralAccent` for emphasis chips, `brandPink` (logo only).
 - **`DSDimens`** — 4–64 px spacing scale (`sizeXxxs` → `size5xl`).
 - **`DSRadii`** — `sm`/`md`/`lg`/`xl`/`pill`. **`DSShadows`** — `e1`/`e2`/`e3`. **`DSMotion`** — durations + curves.
-- **`DSTextStyles`** — `displayHero` / `displayLg` (Sora ExtraBold), `headlineMd`, `titleMd`, `bodyLg` / `bodyMd`, `label`, `caption` (Poppins). Loaded via `google_fonts`.
+- **`DSTextStyles`** — `displayHero` / `displayLg` / `headlineMd` (Bricolage Grotesque, wght 800 + wdth 75 condensed, via the bundled variable font); `titleMd`, `bodyLg` / `bodyMd`, `label`, `caption` (DM Sans via `google_fonts`).
 - Material3 enabled.
 
 Shared components live under `lib/presentation/components/`: `DSCard`, `DSPillButton` + `DSTextLink`, `DSAppBar`, `DSStateView`, `DSOptionRow`, `DSBottomNav`, `DSChip`, `DSDotIndicator`, `DSStatPill`, `DSQuoteCard`, `LineChartCard`, `MascotSpeechBubble`, `OnboardingScaffold`, `WizardStepShell`, `CatAvatar`. Loading indicator: `lib/presentation/widgets/app_loading_widget.dart`. Tab shell: `lib/presentation/main/main_page.dart`.
@@ -289,18 +289,16 @@ firebase deploy --only functions:fetchProductByImageV2    # single function
 
 The barcode flow (`fetchProductByBarcode`) was orphaned and has been removed from both the backend and the Flutter client.
 
-## RevenueCat Integration & Free-Tier Limits
+## RevenueCat Integration & Hard Paywall
 
 RevenueCat is configured **only for iOS** in `main.dart`:
 - API Key: `appl_RLrrtMqNXWlaNlEXzZQxUcxkJxw`
 - Subscription state is read via `HasActiveSubscriptionUseCase` → `SubscriptionRepository`
 - The paywall UI is **custom** (`lib/features/paywall/widgets/paywall_loaded_widget.dart`) on top of `Purchases.getOfferings()` / `Purchases.purchase(PurchaseParams.package(...))` / `Purchases.restorePurchases()`. The `purchases_ui_flutter` drop-in (`RevenueCatUI.presentPaywall()`) is intentionally not used.
 
-Free-tier ceilings (source of truth: `lib/services/`):
-- **1 cat max** — `cat_tracking_service.dart` (`_maxFreeCats = 1`)
-- **3 scans max** — `scan_tracking_service.dart` (`_maxFreeScans = 3`)
+**The app is a hard paywall — there is no free tier.** Subscription is enforced at two non-limit gates: the final, non-dismissible beat of onboarding (`onboarding_bloc.dart`) and the splash screen for returning non-subscribers who finished onboarding (`splash_bloc.dart`). Every active user is therefore a subscriber.
 
-Counters are persisted in SharedPreferences. When a limit is hit, both services emit a `Free Limit Hit` analytics event with `limit_type` and `limit_value`, which the paywall flow uses for context.
+Because of this, the old free-tier scan/cat limits are **no longer wired into any flow**. The two tracking services remain in `lib/services/` (`scan_tracking_service.dart`, `_maxFreeScans = 3`; `cat_tracking_service.dart`, `_maxFreeCats = 1`) and stay registered in `service_locator.dart`, but their gating methods (`canPerformScan`, `canCreateCat`, `getRemainingScans`, and the `Free Limit Hit` event they emit) are **not called** — kept intact only so a free tier can be re-enabled later. `ScanTrackingService` is still used by `HomeBloc`, but **only for streak tracking** (`recordSuccessfulScan` / `getCurrentStreak`), not gating. Scanning and cat creation now proceed unconditionally.
 
 ## Analytics
 

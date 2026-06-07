@@ -41,11 +41,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
   @override
   Widget build(BuildContext context) {
     return OnboardingScaffold(
-      gradient: const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Color(0xFFFEF8E6), Color(0xFFEFEEF5)],
-      ),
+      gradient: DSGradients.onboardingReminders,
       footer: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -117,7 +113,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(DSDimens.sizeS),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8EADA),
+                  color: DSColors.tintSandSoft,
                   borderRadius: BorderRadius.circular(DSRadii.lg),
                 ),
                 child: Row(

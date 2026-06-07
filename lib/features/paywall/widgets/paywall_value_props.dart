@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
-import 'package:yucat/features/paywall/paywall_colors.dart';
 
 class PaywallValueProps extends StatelessWidget {
   const PaywallValueProps({super.key});
@@ -95,10 +94,10 @@ class _FeatureRow extends StatelessWidget {
             width: PaywallValueProps._tileSize,
             height: PaywallValueProps._tileSize,
             decoration: BoxDecoration(
-              color: kPaywallAccentSoft,
+              color: DSColors.paywallAccentSoft,
               borderRadius: BorderRadius.circular(DSRadii.md),
             ),
-            child: Icon(feature.icon, color: kPaywallAccent, size: 18),
+            child: Icon(feature.icon, color: DSColors.paywallAccent, size: 18),
           ),
           const SizedBox(width: DSDimens.sizeM),
           Expanded(
@@ -112,7 +111,7 @@ class _FeatureRow extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: DSDimens.sizeXxxxs),
                 Text(
                   feature.benefit,
                   style: DSTextStyles.caption.copyWith(

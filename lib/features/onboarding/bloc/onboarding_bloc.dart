@@ -33,7 +33,6 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     on<OnBoardingInitialEvent>(_onOnBoardingInitialEvent);
     on<OnBoardingGetStartedEvent>(_onOnBoardingGetStartedEvent);
     on<OnBoardingBackToWelcomeEvent>(_onOnBoardingBackToWelcomeEvent);
-    on<OnBoardingRestorePurchasesEvent>(_onOnBoardingRestorePurchasesEvent);
     on<OnBoardingAttributionSelectedEvent>(_onOnBoardingAttributionSelectedEvent);
     on<OnBoardingAttributionDetailsSubmittedEvent>(_onOnBoardingAttributionDetailsSubmittedEvent);
     on<OnBoardingAttributionSkippedEvent>(_onOnBoardingAttributionSkippedEvent);
@@ -80,6 +79,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       properties: {'timestamp': DateTime.now().toIso8601String()},
     );
 
+    _stepsViewed++;
     _logScreenViewUsecase.call(
       screenName: 'OnBoardingRoute',
       index: _phaseIndex(OnBoardingPhase.scanDemo),
@@ -94,17 +94,6 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     Emitter<OnBoardingState> emit,
   ) {
     emit(const OnBoardingReadyState(phase: OnBoardingPhase.welcome));
-  }
-
-  void _onOnBoardingRestorePurchasesEvent(
-    OnBoardingRestorePurchasesEvent event,
-    Emitter<OnBoardingState> emit,
-  ) {
-    _logEventUsecase.call(
-      eventName: 'Onboarding Restore Purchases Tapped',
-      properties: {'timestamp': DateTime.now().toIso8601String()},
-    );
-    // Real RevenueCat restore flow lands later; no-op for now.
   }
 
   void _onOnBoardingAttributionSelectedEvent(
@@ -123,6 +112,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
         ? OnBoardingPhase.attributionDetails
         : OnBoardingPhase.proofChart;
 
+    _stepsViewed++;
     _logScreenViewUsecase.call(
       screenName: 'OnBoardingRoute',
       index: _phaseIndex(next),
@@ -146,6 +136,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
+    _stepsViewed++;
     emit(_readyState().copyWith(phase: OnBoardingPhase.proofChart));
   }
 
@@ -157,6 +148,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       eventName: 'Onboarding Attribution Skipped',
       properties: {'timestamp': DateTime.now().toIso8601String()},
     );
+    _stepsViewed++;
     emit(_readyState().copyWith(phase: OnBoardingPhase.proofChart));
   }
 
@@ -178,6 +170,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       _ => current.phase,
     };
     if (next != current.phase) {
+      _stepsViewed++;
       _logScreenViewUsecase.call(
         screenName: 'OnBoardingRoute',
         index: _phaseIndex(next),

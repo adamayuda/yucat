@@ -16,19 +16,10 @@ class NotifPrimerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8CDC6),
+      backgroundColor: DSColors.tintCoralSoft,
       body: DecoratedBox(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFF8CDC6),
-              DSColors.tintCoral,
-              Color(0xFFF3EEEC),
-            ],
-            stops: [0.0, 0.45, 1.0],
-          ),
+          gradient: DSGradients.onboardingNotifPrimer,
         ),
         child: Stack(
           children: [
@@ -268,7 +259,7 @@ class _HeartMeter extends StatelessWidget {
               size: 13,
               color: i < filled
                   ? DSColors.coralAccent
-                  : const Color(0xFFE2DFE8),
+                  : DSColors.tintGreySoft,
             ),
           ),
       ],

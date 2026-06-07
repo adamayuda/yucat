@@ -23,7 +23,7 @@ class RatingScreen extends StatelessWidget {
     return Scaffold(
       // Placeholder cream background; decorative art (stars, cat, laurels) will
       // be layered back in as individual assets are provided.
-      backgroundColor: const Color(0xFFFFF4DC),
+      backgroundColor: DSColors.tintCream,
       body: Stack(
         children: [
           // Radial glow as a full-width background — pinned to the very top,

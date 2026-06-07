@@ -56,7 +56,6 @@ class _CreateCatPageState extends State<CreateCatPage> {
   final _nameFieldKey = GlobalKey<FormFieldState<String>>();
   late final PageController _pageController;
 
-  bool _useDefaultPhoto = false;
   bool _disclaimerShown = false;
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -184,9 +183,17 @@ class _CreateCatPageState extends State<CreateCatPage> {
       listenWhen: (previous, current) =>
           previous is CatCreateLoadedState &&
           current is CatCreateLoadedState &&
-          previous.currentStep != current.currentStep,
+          (previous.currentStep != current.currentStep ||
+              previous.errorTick != current.errorTick),
       listener: (context, state) {
         if (state is! CatCreateLoadedState) return;
+        if (state.transientError != null) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(content: Text(state.transientError!)),
+            );
+        }
         if (!_pageController.hasClients) return;
         _pageController.animateToPage(
           state.currentStep,
@@ -224,13 +231,8 @@ class _CreateCatPageState extends State<CreateCatPage> {
       totalSteps: _totalSteps - _initialStep,
       background: DSColors.tintCloud,
       backgroundChild: _buildFactBackdrop(context),
-      backgroundGradient: currentStep == 5
-          ? const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFFA5CAFF), Color(0xFFEFEEF5)],
-            )
-          : null,
+      backgroundGradient:
+          currentStep == 5 ? DSGradients.catCreateBackground : null,
       ctaLabel: isLast
           ? finalCtaLabel
           : isFactStep
@@ -339,40 +341,12 @@ class _CreateCatPageState extends State<CreateCatPage> {
         return ProfilePhotoStep(
           key: const ValueKey('step_2'),
           profilePhoto: cat.profileImageFile,
-          useDefaultPhoto: _useDefaultPhoto,
           imagePicker: _imagePicker,
           onPhotoSelected: (file) {
-            setState(() {
-              _useDefaultPhoto = false;
-            });
             final currentState = _bloc.state;
             if (currentState is CatCreateLoadedState) {
               final updatedCat = currentState.cat.copyWith(
                 profileImageFile: file,
-              );
-              _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
-            }
-          },
-          onUseDefault: () {
-            setState(() {
-              _useDefaultPhoto = true;
-            });
-            final currentState = _bloc.state;
-            if (currentState is CatCreateLoadedState) {
-              final updatedCat = currentState.cat.copyWith(
-                profileImageFile: null,
-              );
-              _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
-            }
-          },
-          onRemovePhoto: () {
-            setState(() {
-              _useDefaultPhoto = false;
-            });
-            final currentState = _bloc.state;
-            if (currentState is CatCreateLoadedState) {
-              final updatedCat = currentState.cat.copyWith(
-                profileImageFile: null,
               );
               _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
             }

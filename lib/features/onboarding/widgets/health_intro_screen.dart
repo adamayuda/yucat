@@ -14,11 +14,7 @@ class HealthIntroScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OnboardingScaffold(
-      gradient: const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Color(0xFFDFE6FD), Color(0xFFEFEEF5)],
-      ),
+      gradient: DSGradients.onboardingHealthIntro,
       footer: DSPillButton(label: "Let's go", onPressed: onAddCat),
       child: Stack(
         children: [
