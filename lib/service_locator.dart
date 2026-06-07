@@ -292,7 +292,12 @@ extension BlocProviderRegistration on GetIt {
 }
 
 Future<void> _registerBlocs() async {
-  sl.registerBloc<SplashBloc>(() => SplashBloc(prefs: sl<SharedPreferences>()));
+  sl.registerBloc<SplashBloc>(
+    () => SplashBloc(
+      prefs: sl<SharedPreferences>(),
+      hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
+    ),
+  );
   sl.registerBloc<ProductListingBloc>(
     () => ProductListingBloc(
       searchByBrandUsecase: sl<SearchByBrandUsecase>(),

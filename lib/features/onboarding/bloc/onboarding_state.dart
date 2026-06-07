@@ -35,16 +35,16 @@ class OnBoardingReadyState extends OnBoardingState {
   final String? seededName;
   final String? seededPhotoPath;
 
-  /// At-a-glance chips for the created cat, returned by the wizard and
-  /// shown on the success screen. Empty until the wizard completes.
-  final List<String> catSummary;
+  /// Structured profile recap for the created cat, returned by the wizard and
+  /// shown on the success screen. Null until the wizard completes.
+  final CatSummary? catSummary;
 
   const OnBoardingReadyState({
     this.phase = OnBoardingPhase.welcome,
     this.selectedSource,
     this.seededName,
     this.seededPhotoPath,
-    this.catSummary = const [],
+    this.catSummary,
   });
 
   @override
@@ -61,7 +61,7 @@ class OnBoardingReadyState extends OnBoardingState {
     String? selectedSource,
     String? seededName,
     String? seededPhotoPath,
-    List<String>? catSummary,
+    CatSummary? catSummary,
   }) => OnBoardingReadyState(
     phase: phase ?? this.phase,
     selectedSource: selectedSource ?? this.selectedSource,

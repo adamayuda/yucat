@@ -63,3 +63,5 @@ functions/firebase-debug.*.log
 firebase-debug.log
 firebase-debug.*.log
 .firebase/
+
+design.zip

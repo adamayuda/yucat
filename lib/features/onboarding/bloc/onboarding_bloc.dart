@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
+import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
 
 part 'onboarding_event.dart';
 part 'onboarding_state.dart';
@@ -249,7 +250,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
         seededPhotoPath: current.seededPhotoPath,
       ),
     );
-    if (result is! List<String>) {
+    if (result is! CatSummary) {
       // Wizard dismissed via back — the onboarding PageView is still on the
       // health-intro screen underneath, so no phase change is needed.
       return;
@@ -288,10 +289,11 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       },
     );
 
-    // Show the paywall as the final beat of onboarding. Whether the user
-    // converts or dismisses, we land them on the main app after.
+    // Hard gate: the paywall is the final beat of onboarding and cannot be
+    // dismissed. push() only returns once the user has subscribed (or restored
+    // an existing subscription), so we only ever reach the main app after that.
     final router = event.context.router;
-    await router.push(const PaywallRoute());
+    await router.push(PaywallRoute(dismissible: false));
     await router.replace(const MainRoute());
   }
 }

@@ -18,6 +18,7 @@ import 'package:yucat/features/onboarding/widgets/scan_demo_screen.dart';
 import 'package:yucat/features/onboarding/widgets/success_screen.dart';
 import 'package:yucat/features/onboarding/widgets/welcome_screen.dart';
 import 'package:yucat/features/onboarding/widgets/why_yucat_screen.dart';
+import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
 @RoutePage()
@@ -71,6 +72,7 @@ class _OnBoardingPage extends State<OnBoardingPage> {
       listener: (context, state) {
         if (state is! OnBoardingReadyState) return;
         if (!_pageController.hasClients) return;
+        FocusScope.of(context).unfocus();
         final targetIndex = OnBoardingPhase.values.indexOf(state.phase);
         _pageController.animateToPage(
           targetIndex,
@@ -125,7 +127,7 @@ class _OnBoardingPage extends State<OnBoardingPage> {
     OnBoardingPhase phase,
     String? selectedSource,
     String? seededName,
-    List<String> catSummary,
+    CatSummary? catSummary,
   ) {
     switch (phase) {
       case OnBoardingPhase.welcome:

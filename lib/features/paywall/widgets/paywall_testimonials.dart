@@ -74,19 +74,26 @@ class _PaywallTestimonialsState extends State<PaywallTestimonials> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           'Success stories\nfrom cat parents',
-          style: DSTextStyles.headlineMd,
+          textAlign: TextAlign.center,
+          style: DSTextStyles.displayLg,
         ),
-        const SizedBox(height: DSDimens.sizeS),
+        const SizedBox(height: DSDimens.sizeL),
         SizedBox(
           height: 200,
           child: PageView(
             controller: _controller,
             children: [
-              for (final t in _testimonials) _TestimonialCard(testimonial: t),
+              for (final t in _testimonials)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: DSDimens.sizeXs,
+                  ),
+                  child: _TestimonialCard(testimonial: t),
+                ),
             ],
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/paywall/paywall_colors.dart';
 import 'package:yucat/features/paywall/utils/paywall_format.dart';
 
 class PaywallPackageRow extends StatelessWidget {
@@ -31,11 +32,11 @@ class PaywallPackageRow extends StatelessWidget {
       curve: DSMotion.curveStandard,
       decoration: BoxDecoration(
         color: selected
-            ? DSColors.accentSuccessSoft
+            ? kPaywallAccentSoft
             : DSColors.surfaceCard,
         borderRadius: BorderRadius.circular(DSRadii.xl),
         border: Border.all(
-          color: selected ? DSColors.accentSuccess : Colors.transparent,
+          color: selected ? kPaywallAccent : Colors.transparent,
           width: 2,
         ),
         boxShadow: selected ? null : DSShadows.e1,
@@ -90,7 +91,7 @@ class PaywallPackageRow extends StatelessWidget {
                           Text(
                             savings,
                             style: DSTextStyles.caption.copyWith(
-                              color: DSColors.accentSuccess,
+                              color: kPaywallAccent,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -116,8 +117,8 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = accent ? DSColors.coralSurface : DSColors.surfaceCardDim;
-    final fg = accent ? DSColors.coralAccent : DSColors.inkSecondary;
+    final bg = accent ? kPaywallAccent : DSColors.surfaceCardDim;
+    final fg = accent ? DSColors.inkInverse : DSColors.inkSecondary;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: DSDimens.sizeXs,

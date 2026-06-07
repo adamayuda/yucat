@@ -9,6 +9,7 @@ import 'package:yucat/features/cat/domain/usecases/create_cat_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/update_cat_usecase.dart';
 import 'package:yucat/features/cat_create/mappers/cat_model_to_entity_mapper.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_create_model.dart';
+import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
 
 part 'cat_create_event.dart';
 part 'cat_create_state.dart';
@@ -247,9 +248,9 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
         );
       }
 
-      // Return a short profile summary so callers (e.g. onboarding) can
+      // Return a structured profile summary so callers (e.g. onboarding) can
       // surface it on a success screen.
-      event.context.router.maybePop(_buildCatSummary(event.cat));
+      event.context.router.maybePop(CatSummary.fromModel(event.cat));
     } catch (e) {
       final isEditMode = _originalCat != null;
       _logEventUsecase.call(
@@ -267,32 +268,6 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
         isSubmitting: false,
       ));
     }
-  }
-
-  /// Builds the at-a-glance chips shown on the post-creation success screen
-  /// (e.g. "Adult · Female · Bengal · Medium activity · 1 health note").
-  List<String> _buildCatSummary(CatCreateModel cat) {
-    String cap(String v) =>
-        v.isEmpty ? v : '${v[0].toUpperCase()}${v.substring(1)}';
-
-    final chips = <String>[];
-    final age = cat.age;
-    if (age != null) {
-      chips.add(age < 12 ? 'Kitten' : (age < 120 ? 'Adult' : 'Senior'));
-    }
-    if (cat.gender != null) chips.add(cap(cat.gender!));
-    if (cat.breed != null && cat.breed != 'Other') chips.add(cat.breed!);
-    if (cat.activityLevel != null) {
-      chips.add('${cap(cat.activityLevel!)} activity');
-    }
-    final conditions =
-        cat.healthConditions.where((c) => c != 'none').toList();
-    if (conditions.isNotEmpty) {
-      chips.add(
-        '${conditions.length} health note${conditions.length == 1 ? '' : 's'}',
-      );
-    }
-    return chips;
   }
 
   List<String> _getChangedFields(CatCreateModel updatedCat) {

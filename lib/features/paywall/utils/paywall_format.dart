@@ -36,31 +36,9 @@ String? savingsLabelFor(Package pkg, List<Package> all) {
   return 'Save ${saved.round()}%';
 }
 
-/// True if the package starts with a free trial intro period.
-bool hasFreeTrial(Package pkg) {
-  final intro = pkg.storeProduct.introductoryPrice;
-  return intro != null && intro.price == 0;
-}
-
-/// CTA label that adapts to the selected package.
+/// CTA label. No free trial: paying is immediate, so the label is fixed.
 String ctaLabelFor(Package pkg) {
-  final intro = pkg.storeProduct.introductoryPrice;
-  if (intro != null && intro.price == 0) {
-    final unit = _periodUnitLabel(intro.periodUnit, intro.periodNumberOfUnits);
-    return 'Start my $unit free trial';
-  }
-  return 'Continue';
-}
-
-String _periodUnitLabel(PeriodUnit unit, int count) {
-  final word = switch (unit) {
-    PeriodUnit.day => 'day',
-    PeriodUnit.week => 'week',
-    PeriodUnit.month => 'month',
-    PeriodUnit.year => 'year',
-    PeriodUnit.unknown => 'period',
-  };
-  return '$count-$word';
+  return 'Unlock Yucat Plus';
 }
 
 String _currencySymbolFor(String priceString) {

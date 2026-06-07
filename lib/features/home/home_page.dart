@@ -44,7 +44,7 @@ class _HomePage extends State<HomePage> {
   }
 
   void _openPaywall() {
-    context.router.push(const PaywallRoute());
+    context.router.push(PaywallRoute());
   }
 
   @override

@@ -173,18 +173,41 @@ class OnBoardingRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [PaywallPage]
-class PaywallRoute extends PageRouteInfo<void> {
-  const PaywallRoute({List<PageRouteInfo>? children})
-    : super(PaywallRoute.name, initialChildren: children);
+class PaywallRoute extends PageRouteInfo<PaywallRouteArgs> {
+  PaywallRoute({
+    Key? key,
+    bool dismissible = true,
+    List<PageRouteInfo>? children,
+  }) : super(
+         PaywallRoute.name,
+         args: PaywallRouteArgs(key: key, dismissible: dismissible),
+         initialChildren: children,
+       );
 
   static const String name = 'PaywallRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const PaywallPage();
+      final args = data.argsAs<PaywallRouteArgs>(
+        orElse: () => const PaywallRouteArgs(),
+      );
+      return PaywallPage(key: args.key, dismissible: args.dismissible);
     },
   );
+}
+
+class PaywallRouteArgs {
+  const PaywallRouteArgs({this.key, this.dismissible = true});
+
+  final Key? key;
+
+  final bool dismissible;
+
+  @override
+  String toString() {
+    return 'PaywallRouteArgs{key: $key, dismissible: $dismissible}';
+  }
 }
 
 /// generated route for

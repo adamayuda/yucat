@@ -12,7 +12,12 @@ import 'package:yucat/features/paywall/widgets/paywall_loading_widget.dart';
 
 @RoutePage()
 class PaywallPage extends StatefulWidget {
-  const PaywallPage({super.key});
+  /// When false the paywall is a hard gate: no close chip and system
+  /// back/swipe is blocked. Used at the end of onboarding and at boot when
+  /// the user has no active subscription.
+  final bool dismissible;
+
+  const PaywallPage({super.key, this.dismissible = true});
 
   @override
   State<PaywallPage> createState() => _PaywallPage();
@@ -35,9 +40,12 @@ class _PaywallPage extends State<PaywallPage> {
       listenWhen: _listenWhen,
       listener: _onStateChange,
       buildWhen: _buildWhen,
-      builder: (context, state) => Scaffold(
-        backgroundColor: Colors.transparent,
-        body: _onStateChangeBuilder(state),
+      builder: (context, state) => PopScope(
+        canPop: widget.dismissible,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: _onStateChangeBuilder(state),
+        ),
       ),
     );
   }
@@ -93,7 +101,11 @@ class _PaywallPage extends State<PaywallPage> {
     return switch (state) {
       PaywallLoadingState() => const PaywallLoadingWidget(),
       PaywallErrorState(:final message) => PaywallErrorWidget(message: message),
-      PaywallLoadedState() => PaywallLoadedWidget(state: state, bloc: _bloc),
+      PaywallLoadedState() => PaywallLoadedWidget(
+        state: state,
+        bloc: _bloc,
+        dismissible: widget.dismissible,
+      ),
       _ => const SizedBox(),
     };
   }

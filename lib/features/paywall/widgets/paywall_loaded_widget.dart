@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/paywall/paywall_colors.dart';
 import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
@@ -17,11 +20,13 @@ const _privacyUrl = 'https://yucat-web-production.up.railway.app/policy.html';
 class PaywallLoadedWidget extends StatefulWidget {
   final PaywallLoadedState state;
   final PaywallBloc bloc;
+  final bool dismissible;
 
   const PaywallLoadedWidget({
     super.key,
     required this.state,
     required this.bloc,
+    this.dismissible = true,
   });
 
   @override
@@ -31,22 +36,9 @@ class PaywallLoadedWidget extends StatefulWidget {
 class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
   bool _showAllPlans = false;
 
-  /// Default-recommended plan: annual with free trial if available,
-  /// otherwise the first annual, otherwise the first package.
-  Package _defaultPlan(List<Package> packages) {
-    final annualWithTrial = packages.firstWhere(
-      (p) => p.packageType == PackageType.annual && hasFreeTrial(p),
-      orElse: () => packages.firstWhere(
-        (p) => p.packageType == PackageType.annual,
-        orElse: () => packages.first,
-      ),
-    );
-    return annualWithTrial;
-  }
-
   String? _badgeFor(Package pkg) {
     if (pkg.packageType == PackageType.annual) {
-      return hasFreeTrial(pkg) ? 'MOST POPULAR' : 'BEST VALUE';
+      return 'BEST VALUE';
     }
     return null;
   }
@@ -56,107 +48,150 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
     final state = widget.state;
     final bloc = widget.bloc;
     final packages = state.packages;
-    final defaultPlan = _defaultPlan(packages);
-    final extraPlans = packages
-        .where((p) => p.identifier != defaultPlan.identifier)
-        .toList();
-    final visiblePlans = _showAllPlans
-        ? <Package>[defaultPlan, ...extraPlans]
-        : <Package>[defaultPlan];
+    // The collapsed view shows the currently-selected plan so the highlighted
+    // row, the CTA, and the package that gets purchased are always the same.
+    final defaultPlan = state.selectedPackage;
+    final hasExtraPlans = packages.length > 1;
+    // Expanded: keep the packages in their natural order so selecting a plan
+    // highlights it in place instead of reordering it to the top. Collapsed:
+    // show only the selected plan.
+    final visiblePlans = _showAllPlans ? packages : <Package>[defaultPlan];
 
     return ColoredBox(
       color: DSColors.surfaceCard,
       child: Stack(
         children: [
-          // Green hero band painted across the top; the white floor below
-          // comes from the outer ColoredBox so the route never goes
-          // transparent (its frame is opaque: false during slide-bottom).
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 320,
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF57BC7E), Color(0xFF44A66E)],
-                ),
-              ),
-            ),
-          ),
-          SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(
-              DSDimens.sizeL,
-              DSDimens.size3xl,
-              DSDimens.sizeL,
-              DSDimens.sizeL,
-            ),
+          // Full-bleed content. No horizontal ListView padding so the hero
+          // bleeds edge-to-edge; the other sections are padded individually.
+          // The close chip lives inside _Hero so it scrolls away with it.
+          ListView(
+            padding: const EdgeInsets.only(bottom: 168),
             children: [
-              const _Hero(),
-              const SizedBox(height: DSDimens.sizeL),
-              for (var i = 0; i < visiblePlans.length; i++) ...[
-                if (i > 0) const SizedBox(height: DSDimens.sizeXs),
-                PaywallPackageRow(
-                  package: visiblePlans[i],
-                  allPackages: packages,
-                  selected:
-                      visiblePlans[i].identifier ==
-                      state.selectedPackage.identifier,
-                  badge: _badgeFor(visiblePlans[i]),
-                  onTap: () => bloc.add(
-                    PaywallPackageSelectedEvent(package: visiblePlans[i]),
-                  ),
-                ),
-              ],
-              if (extraPlans.isNotEmpty) ...[
-                const SizedBox(height: DSDimens.sizeXs),
-                Center(
-                  child: TextButton(
-                    onPressed: () =>
-                        setState(() => _showAllPlans = !_showAllPlans),
-                    child: Text(
-                      _showAllPlans ? 'Hide other plans' : 'Show more plans ⌄',
-                      style: DSTextStyles.label.copyWith(
-                        color: DSColors.inkSecondary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-              const SizedBox(height: DSDimens.sizeL),
-              Center(
-                child: DSPillButton(
-                  label: ctaLabelFor(state.selectedPackage),
-                  onPressed: () => bloc.add(const PaywallPurchaseEvent()),
-                  loading: state.isPurchasing,
-                ),
+              _Hero(
+                onClose: widget.dismissible
+                    ? () => bloc.add(const PaywallDismissEvent())
+                    : null,
               ),
-              const SizedBox(height: DSDimens.sizeXs),
-              const _Reassurance(),
-              const SizedBox(height: DSDimens.size3xl),
-              const PaywallValueProps(),
-              const SizedBox(height: DSDimens.size3xl),
-              const PaywallTestimonials(),
-              const SizedBox(height: DSDimens.size3xl),
-              const _LaurelStats(),
-              const SizedBox(height: DSDimens.size3xl),
-              const _AutoRenewDisclosure(),
-              const SizedBox(height: DSDimens.sizeS),
-              _LegalLinks(
-                onRestore: () => bloc.add(const PaywallRestoreEvent()),
+              const SizedBox(height: DSDimens.sizeL),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+                child: Column(
+                  children: [
+                    for (var i = 0; i < visiblePlans.length; i++) ...[
+                      if (i > 0) const SizedBox(height: DSDimens.sizeXs),
+                      PaywallPackageRow(
+                        package: visiblePlans[i],
+                        allPackages: packages,
+                        selected: visiblePlans[i].identifier ==
+                            state.selectedPackage.identifier,
+                        badge: _badgeFor(visiblePlans[i]),
+                        onTap: () => bloc.add(
+                          PaywallPackageSelectedEvent(package: visiblePlans[i]),
+                        ),
+                      ),
+                    ],
+                    if (hasExtraPlans) ...[
+                      const SizedBox(height: DSDimens.sizeXs),
+                      Center(
+                        child: TextButton(
+                          onPressed: () =>
+                              setState(() => _showAllPlans = !_showAllPlans),
+                          child: Text(
+                            _showAllPlans
+                                ? 'Hide other plans'
+                                : 'Show more plans ⌄',
+                            style: DSTextStyles.label.copyWith(
+                              color: DSColors.inkSecondary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: DSDimens.size3xl),
+                    const PaywallValueProps(),
+                    const SizedBox(height: DSDimens.size3xl),
+                    const PaywallTestimonials(),
+                    const SizedBox(height: DSDimens.size3xl),
+                    const _LaurelStats(),
+                    const SizedBox(height: DSDimens.size3xl),
+                    const _AutoRenewDisclosure(),
+                    const SizedBox(height: DSDimens.sizeS),
+                    _LegalLinks(
+                      onRestore: () => bloc.add(const PaywallRestoreEvent()),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
+          // Fade behind the static CTA (same effect as the onboarding/success
+          // floating footer).
           Positioned(
-            top: MediaQuery.of(context).padding.top + DSDimens.sizeS,
-            left: DSDimens.sizeS,
-            child: _CloseChip(
-              onTap: () => bloc.add(const PaywallDismissEvent()),
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 160,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      DSColors.surfaceCard.withValues(alpha: 0),
+                      DSColors.surfaceCard,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  DSDimens.sizeL,
+                  DSDimens.sizeS,
+                  DSDimens.sizeL,
+                  DSDimens.sizeS,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Center(
+                      heightFactor: 1,
+                      child: DSPillButton(
+                        label: ctaLabelFor(state.selectedPackage),
+                        onPressed: () =>
+                            bloc.add(const PaywallPurchaseEvent()),
+                        loading: state.isPurchasing,
+                      ),
+                    ),
+                    const SizedBox(height: DSDimens.sizeXs),
+                    const _Reassurance(),
+                    // Debug-only escape hatch so the hard gate can be skipped
+                    // while testing the rest of the app. Stripped from release
+                    // builds (kDebugMode is a const false there).
+                    if (kDebugMode && !widget.dismissible)
+                      TextButton(
+                        onPressed: () =>
+                            bloc.add(const PaywallDismissEvent()),
+                        child: Text(
+                          'Skip paywall (debug)',
+                          style: DSTextStyles.caption.copyWith(
+                            color: DSColors.inkTertiary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -166,90 +201,143 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
 }
 
 class _Hero extends StatelessWidget {
-  const _Hero();
+  const _Hero({this.onClose});
+
+  /// When null the close chip is hidden (hard-gate paywall).
+  final VoidCallback? onClose;
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    // cat-cloud.svg is 391×378; rendered at full width its white cloud base
+    // lands on the white content, hiding the gradient's bottom edge.
+    final svgHeight = width * (378 / 391);
+    final fullHeight = topInset + svgHeight;
+    // Clip the empty white cloud below the cat so the branding sits close.
+    final visibleHeight = topInset + svgHeight * 0.66;
     return Column(
       children: [
-        const SizedBox(
-          height: 120,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              Text('😼', style: TextStyle(fontSize: 100)),
-              Positioned(
-                top: 4,
-                left: 12,
-                child: Text('⚡', style: TextStyle(fontSize: 18)),
-              ),
-              Positioned(
-                top: 16,
-                right: 24,
-                child: Text('⚡', style: TextStyle(fontSize: 22)),
-              ),
-              Positioned(
-                bottom: 12,
-                left: 32,
-                child: Text(
-                  '✦',
-                  style: TextStyle(fontSize: 14, color: Colors.white),
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 12,
-                child: Text(
-                  '✦',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: DSDimens.sizeL),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text('Yucat', style: DSTextStyles.headlineMd),
-            const SizedBox(width: DSDimens.sizeXxs),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: DSDimens.sizeXs,
-                vertical: 2,
-              ),
-              decoration: BoxDecoration(
-                color: DSColors.accentSuccess,
-                borderRadius: BorderRadius.circular(DSRadii.sm),
-              ),
-              child: Text(
-                'Plus',
-                style: DSTextStyles.titleMd.copyWith(
-                  color: DSColors.inkInverse,
-                ),
+        // Full-bleed cat-on-cloud hero (the ListView has no horizontal
+        // padding); it carries its own gradient + close chip so the whole
+        // thing scrolls together and bleeds behind the status bar.
+        ClipRect(
+          child: SizedBox(
+            height: visibleHeight,
+            width: double.infinity,
+            child: OverflowBox(
+              minHeight: fullHeight,
+              maxHeight: fullHeight,
+              alignment: Alignment.topCenter,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Pink gradient behind the cat (covered below by the cloud).
+                  const Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0xFFF09595), Color(0xFFF4B6B6)],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const _HeroStar(size: 30, alignment: Alignment(-0.78, -0.55)),
+                  const _HeroStar(size: 38, alignment: Alignment(0.8, -0.7)),
+                  const _HeroStar(size: 22, alignment: Alignment(0.86, -0.05)),
+                  const _HeroStar(size: 26, alignment: Alignment(-0.88, -0.1)),
+                  // Cat-on-cloud, pushed below the status bar.
+                  Positioned(
+                    top: topInset,
+                    left: 0,
+                    right: 0,
+                    child: SvgPicture.asset(
+                      'assets/images/cat-cloud.svg',
+                      width: width,
+                    ),
+                  ),
+                  // Close chip — inside the hero so it scrolls away. Hidden
+                  // when the paywall is a hard gate (onClose == null).
+                  if (onClose != null)
+                    Positioned(
+                      top: topInset + DSDimens.sizeS,
+                      left: DSDimens.sizeL,
+                      child: _CloseChip(onTap: onClose!),
+                    ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
         const SizedBox(height: DSDimens.sizeS),
-        RichText(
-          textAlign: TextAlign.center,
-          text: TextSpan(
-            style: DSTextStyles.displayLg,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+          child: Column(
             children: [
-              const TextSpan(text: 'Find the right\nfood '),
-              TextSpan(
-                text: '4.2× faster',
-                style: DSTextStyles.displayLg.copyWith(
-                  color: DSColors.accentSuccess,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text('Yucat', style: DSTextStyles.headlineMd),
+                  const SizedBox(width: DSDimens.sizeXxs),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: DSDimens.sizeXs,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: kPaywallAccentGradient,
+                      borderRadius: BorderRadius.circular(DSRadii.sm),
+                    ),
+                    child: Text(
+                      'Plus',
+                      style: DSTextStyles.titleMd.copyWith(
+                        color: DSColors.inkInverse,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: DSDimens.sizeS),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: DSTextStyles.displayLg,
+                  children: [
+                    const TextSpan(text: 'Know '),
+                    TextSpan(
+                      text: 'exactly',
+                      style: DSTextStyles.displayLg.copyWith(
+                        color: kPaywallAccent,
+                      ),
+                    ),
+                    const TextSpan(text: "\nwhat's in the bowl"),
+                  ],
                 ),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class _HeroStar extends StatelessWidget {
+  final double size;
+  final Alignment alignment;
+
+  const _HeroStar({required this.size, required this.alignment});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: alignment,
+      child: ExcludeSemantics(
+        child: SvgPicture.asset('assets/images/star-red.svg', width: size),
+      ),
     );
   }
 }
@@ -314,8 +402,11 @@ class _LaurelStat extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('🌿', style: TextStyle(fontSize: 28)),
-        const SizedBox(width: DSDimens.sizeXxs),
+        Transform.flip(
+          flipX: true,
+          child: SvgPicture.asset('assets/images/wheat.svg', height: 46),
+        ),
+        const SizedBox(width: DSDimens.sizeS),
         Column(
           children: [
             Text(value, style: DSTextStyles.displayLg),
@@ -328,11 +419,8 @@ class _LaurelStat extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(width: DSDimens.sizeXxs),
-        Transform.flip(
-          flipX: true,
-          child: const Text('🌿', style: TextStyle(fontSize: 28)),
-        ),
+        const SizedBox(width: DSDimens.sizeS),
+        SvgPicture.asset('assets/images/wheat.svg', height: 46),
       ],
     );
   }
@@ -353,7 +441,7 @@ class _Reassurance extends StatelessWidget {
         ),
         const SizedBox(width: DSDimens.sizeXxs),
         Text(
-          'No payment now. Easy to cancel.',
+          'Cancel anytime.',
           style: DSTextStyles.caption.copyWith(color: DSColors.inkSecondary),
         ),
       ],

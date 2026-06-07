@@ -117,7 +117,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     if (!canScan) {
       final purchasedSubscription = await event.context.router.push<bool>(
-        const PaywallRoute(),
+        PaywallRoute(),
       );
 
       if (purchasedSubscription != true) {

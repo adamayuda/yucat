@@ -87,7 +87,7 @@ class CatListingBloc extends Bloc<CatListingEvent, CatListingState> {
     if (!canCreateCat) {
       // User has reached free cat limit, show paywall
       final purchasedSubscription = await event.context.router.push<bool>(
-        const PaywallRoute(),
+        PaywallRoute(),
       );
 
       if (purchasedSubscription == false) {
