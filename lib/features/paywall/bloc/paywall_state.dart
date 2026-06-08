@@ -22,6 +22,11 @@ class PaywallLoadedState extends PaywallState {
   final Package selectedPackage;
   final bool isPurchasing;
 
+  /// Whether the current user is eligible for the annual plan's introductory
+  /// offer. Gates the promo switch so we never advertise an intro price the
+  /// user won't actually be charged.
+  final bool introEligible;
+
   /// One-shot transient error message for SnackBar (cleared after listener fires).
   /// Increments [errorTick] every time we want to re-fire the SnackBar so
   /// [BlocListener] sees a state change even if the message is the same.
@@ -32,6 +37,7 @@ class PaywallLoadedState extends PaywallState {
     required this.currentOffering,
     required this.packages,
     required this.selectedPackage,
+    this.introEligible = false,
     this.isPurchasing = false,
     this.transientError,
     this.errorTick = 0,
@@ -47,6 +53,7 @@ class PaywallLoadedState extends PaywallState {
       currentOffering: currentOffering,
       packages: packages,
       selectedPackage: selectedPackage ?? this.selectedPackage,
+      introEligible: introEligible,
       isPurchasing: isPurchasing ?? this.isPurchasing,
       transientError: transientError,
       errorTick: errorTick ?? this.errorTick,
@@ -58,6 +65,7 @@ class PaywallLoadedState extends PaywallState {
         currentOffering.identifier,
         packages.map((p) => p.identifier).toList(),
         selectedPackage.identifier,
+        introEligible,
         isPurchasing,
         transientError,
         errorTick,

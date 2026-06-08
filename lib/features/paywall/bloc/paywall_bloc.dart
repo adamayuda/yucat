@@ -62,8 +62,23 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       return;
     }
 
-    final packages = current.availablePackages;
-    final selected = current.annual ?? current.monthly ?? packages.first;
+    final allowed = current.availablePackages
+        .where((p) =>
+            p.packageType == PackageType.weekly ||
+            p.packageType == PackageType.annual)
+        .toList();
+    // Fall back to the raw list if the offering is misconfigured, so the
+    // paywall never renders empty.
+    final packages = allowed.isNotEmpty ? allowed : current.availablePackages;
+    final annual = packages.firstWhere(
+      (p) => p.packageType == PackageType.annual,
+      orElse: () => packages.first,
+    );
+
+    // Whether this user can actually receive the annual plan's introductory
+    // offer. `storeProduct.introductoryPrice` reflects the product config, not
+    // per-user eligibility, so we check explicitly before advertising the promo.
+    final introEligible = await _isIntroEligible(annual);
 
     _paywallShownTime = DateTime.now();
     _logEventUsecase.call(
@@ -78,8 +93,26 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     emit(PaywallLoadedState(
       currentOffering: current,
       packages: packages,
-      selectedPackage: selected,
+      selectedPackage: annual,
+      introEligible: introEligible,
     ));
+  }
+
+  /// Returns true only when [pkg] has a configured introductory offer AND this
+  /// user is eligible for it. On any error/unknown status we fail closed
+  /// (no promo) so we never show a discount the user won't be charged.
+  Future<bool> _isIntroEligible(Package pkg) async {
+    if (pkg.storeProduct.introductoryPrice == null) return false;
+    try {
+      final result = await Purchases.checkTrialOrIntroductoryPriceEligibility(
+        [pkg.storeProduct.identifier],
+      );
+      final status = result[pkg.storeProduct.identifier]?.status;
+      return status == IntroEligibilityStatus.introEligibilityStatusEligible;
+    } catch (e) {
+      debugPrint('PaywallBloc.introEligibility error: $e');
+      return false;
+    }
   }
 
   void _onPackageSelected(

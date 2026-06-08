@@ -8,6 +8,11 @@ class PaywallPackageRow extends StatelessWidget {
   final List<Package> allPackages;
   final bool selected;
   final String? badge;
+
+  /// When true and the package has an introductory offer, the row shows the
+  /// discounted intro price (full price struck through) instead of the regular
+  /// price. Controlled by the paywall's promo switch + intro eligibility.
+  final bool showIntro;
   final VoidCallback onTap;
 
   const PaywallPackageRow({
@@ -17,14 +22,21 @@ class PaywallPackageRow extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.badge,
+    this.showIntro = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final period = periodTitleFor(package);
     final price = package.storeProduct.priceString;
-    final perMonth = perPeriodLabel(package);
-    final savings = savingsLabelFor(package, allPackages);
+    final showIntroOffer = showIntro && hasIntroOffer(package);
+    final introPrice = introPriceStringFor(package);
+    final renewal = renewalLabelFor(package);
+    final introSavings = introSavingsLabelFor(package);
+    // Intro plans show the renewal line ("then $49.99/yr"); others show the
+    // per-month breakdown.
+    final perMonth = showIntroOffer ? renewal : perPeriodLabel(package);
+    final savings = showIntroOffer ? null : savingsLabelFor(package, allPackages);
 
     return AnimatedContainer(
       duration: DSMotion.durFast,
@@ -40,10 +52,12 @@ class PaywallPackageRow extends StatelessWidget {
         ),
         boxShadow: selected ? null : DSShadows.e1,
       ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(DSRadii.xl),
-        child: InkWell(
+      child: Stack(
+        children: [
+          Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(DSRadii.xl),
+            child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(DSRadii.xl),
           child: Padding(
@@ -79,13 +93,38 @@ class PaywallPackageRow extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          price,
-                          style: DSTextStyles.titleMd.copyWith(
-                            fontWeight: FontWeight.w700,
+                        if (showIntroOffer && introPrice != null) ...[
+                          Text(
+                            price,
+                            style: DSTextStyles.bodyMd.copyWith(
+                              color: DSColors.inkTertiary,
+                              decoration: TextDecoration.lineThrough,
+                            ),
                           ),
-                        ),
-                        if (savings != null) ...[
+                          const SizedBox(height: DSDimens.sizeXxxxs),
+                          Text(
+                            introPrice,
+                            style: DSTextStyles.titleMd.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ] else
+                          Text(
+                            price,
+                            style: DSTextStyles.titleMd.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        if (showIntroOffer && introSavings != null) ...[
+                          const SizedBox(height: DSDimens.sizeXxxxs),
+                          Text(
+                            introSavings,
+                            style: DSTextStyles.caption.copyWith(
+                              color: DSColors.paywallAccent,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ] else if (savings != null) ...[
                           const SizedBox(height: DSDimens.sizeXxxxs),
                           Text(
                             savings,
@@ -101,6 +140,70 @@ class PaywallPackageRow extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+          if (selected) const _ShineOverlay(),
+        ],
+      ),
+    );
+  }
+}
+
+/// A subtle diagonal light streak that sweeps across the offer card on a loop.
+class _ShineOverlay extends StatefulWidget {
+  const _ShineOverlay();
+
+  @override
+  State<_ShineOverlay> createState() => _ShineOverlayState();
+}
+
+class _ShineOverlayState extends State<_ShineOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2800),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(DSRadii.xl),
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              // Sweep during the first ~40% of the loop, then rest off-screen.
+              final p = (_controller.value / 0.4).clamp(0.0, 1.0);
+              final dx = -1.6 + 3.2 * p;
+              return DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment(dx - 0.6, -1),
+                    end: Alignment(dx + 0.6, 1),
+                    colors: [
+                      Colors.white.withValues(alpha: 0),
+                      Colors.white.withValues(alpha: 0.32),
+                      Colors.white.withValues(alpha: 0),
+                    ],
+                    stops: const [0.35, 0.5, 0.65],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),

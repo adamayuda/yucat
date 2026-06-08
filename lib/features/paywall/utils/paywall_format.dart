@@ -36,9 +36,43 @@ String? savingsLabelFor(Package pkg, List<Package> all) {
   return 'Save ${saved.round()}%';
 }
 
+/// Whether [pkg] carries an introductory offer (discounted first period).
+bool hasIntroOffer(Package pkg) => pkg.storeProduct.introductoryPrice != null;
+
+/// Formatted introductory price (e.g. "$39.99"), or null when there's no offer.
+String? introPriceStringFor(Package pkg) =>
+    pkg.storeProduct.introductoryPrice?.priceString;
+
+/// Post-intro renewal line for a plan with an introductory offer
+/// (e.g. "then $49.99/yr"). Null when there's no offer.
+String? renewalLabelFor(Package pkg) {
+  if (pkg.storeProduct.introductoryPrice == null) return null;
+  return 'then ${pkg.storeProduct.priceString}/${_periodSuffixFor(pkg)}';
+}
+
+/// "Save X%" comparing the introductory price to the full price. Null when
+/// there's no offer or the saving is negligible (< 5%).
+String? introSavingsLabelFor(Package pkg) {
+  final intro = pkg.storeProduct.introductoryPrice;
+  final full = pkg.storeProduct.price;
+  if (intro == null || full <= 0) return null;
+  final saved = (1 - intro.price / full) * 100;
+  if (saved < 5) return null;
+  return 'Save ${saved.round()}%';
+}
+
 /// CTA label. No free trial: paying is immediate, so the label is fixed.
 String ctaLabelFor(Package pkg) {
   return 'Unlock Yucat Plus';
+}
+
+String _periodSuffixFor(Package pkg) {
+  return switch (pkg.packageType) {
+    PackageType.annual => 'yr',
+    PackageType.monthly => 'mo',
+    PackageType.weekly => 'wk',
+    _ => 'period',
+  };
 }
 
 String _currencySymbolFor(String priceString) {

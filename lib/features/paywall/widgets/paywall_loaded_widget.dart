@@ -33,7 +33,9 @@ class PaywallLoadedWidget extends StatefulWidget {
 }
 
 class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
-  bool _showAllPlans = false;
+  // Promo switch defaults ON: open on the discounted yearly plan with weekly
+  // hidden. Only meaningful when the annual plan has an eligible intro offer.
+  bool _promoOn = true;
 
   String? _badgeFor(Package pkg) {
     if (pkg.packageType == PackageType.annual) {
@@ -42,19 +44,24 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
     return null;
   }
 
+  Package _annualOf(List<Package> packages) => packages.firstWhere(
+        (p) => p.packageType == PackageType.annual,
+        orElse: () => packages.first,
+      );
+
   @override
   Widget build(BuildContext context) {
     final state = widget.state;
     final bloc = widget.bloc;
     final packages = state.packages;
-    // The collapsed view shows the currently-selected plan so the highlighted
-    // row, the CTA, and the package that gets purchased are always the same.
-    final defaultPlan = state.selectedPackage;
-    final hasExtraPlans = packages.length > 1;
-    // Expanded: keep the packages in their natural order so selecting a plan
-    // highlights it in place instead of reordering it to the top. Collapsed:
-    // show only the selected plan.
-    final visiblePlans = _showAllPlans ? packages : <Package>[defaultPlan];
+
+    final annual = _annualOf(packages);
+    // The promo is only offered when the annual plan carries an introductory
+    // offer AND the user is eligible for it (checked in the bloc).
+    final promoAvailable = state.introEligible && hasIntroOffer(annual);
+    final promoActive = promoAvailable && _promoOn;
+    // When the promo is active we collapse to just the discounted yearly plan.
+    final visible = promoActive ? <Package>[annual] : packages;
 
     return ColoredBox(
       color: DSColors.surfaceCard,
@@ -76,34 +83,36 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
                 padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
                 child: Column(
                   children: [
-                    for (var i = 0; i < visiblePlans.length; i++) ...[
+                    if (promoAvailable) ...[
+                      _PromoSwitch(
+                        label: introSavingsLabelFor(annual) != null
+                            ? 'Limited-time offer · ${introSavingsLabelFor(annual)}'
+                            : 'Limited-time offer',
+                        value: _promoOn,
+                        onChanged: (on) {
+                          setState(() => _promoOn = on);
+                          // Turning the promo on collapses to the yearly plan,
+                          // so make sure it's the selected (purchased) package.
+                          if (on) {
+                            bloc.add(
+                              PaywallPackageSelectedEvent(package: annual),
+                            );
+                          }
+                        },
+                      ),
+                      const SizedBox(height: DSDimens.sizeS),
+                    ],
+                    for (var i = 0; i < visible.length; i++) ...[
                       if (i > 0) const SizedBox(height: DSDimens.sizeXs),
                       PaywallPackageRow(
-                        package: visiblePlans[i],
+                        package: visible[i],
                         allPackages: packages,
-                        selected: visiblePlans[i].identifier ==
+                        selected: visible[i].identifier ==
                             state.selectedPackage.identifier,
-                        badge: _badgeFor(visiblePlans[i]),
+                        badge: _badgeFor(visible[i]),
+                        showIntro: promoActive,
                         onTap: () => bloc.add(
-                          PaywallPackageSelectedEvent(package: visiblePlans[i]),
-                        ),
-                      ),
-                    ],
-                    if (hasExtraPlans) ...[
-                      const SizedBox(height: DSDimens.sizeXs),
-                      Center(
-                        child: TextButton(
-                          onPressed: () =>
-                              setState(() => _showAllPlans = !_showAllPlans),
-                          child: Text(
-                            _showAllPlans
-                                ? 'Hide other plans'
-                                : 'Show more plans ⌄',
-                            style: DSTextStyles.label.copyWith(
-                              color: DSColors.inkSecondary,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+                          PaywallPackageSelectedEvent(package: visible[i]),
                         ),
                       ),
                     ],
@@ -192,6 +201,59 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PromoSwitch extends StatelessWidget {
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _PromoSwitch({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        DSDimens.sizeS,
+        DSDimens.sizeXxs,
+        DSDimens.sizeXs,
+        DSDimens.sizeXxs,
+      ),
+      decoration: BoxDecoration(
+        color: DSColors.paywallAccentSoft,
+        borderRadius: BorderRadius.circular(DSRadii.xl),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.local_offer_rounded,
+            size: 18,
+            color: DSColors.paywallAccent,
+          ),
+          const SizedBox(width: DSDimens.sizeXs),
+          Expanded(
+            child: Text(
+              label,
+              style: DSTextStyles.label.copyWith(
+                color: DSColors.inkPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          Switch.adaptive(
+            value: value,
+            onChanged: onChanged,
+            activeThumbColor: Colors.white,
+            activeTrackColor: DSColors.paywallAccent,
           ),
         ],
       ),
