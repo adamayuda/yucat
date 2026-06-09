@@ -30,6 +30,8 @@ class CatAvatar extends StatelessWidget {
       child: photoUrl != null && photoUrl!.isNotEmpty
           ? Image.network(
               photoUrl!,
+              width: size,
+              height: size,
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Icon(
                 Icons.pets_rounded,

@@ -34,11 +34,10 @@ class _HomePage extends State<HomePage> {
     _bloc.add(HomeInitialEvent());
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _bloc.close();
-  }
+  // NOTE: HomeBloc's lifecycle is owned by the root MultiBlocProvider in
+  // main.dart — this page must NOT close it. Closing it here left a dead bloc
+  // in the shared provider, so re-mounting the Home tab threw "Cannot add new
+  // events after calling close" from initState.
 
   void _openScanner() {
     context.router.push(const ScannerRoute());

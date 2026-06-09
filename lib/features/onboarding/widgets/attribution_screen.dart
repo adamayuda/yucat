@@ -6,18 +6,18 @@ import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
 class _AttributionOption {
   final String key;
-  final String emoji;
+  final String asset;
   final String label;
 
-  const _AttributionOption(this.key, this.emoji, this.label);
+  const _AttributionOption(this.key, this.asset, this.label);
 }
 
 const _options = [
-  _AttributionOption('instagram', '📸', 'Instagram'),
-  _AttributionOption('tiktok', '🎵', 'TikTok'),
-  _AttributionOption('youtube', '📺', 'YouTube'),
-  _AttributionOption('app_store', '🍎', 'App Store search'),
-  _AttributionOption('friend', '👋', 'Friends/family'),
+  _AttributionOption('instagram', 'assets/images/camera.svg', 'Instagram'),
+  _AttributionOption('tiktok', 'assets/images/Hand-2.svg', 'TikTok'),
+  _AttributionOption('youtube', 'assets/images/TV.svg', 'YouTube'),
+  _AttributionOption('app_store', 'assets/images/apple.svg', 'App Store search'),
+  _AttributionOption('friend', 'assets/images/Hand.svg', 'Friends/family'),
 ];
 
 class AttributionScreen extends StatefulWidget {
@@ -71,7 +71,7 @@ class _AttributionScreenState extends State<AttributionScreen> {
                 final opt = _options[index];
                 return DSOptionRow(
                   label: opt.label,
-                  leadingEmoji: opt.emoji,
+                  leadingAsset: opt.asset,
                   selected: _selected == opt.key,
                   onTap: () => setState(() => _selected = opt.key),
                 );

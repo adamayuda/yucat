@@ -9,14 +9,34 @@ class NeuteredStatusStep extends StatelessWidget {
   final String? gender;
   final ValueChanged<String?> onStatusChanged;
 
-  static const _baseOptions = [
-    (label: 'Intact', value: 'intact', emoji: '🐱'),
-    (label: 'Neutered / Spayed', value: 'neutered', emoji: '✂️'),
+  static const List<
+      ({String label, String value, String? asset, String? emoji})>
+      _baseOptions = [
+    (
+      label: 'Intact',
+      value: 'intact',
+      asset: 'assets/images/Male.svg',
+      emoji: null,
+    ),
+    (
+      label: 'Neutered / Spayed',
+      value: 'neutered',
+      asset: 'assets/images/Beauty.svg',
+      emoji: null,
+    ),
   ];
 
-  static const _femaleOnlyOptions = [
-    (label: 'Pregnant', value: 'pregnant', emoji: '🤰'),
-    (label: 'Lactating', value: 'lactating', emoji: '🍼'),
+  static const List<
+      ({String label, String value, String? asset, String? emoji})>
+      _femaleOnlyOptions = [
+    // No matching icon for "pregnant" yet — falls back to its emoji.
+    (label: 'Pregnant', value: 'pregnant', asset: null, emoji: '🤰'),
+    (
+      label: 'Lactating',
+      value: 'lactating',
+      asset: 'assets/images/Baby.svg',
+      emoji: null,
+    ),
   ];
 
   const NeuteredStatusStep({
@@ -44,6 +64,7 @@ class NeuteredStatusStep extends StatelessWidget {
                 for (final option in options) ...[
                   DSOptionRow(
                     label: option.label,
+                    leadingAsset: option.asset,
                     leadingEmoji: option.emoji,
                     selected: status == option.value,
                     onTap: () => onStatusChanged(option.value),

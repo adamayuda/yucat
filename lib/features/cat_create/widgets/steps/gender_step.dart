@@ -25,14 +25,14 @@ class GenderStep extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 DSOptionRow(
-                  leadingEmoji: '👩',
+                  leadingAsset: 'assets/images/Female.svg',
                   label: 'Female',
                   selected: gender == 'female',
                   onTap: () => onGenderChanged('female'),
                 ),
                 const SizedBox(height: DSDimens.sizeXs),
                 DSOptionRow(
-                  leadingEmoji: '👨',
+                  leadingAsset: 'assets/images/Male.svg',
                   label: 'Male',
                   selected: gender == 'male',
                   onTap: () => onGenderChanged('male'),

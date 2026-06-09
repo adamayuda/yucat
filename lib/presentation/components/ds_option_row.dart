@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 
 enum DSOptionRowAccent { success, danger }
@@ -8,6 +9,9 @@ class DSOptionRow extends StatelessWidget {
 
   /// Optional secondary line shown under [label] (e.g. an example or hint).
   final String? description;
+  /// Optional leading SVG asset path (e.g. `'assets/images/Female.svg'`).
+  /// Takes precedence over [leadingEmoji] and [leadingIcon] when set.
+  final String? leadingAsset;
   final String? leadingEmoji;
   final IconData? leadingIcon;
   final bool selected;
@@ -23,6 +27,7 @@ class DSOptionRow extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.description,
+    this.leadingAsset,
     this.leadingEmoji,
     this.leadingIcon,
     this.selected = false,
@@ -68,7 +73,9 @@ class DSOptionRow extends StatelessWidget {
             ),
             child: Row(
               children: [
-                if (leadingEmoji != null)
+                if (leadingAsset != null)
+                  SvgPicture.asset(leadingAsset!, width: 28, height: 28)
+                else if (leadingEmoji != null)
                   Text(leadingEmoji!, style: const TextStyle(fontSize: 22))
                 else if (leadingIcon != null)
                   Icon(leadingIcon, size: 22, color: DSColors.inkPrimary),

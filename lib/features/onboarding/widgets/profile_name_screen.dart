@@ -160,11 +160,15 @@ class _SuggestButton extends StatelessWidget {
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
-        child: const SizedBox(
+        child: SizedBox(
           width: 48,
           height: 48,
           child: Center(
-            child: Text('🎲', style: TextStyle(fontSize: 20)),
+            child: SvgPicture.asset(
+              'assets/images/Games.svg',
+              width: 26,
+              height: 26,
+            ),
           ),
         ),
       ),

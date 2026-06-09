@@ -14,10 +14,8 @@ import 'package:yucat/features/onboarding/widgets/proof_chart_screen.dart';
 import 'package:yucat/features/onboarding/widgets/rating_screen.dart';
 import 'package:yucat/features/onboarding/widgets/reminders_screen.dart';
 import 'package:yucat/features/onboarding/widgets/scan_demo_screen.dart';
-import 'package:yucat/features/onboarding/widgets/success_screen.dart';
 import 'package:yucat/features/onboarding/widgets/welcome_screen.dart';
 import 'package:yucat/features/onboarding/widgets/why_yucat_screen.dart';
-import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
 @RoutePage()
@@ -55,9 +53,10 @@ class _OnBoardingPage extends State<OnBoardingPage> {
 
   @override
   void dispose() {
+    // OnBoardingBloc is owned by the root MultiBlocProvider (main.dart) — don't
+    // close it here, or re-mounting the page would add events to a closed bloc.
     _pageController.dispose();
     super.dispose();
-    _bloc.close();
   }
 
   @override
@@ -73,28 +72,17 @@ class _OnBoardingPage extends State<OnBoardingPage> {
         if (!_pageController.hasClients) return;
         FocusScope.of(context).unfocus();
         final targetIndex = OnBoardingPhase.values.indexOf(state.phase);
-        // The success phase is reached when the cat-create wizard (a route
-        // pushed on top) pops. Jump instantly instead of animating so the
-        // PageView doesn't run a second slide that competes with the wizard's
-        // dismiss animation — the wizard then cleanly reveals the success
-        // screen already in place underneath it.
-        if (state.phase == OnBoardingPhase.success) {
-          _pageController.jumpToPage(targetIndex);
-        } else {
-          _pageController.animateToPage(
-            targetIndex,
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeInOutCubic,
-          );
-        }
+        _pageController.animateToPage(
+          targetIndex,
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeInOutCubic,
+        );
       },
       builder: (context, state) {
         if (state is! OnBoardingReadyState) {
           return const SizedBox.shrink();
         }
-        final showBack =
-            state.phase != OnBoardingPhase.welcome &&
-            state.phase != OnBoardingPhase.success;
+        final showBack = state.phase != OnBoardingPhase.welcome;
         return Stack(
           children: [
             PageView.builder(
@@ -106,7 +94,6 @@ class _OnBoardingPage extends State<OnBoardingPage> {
                 state.phase,
                 state.selectedSource,
                 state.seededName,
-                state.catSummary,
               ),
             ),
             if (showBack)
@@ -137,7 +124,6 @@ class _OnBoardingPage extends State<OnBoardingPage> {
     OnBoardingPhase currentPhase,
     String? selectedSource,
     String? seededName,
-    CatSummary? catSummary,
   ) {
     switch (phase) {
       case OnBoardingPhase.welcome:
@@ -195,11 +181,6 @@ class _OnBoardingPage extends State<OnBoardingPage> {
       case OnBoardingPhase.healthIntro:
         return HealthIntroScreen(
           onAddCat: () => _bloc.add(OnBoardingCompletedEvent(context: context)),
-        );
-      case OnBoardingPhase.success:
-        return SuccessScreen(
-          summary: catSummary,
-          onStart: () => _bloc.add(OnBoardingFinalizedEvent(context: context)),
         );
     }
   }

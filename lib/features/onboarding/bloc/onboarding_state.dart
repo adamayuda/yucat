@@ -13,7 +13,6 @@ enum OnBoardingPhase {
   notifPrimer,
   reminders,
   healthIntro,
-  success,
 }
 
 sealed class OnBoardingState extends Equatable {

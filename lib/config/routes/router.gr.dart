@@ -71,6 +71,7 @@ class CreateCatRoute extends PageRouteInfo<CreateCatRouteArgs> {
     CatModel? cat,
     String? seededName,
     String? seededPhotoPath,
+    void Function(BuildContext, CatSummary)? onCreated,
     List<PageRouteInfo>? children,
   }) : super(
          CreateCatRoute.name,
@@ -79,6 +80,7 @@ class CreateCatRoute extends PageRouteInfo<CreateCatRouteArgs> {
            cat: cat,
            seededName: seededName,
            seededPhotoPath: seededPhotoPath,
+           onCreated: onCreated,
          ),
          initialChildren: children,
        );
@@ -96,6 +98,7 @@ class CreateCatRoute extends PageRouteInfo<CreateCatRouteArgs> {
         cat: args.cat,
         seededName: args.seededName,
         seededPhotoPath: args.seededPhotoPath,
+        onCreated: args.onCreated,
       );
     },
   );
@@ -107,6 +110,7 @@ class CreateCatRouteArgs {
     this.cat,
     this.seededName,
     this.seededPhotoPath,
+    this.onCreated,
   });
 
   final Key? key;
@@ -117,9 +121,11 @@ class CreateCatRouteArgs {
 
   final String? seededPhotoPath;
 
+  final void Function(BuildContext, CatSummary)? onCreated;
+
   @override
   String toString() {
-    return 'CreateCatRouteArgs{key: $key, cat: $cat, seededName: $seededName, seededPhotoPath: $seededPhotoPath}';
+    return 'CreateCatRouteArgs{key: $key, cat: $cat, seededName: $seededName, seededPhotoPath: $seededPhotoPath, onCreated: $onCreated}';
   }
 }
 
@@ -380,4 +386,52 @@ class SplashRoute extends PageRouteInfo<void> {
       return const SplashPage();
     },
   );
+}
+
+/// generated route for
+/// [SuccessPage]
+class SuccessRoute extends PageRouteInfo<SuccessRouteArgs> {
+  SuccessRoute({
+    Key? key,
+    required CatSummary? summary,
+    required void Function(BuildContext) onStart,
+    List<PageRouteInfo>? children,
+  }) : super(
+         SuccessRoute.name,
+         args: SuccessRouteArgs(key: key, summary: summary, onStart: onStart),
+         initialChildren: children,
+       );
+
+  static const String name = 'SuccessRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<SuccessRouteArgs>();
+      return SuccessPage(
+        key: args.key,
+        summary: args.summary,
+        onStart: args.onStart,
+      );
+    },
+  );
+}
+
+class SuccessRouteArgs {
+  const SuccessRouteArgs({
+    this.key,
+    required this.summary,
+    required this.onStart,
+  });
+
+  final Key? key;
+
+  final CatSummary? summary;
+
+  final void Function(BuildContext) onStart;
+
+  @override
+  String toString() {
+    return 'SuccessRouteArgs{key: $key, summary: $summary, onStart: $onStart}';
+  }
 }

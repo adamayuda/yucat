@@ -200,43 +200,36 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     return OnBoardingPhase.values.indexOf(phase);
   }
 
-  Future<void> _onOnBoardingCompletedEvent(
+  void _onOnBoardingCompletedEvent(
     OnBoardingCompletedEvent event,
     Emitter<OnBoardingState> emit,
-  ) async {
-    // D0 "Add my cat" → push wizard, then on completion persist the
-    // completion flag and emit the success phase so E0 renders. Final
-    // analytics fires when the user taps "Start scanning" on E0 (see
-    // _onOnBoardingFinalizedEvent).
+  ) {
+    // D0 "Add my cat" → push the wizard. On success the wizard invokes
+    // [onCreated] (below), which pushes the success screen *over* the wizard so
+    // it slides in forward (from the right) like any step. On cancel the wizard
+    // just pops back to the health-intro screen, so there's nothing to do here.
+    // The final analytics + paywall hand-off fire when the user taps "Start
+    // scanning" on the success screen (see _onOnBoardingFinalizedEvent).
     final current = _readyState();
 
-    // The wizard returns an at-a-glance profile summary when it completes.
-    // Backing out of the first step pops with no result (null) — in that
-    // case we stay on the health-intro screen rather than jumping to success.
-    final result = await event.context.router.push(
+    event.context.router.push(
       CreateCatRoute(
         seededName: current.seededName,
         seededPhotoPath: current.seededPhotoPath,
+        onCreated: (wizardContext, summary) {
+          // A cat was actually created — mark onboarding complete and slide in
+          // the success screen over the wizard.
+          _prefs.setBool(_onboardingCompletedKey, true);
+          wizardContext.router.push(
+            SuccessRoute(
+              summary: summary,
+              onStart: (successContext) => add(
+                OnBoardingFinalizedEvent(context: successContext),
+              ),
+            ),
+          );
+        },
       ),
-    );
-    if (result is! CatSummary) {
-      // Wizard dismissed via back — the onboarding PageView is still on the
-      // health-intro screen underneath, so no phase change is needed.
-      return;
-    }
-
-    // Only mark onboarding complete once a cat profile was actually created.
-    await _prefs.setBool(_onboardingCompletedKey, true);
-
-    emit(_readyState().copyWith(
-      phase: OnBoardingPhase.success,
-      catSummary: result,
-    ));
-
-    _logScreenViewUsecase.call(
-      screenName: 'OnBoardingRoute',
-      index: _phaseIndex(OnBoardingPhase.success),
-      name: 'success',
     );
   }
 
@@ -263,6 +256,8 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     // an existing subscription), so we only ever reach the main app after that.
     final router = event.context.router;
     await router.push(PaywallRoute(dismissible: false));
-    await router.replace(const MainRoute());
+    // replaceAll (not replace) because the stack now holds onboarding → wizard
+    // → success underneath; clear them all so Main is the sole route.
+    await router.replaceAll([const MainRoute()]);
   }
 }

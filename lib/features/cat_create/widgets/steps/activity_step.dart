@@ -8,24 +8,24 @@ class ActivityStep extends StatelessWidget {
   final ValueChanged<String?> onActivityLevelChanged;
 
   static const List<
-      ({String label, String value, String desc, IconData icon})> _options = [
+      ({String label, String value, String desc, String asset})> _options = [
     (
       label: 'Low',
       value: 'low',
       desc: 'Mostly naps, rarely chases',
-      icon: Icons.bedtime_rounded,
+      asset: 'assets/images/Low.svg',
     ),
     (
       label: 'Medium',
       value: 'medium',
       desc: 'Plays a few times a day',
-      icon: Icons.directions_walk_rounded,
+      asset: 'assets/images/Medium.svg',
     ),
     (
       label: 'High',
       value: 'high',
       desc: 'Climbs, sprints, hunts toys',
-      icon: Icons.directions_run_rounded,
+      asset: 'assets/images/Hight.svg',
     ),
   ];
 
@@ -52,7 +52,7 @@ class ActivityStep extends StatelessWidget {
                   DSOptionRow(
                     label: option.label,
                     description: option.desc,
-                    leadingIcon: option.icon,
+                    leadingAsset: option.asset,
                     selected: activityLevel == option.value,
                     onTap: () => onActivityLevelChanged(option.value),
                   ),

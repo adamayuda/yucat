@@ -50,7 +50,16 @@ class CatCreateCatEvent extends CatCreateEvent {
   final CatCreateModel cat;
   final BuildContext context;
 
-  const CatCreateCatEvent({required this.cat, required this.context});
+  /// Optional hand-off used in onboarding: when set, the bloc invokes this on
+  /// success instead of popping with the result (so the caller can push the
+  /// success screen over the wizard). See [CreateCatPage.onCreated].
+  final void Function(BuildContext context, CatSummary summary)? onCreated;
+
+  const CatCreateCatEvent({
+    required this.cat,
+    required this.context,
+    this.onCreated,
+  });
 
   @override
   List<Object?> get props => [cat, context];

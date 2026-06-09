@@ -2,8 +2,10 @@ import 'package:auto_route/auto_route.dart';
 import 'package:yucat/features/cat_listing/cat_listing_page.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
 import 'package:yucat/features/cat_create/create_cat_page.dart';
+import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
 import 'package:yucat/features/cat_detail/presentation/cat_detail_page.dart';
 import 'package:yucat/features/onboarding/onboarding_page.dart';
+import 'package:yucat/features/onboarding/success_page.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/profile/profile_page.dart';
 import 'package:yucat/features/saved_products/presentation/saved_products_page.dart';
@@ -106,6 +108,15 @@ class AppRouter extends RootStackRouter {
     CustomRoute(
       page: CreateCatRoute.page,
       path: '/cats/create',
+      durationInMilliseconds: 280,
+      reverseDurationInMilliseconds: 280,
+      transitionsBuilder: _slideLeftCubic,
+    ),
+    // Onboarding success screen. Pushed over the wizard when a cat is created,
+    // so it slides in forward (from the right) like the wizard itself.
+    CustomRoute(
+      page: SuccessRoute.page,
+      path: '/onboarding/success',
       durationInMilliseconds: 280,
       reverseDurationInMilliseconds: 280,
       transitionsBuilder: _slideLeftCubic,

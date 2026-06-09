@@ -253,8 +253,15 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
       }
 
       // Return a structured profile summary so callers (e.g. onboarding) can
-      // surface it on a success screen.
-      event.context.router.maybePop(CatSummary.fromModel(event.cat));
+      // surface it on a success screen. Onboarding supplies [onCreated] to push
+      // that screen over the wizard (forward slide); everyone else pops with it.
+      if (!event.context.mounted) return;
+      final summary = CatSummary.fromModel(event.cat);
+      if (event.onCreated != null) {
+        event.onCreated!(event.context, summary);
+      } else {
+        event.context.router.maybePop(summary);
+      }
     } catch (e) {
       final isEditMode = _originalCat != null;
       _logEventUsecase.call(

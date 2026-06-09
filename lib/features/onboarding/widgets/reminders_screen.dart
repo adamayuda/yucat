@@ -26,16 +26,16 @@ class RemindersScreen extends StatefulWidget {
 }
 
 class _ReminderOption {
-  final String emoji;
+  final String asset;
   final String label;
 
-  const _ReminderOption(this.emoji, this.label);
+  const _ReminderOption(this.asset, this.label);
 }
 
 const _options = [
-  _ReminderOption('🔄', 'When a saved food changes'),
-  _ReminderOption('✨', 'When a better fit is found'),
-  _ReminderOption('📅', 'Monthly check-in'),
+  _ReminderOption('assets/images/girl-1.svg', 'When a saved food changes'),
+  _ReminderOption('assets/images/Magic.svg', 'When a better fit is found'),
+  _ReminderOption('assets/images/Calendar.svg', 'Monthly check-in'),
 ];
 
 class _RemindersScreenState extends State<RemindersScreen> {
@@ -106,7 +106,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
               const SizedBox(height: DSDimens.size3xl),
               for (var i = 0; i < _options.length; i++) ...[
                 DSOptionRow(
-                  leadingEmoji: _options[i].emoji,
+                  leadingAsset: _options[i].asset,
                   label: _options[i].label,
                   showTrailingRadio: true,
                   trailingSize: 18,

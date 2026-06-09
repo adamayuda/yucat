@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
 import 'package:yucat/features/cat_create/mappers/cat_model_to_create_mapper.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_create_model.dart';
+import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat_create/widgets/steps/activity_step.dart';
@@ -42,11 +43,17 @@ class CreateCatPage extends StatefulWidget {
   final String? seededName;
   final String? seededPhotoPath;
 
+  /// When set, called on successful creation INSTEAD of popping with the
+  /// result. Onboarding uses it to push the success screen *over* the wizard
+  /// (a forward slide) rather than have the wizard pop to reveal it.
+  final void Function(BuildContext context, CatSummary summary)? onCreated;
+
   const CreateCatPage({
     super.key,
     this.cat,
     this.seededName,
     this.seededPhotoPath,
+    this.onCreated,
   });
 
   @override
@@ -280,7 +287,11 @@ class _CreateCatPageState extends State<CreateCatPage> {
   Future<void> _handleSubmit() async {
     final currentState = _bloc.state;
     if (currentState is CatCreateLoadedState) {
-      _bloc.add(CatCreateCatEvent(cat: currentState.cat, context: context));
+      _bloc.add(CatCreateCatEvent(
+        cat: currentState.cat,
+        context: context,
+        onCreated: widget.onCreated,
+      ));
     }
   }
 
