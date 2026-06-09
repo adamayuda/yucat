@@ -162,6 +162,13 @@ class _SummaryCard extends StatelessWidget {
         muted: summary.activityLabel == null,
       ),
       _SummaryRow(
+        icon: Icons.monitor_weight_rounded,
+        tint: DSColors.tintMintSoft,
+        label: 'Body condition',
+        value: summary.bodyConditionLabel ?? notSet,
+        muted: summary.bodyConditionLabel == null,
+      ),
+      _SummaryRow(
         icon: Icons.brush_rounded,
         tint: DSColors.tintLavender,
         label: 'Coat',

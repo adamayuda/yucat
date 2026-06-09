@@ -8,6 +8,11 @@ class DSBottomNavItem {
   const DSBottomNavItem({required this.icon, required this.label});
 }
 
+/// Vertical space a tab page's scrollable content should reserve at the bottom
+/// so its last item clears the floating bottom nav (which overlays content).
+/// Add to `MediaQuery.padding.bottom`.
+const double kFloatingNavClearance = 96;
+
 /// Floating pill bottom navigation.
 ///
 /// Renders centered above the safe-area edge with a `surfaceCardDim`

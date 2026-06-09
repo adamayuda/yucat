@@ -20,11 +20,15 @@ class SearchDiscoverLoadingState extends SearchState {
 
 class SearchDiscoverLoadedState extends SearchState {
   final List<BrandDisplayModel> brands;
+  final List<String> recentSearches;
 
-  const SearchDiscoverLoadedState({required this.brands});
+  const SearchDiscoverLoadedState({
+    required this.brands,
+    this.recentSearches = const [],
+  });
 
   @override
-  List<Object?> get props => [brands];
+  List<Object?> get props => [brands, recentSearches];
 }
 
 class SearchHiddenState extends SearchState {

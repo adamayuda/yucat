@@ -13,7 +13,6 @@ class _AttributionOption {
 }
 
 const _options = [
-  _AttributionOption('influencer', '⭐', 'From an influencer'),
   _AttributionOption('instagram', '📸', 'Instagram'),
   _AttributionOption('tiktok', '🎵', 'TikTok'),
   _AttributionOption('youtube', '📺', 'YouTube'),

@@ -8,8 +8,10 @@ import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
 import 'package:yucat/features/cat_create/mappers/cat_model_to_create_mapper.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_create_model.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
+import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat_create/widgets/steps/activity_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/age_step.dart';
+import 'package:yucat/features/cat_create/widgets/steps/body_condition_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/breed_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/cat_name_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/coat_step.dart';
@@ -25,7 +27,7 @@ import 'package:yucat/presentation/components/wizard_step_shell.dart';
 import 'package:yucat/service_locator.dart';
 import 'package:yucat/config/themes/theme.dart';
 
-const _totalSteps = 11;
+const _totalSteps = 12;
 
 /// Step indices that are non-input "did you know" interstitials.
 const _factSteps = {5, 8};
@@ -359,7 +361,10 @@ class _CreateCatPageState extends State<CreateCatPage> {
           onAgeChanged: (value) {
             final currentState = _bloc.state;
             if (currentState is CatCreateLoadedState) {
-              final updatedCat = currentState.cat.copyWith(age: value);
+              final updatedCat = currentState.cat.copyWith(
+                age: value,
+                ageGroup: ageGroupFromMonths(value),
+              );
               _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
             }
           },
@@ -433,6 +438,20 @@ class _CreateCatPageState extends State<CreateCatPage> {
             final currentState = _bloc.state;
             if (currentState is CatCreateLoadedState) {
               final updatedCat = currentState.cat.copyWith(breed: breed);
+              _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
+            }
+          },
+        );
+      case 11:
+        return BodyConditionStep(
+          key: const ValueKey('step_11'),
+          weightCategory: cat.weightCategory,
+          onWeightCategoryChanged: (value) {
+            final currentState = _bloc.state;
+            if (currentState is CatCreateLoadedState) {
+              final updatedCat = currentState.cat.copyWith(
+                weightCategory: value,
+              );
               _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
             }
           },

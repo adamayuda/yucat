@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 
 sealed class HomeState extends Equatable {
@@ -20,30 +21,23 @@ class HomeHiddenState extends HomeState {
 class HomeLoadedState extends HomeState {
   final int _timestamp;
 
-  /// Whether the user has an active premium subscription.
-  final bool isPremium;
+  /// The user's cats. Drives the greeting, the active-cat selector, the
+  /// snapshot card, and the per-cat scoring of saved products.
+  final List<CatEntity> cats;
 
-  /// Primary cat profile (the user's first cat) for the greeting card.
-  final String? primaryCatName;
-  final String? primaryCatPhotoUrl;
-
-  /// Current scan-day streak. 0 when broken or never started.
-  final int currentStreak;
+  /// Saved products, newest-first (the repository prepends on save).
+  final List<ProductDisplayModel> savedProducts;
 
   HomeLoadedState({
-    this.isPremium = false,
-    this.primaryCatName,
-    this.primaryCatPhotoUrl,
-    this.currentStreak = 0,
+    this.cats = const [],
+    this.savedProducts = const [],
   }) : _timestamp = DateTime.now().microsecondsSinceEpoch;
 
   @override
   List<Object?> get props => [
         _timestamp,
-        isPremium,
-        primaryCatName,
-        primaryCatPhotoUrl,
-        currentStreak,
+        cats,
+        savedProducts,
       ];
 }
 

@@ -8,6 +8,12 @@ class NutritionGridCard extends StatelessWidget {
 
   const NutritionGridCard({super.key, required this.product});
 
+  /// A macro of exactly 0 means it was missing from the guaranteed analysis
+  /// (the backend defaults unknown values to 0). Show an em-dash rather than a
+  /// misleading "0.0%".
+  static String _format(double value) =>
+      value <= 0 ? '—' : '${value.toStringAsFixed(1)}%';
+
   @override
   Widget build(BuildContext context) {
     return DSCard(
@@ -21,35 +27,35 @@ class NutritionGridCard extends StatelessWidget {
             child: _MacroCell(
               iconAsset: 'assets/images/Icons/nutrient-protein.png',
               label: 'Protein',
-              value: '${product.protein.toStringAsFixed(1)}%',
+              value: _format(product.protein),
             ),
           ),
           Expanded(
             child: _MacroCell(
               iconAsset: 'assets/images/Icons/nutrient-fat.png',
               label: 'Fat',
-              value: '${product.fat.toStringAsFixed(1)}%',
+              value: _format(product.fat),
             ),
           ),
           Expanded(
             child: _MacroCell(
               iconAsset: 'assets/images/Icons/nutrient-moisture.png',
               label: 'Moisture',
-              value: '${product.moisture.toStringAsFixed(1)}%',
+              value: _format(product.moisture),
             ),
           ),
           Expanded(
             child: _MacroCell(
               iconAsset: 'assets/images/Icons/nutrient-fiber.png',
               label: 'Fiber',
-              value: '${product.fiber.toStringAsFixed(1)}%',
+              value: _format(product.fiber),
             ),
           ),
           Expanded(
             child: _MacroCell(
               iconAsset: 'assets/images/Icons/nutrient-carbs.png',
               label: 'Carbs',
-              value: '${product.carbs.toStringAsFixed(1)}%',
+              value: _format(product.carbs),
             ),
           ),
         ],

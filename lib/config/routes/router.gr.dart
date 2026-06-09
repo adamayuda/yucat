@@ -319,6 +319,22 @@ class SavedProductsRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [ScanHistoryPage]
+class ScanHistoryRoute extends PageRouteInfo<void> {
+  const ScanHistoryRoute({List<PageRouteInfo>? children})
+    : super(ScanHistoryRoute.name, initialChildren: children);
+
+  static const String name = 'ScanHistoryRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ScanHistoryPage();
+    },
+  );
+}
+
+/// generated route for
 /// [ScannerPage]
 class ScannerRoute extends PageRouteInfo<void> {
   const ScannerRoute({List<PageRouteInfo>? children})

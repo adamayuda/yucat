@@ -8,13 +8,13 @@ import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 const _tabScreenNames = [
   SearchRoute.name,
   HomeRoute.name,
-  CatListingRoute.name,
+  ProfileRoute.name,
 ];
 
 const _tabItems = [
   DSBottomNavItem(icon: Icons.search_rounded, label: 'Search'),
   DSBottomNavItem(icon: Icons.home_rounded, label: 'Home'),
-  DSBottomNavItem(icon: Icons.pets_rounded, label: 'My cats'),
+  DSBottomNavItem(icon: Icons.person_rounded, label: 'Profile'),
 ];
 
 class BottomNavBar extends StatelessWidget {

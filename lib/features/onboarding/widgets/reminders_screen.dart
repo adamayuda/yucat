@@ -4,12 +4,15 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/ds_option_row.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
+import 'package:yucat/service_locator.dart';
+import 'package:yucat/services/notification_service.dart';
 
 /// Reminder-preferences screen.
 ///
-/// MOCK ONLY — selections are tracked in local state for the screen's
-/// feel but are not persisted or used to schedule any notification.
-// TODO(feature): persist reminder preferences + schedule push notifications.
+/// The reminder-type selections are presentational only (not persisted). Tapping
+/// "Done" triggers the OS push-permission prompt via OneSignal before advancing;
+/// "Set up later" advances without prompting.
+// TODO(feature): persist reminder-type preferences for segmentation.
 class RemindersScreen extends StatefulWidget {
   final VoidCallback onNext;
 
@@ -38,6 +41,13 @@ const _options = [
 class _RemindersScreenState extends State<RemindersScreen> {
   final Set<int> _selected = {};
 
+  /// Prompt for push permission, then advance regardless of the user's choice
+  /// so onboarding never blocks on the OS dialog.
+  Future<void> _onDone() async {
+    await sl<NotificationService>().requestPermission();
+    widget.onNext();
+  }
+
   @override
   Widget build(BuildContext context) {
     return OnboardingScaffold(
@@ -45,7 +55,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
       footer: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          DSPillButton(label: 'Done', onPressed: widget.onNext),
+          DSPillButton(label: 'Done', onPressed: _onDone),
           const SizedBox(height: DSDimens.sizeXxs),
           TextButton(
             onPressed: widget.onNext,

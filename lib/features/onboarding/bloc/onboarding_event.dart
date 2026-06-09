@@ -36,15 +36,6 @@ class OnBoardingAttributionSelectedEvent extends OnBoardingEvent {
   List<Object?> get props => [source];
 }
 
-class OnBoardingAttributionDetailsSubmittedEvent extends OnBoardingEvent {
-  final String? text;
-
-  const OnBoardingAttributionDetailsSubmittedEvent(this.text);
-
-  @override
-  List<Object?> get props => [text];
-}
-
 class OnBoardingAttributionSkippedEvent extends OnBoardingEvent {
   const OnBoardingAttributionSkippedEvent();
 

@@ -15,7 +15,6 @@ class ProductDisplayModel {
   final double fat;
   final double fiber;
   final double carbs;
-  final double calories;
   final bool isAiIdentified;
   final String format;
   final String packageSize;
@@ -36,7 +35,6 @@ class ProductDisplayModel {
     this.fat = 0.0,
     this.fiber = 0.0,
     this.carbs = 0.0,
-    this.calories = 0.0,
     this.isAiIdentified = false,
     this.format = '',
     this.packageSize = '',
@@ -44,6 +42,10 @@ class ProductDisplayModel {
   });
 
   String get scoreDisplay => '$score/$maxScore';
+
+  /// Metabolizable energy estimate (kcal / 100g) via the Atwater factors,
+  /// derived from the displayed macros so it always matches [carbs].
+  double get calories => protein * 4 + fat * 9 + carbs * 4;
 
   /// Subtitle segment for the hero card: "Wet pâté · 85g pouch", or just one
   /// of them, or empty when neither is set.

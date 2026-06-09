@@ -10,14 +10,17 @@ class CatDocumentMapperImpl implements CatDocumentMapper {
   @override
   CatEntity call(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data();
+    final age = data['age'] as int?;
     return CatEntity(
       id: doc.id,
       name: data['name'] as String,
-      age: data['age'] as int?,
+      age: age,
       weight: data['weight'] as double?,
       neutered: data['neutered'] as bool? ?? false,
       profileImageUrl: data['profileImageUrl'] as String?,
-      ageGroup: data['age_group'] as String?,
+      // Older cats were saved without an age group; derive it from age so the
+      // per-cat assessment's age rules work without a data migration.
+      ageGroup: (data['age_group'] as String?) ?? ageGroupFromMonths(age),
       neuteredStatus: data['neutered_status'] as String?,
       breed: data['breed'] as String?,
       weightCategory: data['weight_category'] as String?,

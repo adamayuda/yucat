@@ -33,9 +33,9 @@ class PaywallLoadedWidget extends StatefulWidget {
 }
 
 class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
-  // Promo switch defaults ON: open on the discounted yearly plan with weekly
-  // hidden. Only meaningful when the annual plan has an eligible intro offer.
-  bool _promoOn = true;
+  // Promo switch defaults OFF; the "Limited-time offer" toggle shines to draw
+  // the eye. Only meaningful when the annual plan has an eligible intro offer.
+  bool _promoOn = false;
 
   String? _badgeFor(Package pkg) {
     if (pkg.packageType == PackageType.annual) {
@@ -221,7 +221,9 @@ class _PromoSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Stack(
+      children: [
+        Container(
       padding: const EdgeInsets.fromLTRB(
         DSDimens.sizeS,
         DSDimens.sizeXxs,
@@ -256,6 +258,71 @@ class _PromoSwitch extends StatelessWidget {
             activeTrackColor: DSColors.paywallAccent,
           ),
         ],
+      ),
+        ),
+        const _ShineOverlay(),
+      ],
+    );
+  }
+}
+
+/// A diagonal light streak that sweeps across the limited-time offer toggle to
+/// draw the eye. Loops with a pause; bright/strong rather than a faint shimmer.
+class _ShineOverlay extends StatefulWidget {
+  const _ShineOverlay();
+
+  @override
+  State<_ShineOverlay> createState() => _ShineOverlayState();
+}
+
+class _ShineOverlayState extends State<_ShineOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(DSRadii.xl),
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              // Sweep during the first ~45% of the loop, then rest off-screen.
+              final p = (_controller.value / 0.45).clamp(0.0, 1.0);
+              final dx = -1.6 + 3.2 * p;
+              return DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment(dx - 0.7, -1),
+                    end: Alignment(dx + 0.7, 1),
+                    colors: [
+                      Colors.white.withValues(alpha: 0),
+                      Colors.white.withValues(alpha: 0.7),
+                      Colors.white.withValues(alpha: 0),
+                    ],
+                    stops: const [0.3, 0.5, 0.7],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

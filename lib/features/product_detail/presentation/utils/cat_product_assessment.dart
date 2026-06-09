@@ -238,7 +238,7 @@ _DimensionResult _evaluateAge(
   final cons = <CatProductFinding>[];
   var delta = 0;
 
-  switch (cat.ageGroup) {
+  switch (_norm(cat.ageGroup)) {
     case 'kitten':
       if (product.protein > _kittenProteinHigh) {
         pros.add(_p('High protein (>35%) which is beneficial for kittens',
@@ -298,7 +298,7 @@ _DimensionResult _evaluateWeight(CatEntity cat, ProductDisplayModel product) {
   final cons = <CatProductFinding>[];
   var delta = 0;
 
-  switch (cat.weightCategory) {
+  switch (_norm(cat.weightCategory)) {
     case 'underweight':
       if (product.calories > _underweightCaloriesHigh) {
         pros.add(_p(
@@ -364,7 +364,7 @@ _DimensionResult _evaluateActivity(CatEntity cat, ProductDisplayModel product) {
   final cons = <CatProductFinding>[];
   var delta = 0;
 
-  switch (cat.activityLevel) {
+  switch (_norm(cat.activityLevel)) {
     case 'low':
       if (product.calories > _lowActivityCaloriesHigh) {
         cons.add(_p(
@@ -406,7 +406,7 @@ _DimensionResult _evaluateNeutered(
   final cons = <CatProductFinding>[];
   var delta = 0;
 
-  switch (cat.neuteredStatus) {
+  switch (_norm(cat.neuteredStatus)) {
     case 'neutered':
       if (product.calories > _neuteredCaloriesHigh) {
         cons.add(_p(
@@ -461,10 +461,10 @@ _DimensionResult _evaluateBreed(
   final cons = <CatProductFinding>[];
   var delta = 0;
 
-  final breedRaw = cat.breed;
-  if (breedRaw == null) return const _DimensionResult();
+  final breed = _norm(cat.breed);
+  if (breed == null) return const _DimensionResult();
 
-  switch (breedRaw.toLowerCase()) {
+  switch (breed) {
     case 'maine coon':
       if (_containsAny(text, _kJointSupport)) {
         pros.add(_p(
@@ -702,6 +702,15 @@ _DimensionResult _evaluateHealth(
 CatProductFinding _p(String text, CatAssessmentDimension dim) =>
     CatProductFinding(text: text, dimension: dim);
 
+/// Canonicalizes a loosely-stored cat profile field (trims + lowercases) so a
+/// value like `'Kitten'` or `'adult '` still matches the rule switches. Returns
+/// null for null/empty so callers fall through to the neutral baseline.
+String? _norm(String? value) {
+  if (value == null) return null;
+  final trimmed = value.trim().toLowerCase();
+  return trimmed.isEmpty ? null : trimmed;
+}
+
 String _normalizeText(ProductDisplayModel product) {
   return (product.pros + product.cons)
       .join(' ')
@@ -713,11 +722,12 @@ bool _containsAny(String text, List<String> needles) =>
     needles.any(text.contains);
 
 bool _hasManyFillersWordBoundary(String text) {
-  // Word-boundary match so "corn-free" / "wheat-free" don't false-positive.
-  // Note: text has hyphens replaced with spaces, so "corn-free" reads as
-  // "corn free" — \b still anchors on the space.
+  // Word-boundary match, and ignore "<filler> free" claims. Hyphens are already
+  // normalized to spaces upstream, so "corn-free" reads as "corn free"; the
+  // negative lookahead keeps that from counting as containing corn.
   final hits = _kFillers.where((needle) {
-    final pattern = RegExp(r'\b' + RegExp.escape(needle) + r'\b');
+    final pattern =
+        RegExp(r'\b' + RegExp.escape(needle) + r'\b(?!\s+free)');
     return pattern.hasMatch(text);
   }).length;
   return hits >= 2;

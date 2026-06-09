@@ -201,6 +201,31 @@ flutter clean
 flutter clean && flutter pub get
 ```
 
+### Publishing to App Store Connect
+
+When the user asks to "publish" / "ship" / "release to the App Store", do the full
+flow end-to-end (it's iOS-only). Confirm the version + that shipping the whole
+working tree is intended, then:
+
+1. **Bump the version** in `pubspec.yaml` (`version: 1.2.0+N` — increment the build
+   number `+N`; bump the marketing version too if `1.x.y` is already released).
+2. **Build the signed IPA** (signing is automatic via Xcode team `8UA5Q9FKL5`):
+   ```bash
+   fvm flutter build ipa --release   # → build/ios/ipa/yucat.ipa
+   ```
+3. **Upload** with the App Store Connect API key already on the machine
+   (`xcrun altool`; key id `86D7A742NT`, issuer `4ee93d32-da4a-40f7-9365-3e056a27a5f4`;
+   the `.p8` lives in `~/.appstoreconnect/private_keys/` and is **not** committed):
+   ```bash
+   xcrun altool --upload-app --type ios -f build/ios/ipa/yucat.ipa \
+     --apiKey 86D7A742NT --apiIssuer 4ee93d32-da4a-40f7-9365-3e056a27a5f4
+   ```
+   Both steps are long-running — run them in the background and report the result.
+4. **The user finishes in App Store Connect** (Claude can't do these): after ~5–15
+   min processing the build appears under TestFlight → attach build N to the version,
+   add **What's New**, attach any new/changed subscriptions to the same review, then
+   **Submit for Review**.
+
 ## Dependency Injection (service_locator.dart)
 
 All dependencies are registered in `lib/service_locator.dart` using GetIt. The initialization order is critical:
@@ -295,6 +320,9 @@ RevenueCat is configured **only for iOS** in `main.dart`:
 - API Key: `appl_RLrrtMqNXWlaNlEXzZQxUcxkJxw`
 - Subscription state is read via `HasActiveSubscriptionUseCase` → `SubscriptionRepository`
 - The paywall UI is **custom** (`lib/features/paywall/widgets/paywall_loaded_widget.dart`) on top of `Purchases.getOfferings()` / `Purchases.purchase(PurchaseParams.package(...))` / `Purchases.restorePurchases()`. The `purchases_ui_flutter` drop-in (`RevenueCatUI.presentPaywall()`) is intentionally not used.
+- Entitlement id is **`yucat pro`** (`subscription_repository_impl.dart`).
+
+**Plans & intro-offer promo switch.** The paywall offers exactly two plans — **weekly** + **annual** (`$rc_weekly` / `$rc_annual` in the Current RevenueCat offering; `PaywallBloc._onInitial` also filters `availablePackages` to `PackageType.weekly`/`annual` as a safety net, defaulting the selection to annual). The annual product carries an **App Store introductory offer** (discounted first year, e.g. $39.99 then $49.99) — an automatic discount for eligible new subscribers, **not** an offer code. The paywall surfaces it via a promo `Switch` (`_PromoSwitch` in `paywall_loaded_widget.dart`) that **defaults ON**: it hides weekly and shows only the discounted annual (intro price bold, full price struck through, "Save X%" derived from the prices in `paywall_format.dart` — `hasIntroOffer` / `introPriceStringFor` / `renewalLabelFor` / `introSavingsLabelFor`). Toggling OFF reveals both plans. The switch only renders when `PaywallLoadedState.introEligible` is true — the bloc gates it with `Purchases.checkTrialOrIntroductoryPriceEligibility(...)` (fails closed) so an ineligible/returning user never sees a price they won't be charged; they get the plain two-plan paywall at full price. Intro offers, eligibility, and pricing can only be exercised in App Store **sandbox** with a fresh tester account.
 
 **The app is a hard paywall — there is no free tier.** Subscription is enforced at two non-limit gates: the final, non-dismissible beat of onboarding (`onboarding_bloc.dart`) and the splash screen for returning non-subscribers who finished onboarding (`splash_bloc.dart`). Every active user is therefore a subscriber.
 

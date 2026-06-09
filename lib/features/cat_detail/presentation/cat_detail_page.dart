@@ -257,6 +257,13 @@ class _DetailsCard extends StatelessWidget {
             : notSet,
       ),
       _TileSpec(
+        Icons.monitor_weight_rounded,
+        'Body',
+        cat.weightCategory != null
+            ? _formatBodyCondition(cat.weightCategory!)
+            : notSet,
+      ),
+      _TileSpec(
         Icons.medical_services_rounded,
         'Status',
         cat.neuteredStatus != null
@@ -320,6 +327,16 @@ class _DetailsCard extends StatelessWidget {
       'medium' => 'Medium',
       'high' => 'High',
       _ => _formatSnakeCase(level),
+    };
+  }
+
+  String _formatBodyCondition(String category) {
+    return switch (category.toLowerCase()) {
+      'underweight' => 'Underweight',
+      'normal' => 'Ideal weight',
+      'overweight' => 'Overweight',
+      'obese' => 'Obese',
+      _ => _formatSnakeCase(category),
     };
   }
 

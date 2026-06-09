@@ -4,7 +4,6 @@ enum OnBoardingPhase {
   welcome,
   scanDemo,
   attribution,
-  attributionDetails,
   proofChart,
   whyYucat,
   nutritionFact,

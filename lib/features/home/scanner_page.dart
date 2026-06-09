@@ -23,6 +23,7 @@ class _ScannerPageState extends State<ScannerPage>
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
   bool _isTakingPicture = false;
+  bool _hasCameraError = false;
 
   @override
   void initState() {
@@ -58,22 +59,32 @@ class _ScannerPageState extends State<ScannerPage>
   Future<void> _initCamera() async {
     if (_isCameraInitialized) return;
 
-    final cameras = await availableCameras();
-    if (cameras.isEmpty || !mounted) return;
-
-    _cameraController = CameraController(
-      cameras.first,
-      ResolutionPreset.medium,
-      enableAudio: false,
-    );
-
     try {
+      final cameras = await availableCameras();
+      if (!mounted) return;
+      if (cameras.isEmpty) {
+        setState(() => _hasCameraError = true);
+        return;
+      }
+
+      _cameraController = CameraController(
+        cameras.first,
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
+
       await _cameraController!.initialize();
       if (mounted) {
-        setState(() => _isCameraInitialized = true);
+        setState(() {
+          _isCameraInitialized = true;
+          _hasCameraError = false;
+        });
       }
     } catch (e) {
       debugPrint('Camera init error: $e');
+      if (mounted) {
+        setState(() => _hasCameraError = true);
+      }
     }
   }
 
@@ -137,6 +148,10 @@ class _ScannerPageState extends State<ScannerPage>
           if (_isCameraInitialized && _cameraController != null)
             Positioned.fill(child: CameraPreview(_cameraController!)),
 
+          if (_hasCameraError) Positioned.fill(child: _CameraErrorView(
+            onPickFromGallery: _pickFromGallery,
+          )),
+
           // Top close button
           Positioned(
             top: MediaQuery.of(context).padding.top + DSDimens.sizeS,
@@ -147,53 +162,107 @@ class _ScannerPageState extends State<ScannerPage>
             ),
           ),
 
-          // Bottom controls
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).padding.bottom + DSDimens.sizeM,
-                top: DSDimens.sizeL,
-                left: DSDimens.size3xl,
-                right: DSDimens.size3xl,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _ChromeButton(
-                    icon: Icons.photo_outlined,
-                    onTap: _pickFromGallery,
-                  ),
-                  GestureDetector(
-                    onTap: _takePicture,
-                    child: Container(
-                      width: 76,
-                      height: 76,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: DSColors.inkInverse,
-                          width: 4,
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(4),
-                      child: const DecoratedBox(
+          // Bottom controls (hidden when the camera is unavailable — the
+          // error view offers the gallery fallback instead).
+          if (!_hasCameraError)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: EdgeInsets.only(
+                  bottom:
+                      MediaQuery.of(context).padding.bottom + DSDimens.sizeM,
+                  top: DSDimens.sizeL,
+                  left: DSDimens.size3xl,
+                  right: DSDimens.size3xl,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _ChromeButton(
+                      icon: Icons.photo_outlined,
+                      onTap: _pickFromGallery,
+                    ),
+                    GestureDetector(
+                      onTap: _takePicture,
+                      child: Container(
+                        width: 76,
+                        height: 76,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: DSColors.inkInverse,
+                          border: Border.all(
+                            color: DSColors.inkInverse,
+                            width: 4,
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        child: const DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: DSColors.inkInverse,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  // Spacer to balance the shutter
-                  const SizedBox(width: 44),
-                ],
+                    // Spacer to balance the shutter
+                    const SizedBox(width: 44),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
+      ),
+    );
+  }
+}
+
+class _CameraErrorView extends StatelessWidget {
+  final VoidCallback onPickFromGallery;
+
+  const _CameraErrorView({required this.onPickFromGallery});
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: DSColors.inkPrimary,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DSDimens.size3xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.no_photography_outlined,
+                color: DSColors.inkInverse,
+                size: 48,
+              ),
+              const SizedBox(height: DSDimens.sizeL),
+              Text(
+                'Camera unavailable',
+                style: DSTextStyles.titleMd.copyWith(
+                  color: DSColors.inkInverse,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: DSDimens.sizeXs),
+              Text(
+                'Enable camera access for YuCat in Settings, or pick a photo '
+                'from your gallery instead.',
+                style: DSTextStyles.bodyMd.copyWith(
+                  color: DSColors.inkInverse.withValues(alpha: 0.7),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: DSDimens.sizeXl),
+              FilledButton.icon(
+                onPressed: onPickFromGallery,
+                icon: const Icon(Icons.photo_outlined),
+                label: const Text('Choose from gallery'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

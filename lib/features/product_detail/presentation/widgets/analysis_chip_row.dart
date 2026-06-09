@@ -9,18 +9,16 @@ class AnalysisChipRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shownPros = pros.take(3).toList();
-    final shownCons = cons.take(1).toList();
-    if (shownPros.isEmpty && shownCons.isEmpty) {
+    if (pros.isEmpty && cons.isEmpty) {
       return const SizedBox.shrink();
     }
     return Wrap(
       spacing: DSDimens.sizeXxs,
       runSpacing: DSDimens.sizeXxs,
       children: [
-        for (final pro in shownPros)
+        for (final pro in pros)
           _AnalysisChip(text: pro, kind: _ChipKind.success),
-        for (final con in shownCons)
+        for (final con in cons)
           _AnalysisChip(text: con, kind: _ChipKind.caution),
       ],
     );

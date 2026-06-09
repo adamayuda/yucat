@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/onboarding/bloc/onboarding_bloc.dart';
-import 'package:yucat/features/onboarding/widgets/attribution_details_screen.dart';
 import 'package:yucat/features/onboarding/widgets/attribution_screen.dart';
 import 'package:yucat/features/onboarding/widgets/health_intro_screen.dart';
 import 'package:yucat/features/onboarding/widgets/notif_primer_screen.dart';
@@ -95,6 +94,7 @@ class _OnBoardingPage extends State<OnBoardingPage> {
               itemCount: OnBoardingPhase.values.length,
               itemBuilder: (context, index) => _buildPhase(
                 OnBoardingPhase.values[index],
+                state.phase,
                 state.selectedSource,
                 state.seededName,
                 state.catSummary,
@@ -125,6 +125,7 @@ class _OnBoardingPage extends State<OnBoardingPage> {
 
   Widget _buildPhase(
     OnBoardingPhase phase,
+    OnBoardingPhase currentPhase,
     String? selectedSource,
     String? seededName,
     CatSummary? catSummary,
@@ -145,11 +146,6 @@ class _OnBoardingPage extends State<OnBoardingPage> {
               _bloc.add(OnBoardingAttributionSelectedEvent(source)),
           onSkip: () => _bloc.add(const OnBoardingAttributionSkippedEvent()),
         );
-      case OnBoardingPhase.attributionDetails:
-        return AttributionDetailsScreen(
-          onSubmit: (text) =>
-              _bloc.add(OnBoardingAttributionDetailsSubmittedEvent(text)),
-        );
       case OnBoardingPhase.proofChart:
         return ProofChartScreen(
           onNext: () => _bloc.add(const OnBoardingAdvancePhaseEvent()),
@@ -168,6 +164,7 @@ class _OnBoardingPage extends State<OnBoardingPage> {
         );
       case OnBoardingPhase.profileName:
         return ProfileNameScreen(
+          active: phase == currentPhase,
           initialName: seededName,
           onNext: (name) {
             _bloc.add(OnBoardingNameSeededEvent(name));

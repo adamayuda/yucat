@@ -28,6 +28,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
     'CoatFact',
     'HealthConditions',
     'Breed',
+    'BodyCondition',
   ];
 
   final CreateCatUsecase _createCatUsecase;

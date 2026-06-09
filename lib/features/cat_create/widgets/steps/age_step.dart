@@ -79,52 +79,36 @@ class _AgeStepState extends State<AgeStep> {
                   ],
                 ),
                 const SizedBox(height: DSDimens.sizeXs),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // shared selection band behind both wheels
-                    Container(
-                      height: 56,
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: DSDimens.sizeL,
+                SizedBox(
+                  height: 220,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _wheel(
+                          controller: _yearsController,
+                          count: AgeStep.maxYears + 1,
+                          current: _years,
+                          unit: 'yr',
+                          onChanged: (value) {
+                            setState(() => _years = value);
+                            widget.onAgeChanged(_totalMonths);
+                          },
+                        ),
                       ),
-                      decoration: BoxDecoration(
-                        color: DSColors.surfaceCardDim,
-                        borderRadius: BorderRadius.circular(DSRadii.lg),
+                      Expanded(
+                        child: _wheel(
+                          controller: _monthsController,
+                          count: 12,
+                          current: _months,
+                          unit: 'mo',
+                          onChanged: (value) {
+                            setState(() => _months = value);
+                            widget.onAgeChanged(_totalMonths);
+                          },
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 220,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _wheel(
-                              controller: _yearsController,
-                              count: AgeStep.maxYears + 1,
-                              current: _years,
-                              unit: 'yr',
-                              onChanged: (value) {
-                                setState(() => _years = value);
-                                widget.onAgeChanged(_totalMonths);
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: _wheel(
-                              controller: _monthsController,
-                              count: 12,
-                              current: _months,
-                              unit: 'mo',
-                              onChanged: (value) {
-                                setState(() => _months = value);
-                                widget.onAgeChanged(_totalMonths);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),

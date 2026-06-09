@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
+import 'package:yucat/features/product_detail/presentation/widgets/hatched_placeholder.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 
 class ProductRowCard extends StatelessWidget {
@@ -78,17 +79,9 @@ class _ProductThumb extends StatelessWidget {
           ? Image.network(
               imageUrl!,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const Icon(
-                Icons.image_outlined,
-                color: DSColors.inkTertiary,
-                size: 24,
-              ),
+              errorBuilder: (_, __, ___) => const HatchedPlaceholder(),
             )
-          : const Icon(
-              Icons.image_outlined,
-              color: DSColors.inkTertiary,
-              size: 24,
-            ),
+          : const HatchedPlaceholder(),
     );
   }
 }

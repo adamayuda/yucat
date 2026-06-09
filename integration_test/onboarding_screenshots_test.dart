@@ -121,14 +121,9 @@ void main() {
       await tapPill('Continue');
 
       await shot('05-onboarding-attribution');
-      await tester.tap(find.text('From influencer'));
+      await tester.tap(find.text('Instagram'));
       await idle();
       await tapPill('Next'); // footer label flips from "Skip" once selected
-
-      await shot('06-onboarding-attribution-details');
-      await tester.enterText(find.byType(TextField), 'Jackson Galaxy');
-      await idle();
-      await tapPill('Next'); // footer label flips from "No, skip" once typed
 
       await shot('07-onboarding-social-proof');
       await tapPill('Next');

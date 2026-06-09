@@ -39,3 +39,28 @@ class NavigateToProductDetailEvent extends SearchEvent {
   @override
   List<Object?> get props => [product, context];
 }
+
+class SubmitSearchEvent extends SearchEvent {
+  final String query;
+
+  const SubmitSearchEvent({required this.query});
+
+  @override
+  List<Object?> get props => [query];
+}
+
+class RecentSearchSelectedEvent extends SearchEvent {
+  final String query;
+
+  const RecentSearchSelectedEvent({required this.query});
+
+  @override
+  List<Object?> get props => [query];
+}
+
+class ClearRecentSearchesEvent extends SearchEvent {
+  const ClearRecentSearchesEvent();
+
+  @override
+  List<Object?> get props => [];
+}

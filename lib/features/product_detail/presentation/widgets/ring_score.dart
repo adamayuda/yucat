@@ -22,7 +22,10 @@ class RingScore extends StatelessWidget {
     final color = _accentFor(ratingColor);
     final stroke = (size / 10).clamp(4.0, 7.0);
 
-    return SizedBox(
+    return Semantics(
+      label: 'Score $score out of $maxScore',
+      excludeSemantics: true,
+      child: SizedBox(
       width: size,
       height: size,
       child: Stack(
@@ -48,6 +51,7 @@ class RingScore extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

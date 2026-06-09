@@ -1,5 +1,6 @@
 import 'package:yucat/features/product/domain/entities/product_entity.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
+import 'package:yucat/features/product_detail/presentation/utils/product_rating.dart';
 
 abstract class ProductToModelMapper {
   ProductDisplayModel call(ProductEntity product);
@@ -10,16 +11,13 @@ class ProductToModelMapperImpl extends ProductToModelMapper {
 
   @override
   ProductDisplayModel call(ProductEntity product) {
-    final ratingText = _getRatingText(product.score, maxScore);
-    final ratingColor = _getRatingColor(product.score, maxScore);
-
     return ProductDisplayModel(
       name: product.name,
       brand: product.brand,
       score: product.score,
       maxScore: maxScore,
-      ratingText: ratingText,
-      ratingColor: ratingColor,
+      ratingText: ratingTextForScore(product.score, maxScore),
+      ratingColor: ratingColorForScore(product.score, maxScore),
       imageUrl: product.imageUrl,
       pros: product.pros,
       cons: product.cons,
@@ -27,42 +25,18 @@ class ProductToModelMapperImpl extends ProductToModelMapper {
       moisture: product.moisture,
       fat: product.fat,
       fiber: product.fiber,
-      carbs: product.carbs == 0
-          ? 100.0 -
-                product.protein -
-                product.fat -
-                product.fiber -
-                product.moisture -
-                product.ash
-          : product.carbs,
+      carbs: _calculateCarbs(product),
     );
   }
 
-  String _getRatingText(int score, int maxScore) {
-    if (maxScore == 0) return 'Unknown';
-    final percentage = (score / maxScore) * 100;
-    if (percentage >= 80) {
-      return 'Excellent';
-    } else if (percentage >= 60) {
-      return 'Good';
-    } else if (percentage >= 40) {
-      return 'Fair';
-    } else if (percentage >= 20) {
-      return 'Poor';
-    } else {
-      return 'Very Poor';
-    }
-  }
-
-  ProductRatingColor _getRatingColor(int score, int maxScore) {
-    if (maxScore == 0) return ProductRatingColor.red;
-    final percentage = (score / maxScore) * 100;
-    if (percentage >= 70) {
-      return ProductRatingColor.green;
-    } else if (percentage >= 40) {
-      return ProductRatingColor.yellow;
-    } else {
-      return ProductRatingColor.red;
-    }
+  double _calculateCarbs(ProductEntity product) {
+    if (product.carbs != 0) return product.carbs;
+    final derived = 100.0 -
+        product.protein -
+        product.fat -
+        product.fiber -
+        product.moisture -
+        product.ash;
+    return derived < 0 ? 0.0 : derived;
   }
 }

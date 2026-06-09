@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 
 /// Social-proof screen — App Store rating + a stack of reviews.
 ///
-/// Presentational only. The native review modal is intentionally not
-/// triggered here: Apple discourages onboarding-time prompts and the
-/// app already has a scan-gated `ReviewPromptService` for high-intent
-/// moments.
-// TODO(feature): optionally wire a "Rate YuCat" deep-link to the App Store.
+/// Tapping "Next" requests the native App Store review popup
+/// (`SKStoreReviewController` on iOS) before advancing the flow. The popup
+/// is rate-limited by Apple and may not appear; onboarding advances either
+/// way.
 /// Muted warm-grey used for the supporting labels on this screen.
 const _mutedLabel = Color(0xFFAAA498);
 
@@ -17,6 +17,20 @@ class RatingScreen extends StatelessWidget {
   final VoidCallback onNext;
 
   const RatingScreen({super.key, required this.onNext});
+
+  /// Requests the native review popup, then advances. Never blocks the flow
+  /// on a review-prompt failure or unavailability.
+  Future<void> _handleNext() async {
+    try {
+      final inAppReview = InAppReview.instance;
+      if (await inAppReview.isAvailable()) {
+        await inAppReview.requestReview();
+      }
+    } catch (_) {
+      // Ignore — advancing onboarding must not depend on the review prompt.
+    }
+    onNext();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +145,7 @@ class RatingScreen extends StatelessWidget {
                     child: Center(
                       child: OnboardingFloatingButton(
                         label: 'Next',
-                        onPressed: onNext,
+                        onPressed: _handleNext,
                       ),
                     ),
                   ),

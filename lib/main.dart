@@ -20,8 +20,11 @@ import 'package:yucat/features/onboarding/bloc/onboarding_bloc.dart';
 import 'package:yucat/features/product_detail/presentation/bloc/product_detail_bloc.dart';
 import 'package:yucat/features/product_listing/presentation/bloc/product_listing_bloc.dart';
 import 'package:yucat/features/profile/bloc/profile_bloc.dart';
+import 'package:yucat/features/saved_products/presentation/bloc/saved_products_bloc.dart';
+import 'package:yucat/features/scan_history/presentation/bloc/scan_history_bloc.dart';
 import 'package:yucat/features/search_products/presentation/bloc/search_bloc.dart';
 import 'package:yucat/service_locator.dart';
+import 'package:yucat/services/notification_service.dart';
 
 import 'config/routes/analytics_route_observer.dart';
 import 'config/routes/router.dart';
@@ -37,6 +40,12 @@ Future<void> main() async {
   }
 
   await initializeDependencies();
+
+  // Initialise OneSignal (iOS only). Does not prompt for permission — that is
+  // deferred to the onboarding reminders screen.
+  if (Platform.isIOS) {
+    await sl<NotificationService>().initialize();
+  }
 
   runApp(App());
 }
@@ -69,6 +78,8 @@ class App extends StatelessWidget {
         BlocProvider(create: (context) => sl<HomeBloc>()),
         BlocProvider(create: (context) => sl<ProfileBloc>()),
         BlocProvider(create: (context) => sl<ProductDetailBloc>()),
+        BlocProvider(create: (context) => sl<SavedProductsBloc>()),
+        BlocProvider(create: (context) => sl<ScanHistoryBloc>()),
         BlocProvider(create: (context) => sl<CatListingBloc>()),
         BlocProvider(create: (context) => sl<CatCreateBloc>()),
         BlocProvider(create: (context) => sl<CatDetailBloc>()),

@@ -7,7 +7,7 @@ import 'package:yucat/features/product_detail/presentation/mappers/product_entit
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/search_products/presentation/bloc/search_bloc.dart';
 import 'package:yucat/features/search_products/presentation/widgets/product_row_card.dart';
-import 'package:yucat/features/search_products/presentation/widgets/search_brand_strip.dart';
+import 'package:yucat/features/search_products/presentation/widgets/search_discover_view.dart';
 import 'package:yucat/features/search_products/presentation/widgets/search_text_field.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
@@ -42,6 +42,27 @@ class _SearchPage extends State<SearchPage> {
 
   void _onQueryChanged(String value) {
     _bloc.add(SearchQueryEvent(query: value));
+  }
+
+  void _onClear() {
+    _searchController.clear();
+    _bloc.add(const SearchQueryEvent(query: ''));
+  }
+
+  void _onSubmitted(String query) {
+    _bloc.add(SubmitSearchEvent(query: query));
+  }
+
+  void _onRecentTap(String query) {
+    _searchController.value = TextEditingValue(
+      text: query,
+      selection: TextSelection.collapsed(offset: query.length),
+    );
+    _bloc.add(RecentSearchSelectedEvent(query: query));
+  }
+
+  void _onClearRecents() {
+    _bloc.add(const ClearRecentSearchesEvent());
   }
 
   @override
@@ -88,6 +109,8 @@ class _SearchPage extends State<SearchPage> {
               child: SearchTextField(
                 controller: _searchController,
                 onChanged: _onQueryChanged,
+                onClear: _onClear,
+                onSubmitted: _onSubmitted,
               ),
             ),
             Expanded(child: _buildBody(state)),
@@ -100,8 +123,12 @@ class _SearchPage extends State<SearchPage> {
   Widget _buildBody(SearchState state) {
     return switch (state) {
       SearchDiscoverLoadingState() => const AppLoadingWidget(),
-      SearchDiscoverLoadedState(:final brands) => SearchBrandStrip(
+      SearchDiscoverLoadedState(:final brands, :final recentSearches) =>
+        SearchDiscoverView(
           brands: brands,
+          recentSearches: recentSearches,
+          onRecentTap: _onRecentTap,
+          onClearRecents: _onClearRecents,
         ),
       SearchLoadingState() => const AppLoadingWidget(),
       SearchLoadedState(:final isLoading, :final products) => _ResultsList(
@@ -136,17 +163,14 @@ class _ResultsList extends StatelessWidget {
       return const AppLoadingWidget();
     }
     if (products.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(DSDimens.sizeL),
-          child: Text(
-            'No products match your search.',
-            textAlign: TextAlign.center,
-            style: DSTextStyles.bodyMd,
-          ),
-        ),
+      return const DSStateView.empty(
+        illustrationAsset: 'assets/images/Illustrations/empty-state.gif',
+        headline: 'No matches',
+        body: 'Try a different name, or browse popular brands.',
       );
     }
+    final n = products.length;
+    final caption = '$n result${n == 1 ? '' : 's'}';
     final bottomInset = MediaQuery.of(context).padding.bottom + 96;
     return ListView.separated(
       padding: EdgeInsets.fromLTRB(
@@ -155,10 +179,21 @@ class _ResultsList extends StatelessWidget {
         DSDimens.sizeL,
         bottomInset,
       ),
-      itemCount: products.length,
+      itemCount: products.length + 1,
       separatorBuilder: (_, __) => const SizedBox(height: DSDimens.sizeXs),
       itemBuilder: (context, index) {
-        final product = products[index];
+        if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: DSDimens.sizeXxs),
+            child: Text(
+              caption,
+              style: DSTextStyles.caption.copyWith(
+                color: DSColors.inkSecondary,
+              ),
+            ),
+          );
+        }
+        final product = products[index - 1];
         return ProductRowCard(
           product: product,
           onTap: () => onTap(product),

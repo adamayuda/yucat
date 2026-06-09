@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat_listing/bloc/cat_listing_bloc.dart';
 import 'package:yucat/features/cat_listing/widgets/cat_listing_empty_page.dart';
@@ -21,10 +20,6 @@ class CatListingPage extends StatefulWidget {
 class _CatListingPageState extends State<CatListingPage> {
   late CatListingBloc _bloc;
 
-  void _navigateToProfile() {
-    context.router.push(const ProfileRoute());
-  }
-
   @override
   void initState() {
     super.initState();
@@ -43,16 +38,9 @@ class _CatListingPageState extends State<CatListingPage> {
           children: [
             SafeArea(
               bottom: false,
-              child: DSAppBar.tab(
+              child: DSAppBar.modal(
                 title: 'My cats',
-                trailing: IconButton(
-                  onPressed: _navigateToProfile,
-                  icon: const Icon(
-                    Icons.settings_rounded,
-                    color: DSColors.inkPrimary,
-                    size: 24,
-                  ),
-                ),
+                onBack: () => Navigator.of(context).pop(),
               ),
             ),
             Expanded(child: _onStateChangeBuilder(state)),

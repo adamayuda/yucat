@@ -23,10 +23,16 @@ class ProfileNameScreen extends StatefulWidget {
   final String? initialName;
   final void Function(String name) onNext;
 
+  /// Whether this is the currently-visible onboarding phase. The keyboard is
+  /// only raised when active, so the off-screen page in the PageView doesn't
+  /// pop the keyboard on neighbouring screens.
+  final bool active;
+
   const ProfileNameScreen({
     super.key,
     required this.initialName,
     required this.onNext,
+    this.active = true,
   });
 
   @override
@@ -35,6 +41,7 @@ class ProfileNameScreen extends StatefulWidget {
 
 class _ProfileNameScreenState extends State<ProfileNameScreen> {
   late final TextEditingController _controller;
+  final _focusNode = FocusNode();
   final _random = Random();
 
   @override
@@ -42,10 +49,28 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
     super.initState();
     _controller = TextEditingController(text: widget.initialName ?? '');
     _controller.addListener(() => setState(() {}));
+    if (widget.active) _requestFocusSoon();
+  }
+
+  @override
+  void didUpdateWidget(ProfileNameScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.active && !oldWidget.active) {
+      _requestFocusSoon();
+    } else if (!widget.active && oldWidget.active) {
+      _focusNode.unfocus();
+    }
+  }
+
+  void _requestFocusSoon() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && widget.active) _focusNode.requestFocus();
+    });
   }
 
   @override
   void dispose() {
+    _focusNode.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -106,7 +131,7 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
               const SizedBox(height: DSDimens.sizeXs),
               TextField(
                 controller: _controller,
-                autofocus: true,
+                focusNode: _focusNode,
                 textAlign: TextAlign.center,
                 textCapitalization: TextCapitalization.words,
                 style: DSTextStyles.displayHero,

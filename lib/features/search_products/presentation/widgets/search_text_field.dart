@@ -6,10 +6,19 @@ class SearchTextField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final String hintText;
 
+  /// Called when the clear (✕) button is tapped. The button only renders while
+  /// the field has text.
+  final VoidCallback? onClear;
+
+  /// Called when the keyboard search/return key is pressed.
+  final ValueChanged<String>? onSubmitted;
+
   const SearchTextField({
     super.key,
     required this.controller,
     required this.onChanged,
+    this.onClear,
+    this.onSubmitted,
     this.hintText = 'Search for a cat food',
   });
 
@@ -24,7 +33,9 @@ class SearchTextField extends StatelessWidget {
       child: TextField(
         controller: controller,
         onChanged: onChanged,
+        onSubmitted: onSubmitted,
         style: DSTextStyles.bodyLg,
+        textInputAction: TextInputAction.search,
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: DSTextStyles.bodyLg.copyWith(color: DSColors.inkTertiary),
@@ -33,6 +44,21 @@ class SearchTextField extends StatelessWidget {
           prefixIcon: const Icon(
             Icons.search_rounded,
             color: DSColors.inkSecondary,
+          ),
+          suffixIcon: ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller,
+            builder: (context, value, _) {
+              if (value.text.isEmpty) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: DSColors.inkSecondary,
+                  size: 20,
+                ),
+                splashRadius: 20,
+                onPressed: onClear,
+              );
+            },
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: DSDimens.sizeS,

@@ -1,3 +1,13 @@
+/// Maps an age in months to the assessment's age group:
+/// `<12` → kitten, `12–119` → adult, `>=120` → senior. Mirrors the life-stage
+/// labels shown in the onboarding Age step. Returns null when [months] is null.
+String? ageGroupFromMonths(int? months) {
+  if (months == null) return null;
+  if (months < 12) return 'kitten';
+  if (months < 120) return 'adult';
+  return 'senior';
+}
+
 class CatEntity {
   final String? id;
   final String name;

@@ -5,15 +5,19 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
-import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/signin_anonymously_usecase.dart';
+import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
 import 'package:yucat/features/product/domain/usecases/fetch_product_by_image_usecase.dart';
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
+import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
+import 'package:yucat/features/saved_products/domain/usecases/get_saved_products_usecase.dart';
+import 'package:yucat/features/scan_history/domain/usecases/add_scan_to_history_usecase.dart';
+import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/review_prompt_service.dart';
 import 'package:yucat/services/scan_tracking_service.dart';
 
@@ -24,12 +28,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final SigninAnonymouslyUsecase _signinAnonymouslyUsecase;
   final ScanTrackingService _scanTrackingService;
   final ReviewPromptService _reviewPromptService;
-  final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
   final GetCatsUsecase _getCatsUsecase;
+  final GetSavedProductsUsecase _getSavedProductsUsecase;
+  final AddScanToHistoryUsecase _addScanToHistoryUsecase;
   final LogEventUsecase _logEventUsecase;
+  final NotificationService _notificationService;
   // ignore: unused_field
   final SharedPreferences _prefs;
-  static const String entitlementID = 'yucat pro';
 
   HomeBloc({
     required FetchProductByImageUsecase fetchProductByImageUsecase,
@@ -38,9 +43,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required SigninAnonymouslyUsecase signinAnonymouslyUsecase,
     required ScanTrackingService scanTrackingService,
     required ReviewPromptService reviewPromptService,
-    required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
     required GetCatsUsecase getCatsUsecase,
+    required GetSavedProductsUsecase getSavedProductsUsecase,
+    required AddScanToHistoryUsecase addScanToHistoryUsecase,
     required LogEventUsecase logEventUsecase,
+    required NotificationService notificationService,
     required SharedPreferences prefs,
   }) : _fetchProductByImageUsecase = fetchProductByImageUsecase,
        _productEntityToModelMapper = productEntityToModelMapper,
@@ -48,9 +55,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
        _signinAnonymouslyUsecase = signinAnonymouslyUsecase,
        _scanTrackingService = scanTrackingService,
        _reviewPromptService = reviewPromptService,
-       _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
        _getCatsUsecase = getCatsUsecase,
+       _getSavedProductsUsecase = getSavedProductsUsecase,
+       _addScanToHistoryUsecase = addScanToHistoryUsecase,
        _logEventUsecase = logEventUsecase,
+       _notificationService = notificationService,
        _prefs = prefs,
        super(HomeHiddenState()) {
     on<HomeInitialEvent>(_onHomeInitialEvent);
@@ -70,30 +79,29 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     final user = _currentUserUsecase();
 
-    final isPremium = await _hasActiveSubscriptionUseCase();
+    // Attach the anonymous Firebase UID as the OneSignal external id so push
+    // notifications can target this user. Fire-and-forget; iOS-only internally.
+    if (user != null) {
+      unawaited(_notificationService.login(user.uid));
+    }
 
-    String? primaryCatName;
-    String? primaryCatPhotoUrl;
+    List<CatEntity> cats = const [];
     if (user != null) {
       try {
-        final cats = await _getCatsUsecase(userId: user.uid);
-        if (cats.isNotEmpty) {
-          primaryCatName = cats.first.name;
-          primaryCatPhotoUrl = cats.first.profileImageUrl;
-        }
+        cats = await _getCatsUsecase(userId: user.uid);
       } catch (_) {
-        // Greeting falls back to generic copy on read failure.
+        // Header falls back to generic copy on read failure.
       }
     }
 
-    final currentStreak = _scanTrackingService.getCurrentStreak();
+    List<ProductDisplayModel> savedProducts = const [];
+    try {
+      savedProducts = await _getSavedProductsUsecase();
+    } catch (_) {
+      // Preview hides on read failure.
+    }
 
-    emit(HomeLoadedState(
-      isPremium: isPremium,
-      primaryCatName: primaryCatName,
-      primaryCatPhotoUrl: primaryCatPhotoUrl,
-      currentStreak: currentStreak,
-    ));
+    emit(HomeLoadedState(cats: cats, savedProducts: savedProducts));
   }
 
   Future<void> _onImageCapturedEvent(
@@ -129,6 +137,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
 
       final productDetailModel = _productEntityToModelMapper(product);
+
+      // Record every successful scan to local history (best-effort; a
+      // persistence failure must never block navigation to the result).
+      try {
+        await _addScanToHistoryUsecase(productDetailModel);
+      } catch (_) {}
 
       _logEventUsecase.call(
         eventName: 'Product Selected',

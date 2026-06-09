@@ -15,6 +15,7 @@ class CatSummary {
   final String? activityLabel;
   final String? coatLabel;
   final String? neuterLabel;
+  final String? bodyConditionLabel;
 
   /// Breed name, or null when unset / "Other" (mixed / unknown).
   final String? breed;
@@ -30,6 +31,7 @@ class CatSummary {
     this.activityLabel,
     this.coatLabel,
     this.neuterLabel,
+    this.bodyConditionLabel,
     this.breed,
     this.healthLabels = const [],
   });
@@ -72,6 +74,7 @@ class CatSummary {
           : null,
       coatLabel: _coatLabels[cat.coatType],
       neuterLabel: _neuterLabels[cat.neuteredStatus],
+      bodyConditionLabel: _bodyConditionLabels[cat.weightCategory],
       breed: (cat.breed != null && cat.breed != 'Other') ? cat.breed : null,
       healthLabels: [
         for (final c in cat.healthConditions)
@@ -91,6 +94,13 @@ class CatSummary {
     'intact': 'Not neutered',
     'pregnant': 'Pregnant',
     'lactating': 'Lactating',
+  };
+
+  static const _bodyConditionLabels = {
+    'underweight': 'Underweight',
+    'normal': 'Ideal weight',
+    'overweight': 'Overweight',
+    'obese': 'Obese',
   };
 
   static const _healthLabels = {

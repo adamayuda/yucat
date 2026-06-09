@@ -4,6 +4,9 @@ import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/search_products/presentation/models/brand_display_model.dart';
 
+/// "Popular brands" section — a title + a horizontal strip of brand tiles.
+/// Designed to sit inside a parent scroll view (see [SearchDiscoverView]); it
+/// does not impose its own outer scroll or padding.
 class SearchBrandStrip extends StatelessWidget {
   final List<BrandDisplayModel> brands;
 
@@ -11,14 +14,8 @@ class SearchBrandStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom + 96;
-    return ListView(
-      padding: EdgeInsets.fromLTRB(
-        DSDimens.sizeL,
-        DSDimens.sizeS,
-        DSDimens.sizeL,
-        bottomInset,
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Popular brands',

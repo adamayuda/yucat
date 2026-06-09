@@ -11,8 +11,6 @@ import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
 part 'onboarding_event.dart';
 part 'onboarding_state.dart';
 
-const _influencerSource = 'influencer';
-
 class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
   static const String _onboardingCompletedKey = 'onboarding_completed';
   final SharedPreferences _prefs;
@@ -34,7 +32,6 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     on<OnBoardingGetStartedEvent>(_onOnBoardingGetStartedEvent);
     on<OnBoardingBackToWelcomeEvent>(_onOnBoardingBackToWelcomeEvent);
     on<OnBoardingAttributionSelectedEvent>(_onOnBoardingAttributionSelectedEvent);
-    on<OnBoardingAttributionDetailsSubmittedEvent>(_onOnBoardingAttributionDetailsSubmittedEvent);
     on<OnBoardingAttributionSkippedEvent>(_onOnBoardingAttributionSkippedEvent);
     on<OnBoardingAdvancePhaseEvent>(_onOnBoardingAdvancePhaseEvent);
     on<OnBoardingPreviousPhaseEvent>(_onOnBoardingPreviousPhaseEvent);
@@ -108,9 +105,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       },
     );
 
-    final next = event.source == _influencerSource
-        ? OnBoardingPhase.attributionDetails
-        : OnBoardingPhase.proofChart;
+    const next = OnBoardingPhase.proofChart;
 
     _stepsViewed++;
     _logScreenViewUsecase.call(
@@ -123,21 +118,6 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       phase: next,
       selectedSource: event.source,
     ));
-  }
-
-  void _onOnBoardingAttributionDetailsSubmittedEvent(
-    OnBoardingAttributionDetailsSubmittedEvent event,
-    Emitter<OnBoardingState> emit,
-  ) {
-    _logEventUsecase.call(
-      eventName: 'Onboarding Attribution Details Submitted',
-      properties: {
-        'has_text': event.text != null && event.text!.isNotEmpty,
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-    _stepsViewed++;
-    emit(_readyState().copyWith(phase: OnBoardingPhase.proofChart));
   }
 
   void _onOnBoardingAttributionSkippedEvent(
@@ -188,11 +168,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     final prev = switch (current.phase) {
       OnBoardingPhase.scanDemo => OnBoardingPhase.welcome,
       OnBoardingPhase.attribution => OnBoardingPhase.scanDemo,
-      OnBoardingPhase.attributionDetails => OnBoardingPhase.attribution,
-      OnBoardingPhase.proofChart =>
-        current.selectedSource == _influencerSource
-            ? OnBoardingPhase.attributionDetails
-            : OnBoardingPhase.attribution,
+      OnBoardingPhase.proofChart => OnBoardingPhase.attribution,
       OnBoardingPhase.whyYucat => OnBoardingPhase.proofChart,
       OnBoardingPhase.nutritionFact => OnBoardingPhase.whyYucat,
       OnBoardingPhase.profileIntro => OnBoardingPhase.nutritionFact,

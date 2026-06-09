@@ -52,12 +52,10 @@ class PaywallPackageRow extends StatelessWidget {
         ),
         boxShadow: selected ? null : DSShadows.e1,
       ),
-      child: Stack(
-        children: [
-          Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(DSRadii.xl),
-            child: InkWell(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(DSRadii.xl),
+        child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(DSRadii.xl),
           child: Padding(
@@ -140,70 +138,6 @@ class PaywallPackageRow extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-          if (selected) const _ShineOverlay(),
-        ],
-      ),
-    );
-  }
-}
-
-/// A subtle diagonal light streak that sweeps across the offer card on a loop.
-class _ShineOverlay extends StatefulWidget {
-  const _ShineOverlay();
-
-  @override
-  State<_ShineOverlay> createState() => _ShineOverlayState();
-}
-
-class _ShineOverlayState extends State<_ShineOverlay>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2800),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(DSRadii.xl),
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) {
-              // Sweep during the first ~40% of the loop, then rest off-screen.
-              final p = (_controller.value / 0.4).clamp(0.0, 1.0);
-              final dx = -1.6 + 3.2 * p;
-              return DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment(dx - 0.6, -1),
-                    end: Alignment(dx + 0.6, 1),
-                    colors: [
-                      Colors.white.withValues(alpha: 0),
-                      Colors.white.withValues(alpha: 0.32),
-                      Colors.white.withValues(alpha: 0),
-                    ],
-                    stops: const [0.35, 0.5, 0.65],
-                  ),
-                ),
-              );
-            },
           ),
         ),
       ),

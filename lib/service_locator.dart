@@ -56,6 +56,11 @@ import 'package:yucat/features/saved_products/domain/usecases/is_product_saved_u
 import 'package:yucat/features/saved_products/domain/usecases/save_product_usecase.dart';
 import 'package:yucat/features/saved_products/domain/usecases/unsave_product_usecase.dart';
 import 'package:yucat/features/saved_products/presentation/bloc/saved_products_bloc.dart';
+import 'package:yucat/features/scan_history/data/repositories/scan_history_repository_impl.dart';
+import 'package:yucat/features/scan_history/domain/repositories/scan_history_repository.dart';
+import 'package:yucat/features/scan_history/domain/usecases/add_scan_to_history_usecase.dart';
+import 'package:yucat/features/scan_history/domain/usecases/get_scan_history_usecase.dart';
+import 'package:yucat/features/scan_history/presentation/bloc/scan_history_bloc.dart';
 import 'package:yucat/features/product/data/datasources/product_remote_datasource.dart';
 import 'package:yucat/features/product/data/mappers/product_to_domain_mapper.dart';
 import 'package:yucat/features/product/data/repositories/product_repository.dart';
@@ -63,8 +68,13 @@ import 'package:yucat/features/product/domain/repositories/product_repository.da
 import 'package:yucat/features/product/domain/usecases/fetch_product_by_image_usecase.dart';
 import 'package:yucat/features/search/data/datasources/algolia_search_datasource.dart';
 import 'package:yucat/features/search/data/mappers/search_product_to_domain_mapper.dart';
+import 'package:yucat/features/search/data/repositories/recent_searches_repository_impl.dart';
 import 'package:yucat/features/search/data/repositories/search_repository.dart';
+import 'package:yucat/features/search/domain/repositories/recent_searches_repository.dart';
 import 'package:yucat/features/search/domain/repositories/search_repository.dart';
+import 'package:yucat/features/search/domain/usecases/add_recent_search_usecase.dart';
+import 'package:yucat/features/search/domain/usecases/clear_recent_searches_usecase.dart';
+import 'package:yucat/features/search/domain/usecases/get_recent_searches_usecase.dart';
 import 'package:yucat/features/search/domain/usecases/search_by_brand_usecase.dart';
 import 'package:yucat/features/search/domain/usecases/search_by_query_usecase.dart';
 import 'package:yucat/features/search_products/presentation/bloc/search_bloc.dart';
@@ -72,6 +82,7 @@ import 'package:yucat/features/search_products/presentation/mappers/brand_to_mod
 import 'package:yucat/features/search_products/presentation/mappers/product_to_model_mapper.dart';
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
 import 'package:yucat/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/review_prompt_service.dart';
 import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/services/cat_tracking_service.dart';
@@ -178,6 +189,9 @@ Future<void> _registerRepositories() async {
       searchProductToDomainMapper: sl<SearchProductToDomainMapper>(),
     ),
   );
+  sl.registerSingleton<RecentSearchesRepository>(
+    RecentSearchesRepositoryImpl(prefs: sl<SharedPreferences>()),
+  );
   sl.registerSingleton<CatRepository>(
     CatRepositoryImpl(
       dataSource: sl<CatDataSource>(),
@@ -190,6 +204,9 @@ Future<void> _registerRepositories() async {
   sl.registerSingleton<SubscriptionRepository>(SubscriptionRepositoryImpl());
   sl.registerSingleton<SavedProductsRepository>(
     SavedProductsRepositoryImpl(prefs: sl<SharedPreferences>()),
+  );
+  sl.registerSingleton<ScanHistoryRepository>(
+    ScanHistoryRepositoryImpl(prefs: sl<SharedPreferences>()),
   );
 }
 
@@ -220,6 +237,15 @@ Future<void> _registerUseCases() async {
   );
   sl.registerSingleton<SearchByQueryUsecase>(
     SearchByQueryUsecase(searchRepository: sl<SearchRepository>()),
+  );
+  sl.registerSingleton<GetRecentSearchesUsecase>(
+    GetRecentSearchesUsecase(repository: sl<RecentSearchesRepository>()),
+  );
+  sl.registerSingleton<AddRecentSearchUsecase>(
+    AddRecentSearchUsecase(repository: sl<RecentSearchesRepository>()),
+  );
+  sl.registerSingleton<ClearRecentSearchesUsecase>(
+    ClearRecentSearchesUsecase(repository: sl<RecentSearchesRepository>()),
   );
   sl.registerSingleton<FetchProductByImageUsecase>(
     FetchProductByImageUsecase(productRepository: sl<ProductRepository>()),
@@ -257,6 +283,12 @@ Future<void> _registerUseCases() async {
   sl.registerSingleton<UnsaveProductUsecase>(
     UnsaveProductUsecase(repository: sl<SavedProductsRepository>()),
   );
+  sl.registerSingleton<GetScanHistoryUsecase>(
+    GetScanHistoryUsecase(repository: sl<ScanHistoryRepository>()),
+  );
+  sl.registerSingleton<AddScanToHistoryUsecase>(
+    AddScanToHistoryUsecase(repository: sl<ScanHistoryRepository>()),
+  );
 }
 
 Future<void> _registerServices() async {
@@ -277,6 +309,11 @@ Future<void> _registerServices() async {
   sl.registerSingleton<ReviewPromptService>(
     ReviewPromptService(
       prefs: sl<SharedPreferences>(),
+      logEventUsecase: sl<LogEventUsecase>(),
+    ),
+  );
+  sl.registerSingleton<NotificationService>(
+    NotificationService(
       logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
@@ -318,6 +355,9 @@ Future<void> _registerBlocs() async {
       logEventUsecase: sl<LogEventUsecase>(),
       getBrandsUsecase: sl<GetBrandsUsecase>(),
       brandToModelMapper: sl<BrandToModelMapper>(),
+      getRecentSearchesUsecase: sl<GetRecentSearchesUsecase>(),
+      addRecentSearchUsecase: sl<AddRecentSearchUsecase>(),
+      clearRecentSearchesUsecase: sl<ClearRecentSearchesUsecase>(),
     ),
   );
   sl.registerBloc<HomeBloc>(
@@ -328,15 +368,23 @@ Future<void> _registerBlocs() async {
       signinAnonymouslyUsecase: sl<SigninAnonymouslyUsecase>(),
       scanTrackingService: sl<ScanTrackingService>(),
       reviewPromptService: sl<ReviewPromptService>(),
-      hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
       getCatsUsecase: sl<GetCatsUsecase>(),
+      getSavedProductsUsecase: sl<GetSavedProductsUsecase>(),
+      addScanToHistoryUsecase: sl<AddScanToHistoryUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
+      notificationService: sl<NotificationService>(),
       prefs: sl<SharedPreferences>(),
     ),
   );
   sl.registerBloc<ProfileBloc>(
     () => ProfileBloc(
       prefs: sl<SharedPreferences>(),
+      hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
+      getCatsUsecase: sl<GetCatsUsecase>(),
+      getSavedProductsUsecase: sl<GetSavedProductsUsecase>(),
+      getScanHistoryUsecase: sl<GetScanHistoryUsecase>(),
+      currentUserUsecase: sl<CurrentUserUsecase>(),
+      logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
   sl.registerBloc<ProductDetailBloc>(
@@ -350,6 +398,11 @@ Future<void> _registerBlocs() async {
   sl.registerBloc<SavedProductsBloc>(
     () => SavedProductsBloc(
       getSavedProductsUsecase: sl<GetSavedProductsUsecase>(),
+    ),
+  );
+  sl.registerBloc<ScanHistoryBloc>(
+    () => ScanHistoryBloc(
+      getScanHistoryUsecase: sl<GetScanHistoryUsecase>(),
     ),
   );
   sl.registerBloc<CatListingBloc>(

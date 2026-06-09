@@ -88,9 +88,22 @@ class _LoadedList extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: DSDimens.sizeS),
       itemBuilder: (context, index) {
         if (index == 0) {
+          final n = products.length;
           return Padding(
             padding: const EdgeInsets.only(bottom: DSDimens.sizeS),
-            child: Text('Saved products', style: DSTextStyles.displayLg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Saved products', style: DSTextStyles.displayLg),
+                const SizedBox(height: DSDimens.sizeXxxs),
+                Text(
+                  '$n saved',
+                  style: DSTextStyles.bodyMd.copyWith(
+                    color: DSColors.inkSecondary,
+                  ),
+                ),
+              ],
+            ),
           );
         }
         final product = products[index - 1];

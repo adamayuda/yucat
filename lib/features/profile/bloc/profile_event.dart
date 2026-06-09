@@ -37,3 +37,12 @@ class ResetOnboardingTapEvent extends ProfileEvent {
   @override
   List<Object?> get props => [context];
 }
+
+class RestorePurchasesTapEvent extends ProfileEvent {
+  final BuildContext context;
+
+  const RestorePurchasesTapEvent({required this.context});
+
+  @override
+  List<Object?> get props => [context];
+}
