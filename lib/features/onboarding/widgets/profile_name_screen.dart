@@ -49,23 +49,17 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
     super.initState();
     _controller = TextEditingController(text: widget.initialName ?? '');
     _controller.addListener(() => setState(() {}));
-    if (widget.active) _requestFocusSoon();
   }
 
   @override
   void didUpdateWidget(ProfileNameScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.active && !oldWidget.active) {
-      _requestFocusSoon();
-    } else if (!widget.active && oldWidget.active) {
+    // No auto-focus (it opens the keyboard immediately and causes lag); the
+    // user taps the field to type. Just drop focus when leaving so the keyboard
+    // doesn't linger on the next page.
+    if (!widget.active && oldWidget.active) {
       _focusNode.unfocus();
     }
-  }
-
-  void _requestFocusSoon() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && widget.active) _focusNode.requestFocus();
-    });
   }
 
   @override
@@ -114,7 +108,7 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
             right: -DSDimens.size3xl,
             child: SvgPicture.asset(
               'assets/images/cat-side.svg',
-              width: 190,
+              width: 160,
             ),
           ),
           Column(

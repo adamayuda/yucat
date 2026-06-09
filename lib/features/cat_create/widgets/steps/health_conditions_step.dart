@@ -61,27 +61,40 @@ class HealthConditionsStep extends StatelessWidget {
         ),
         const SizedBox(height: DSDimens.sizeL),
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              DSDimens.sizeL,
-              0,
-              DSDimens.sizeL,
-              96,
-            ),
-            // The Wrap fills the width and centres each row, so the chip block
-            // sits horizontally centred on the screen.
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: DSDimens.sizeXxxs,
-              runSpacing: DSDimens.sizeXxxs,
-              children: [
-                for (final option in _options)
-                  DSChip(
-                    label: option.label,
-                    selected: selectedHealthConditions.contains(option.value),
-                    onTap: () => _toggle(option.value),
+          // Centre the chip block vertically; the ConstrainedBox keeps it
+          // centred when it fits and lets it scroll (clearing the floating CTA)
+          // if it ever overflows.
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    DSDimens.sizeL,
+                    0,
+                    DSDimens.sizeL,
+                    96,
                   ),
-              ],
+                  child: Center(
+                    // The Wrap fills the width and centres each row, so the
+                    // block sits horizontally centred too.
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: DSDimens.sizeXxxs,
+                      runSpacing: DSDimens.sizeXxxs,
+                      children: [
+                        for (final option in _options)
+                          DSChip(
+                            label: option.label,
+                            selected: selectedHealthConditions
+                                .contains(option.value),
+                            onTap: () => _toggle(option.value),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),

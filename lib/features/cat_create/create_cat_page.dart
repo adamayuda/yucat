@@ -30,11 +30,11 @@ import 'package:yucat/config/themes/theme.dart';
 const _totalSteps = 12;
 
 /// Step indices that are non-input "did you know" interstitials.
-const _factSteps = {5, 8};
+const _factSteps = {6, 9};
 
 /// The full-bleed hydration interstitial — its glasses band paints edge-to-edge
 /// (no shell padding), so it is excluded from the per-step horizontal inset.
-const _waterFactStep = 5;
+const _waterFactStep = 6;
 
 @RoutePage()
 class CreateCatPage extends StatefulWidget {
@@ -161,7 +161,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
     }
 
     // Surface the medical disclaimer once, right after health conditions.
-    if (step == 9 && !_disclaimerShown) {
+    if (step == 10 && !_disclaimerShown) {
       _disclaimerShown = true;
       await showMedicalDisclaimerSheet(context);
       if (!mounted) return;
@@ -221,8 +221,8 @@ class _CreateCatPageState extends State<CreateCatPage> {
   }) {
     final isLast = currentStep == _totalSteps - 1;
     final isPhotoStep = currentStep == 2;
-    final isHealthStep = currentStep == 9;
-    final isBreedStep = currentStep == 10;
+    final isHealthStep = currentStep == 10;
+    final isBreedStep = currentStep == 11;
     final isFactStep = _factSteps.contains(currentStep);
     final isEditing = widget.cat != null;
     final hasHealthSelection = cat.healthConditions.isNotEmpty;
@@ -234,7 +234,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
       background: DSColors.tintCloud,
       backgroundChild: _buildFactBackdrop(context),
       backgroundGradient:
-          currentStep == 5 ? DSGradients.catCreateBackground : null,
+          currentStep == 6 ? DSGradients.catCreateBackground : null,
       ctaLabel: isLast
           ? finalCtaLabel
           : isFactStep
@@ -289,7 +289,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
   /// that page — behind the status bar, nav row and CTA — and stays off-screen
   /// (so it never tints the neighbouring steps) the rest of the time.
   Widget _buildFactBackdrop(BuildContext context) {
-    const factIndex = 8;
+    const factIndex = 9;
     final width = MediaQuery.sizeOf(context).width;
     return AnimatedBuilder(
       animation: _pageController,
@@ -370,8 +370,22 @@ class _CreateCatPageState extends State<CreateCatPage> {
           },
         );
       case 4:
-        return ActivityStep(
+        return BodyConditionStep(
           key: const ValueKey('step_4'),
+          weightCategory: cat.weightCategory,
+          onWeightCategoryChanged: (value) {
+            final currentState = _bloc.state;
+            if (currentState is CatCreateLoadedState) {
+              final updatedCat = currentState.cat.copyWith(
+                weightCategory: value,
+              );
+              _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
+            }
+          },
+        );
+      case 5:
+        return ActivityStep(
+          key: const ValueKey('step_5'),
           activityLevel: cat.activityLevel,
           onActivityLevelChanged: (value) {
             final currentState = _bloc.state;
@@ -383,11 +397,11 @@ class _CreateCatPageState extends State<CreateCatPage> {
             }
           },
         );
-      case 5:
-        return const WaterIntakeFactStep(key: ValueKey('step_5'));
       case 6:
+        return const WaterIntakeFactStep(key: ValueKey('step_6'));
+      case 7:
         return NeuteredStatusStep(
-          key: const ValueKey('step_6'),
+          key: const ValueKey('step_7'),
           status: cat.neuteredStatus,
           gender: cat.gender,
           onStatusChanged: (value) {
@@ -401,9 +415,9 @@ class _CreateCatPageState extends State<CreateCatPage> {
             }
           },
         );
-      case 7:
+      case 8:
         return CoatStep(
-          key: const ValueKey('step_7'),
+          key: const ValueKey('step_8'),
           coatType: cat.coatType,
           onCoatTypeChanged: (value) {
             final currentState = _bloc.state;
@@ -413,11 +427,11 @@ class _CreateCatPageState extends State<CreateCatPage> {
             }
           },
         );
-      case 8:
-        return const CoatFactStep(key: ValueKey('step_8'));
       case 9:
+        return const CoatFactStep(key: ValueKey('step_9'));
+      case 10:
         return HealthConditionsStep(
-          key: const ValueKey('step_9'),
+          key: const ValueKey('step_10'),
           selectedHealthConditions: cat.healthConditions,
           onHealthConditionsChanged: (value) {
             final currentState = _bloc.state;
@@ -429,29 +443,15 @@ class _CreateCatPageState extends State<CreateCatPage> {
             }
           },
         );
-      case 10:
+      case 11:
         return BreedStep(
-          key: const ValueKey('step_10'),
+          key: const ValueKey('step_11'),
           selectedBreed: cat.breed ?? 'Other',
           breeds: _breeds,
           onBreedSelected: (breed) {
             final currentState = _bloc.state;
             if (currentState is CatCreateLoadedState) {
               final updatedCat = currentState.cat.copyWith(breed: breed);
-              _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
-            }
-          },
-        );
-      case 11:
-        return BodyConditionStep(
-          key: const ValueKey('step_11'),
-          weightCategory: cat.weightCategory,
-          onWeightCategoryChanged: (value) {
-            final currentState = _bloc.state;
-            if (currentState is CatCreateLoadedState) {
-              final updatedCat = currentState.cat.copyWith(
-                weightCategory: value,
-              );
               _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
             }
           },

@@ -76,9 +76,9 @@ class RatingScreen extends StatelessWidget {
                     // Clear the back chip at the top.
                     64,
                     DSDimens.sizeL,
-                    // Clear the floating Next button so the last review can
-                    // scroll above it.
-                    96,
+                    // Clear the floating Next button + fade so the last review
+                    // can scroll fully above it.
+                    150,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -133,6 +133,28 @@ class RatingScreen extends StatelessWidget {
                         _ReviewCard(review: _reviews[i]),
                       ],
                     ],
+                  ),
+                ),
+                // Fade behind the floating Next button (same effect as the
+                // other onboarding screens).
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 150,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            DSColors.tintCream.withValues(alpha: 0),
+                            DSColors.tintCream,
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 // Floats centered over the bottom of the scrolling content.

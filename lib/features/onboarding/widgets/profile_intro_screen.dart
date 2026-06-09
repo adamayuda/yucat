@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
-import 'package:yucat/presentation/components/ds_pill_button.dart';
+import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
 class ProfileIntroScreen extends StatelessWidget {
@@ -10,16 +10,12 @@ class ProfileIntroScreen extends StatelessWidget {
   static const Color _background = DSColors.tintCloud;
   static const Color _quoteSurface = Color(0xFFE5E4EB);
 
-  const ProfileIntroScreen({
-    super.key,
-    required this.onNext,
-  });
+  const ProfileIntroScreen({super.key, required this.onNext});
 
   @override
   Widget build(BuildContext context) {
     return OnboardingScaffold(
       background: _background,
-      footer: DSPillButton(label: 'Next', onPressed: onNext),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -46,6 +42,11 @@ class ProfileIntroScreen extends StatelessWidget {
           ),
           const Spacer(flex: 2),
           _QuoteCard(),
+          // Center so the stretch crossAxisAlignment doesn't force the pill to
+          // full width.
+          Center(
+            child: OnboardingFloatingButton(label: 'Next', onPressed: onNext),
+          ),
         ],
       ),
     );
@@ -64,10 +65,7 @@ class _QuoteCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            '2 min',
-            style: DSTextStyles.displayLg.copyWith(fontSize: 22),
-          ),
+          Text('2 min', style: DSTextStyles.displayLg.copyWith(fontSize: 22)),
           const SizedBox(width: DSDimens.sizeS),
           Expanded(
             child: Text(

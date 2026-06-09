@@ -70,12 +70,16 @@ class CoatFactStep extends StatelessWidget {
                 ),
               ),
             ),
-            const Spacer(flex: 1),
+            // Fixed gap (not a flex Spacer) so the cat is anchored from the
+            // top and doesn't drift down when the next (floating-CTA) step
+            // grows the content area mid-transition. The trailing Spacer
+            // absorbs that height change instead.
+            const SizedBox(height: DSDimens.size3xl),
             SvgPicture.asset(
               'assets/images/cat-thumb.svg',
               height: 280,
             ),
-            const Spacer(flex: 2),
+            const Spacer(),
           ],
         ),
       ],
