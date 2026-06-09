@@ -90,12 +90,16 @@ class _ScannerPageState extends State<ScannerPage>
 
   void _onImageCaptured(String imageBase64, String mimeType) {
     final bloc = context.read<HomeBloc>();
+    // Capture the router controller while still mounted — the scan resolves
+    // after this page pops, so navigating via this page's context later would
+    // throw. The controller persists past the pop.
+    final router = context.router;
     bloc.add(ImageCapturedEvent(
       imageBase64: imageBase64,
       mimeType: mimeType,
-      context: context,
+      router: router,
     ));
-    context.router.maybePop();
+    router.maybePop();
   }
 
   Future<void> _takePicture() async {
@@ -146,7 +150,19 @@ class _ScannerPageState extends State<ScannerPage>
       body: Stack(
         children: [
           if (_isCameraInitialized && _cameraController != null)
-            Positioned.fill(child: CameraPreview(_cameraController!)),
+            Positioned.fill(
+              child: ClipRect(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    // previewSize is reported landscape; swap for portrait UI.
+                    width: _cameraController!.value.previewSize!.height,
+                    height: _cameraController!.value.previewSize!.width,
+                    child: CameraPreview(_cameraController!),
+                  ),
+                ),
+              ),
+            ),
 
           if (_hasCameraError) Positioned.fill(child: _CameraErrorView(
             onPickFromGallery: _pickFromGallery,

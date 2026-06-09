@@ -156,6 +156,8 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | `CatAvatar` | `cat_avatar.dart` | Circular cat photo or `Icons.pets` fallback on `tintLavender` disc. Default 56px; takes `size`. |
 | `MascotSpeechBubble` | `mascot_speech_bubble.dart` | Mascot illustration + speech bubble with `CustomPainter` tail. Used by every cat-create wizard step. |
 | `LineChartCard` | `line_chart_card.dart` | Two-line chart (your line vs theirs) inside a `DSCard`. Phase C0. |
+| `DSShimmer` / `ShimmerBone` / `ShimmerCircle` | `ds_shimmer.dart` | Loading-skeleton primitives on `shimmer`. `DSShimmer` wraps a bone subtree in the sweep (base `tintAsh`, highlight `surfaceCard`, 1200ms); `ShimmerBone` is a rounded block, `ShimmerCircle` a disc. Place real white `DSCard`s outside the wrapper, bones inside, so cards keep their surface while bones shimmer. |
+| `ProductRowSkeleton` / `ProductListSkeleton` | `skeletons/product_list_skeleton.dart` | Loading skeleton mirroring `ProductRowCard` / `CatSummaryCard` (thumb + 2 lines + pill; `circularThumb` for cat avatars). Used by Search results/pagination, Product Listing, Saved Products, Scan History, Cat Listing. Replaces the old `AppLoadingWidget` spinner on content lists. |
 
 ### 8b. Feature-bundled but reused across screens
 
@@ -166,6 +168,7 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | `RingScore` | `lib/features/product_detail/presentation/widgets/ring_score.dart` | Circular ring score: `CircularProgressIndicator(value)` + centered number. Color buckets (green / amber / coral) follow `ProductRatingColor`. Used on product analysis card and per-cat verdict cards. |
 | `HatchedPlaceholder` | `lib/features/product_detail/presentation/widgets/hatched_placeholder.dart` | 45° hatch `CustomPainter` + "PRODUCT" tag corner. Hero fallback when `imageUrl` is null. |
 | `AnalysisChipRow` | `lib/features/product_detail/presentation/widgets/analysis_chip_row.dart` | Wrapping pill chips: success (`+ ...` green) / caution (`! ...` amber). Truncates to 3 pros + 1 con. |
+| Per-screen skeletons | `ProductDetailSkeleton`, `CatDetailSkeleton`, `ProfileSkeleton`, `SearchDiscoverSkeleton`, `HomeSkeleton`, `PaywallSkeleton` (each in its feature's `widgets/`) | Layout-matched loading skeletons built from `DSShimmer` + bones, mirroring each screen's loaded body. Replace the old full-screen `AppLoadingWidget`. `HomeSkeleton` covers the dashboard load only — the 4-step scan animation (`HomeLoadingWidget`) now fires solely for a real scan (`HomeScanningState`). `PaywallSkeleton` paints on white (`surfaceCard`) to match the loaded paywall (no mint flash). `AppLoadingWidget` (`Loading.gif`) is retained only for the product-detail cat-assessment `FutureBuilder`. |
 
 ### 8c. App-shell layout rules
 

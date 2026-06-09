@@ -73,11 +73,20 @@ class _OnBoardingPage extends State<OnBoardingPage> {
         if (!_pageController.hasClients) return;
         FocusScope.of(context).unfocus();
         final targetIndex = OnBoardingPhase.values.indexOf(state.phase);
-        _pageController.animateToPage(
-          targetIndex,
-          duration: const Duration(milliseconds: 280),
-          curve: Curves.easeInOutCubic,
-        );
+        // The success phase is reached when the cat-create wizard (a route
+        // pushed on top) pops. Jump instantly instead of animating so the
+        // PageView doesn't run a second slide that competes with the wizard's
+        // dismiss animation — the wizard then cleanly reveals the success
+        // screen already in place underneath it.
+        if (state.phase == OnBoardingPhase.success) {
+          _pageController.jumpToPage(targetIndex);
+        } else {
+          _pageController.animateToPage(
+            targetIndex,
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeInOutCubic,
+          );
+        }
       },
       builder: (context, state) {
         if (state is! OnBoardingReadyState) {

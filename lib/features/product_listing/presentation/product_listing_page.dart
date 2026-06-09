@@ -6,7 +6,7 @@ import 'package:yucat/features/product_detail/presentation/models/product_displa
 import 'package:yucat/features/product_listing/presentation/bloc/product_listing_bloc.dart';
 import 'package:yucat/features/search_products/presentation/widgets/product_row_card.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
-import 'package:yucat/presentation/widgets/app_loading_widget.dart';
+import 'package:yucat/presentation/components/skeletons/product_list_skeleton.dart';
 
 @RoutePage()
 class ProductListingPage extends StatefulWidget {
@@ -46,7 +46,14 @@ class _ProductListingPage extends State<ProductListingPage> {
                 bloc: _bloc,
                 buildWhen: (previous, current) => previous != current,
                 builder: (context, state) => switch (state) {
-                  ProductListingLoadingState() => const AppLoadingWidget(),
+                  ProductListingLoadingState() => const ProductListSkeleton(
+                      padding: EdgeInsets.fromLTRB(
+                        DSDimens.sizeL,
+                        DSDimens.sizeXxs,
+                        DSDimens.sizeL,
+                        DSDimens.size3xl,
+                      ),
+                    ),
                   ProductListingLoadedState(:final products) => _ProductList(
                       products: products,
                       onTap: (product) => _bloc.add(

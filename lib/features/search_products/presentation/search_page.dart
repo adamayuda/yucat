@@ -7,11 +7,12 @@ import 'package:yucat/features/product_detail/presentation/mappers/product_entit
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/search_products/presentation/bloc/search_bloc.dart';
 import 'package:yucat/features/search_products/presentation/widgets/product_row_card.dart';
+import 'package:yucat/features/search_products/presentation/widgets/search_discover_skeleton.dart';
 import 'package:yucat/features/search_products/presentation/widgets/search_discover_view.dart';
 import 'package:yucat/features/search_products/presentation/widgets/search_text_field.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
-import 'package:yucat/presentation/widgets/app_loading_widget.dart';
+import 'package:yucat/presentation/components/skeletons/product_list_skeleton.dart';
 import 'package:yucat/service_locator.dart';
 
 @RoutePage()
@@ -122,7 +123,7 @@ class _SearchPage extends State<SearchPage> {
 
   Widget _buildBody(SearchState state) {
     return switch (state) {
-      SearchDiscoverLoadingState() => const AppLoadingWidget(),
+      SearchDiscoverLoadingState() => const SearchDiscoverSkeleton(),
       SearchDiscoverLoadedState(:final brands, :final recentSearches) =>
         SearchDiscoverView(
           brands: brands,
@@ -130,7 +131,14 @@ class _SearchPage extends State<SearchPage> {
           onRecentTap: _onRecentTap,
           onClearRecents: _onClearRecents,
         ),
-      SearchLoadingState() => const AppLoadingWidget(),
+      SearchLoadingState() => const ProductListSkeleton(
+          padding: EdgeInsets.fromLTRB(
+            DSDimens.sizeL,
+            DSDimens.sizeXxs,
+            DSDimens.sizeL,
+            DSDimens.size4xl,
+          ),
+        ),
       SearchLoadedState(:final isLoading, :final products) => _ResultsList(
           isLoading: isLoading,
           products: products,
@@ -160,7 +168,14 @@ class _ResultsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const AppLoadingWidget();
+      return const ProductListSkeleton(
+        padding: EdgeInsets.fromLTRB(
+          DSDimens.sizeL,
+          DSDimens.sizeXxs,
+          DSDimens.sizeL,
+          DSDimens.size4xl,
+        ),
+      );
     }
     if (products.isEmpty) {
       return const DSStateView.empty(

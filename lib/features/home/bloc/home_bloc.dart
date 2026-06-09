@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:auto_route/auto_route.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -116,7 +115,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       },
     );
 
-    emit(HomeLoadingState());
+    emit(HomeScanningState());
 
     try {
       final product = await _fetchProductByImageUsecase.call(
@@ -161,7 +160,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         _reviewPromptService.maybePrompt(trigger: 'post_scan'),
       );
 
-      event.context.router.push(
+      event.router.push(
         ProductDetailRoute(product: productDetailModel),
       );
       add(HomeInitialEvent());

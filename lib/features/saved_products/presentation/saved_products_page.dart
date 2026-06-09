@@ -9,7 +9,7 @@ import 'package:yucat/features/saved_products/presentation/bloc/saved_products_b
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
-import 'package:yucat/presentation/widgets/app_loading_widget.dart';
+import 'package:yucat/presentation/components/skeletons/product_list_skeleton.dart';
 
 @RoutePage()
 class SavedProductsPage extends StatefulWidget {
@@ -48,7 +48,14 @@ class _SavedProductsPageState extends State<SavedProductsPage> {
                 bloc: _bloc,
                 buildWhen: (prev, curr) => prev != curr,
                 builder: (context, state) => switch (state) {
-                  SavedProductsLoadingState() => const AppLoadingWidget(),
+                  SavedProductsLoadingState() => const ProductListSkeleton(
+                      padding: EdgeInsets.fromLTRB(
+                        DSDimens.sizeL,
+                        DSDimens.sizeS,
+                        DSDimens.sizeL,
+                        DSDimens.size4xl,
+                      ),
+                    ),
                   SavedProductsLoadedState(:final products) =>
                     products.isEmpty
                         ? _EmptyView()

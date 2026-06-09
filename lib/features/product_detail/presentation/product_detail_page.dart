@@ -11,6 +11,7 @@ import 'package:yucat/features/product_detail/presentation/models/product_displa
 import 'package:yucat/features/product_detail/presentation/widgets/analysis_card.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/cat_assessment_card.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/nutrition_grid_card.dart';
+import 'package:yucat/features/product_detail/presentation/widgets/product_detail_skeleton.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/product_hero_card.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
@@ -99,7 +100,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 bloc: _bloc,
                 buildWhen: (previous, current) => previous != current,
                 builder: (context, state) => switch (state) {
-                  ProductDetailLoadingState() => const AppLoadingWidget(),
+                  ProductDetailLoadingState() => const ProductDetailSkeleton(),
                   ProductDetailLoadedState(:final product) =>
                     _LoadedBody(
                       product: product,

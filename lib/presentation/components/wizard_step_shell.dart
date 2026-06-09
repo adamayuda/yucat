@@ -131,7 +131,7 @@ class WizardStepShell extends StatelessWidget {
                   Positioned(
                     left: 0,
                     right: 0,
-                    bottom: DSDimens.sizeS,
+                    bottom: DSDimens.size3xl,
                     child: Center(child: button),
                   ),
               ],
@@ -141,7 +141,8 @@ class WizardStepShell extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(
                 top: DSDimens.sizeS,
-                bottom: DSDimens.sizeS,
+                // Match the onboarding CTA level (40px from the safe-area edge).
+                bottom: DSDimens.size3xl,
               ),
               child: button,
             ),

@@ -4,12 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat_detail/presentation/bloc/cat_detail_bloc.dart';
+import 'package:yucat/features/cat_detail/presentation/widgets/cat_detail_skeleton.dart';
 import 'package:yucat/features/cat_detail/presentation/widgets/cat_hero_section.dart';
 import 'package:yucat/features/cat_detail/presentation/widgets/cat_stat_tile.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
-import 'package:yucat/presentation/widgets/app_loading_widget.dart';
 
 @RoutePage()
 class CatDetailPage extends StatefulWidget {
@@ -53,7 +53,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
         if (state is CatDetailLoadingState) {
           return const Scaffold(
             backgroundColor: DSColors.tintLavender,
-            body: AppLoadingWidget(),
+            body: SafeArea(child: CatDetailSkeleton()),
           );
         }
 

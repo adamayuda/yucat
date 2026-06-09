@@ -7,7 +7,7 @@ import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
 import 'package:yucat/features/paywall/widgets/paywall_error_widget.dart';
 import 'package:yucat/features/paywall/widgets/paywall_loaded_widget.dart';
-import 'package:yucat/features/paywall/widgets/paywall_loading_widget.dart';
+import 'package:yucat/features/paywall/widgets/paywall_skeleton.dart';
 
 @RoutePage()
 class PaywallPage extends StatefulWidget {
@@ -88,7 +88,7 @@ class _PaywallPage extends State<PaywallPage> {
 
   Widget _onStateChangeBuilder(PaywallState state) {
     return switch (state) {
-      PaywallLoadingState() => const PaywallLoadingWidget(),
+      PaywallLoadingState() => const PaywallSkeleton(),
       PaywallErrorState(:final message) => PaywallErrorWidget(message: message),
       PaywallLoadedState() => PaywallLoadedWidget(
         state: state,

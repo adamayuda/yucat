@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/core/legal_urls.dart';
 import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
@@ -12,9 +13,6 @@ import 'package:yucat/features/paywall/widgets/paywall_package_row.dart';
 import 'package:yucat/features/paywall/widgets/paywall_testimonials.dart';
 import 'package:yucat/features/paywall/widgets/paywall_value_props.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
-
-const _termsUrl = 'https://yucat-web-production.up.railway.app/cgv.html';
-const _privacyUrl = 'https://yucat-web-production.up.railway.app/policy.html';
 
 class PaywallLoadedWidget extends StatefulWidget {
   final PaywallLoadedState state;
@@ -595,7 +593,7 @@ class _LegalLinks extends StatelessWidget {
 
   Future<void> _open(Uri uri) async {
     if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.inAppWebView);
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 
@@ -607,11 +605,11 @@ class _LegalLinks extends StatelessWidget {
         DSTextLink(label: 'Restore purchases', onPressed: onRestore),
         DSTextLink(
           label: 'Terms',
-          onPressed: () => _open(Uri.parse(_termsUrl)),
+          onPressed: () => _open(Uri.parse(kTermsUrl)),
         ),
         DSTextLink(
           label: 'Privacy',
-          onPressed: () => _open(Uri.parse(_privacyUrl)),
+          onPressed: () => _open(Uri.parse(kPrivacyUrl)),
         ),
       ],
     );

@@ -232,13 +232,22 @@ export async function identifyProductFromImage(
   return null;
 }
 
+// web_search is a server-side tool: when its internal loop pauses, the API
+// returns stop_reason "pause_turn" with NO submit_product block yet. We must
+// re-send the assistant turn to resume. This caps how many times we resume.
+const MAX_CONTINUATIONS = 3;
+
 /**
  * Step 2 — Full analysis with Anthropic web_search. Returns a Product on
  * success, or null if the model could not produce a structured answer.
  *
- * web_search_20250305 is a server-side tool — Anthropic resolves searches
- * internally, so we receive a single response with the final submit_product
- * tool_use block (no manual tool-use loop required).
+ * web_search_20250305 is a server-side tool. It does NOT always resolve in a
+ * single round trip: the response can come back with stop_reason "pause_turn"
+ * (search loop paused, mid-task) or "max_tokens" (output truncated before the
+ * final tool call) and therefore no submit_product block. We resume on
+ * "pause_turn", and if the search path still yields nothing we fall back to a
+ * forced submit_product call with no web search so a real, on-label product is
+ * never silently dropped to null.
  */
 export async function analyzeProductImage(
   imageBase64: string,
@@ -248,50 +257,95 @@ export async function analyzeProductImage(
   const systemText = generateAnalysisSystemPrompt();
   const userText = generateAnalysisUserPrompt();
 
-  const response = await withRetry("analyzeProductImage", () =>
-    getClient().messages.create({
-      model: config.anthropic.model,
-      max_tokens: 4096,
-      temperature: config.anthropic.temperature,
-      system: [
-        {
-          type: "text",
-          text: systemText,
-          cache_control: {type: "ephemeral"},
-        },
-      ],
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "image",
-              source: {type: "base64", media_type: mediaType, data: imageBase64},
-            },
-            {type: "text", text: userText},
-          ],
-        },
-      ],
-      tools: [
-        {
-          type: "web_search_20250305",
-          name: "web_search",
-          max_uses: config.anthropic.maxWebSearches,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
-        ...ANALYSIS_TOOLS,
-      ],
-      tool_choice: {type: "auto"},
-    })
-  );
+  const systemBlocks = [
+    {
+      type: "text" as const,
+      text: systemText,
+      cache_control: {type: "ephemeral" as const},
+    },
+  ];
 
-  const submit = findToolUse(response.content, "submit_product");
+  const userContent: Anthropic.MessageParam["content"] = [
+    {
+      type: "image",
+      source: {type: "base64", media_type: mediaType, data: imageBase64},
+    },
+    {type: "text", text: userText},
+  ];
+
+  // Resume loop: continue the turn while the server-side search tool pauses.
+  const messages: Anthropic.MessageParam[] = [
+    {role: "user", content: userContent},
+  ];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let accumulated: any[] = [];
+  let lastStopReason: string | null | undefined;
+
+  for (let i = 0; i <= MAX_CONTINUATIONS; i++) {
+    const response = await withRetry("analyzeProductImage", () =>
+      getClient().messages.create({
+        model: config.anthropic.model,
+        max_tokens: 8192,
+        temperature: config.anthropic.temperature,
+        system: systemBlocks,
+        messages,
+        tools: [
+          {
+            type: "web_search_20250305",
+            name: "web_search",
+            max_uses: config.anthropic.maxWebSearches,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+          ...ANALYSIS_TOOLS,
+        ],
+        tool_choice: {type: "auto"},
+      })
+    );
+
+    accumulated = accumulated.concat(response.content);
+    lastStopReason = response.stop_reason;
+
+    // "pause_turn" predates the pinned SDK's StopReason union — compare as string.
+    if ((response.stop_reason as string) === "pause_turn") {
+      // Server tool loop paused — re-send the assistant turn to resume.
+      messages.push({role: "assistant", content: response.content});
+      continue;
+    }
+    break;
+  }
+
+  let submit = findToolUse(accumulated, "submit_product");
+
+  // Fallback — web search yielded no structured answer (no submit_product,
+  // pause cap reached, or output truncated). Force a submit_product call from
+  // the label alone (no web search). The analyze prompt instructs the model to
+  // submit with empty pros/cons rather than invent values when data is missing.
   if (!submit) {
-    logger.warn("analyzeProductImage returned no submit_product", {
-      stopReason: response.stop_reason,
-      structuredData: true,
-    });
-    return {product: null, rawResponse: JSON.stringify(response.content)};
+    logger.warn(
+      "analyzeProductImage: no submit_product from web search, retrying without search",
+      {stopReason: lastStopReason, structuredData: true}
+    );
+
+    const fallback = await withRetry("analyzeProductImage:noSearch", () =>
+      getClient().messages.create({
+        model: config.anthropic.model,
+        max_tokens: 4096,
+        temperature: config.anthropic.temperature,
+        system: systemBlocks,
+        messages: [{role: "user", content: userContent}],
+        tools: ANALYSIS_TOOLS,
+        tool_choice: {type: "tool", name: "submit_product"},
+      })
+    );
+
+    submit = findToolUse(fallback.content, "submit_product");
+    if (!submit) {
+      logger.warn("analyzeProductImage fallback returned no submit_product", {
+        stopReason: fallback.stop_reason,
+        structuredData: true,
+      });
+      return {product: null, rawResponse: JSON.stringify(fallback.content)};
+    }
   }
 
   const product = ProductModel.fromObject({

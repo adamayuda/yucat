@@ -13,6 +13,16 @@ class HomeLoadingState extends HomeState {
   List<Object?> get props => [];
 }
 
+/// Loading state for an in-progress product scan — drives the multi-step
+/// "Scanning → Analyzing" animation. Kept distinct from [HomeLoadingState]
+/// (the plain dashboard load) so the scan theater never shows on ordinary loads.
+class HomeScanningState extends HomeState {
+  const HomeScanningState();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class HomeHiddenState extends HomeState {
   @override
   List<Object?> get props => [];

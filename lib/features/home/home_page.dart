@@ -11,6 +11,7 @@ import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
 import 'package:yucat/features/home/widgets/home_dashboard_page.dart';
 import 'package:yucat/features/home/widgets/home_loading_page.dart';
+import 'package:yucat/features/home/widgets/home_skeleton.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
 import 'package:yucat/service_locator.dart';
@@ -106,6 +107,11 @@ class _HomePage extends State<HomePage> {
   Widget _onStateChangeBuilder(HomeState state) {
     switch (state) {
       case HomeLoadingState():
+        return Scaffold(
+          backgroundColor: DSColors.tintLavender,
+          body: const HomeSkeleton(),
+        );
+      case HomeScanningState():
         return Scaffold(
           backgroundColor: DSColors.tintLavender,
           body: const HomeLoadingWidget(),

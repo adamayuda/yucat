@@ -108,9 +108,13 @@ class SuccessScreen extends StatelessWidget {
               child: SafeArea(
                 top: false,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: DSDimens.sizeL,
-                    vertical: DSDimens.sizeS,
+                  // Bottom 40px (size3xl) to match the CTA level on the other
+                  // onboarding screens + wizard.
+                  padding: const EdgeInsets.fromLTRB(
+                    DSDimens.sizeL,
+                    DSDimens.sizeS,
+                    DSDimens.sizeL,
+                    DSDimens.size3xl,
                   ),
                   // Center keeps the button content-sized (loose constraints);
                   // a bare Positioned child gets tight full-width constraints

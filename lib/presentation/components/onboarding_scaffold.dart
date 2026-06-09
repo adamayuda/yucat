@@ -38,7 +38,9 @@ class OnboardingScaffold extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(
                   top: DSDimens.sizeS,
-                  bottom: DSDimens.sizeS,
+                  // Match OnboardingFloatingButton's bottom margin so the CTA
+                  // sits at the same level across all onboarding screens.
+                  bottom: DSDimens.size3xl,
                 ),
                 child: footer,
               ),

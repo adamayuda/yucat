@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/core/legal_urls.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat_listing/mappers/cat_entity_to_model_mapper.dart';
@@ -13,15 +14,12 @@ import 'package:yucat/features/product_detail/presentation/widgets/hatched_place
 import 'package:yucat/features/profile/bloc/profile_bloc.dart';
 import 'package:yucat/features/profile/bloc/profile_event.dart';
 import 'package:yucat/features/profile/bloc/profile_state.dart';
+import 'package:yucat/features/profile/widgets/profile_skeleton.dart';
 import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
-import 'package:yucat/presentation/widgets/app_loading_widget.dart';
 import 'package:yucat/service_locator.dart';
 
-const _termsUrl = 'https://yucat-web-production.up.railway.app/cgv.html';
-const _privacyUrl = 'https://yucat-web-production.up.railway.app/policy.html';
-const _supportEmail = 'yucat.app@gmail.com';
 const _manageSubscriptionUrl = 'https://apps.apple.com/account/subscriptions';
 
 @RoutePage()
@@ -131,18 +129,18 @@ class _ProfilePage extends State<ProfilePage> {
             onSavedProductsTap: _openSavedProducts,
             onScanHistoryTap: _openScanHistory,
             onContactTap: () => _launchUri(
-              Uri(scheme: 'mailto', path: _supportEmail),
+              Uri(scheme: 'mailto', path: kSupportEmail),
               errorMessage:
-                  'Could not launch email. Please contact us at $_supportEmail',
+                  'Could not launch email. Please contact us at $kSupportEmail',
             ),
             onPrivacyTap: () => _launchUri(
-              Uri.parse(_privacyUrl),
-              mode: LaunchMode.inAppWebView,
+              Uri.parse(kPrivacyUrl),
+              mode: LaunchMode.externalApplication,
               errorMessage: 'Could not open Privacy Policy',
             ),
             onTermsTap: () => _launchUri(
-              Uri.parse(_termsUrl),
-              mode: LaunchMode.inAppWebView,
+              Uri.parse(kTermsUrl),
+              mode: LaunchMode.externalApplication,
               errorMessage: 'Could not open Terms & Conditions',
             ),
             onResetOnboardingTap: () =>
@@ -150,7 +148,7 @@ class _ProfilePage extends State<ProfilePage> {
           ),
         _ => const Scaffold(
             backgroundColor: DSColors.tintLavender,
-            body: AppLoadingWidget(),
+            body: ProfileSkeleton(),
           ),
       },
     );

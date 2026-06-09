@@ -9,7 +9,7 @@ import 'package:yucat/features/scan_history/presentation/bloc/scan_history_bloc.
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
-import 'package:yucat/presentation/widgets/app_loading_widget.dart';
+import 'package:yucat/presentation/components/skeletons/product_list_skeleton.dart';
 
 @RoutePage()
 class ScanHistoryPage extends StatefulWidget {
@@ -48,7 +48,14 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
                 bloc: _bloc,
                 buildWhen: (prev, curr) => prev != curr,
                 builder: (context, state) => switch (state) {
-                  ScanHistoryLoadingState() => const AppLoadingWidget(),
+                  ScanHistoryLoadingState() => const ProductListSkeleton(
+                      padding: EdgeInsets.fromLTRB(
+                        DSDimens.sizeL,
+                        DSDimens.sizeS,
+                        DSDimens.sizeL,
+                        DSDimens.size4xl,
+                      ),
+                    ),
                   ScanHistoryLoadedState(:final products) => products.isEmpty
                       ? _EmptyView()
                       : _LoadedList(

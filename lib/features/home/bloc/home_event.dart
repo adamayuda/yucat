@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
@@ -23,16 +24,22 @@ class SearchEvent extends HomeEvent {
 class ImageCapturedEvent extends HomeEvent {
   final String imageBase64;
   final String mimeType;
-  final BuildContext context;
+
+  /// The router *controller* captured before the ScannerPage pops itself.
+  /// We must not navigate via the page's BuildContext after the scan resolves
+  /// — by then the ScannerPage is unmounted and any `context.router` lookup
+  /// throws ("deactivated widget's ancestor is unsafe"). The StackRouter
+  /// controller outlives the page, so it stays safe to push onto.
+  final StackRouter router;
 
   const ImageCapturedEvent({
     required this.imageBase64,
     required this.mimeType,
-    required this.context,
+    required this.router,
   });
 
   @override
-  List<Object?> get props => [imageBase64, mimeType, context];
+  List<Object?> get props => [imageBase64, mimeType, router];
 }
 
 class PaywallDismissedEvent extends HomeEvent {

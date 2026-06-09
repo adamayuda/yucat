@@ -1,6 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/core/legal_urls.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -10,6 +13,10 @@ class WelcomeScreen extends StatelessWidget {
     super.key,
     required this.onGetStarted,
   });
+
+  Future<void> _openUrl(String url) async {
+    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,8 +82,31 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: DSDimens.sizeXxs),
-                  Text(
-                    "By continuing you're accepting our\nTerms of Use and Privacy Notice",
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        const TextSpan(
+                          text: "By continuing you're accepting our\n",
+                        ),
+                        TextSpan(
+                          text: 'Terms of Use',
+                          style: const TextStyle(
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => _openUrl(kTermsUrl),
+                        ),
+                        const TextSpan(text: ' and '),
+                        TextSpan(
+                          text: 'Privacy Notice',
+                          style: const TextStyle(
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => _openUrl(kPrivacyUrl),
+                        ),
+                      ],
+                    ),
                     textAlign: TextAlign.center,
                     style: DSTextStyles.caption,
                   ),
