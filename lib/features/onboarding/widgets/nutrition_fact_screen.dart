@@ -53,7 +53,7 @@ class NutritionFactScreen extends StatelessWidget {
                   color: DSColors.tintBlueSoft,
                 ),
                 alignment: Alignment.center,
-                child: SvgPicture.asset('assets/images/Meat.svg', width: 116),
+                child: SvgPicture.asset('assets/images/meat-2.svg', width: 116),
               ),
               const SizedBox(height: DSDimens.size3xl),
               RichText(

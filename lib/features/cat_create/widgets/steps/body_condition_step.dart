@@ -10,30 +10,30 @@ class BodyConditionStep extends StatelessWidget {
   // Values map to the assessment's `weightCategory` buckets
   // ('underweight' / 'normal' / 'overweight' / 'obese').
   static const List<
-      ({String label, String value, String desc, IconData icon})> _options = [
+      ({String label, String value, String desc, String asset})> _options = [
     (
       label: 'Underweight',
       value: 'underweight',
       desc: 'Ribs and spine show, very little fat',
-      icon: Icons.trending_down_rounded,
+      asset: 'assets/images/Under.svg',
     ),
     (
       label: 'Just right',
       value: 'normal',
       desc: 'Ribs felt easily, visible waist',
-      icon: Icons.check_circle_outline_rounded,
+      asset: 'assets/images/right.svg',
     ),
     (
       label: 'Overweight',
       value: 'overweight',
       desc: 'Ribs hard to feel, rounded belly',
-      icon: Icons.trending_up_rounded,
+      asset: 'assets/images/Over.svg',
     ),
     (
       label: 'Obese',
       value: 'obese',
       desc: 'Heavy fat cover, no waist',
-      icon: Icons.warning_amber_rounded,
+      asset: 'assets/images/Obese.svg',
     ),
   ];
 
@@ -60,7 +60,7 @@ class BodyConditionStep extends StatelessWidget {
                   DSOptionRow(
                     label: option.label,
                     description: option.desc,
-                    leadingIcon: option.icon,
+                    leadingAsset: option.asset,
                     selected: weightCategory == option.value,
                     onTap: () => onWeightCategoryChanged(option.value),
                   ),
