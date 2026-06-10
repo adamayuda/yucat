@@ -194,15 +194,14 @@ class _MockNotification extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: DSColors.tintLavender,
-              borderRadius: BorderRadius.circular(DSRadii.sm),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(DSRadii.sm),
+            child: SvgPicture.asset(
+              'assets/images/logo.svg',
+              width: 40,
+              height: 40,
+              fit: BoxFit.cover,
             ),
-            child: const Text('🐱', style: TextStyle(fontSize: 22)),
           ),
           const SizedBox(width: DSDimens.sizeXs),
           Expanded(

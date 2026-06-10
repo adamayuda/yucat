@@ -214,10 +214,12 @@ class _Review {
   final String headline;
   final String body;
   final String author;
+  final String avatar;
   const _Review({
     required this.headline,
     required this.body,
     required this.author,
+    required this.avatar,
   });
 }
 
@@ -229,6 +231,7 @@ const _reviews = [
         "I scanned my cat's kibble and finally understood what was in it. "
         'Switched brands the same week and never looked back.',
     author: 'Felicia',
+    avatar: 'assets/images/image.png',
   ),
   _Review(
     headline: 'Loving this app!!!',
@@ -236,6 +239,7 @@ const _reviews = [
         'Amazing app, so easy to use. I just upload pictures of the food and '
         'it tells me everything great!',
     author: 'Joshua_la',
+    avatar: 'assets/images/image2.png',
   ),
   _Review(
     headline: 'A senior-cat lifesaver',
@@ -243,6 +247,7 @@ const _reviews = [
         "YuCat narrowed down a senior food that's gentle on Lulu's stomach "
         'in one afternoon.',
     author: 'Sophie',
+    avatar: 'assets/images/image3.png',
   ),
   _Review(
     headline: 'Finally feel confident',
@@ -250,6 +255,7 @@ const _reviews = [
         'I used to just grab whatever was on sale. Now I actually know which '
         "foods match my kitten's needs. Total peace of mind.",
     author: 'Marcus_T',
+    avatar: 'assets/images/image5.png',
   ),
   _Review(
     headline: 'So simple to use',
@@ -257,6 +263,7 @@ const _reviews = [
         'Snap a photo and you get a clear breakdown in seconds. My vet was '
         'even impressed when I showed her.',
     author: 'Priya',
+    avatar: 'assets/images/image4.png',
   ),
   _Review(
     headline: 'Two cats, two diets',
@@ -264,6 +271,7 @@ const _reviews = [
         'Managing food for an overweight tabby and a picky Siamese was a '
         'nightmare. YuCat made it effortless for both.',
     author: 'Dani_R',
+    avatar: 'assets/images/image6.jpeg',
   ),
 ];
 
@@ -293,7 +301,12 @@ class _StatBlock extends StatelessWidget {
 class _PeopleBlock extends StatelessWidget {
   const _PeopleBlock();
 
-  static const _faces = ['👩', '🧑', '👧', '🧑‍🦰'];
+  static const _faces = [
+    'assets/images/image.png',
+    'assets/images/image2.png',
+    'assets/images/image4.png',
+    'assets/images/image5.png',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -320,9 +333,14 @@ class _PeopleBlock extends StatelessWidget {
                         width: 2,
                       ),
                     ),
-                    child: Text(
-                      _faces[i],
-                      style: const TextStyle(fontSize: 18),
+                    child: ClipOval(
+                      child: Image.asset(
+                        _faces[i],
+                        width: 32,
+                        height: 32,
+                        cacheWidth: 96,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
@@ -369,6 +387,16 @@ class _ReviewCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: DSDimens.sizeXs),
+              ClipOval(
+                child: Image.asset(
+                  review.avatar,
+                  width: 24,
+                  height: 24,
+                  cacheWidth: 72,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: DSDimens.sizeXxs),
               Text(
                 review.author,
                 style: DSTextStyles.caption.copyWith(

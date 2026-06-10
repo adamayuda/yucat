@@ -7,10 +7,7 @@ import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 class NutritionFactScreen extends StatelessWidget {
   final VoidCallback onNext;
 
-  const NutritionFactScreen({
-    super.key,
-    required this.onNext,
-  });
+  const NutritionFactScreen({super.key, required this.onNext});
 
   static final Uri _sourceUri = Uri.parse(
     'https://www.merckvetmanual.com/management-and-nutrition/'
@@ -56,10 +53,7 @@ class NutritionFactScreen extends StatelessWidget {
                   color: DSColors.tintBlueSoft,
                 ),
                 alignment: Alignment.center,
-                child: SvgPicture.asset(
-                  'assets/images/meat.svg',
-                  width: 116,
-                ),
+                child: SvgPicture.asset('assets/images/Meat.svg', width: 116),
               ),
               const SizedBox(height: DSDimens.size3xl),
               RichText(
@@ -129,7 +123,8 @@ class NutritionFactScreen extends StatelessWidget {
                               ),
                             ),
                             TextSpan(
-                              text: "notes a cat's protein and amino-acid "
+                              text:
+                                  "notes a cat's protein and amino-acid "
                                   'needs change with life stage — kittens '
                                   'require more protein than adults and are '
                                   'more sensitive to amino-acid balance.',

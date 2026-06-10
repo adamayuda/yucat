@@ -16,21 +16,17 @@ class _Testimonial {
   final String name;
   final String flag;
   final String detail;
-  final List<Color> avatarGradient;
-  final String avatarEmoji;
+  final String avatarImage;
 
   const _Testimonial({
     required this.quote,
     required this.name,
     required this.flag,
     required this.detail,
-    required this.avatarGradient,
-    required this.avatarEmoji,
+    required this.avatarImage,
   });
 }
 
-// Per-person avatar gradients are intentionally inline (one-off decorative art,
-// not reused) — not promoted to DSColors tokens.
 const _testimonials = [
   _Testimonial(
     quote:
@@ -39,8 +35,7 @@ const _testimonials = [
     name: 'Sophie',
     flag: '🇬🇧',
     detail: 'Senior cat · sensitive stomach',
-    avatarGradient: [Color(0xFFFFD9A6), Color(0xFFFFB773)],
-    avatarEmoji: '🧑',
+    avatarImage: 'assets/images/image.png',
   ),
   _Testimonial(
     quote:
@@ -49,8 +44,7 @@ const _testimonials = [
     name: 'Marco',
     flag: '🇮🇹',
     detail: 'Kitten · picky eater',
-    avatarGradient: [Color(0xFFC9E4FF), Color(0xFF7AB8F0)],
-    avatarEmoji: '👨',
+    avatarImage: 'assets/images/image2.png',
   ),
   _Testimonial(
     quote:
@@ -59,8 +53,7 @@ const _testimonials = [
     name: 'Priya',
     flag: '🇮🇳',
     detail: 'Multi-cat household',
-    avatarGradient: [Color(0xFFFAD3D6), Color(0xFFE89BA3)],
-    avatarEmoji: '👩',
+    avatarImage: 'assets/images/image3.png',
   ),
 ];
 
@@ -131,21 +124,13 @@ class _TestimonialCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: testimonial.avatarGradient,
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  testimonial.avatarEmoji,
-                  style: const TextStyle(fontSize: 20),
+              ClipOval(
+                child: Image.asset(
+                  testimonial.avatarImage,
+                  width: 40,
+                  height: 40,
+                  cacheWidth: 120,
+                  fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(width: DSDimens.sizeXs),
