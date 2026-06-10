@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
@@ -68,6 +69,28 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
     on<CatCreateCatEvent>(_onCatCreateCatEvent);
   }
 
+  /// Logs a single wizard step view: the generic `Screen View` (kept for
+  /// continuity) plus the dedicated `Cat Wizard Step Viewed` event with a stable
+  /// `step_index` + `step_name` and `is_edit_mode`, used to build the wizard
+  /// flow funnel & drop-off curve in Mixpanel. Filter `is_edit_mode = false`
+  /// for the first-time creation drop-off.
+  void _trackStepView(int index) {
+    _logScreenViewUsecase.call(
+      screenName: _createCatScreenName,
+      index: index,
+      name: _stepNames[index],
+    );
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.catWizardStepViewed,
+      properties: {
+        'step_index': index,
+        'step_name': _stepNames[index],
+        'is_edit_mode': _originalCat != null,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+  }
+
   void _onCatCreateGoToNextStepEvent(
     CatCreateGoToNextStepEvent event,
     Emitter<CatCreateState> emit,
@@ -88,11 +111,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
       );
 
       emit(CatCreateLoadedState(currentStep: nextStep, cat: currentState.cat));
-      _logScreenViewUsecase.call(
-        screenName: _createCatScreenName,
-        index: nextStep,
-        name: _stepNames[nextStep],
-      );
+      _trackStepView(nextStep);
     }
   }
 
@@ -117,11 +136,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
       emit(
         CatCreateLoadedState(currentStep: event.step, cat: currentState.cat),
       );
-      _logScreenViewUsecase.call(
-        screenName: _createCatScreenName,
-        index: event.step,
-        name: _stepNames[event.step],
-      );
+      _trackStepView(event.step);
     }
   }
 
@@ -155,11 +170,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
         cat: event.cat ?? const CatCreateModel(name: '', neutered: false),
       ),
     );
-    _logScreenViewUsecase.call(
-      screenName: _createCatScreenName,
-      index: event.initialStep,
-      name: _stepNames[event.initialStep],
-    );
+    _trackStepView(event.initialStep);
   }
 
   void _onCatCreateUpdateCatEvent(

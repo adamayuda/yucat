@@ -4,9 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
+import 'package:yucat/services/user_analytics_service.dart';
 
 part 'onboarding_event.dart';
 part 'onboarding_state.dart';
@@ -16,6 +18,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
   final SharedPreferences _prefs;
   final LogScreenViewUsecase _logScreenViewUsecase;
   final LogEventUsecase _logEventUsecase;
+  final UserAnalyticsService _userAnalyticsService;
 
   DateTime? _onboardingStartTime;
   int _stepsViewed = 0;
@@ -24,9 +27,11 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     required SharedPreferences prefs,
     required LogScreenViewUsecase logScreenViewUsecase,
     required LogEventUsecase logEventUsecase,
+    required UserAnalyticsService userAnalyticsService,
   }) : _prefs = prefs,
        _logScreenViewUsecase = logScreenViewUsecase,
        _logEventUsecase = logEventUsecase,
+       _userAnalyticsService = userAnalyticsService,
        super(OnBoardingLoadingState()) {
     on<OnBoardingInitialEvent>(_onOnBoardingInitialEvent);
     on<OnBoardingGetStartedEvent>(_onOnBoardingGetStartedEvent);
@@ -59,12 +64,29 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       },
     );
 
+    _trackPhaseView(OnBoardingPhase.welcome);
+    emit(const OnBoardingReadyState());
+  }
+
+  /// Logs a single onboarding screen view: the generic `Screen View` (kept for
+  /// continuity) plus the dedicated `Onboarding Step Viewed` event with a stable
+  /// `step_index` (0–11) and normalized `step_name`, used to build the
+  /// onboarding flow funnel & mid-onboarding drop-off in Mixpanel.
+  void _trackPhaseView(OnBoardingPhase phase) {
+    final index = _phaseIndex(phase);
     _logScreenViewUsecase.call(
       screenName: 'OnBoardingRoute',
-      index: 0,
-      name: 'welcome',
+      index: index,
+      name: phase.name,
     );
-    emit(const OnBoardingReadyState());
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.onboardingStepViewed,
+      properties: {
+        'step_index': index,
+        'step_name': phase.name,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
   }
 
   void _onOnBoardingGetStartedEvent(
@@ -77,11 +99,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     );
 
     _stepsViewed++;
-    _logScreenViewUsecase.call(
-      screenName: 'OnBoardingRoute',
-      index: _phaseIndex(OnBoardingPhase.scanDemo),
-      name: 'scan_demo',
-    );
+    _trackPhaseView(OnBoardingPhase.scanDemo);
 
     emit(const OnBoardingReadyState(phase: OnBoardingPhase.scanDemo));
   }
@@ -104,15 +122,12 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
+    _userAnalyticsService.setAttribution(event.source);
 
     const next = OnBoardingPhase.proofChart;
 
     _stepsViewed++;
-    _logScreenViewUsecase.call(
-      screenName: 'OnBoardingRoute',
-      index: _phaseIndex(next),
-      name: next.name,
-    );
+    _trackPhaseView(next);
 
     emit(_readyState().copyWith(
       phase: next,
@@ -129,6 +144,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       properties: {'timestamp': DateTime.now().toIso8601String()},
     );
     _stepsViewed++;
+    _trackPhaseView(OnBoardingPhase.proofChart);
     emit(_readyState().copyWith(phase: OnBoardingPhase.proofChart));
   }
 
@@ -151,11 +167,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     };
     if (next != current.phase) {
       _stepsViewed++;
-      _logScreenViewUsecase.call(
-        screenName: 'OnBoardingRoute',
-        index: _phaseIndex(next),
-        name: next.name,
-      );
+      _trackPhaseView(next);
     }
     emit(current.copyWith(phase: next));
   }
@@ -179,6 +191,16 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       OnBoardingPhase.healthIntro => OnBoardingPhase.reminders,
       _ => current.phase,
     };
+    if (prev != current.phase) {
+      _logEventUsecase.call(
+        eventName: AnalyticsEvents.onboardingStepBack,
+        properties: {
+          'from_phase': current.phase.name,
+          'to_phase': prev.name,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+    }
     emit(current.copyWith(phase: prev));
   }
 
@@ -250,14 +272,23 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
+    _userAnalyticsService.markOnboardingComplete();
 
     // Hard gate: the paywall is the final beat of onboarding and cannot be
     // dismissed. push() only returns once the user has subscribed (or restored
     // an existing subscription), so we only ever reach the main app after that.
     final router = event.context.router;
-    await router.push(PaywallRoute(dismissible: false));
+    await router.push(
+      PaywallRoute(
+        dismissible: false,
+        trigger: PaywallTrigger.onboardingComplete,
+      ),
+    );
     // replaceAll (not replace) because the stack now holds onboarding → wizard
-    // → success underneath; clear them all so Main is the sole route.
-    await router.replaceAll([const MainRoute()]);
+    // → success underneath; clear them all so Main is the sole route. Activate
+    // the Home tab (not the default first/Search tab) to match the splash flow.
+    await router.replaceAll([
+      MainRoute(children: [const HomeRoute()]),
+    ]);
   }
 }

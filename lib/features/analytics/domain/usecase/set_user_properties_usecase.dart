@@ -15,4 +15,8 @@ class SetUserPropertiesUsecase {
       value: value,
     );
   }
+
+  Future<void> increment(String propertyName, double by) async {
+    return repository.incrementUserProperty(propertyName, by);
+  }
 }

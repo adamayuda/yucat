@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
+import 'package:yucat/services/user_analytics_service.dart';
 
 /// Thin wrapper around the OneSignal SDK so the rest of the app never touches
 /// it directly. iOS-only — push is not wired for Android (mirrors RevenueCat).
@@ -20,11 +21,15 @@ class NotificationService {
   static const String _appId = '2a0ad1ef-59ab-43d5-bfef-b3670478287f';
 
   final LogEventUsecase _logEventUsecase;
+  final UserAnalyticsService _userAnalyticsService;
 
   bool _initialized = false;
 
-  NotificationService({required LogEventUsecase logEventUsecase})
-      : _logEventUsecase = logEventUsecase;
+  NotificationService({
+    required LogEventUsecase logEventUsecase,
+    required UserAnalyticsService userAnalyticsService,
+  })  : _logEventUsecase = logEventUsecase,
+        _userAnalyticsService = userAnalyticsService;
 
   /// Initialise the SDK. No-op on non-iOS platforms. Safe to call more than
   /// once.
@@ -57,6 +62,7 @@ class NotificationService {
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
+    _userAnalyticsService.setNotificationsEnabled(granted);
 
     return granted;
   }

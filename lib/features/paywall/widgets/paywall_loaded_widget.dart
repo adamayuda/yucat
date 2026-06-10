@@ -89,6 +89,7 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
                         value: _promoOn,
                         onChanged: (on) {
                           setState(() => _promoOn = on);
+                          bloc.add(PaywallPromoToggledEvent(promoOn: on));
                           // Turning the promo on collapses to the yearly plan,
                           // so make sure it's the selected (purchased) package.
                           if (on) {

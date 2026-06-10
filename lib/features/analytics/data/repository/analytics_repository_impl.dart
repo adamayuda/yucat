@@ -23,6 +23,11 @@ class AnalyticsRepositoryImpl extends AnalyticsRepository {
   }
 
   @override
+  Future<void> identify(String distinctId) async {
+    _mixpanel.identify(distinctId);
+  }
+
+  @override
   Future<void> setUserProperty({
     required String propertyName,
     required dynamic value,
@@ -35,5 +40,10 @@ class AnalyticsRepositoryImpl extends AnalyticsRepository {
     properties.forEach((key, value) {
       _mixpanel.getPeople().set(key, value);
     });
+  }
+
+  @override
+  Future<void> incrementUserProperty(String propertyName, double by) async {
+    _mixpanel.getPeople().increment(propertyName, by);
   }
 }

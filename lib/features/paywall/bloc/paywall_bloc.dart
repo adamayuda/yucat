@@ -5,27 +5,34 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
+import 'package:yucat/services/user_analytics_service.dart';
 
 class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
   final LogEventUsecase _logEventUsecase;
+  final UserAnalyticsService _userAnalyticsService;
 
   DateTime? _paywallShownTime;
+  String _trigger = 'manual';
 
   PaywallBloc({
     required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
     required LogEventUsecase logEventUsecase,
+    required UserAnalyticsService userAnalyticsService,
   })  : _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
         _logEventUsecase = logEventUsecase,
+        _userAnalyticsService = userAnalyticsService,
         super(const PaywallInitialState()) {
     on<PaywallInitialEvent>(_onInitial);
     on<PaywallPackageSelectedEvent>(_onPackageSelected);
     on<PaywallPurchaseEvent>(_onPurchase);
     on<PaywallRestoreEvent>(_onRestore);
     on<PaywallDismissEvent>(_onDismiss);
+    on<PaywallPromoToggledEvent>(_onPromoToggled);
   }
 
   Future<void> _onInitial(
@@ -39,6 +46,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       return;
     }
 
+    _trigger = event.trigger;
     emit(const PaywallLoadingState());
 
     if (await _hasActiveSubscriptionUseCase()) {
@@ -82,10 +90,11 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
 
     _paywallShownTime = DateTime.now();
     _logEventUsecase.call(
-      eventName: 'Paywall Shown',
+      eventName: AnalyticsEvents.paywallShown,
       properties: {
-        'trigger': 'manual',
+        'trigger': _trigger,
         'offering': current.identifier,
+        'intro_eligible': introEligible,
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
@@ -121,6 +130,17 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   ) {
     final current = state;
     if (current is! PaywallLoadedState) return;
+    if (current.selectedPackage.identifier != event.package.identifier) {
+      _logEventUsecase.call(
+        eventName: AnalyticsEvents.planSelected,
+        properties: {
+          'package_id': event.package.identifier,
+          'package_type': event.package.packageType.name,
+          'trigger': _trigger,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+    }
     emit(current.copyWith(selectedPackage: event.package));
   }
 
@@ -144,19 +164,27 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
 
       if (isActive) {
         _logEventUsecase.call(
-          eventName: 'Subscription Completed',
+          eventName: AnalyticsEvents.subscriptionCompleted,
           properties: {
             'package_id': current.selectedPackage.identifier,
             'package_type': current.selectedPackage.packageType.name,
             'price': current.selectedPackage.storeProduct.price,
             'currency':
                 current.selectedPackage.storeProduct.currencyCode,
+            'trigger': _trigger,
             'timestamp': DateTime.now().toIso8601String(),
           },
+        );
+        _userAnalyticsService.syncSubscription(
+          isSubscriber: true,
+          plan: current.selectedPackage.packageType.name,
+          price: current.selectedPackage.storeProduct.price,
+          currency: current.selectedPackage.storeProduct.currencyCode,
         );
         _logPaywallDismissed(ctaTapped: true);
         emit(const PaywallSuccessState(purchasedSubscription: true));
       } else {
+        _logPurchaseFailed(reason: 'not_active', packageType: current.selectedPackage.packageType.name);
         emit(current.copyWith(
           isPurchasing: false,
           transientError: 'Purchase did not complete. Please try again.',
@@ -166,9 +194,18 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     } on PlatformException catch (e) {
       final code = PurchasesErrorHelper.getErrorCode(e);
       if (code == PurchasesErrorCode.purchaseCancelledError) {
+        _logPurchaseFailed(
+          reason: 'cancelled',
+          packageType: current.selectedPackage.packageType.name,
+        );
         emit(current.copyWith(isPurchasing: false));
         return;
       }
+      _logPurchaseFailed(
+        reason: 'platform_error',
+        errorMessage: e.message,
+        packageType: current.selectedPackage.packageType.name,
+      );
       emit(current.copyWith(
         isPurchasing: false,
         transientError: e.message ?? 'Purchase failed. Please try again.',
@@ -176,12 +213,34 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       ));
     } catch (e) {
       debugPrint('PaywallBloc.purchase error: $e');
+      _logPurchaseFailed(
+        reason: 'unknown',
+        errorMessage: e.toString(),
+        packageType: current.selectedPackage.packageType.name,
+      );
       emit(current.copyWith(
         isPurchasing: false,
         transientError: 'Something went wrong. Please try again.',
         errorTick: current.errorTick + 1,
       ));
     }
+  }
+
+  void _logPurchaseFailed({
+    required String reason,
+    String? errorMessage,
+    String? packageType,
+  }) {
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.subscriptionPurchaseFailed,
+      properties: {
+        'reason': reason,
+        if (errorMessage != null) 'error_message': errorMessage,
+        if (packageType != null) 'package_type': packageType,
+        'trigger': _trigger,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
   }
 
   Future<void> _onRestore(
@@ -200,14 +259,17 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
 
       if (isActive) {
         _logEventUsecase.call(
-          eventName: 'Subscription Restored',
+          eventName: AnalyticsEvents.subscriptionRestored,
           properties: {
+            'trigger': _trigger,
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
+        _userAnalyticsService.syncSubscription(isSubscriber: true);
         _logPaywallDismissed(ctaTapped: true);
         emit(const PaywallSuccessState(purchasedSubscription: true));
       } else {
+        _logRestoreFailed(reason: 'no_active_subscription');
         emit(current.copyWith(
           isPurchasing: false,
           transientError: 'No active subscription found.',
@@ -216,12 +278,38 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       }
     } catch (e) {
       debugPrint('PaywallBloc.restore error: $e');
+      _logRestoreFailed(reason: 'error', errorMessage: e.toString());
       emit(current.copyWith(
         isPurchasing: false,
         transientError: 'Could not restore purchases. Please try again.',
         errorTick: current.errorTick + 1,
       ));
     }
+  }
+
+  void _logRestoreFailed({required String reason, String? errorMessage}) {
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.subscriptionRestoreFailed,
+      properties: {
+        'reason': reason,
+        if (errorMessage != null) 'error_message': errorMessage,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+  }
+
+  void _onPromoToggled(
+    PaywallPromoToggledEvent event,
+    Emitter<PaywallState> emit,
+  ) {
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.paywallPromoToggled,
+      properties: {
+        'promo_on': event.promoOn,
+        'trigger': _trigger,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
   }
 
   void _onDismiss(

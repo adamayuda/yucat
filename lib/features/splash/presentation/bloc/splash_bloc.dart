@@ -7,6 +7,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/services/user_analytics_service.dart';
 
 part 'splash_event.dart';
 part 'splash_state.dart';
@@ -16,12 +18,15 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
   final SharedPreferences _prefs;
   final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
+  final UserAnalyticsService _userAnalyticsService;
 
   SplashBloc({
     required SharedPreferences prefs,
     required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
+    required UserAnalyticsService userAnalyticsService,
   })  : _prefs = prefs,
         _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
+        _userAnalyticsService = userAnalyticsService,
         super(SplashLoadingState()) {
     on<SplashInitialEvent>(_onSplashInitialEvent);
   }
@@ -54,10 +59,19 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     final hasSubscription =
         await _hasActiveSubscriptionUseCase(forceRefresh: true);
 
+    // Keep the People profile's subscription state fresh on every cold launch
+    // of a returning user (handles lapses/renewals between sessions).
+    _userAnalyticsService.syncSubscription(isSubscriber: hasSubscription);
+
     if (hasSubscription) {
       router.replace(const HomeRoute());
     } else {
-      await router.push(PaywallRoute(dismissible: false));
+      await router.push(
+        PaywallRoute(
+          dismissible: false,
+          trigger: PaywallTrigger.returningUser,
+        ),
+      );
       router.replace(const HomeRoute());
     }
   }

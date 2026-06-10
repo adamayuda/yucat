@@ -19,6 +19,7 @@ import 'package:yucat/features/scan_history/domain/usecases/add_scan_to_history_
 import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/review_prompt_service.dart';
 import 'package:yucat/services/scan_tracking_service.dart';
+import 'package:yucat/services/user_analytics_service.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final FetchProductByImageUsecase _fetchProductByImageUsecase;
@@ -32,6 +33,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final AddScanToHistoryUsecase _addScanToHistoryUsecase;
   final LogEventUsecase _logEventUsecase;
   final NotificationService _notificationService;
+  final UserAnalyticsService _userAnalyticsService;
   // ignore: unused_field
   final SharedPreferences _prefs;
 
@@ -47,6 +49,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required AddScanToHistoryUsecase addScanToHistoryUsecase,
     required LogEventUsecase logEventUsecase,
     required NotificationService notificationService,
+    required UserAnalyticsService userAnalyticsService,
     required SharedPreferences prefs,
   }) : _fetchProductByImageUsecase = fetchProductByImageUsecase,
        _productEntityToModelMapper = productEntityToModelMapper,
@@ -59,6 +62,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
        _addScanToHistoryUsecase = addScanToHistoryUsecase,
        _logEventUsecase = logEventUsecase,
        _notificationService = notificationService,
+       _userAnalyticsService = userAnalyticsService,
        _prefs = prefs,
        super(HomeHiddenState()) {
     on<HomeInitialEvent>(_onHomeInitialEvent);
@@ -80,14 +84,23 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     // Attach the anonymous Firebase UID as the OneSignal external id so push
     // notifications can target this user. Fire-and-forget; iOS-only internally.
+    // Also bind the same UID as the Mixpanel distinct id so People properties
+    // attach to a stable profile (idempotent per session).
     if (user != null) {
       unawaited(_notificationService.login(user.uid));
+      unawaited(_userAnalyticsService.identify(user.uid));
     }
 
     List<CatEntity> cats = const [];
     if (user != null) {
       try {
         cats = await _getCatsUsecase(userId: user.uid);
+        // Authoritative cats sync — home loads on every return to the tab, so
+        // this corrects the People profile after creates/deletes elsewhere.
+        unawaited(_userAnalyticsService.syncCats(
+          count: cats.length,
+          primaryAgeGroup: cats.isNotEmpty ? cats.first.ageGroup : null,
+        ));
       } catch (_) {
         // Header falls back to generic copy on read failure.
       }
@@ -153,7 +166,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         },
       );
 
-      await _scanTrackingService.recordSuccessfulScan();
+      final streak = await _scanTrackingService.recordSuccessfulScan();
+      unawaited(_userAnalyticsService.recordScan(currentStreak: streak));
       await _reviewPromptService.recordScan();
       // Fire-and-forget; the service applies its own gating.
       unawaited(

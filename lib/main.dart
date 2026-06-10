@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
 import 'package:yucat/features/cat_detail/presentation/bloc/cat_detail_bloc.dart';
@@ -64,10 +66,46 @@ Future<void> _configureRevenueCat() async {
   await Purchases.configure(configuration);
 }
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
+  const App({super.key});
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> with WidgetsBindingObserver {
   final _appRouter = AppRouter();
 
-  App({super.key});
+  void _logAppOpened(String launchType) {
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.appOpened,
+      properties: {
+        'launch_type': launchType,
+        'platform': Platform.isIOS ? 'ios' : (Platform.isAndroid ? 'android' : 'other'),
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _logAppOpened('cold');
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _logAppOpened('warm');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

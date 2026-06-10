@@ -16,7 +16,15 @@ class PaywallPage extends StatefulWidget {
   /// the user has no active subscription.
   final bool dismissible;
 
-  const PaywallPage({super.key, this.dismissible = true});
+  /// Where the paywall was opened from — stamped onto paywall funnel events so
+  /// Mixpanel can separate the onboarding gate from the returning-user gate.
+  final String trigger;
+
+  const PaywallPage({
+    super.key,
+    this.dismissible = true,
+    this.trigger = 'manual',
+  });
 
   @override
   State<PaywallPage> createState() => _PaywallPage();
@@ -29,7 +37,7 @@ class _PaywallPage extends State<PaywallPage> {
   void initState() {
     super.initState();
     _bloc = context.read<PaywallBloc>();
-    _bloc.add(const PaywallInitialEvent());
+    _bloc.add(PaywallInitialEvent(trigger: widget.trigger));
   }
 
   @override

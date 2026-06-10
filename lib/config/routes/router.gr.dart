@@ -183,10 +183,15 @@ class PaywallRoute extends PageRouteInfo<PaywallRouteArgs> {
   PaywallRoute({
     Key? key,
     bool dismissible = true,
+    String trigger = 'manual',
     List<PageRouteInfo>? children,
   }) : super(
          PaywallRoute.name,
-         args: PaywallRouteArgs(key: key, dismissible: dismissible),
+         args: PaywallRouteArgs(
+           key: key,
+           dismissible: dismissible,
+           trigger: trigger,
+         ),
          initialChildren: children,
        );
 
@@ -198,21 +203,31 @@ class PaywallRoute extends PageRouteInfo<PaywallRouteArgs> {
       final args = data.argsAs<PaywallRouteArgs>(
         orElse: () => const PaywallRouteArgs(),
       );
-      return PaywallPage(key: args.key, dismissible: args.dismissible);
+      return PaywallPage(
+        key: args.key,
+        dismissible: args.dismissible,
+        trigger: args.trigger,
+      );
     },
   );
 }
 
 class PaywallRouteArgs {
-  const PaywallRouteArgs({this.key, this.dismissible = true});
+  const PaywallRouteArgs({
+    this.key,
+    this.dismissible = true,
+    this.trigger = 'manual',
+  });
 
   final Key? key;
 
   final bool dismissible;
 
+  final String trigger;
+
   @override
   String toString() {
-    return 'PaywallRouteArgs{key: $key, dismissible: $dismissible}';
+    return 'PaywallRouteArgs{key: $key, dismissible: $dismissible, trigger: $trigger}';
   }
 }
 

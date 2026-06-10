@@ -9,7 +9,14 @@ sealed class PaywallEvent extends Equatable {
 }
 
 class PaywallInitialEvent extends PaywallEvent {
-  const PaywallInitialEvent();
+  /// Where the paywall was opened from, e.g. `onboarding_complete` or
+  /// `returning_user`. Stamped onto all paywall funnel events.
+  final String trigger;
+
+  const PaywallInitialEvent({this.trigger = 'manual'});
+
+  @override
+  List<Object?> get props => [trigger];
 }
 
 class PaywallPackageSelectedEvent extends PaywallEvent {
@@ -31,4 +38,13 @@ class PaywallRestoreEvent extends PaywallEvent {
 
 class PaywallDismissEvent extends PaywallEvent {
   const PaywallDismissEvent();
+}
+
+class PaywallPromoToggledEvent extends PaywallEvent {
+  final bool promoOn;
+
+  const PaywallPromoToggledEvent({required this.promoOn});
+
+  @override
+  List<Object?> get props => [promoOn];
 }

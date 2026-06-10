@@ -13,6 +13,7 @@ import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_
 import 'package:yucat/features/analytics/data/repository/analytics_repository_impl.dart';
 import 'package:yucat/features/analytics/data/sources/analytics_data_source.dart';
 import 'package:yucat/features/analytics/domain/repository/analytics_repository.dart';
+import 'package:yucat/features/analytics/domain/usecase/identify_user_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_login_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
@@ -86,10 +87,14 @@ import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/review_prompt_service.dart';
 import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/services/cat_tracking_service.dart';
+import 'package:yucat/services/user_analytics_service.dart';
 
 final sl = GetIt.instance;
 
-const _mixpanelToken = 'a2e7bb0030da8c6a41153524b5051ea4';
+// Revamp Mixpanel project token. Separate from the legacy app's project
+// (old token 'a2e7bb0030da8c6a41153524b5051ea4') so the two never overlap.
+// All events also carry the `tracking_version = v2` super property.
+const _mixpanelToken = '100a0ee3f1cc3cf5220f2726ce81351e';
 
 Future<void> initializeDependencies() async {
   await _registerMixpanel();
@@ -109,6 +114,12 @@ Future<void> _registerMixpanel() async {
     _mixpanelToken,
     trackAutomaticEvents: true,
   );
+  // Stamp every event with the app edition. The revamp writes to a dedicated
+  // Mixpanel project (separate token) so it never overlaps with the legacy
+  // app's data; this super property is belt-and-suspenders + lets us segment
+  // future builds. App version/build are auto-attached by the SDK
+  // (trackAutomaticEvents) as $app_version_string / $app_build_number.
+  mixpanel.registerSuperProperties({'tracking_version': 'v2'});
   sl.registerSingleton<Mixpanel>(mixpanel);
 }
 
@@ -235,6 +246,9 @@ Future<void> _registerUseCases() async {
   sl.registerSingleton<SetUserPropertiesUsecase>(
     SetUserPropertiesUsecase(repository: sl<AnalyticsRepository>()),
   );
+  sl.registerSingleton<IdentifyUserUsecase>(
+    IdentifyUserUsecase(repository: sl<AnalyticsRepository>()),
+  );
   sl.registerSingleton<SearchByQueryUsecase>(
     SearchByQueryUsecase(searchRepository: sl<SearchRepository>()),
   );
@@ -292,6 +306,12 @@ Future<void> _registerUseCases() async {
 }
 
 Future<void> _registerServices() async {
+  sl.registerSingleton<UserAnalyticsService>(
+    UserAnalyticsService(
+      identifyUserUsecase: sl<IdentifyUserUsecase>(),
+      setUserPropertiesUsecase: sl<SetUserPropertiesUsecase>(),
+    ),
+  );
   sl.registerSingleton<ScanTrackingService>(
     ScanTrackingService(
       prefs: sl<SharedPreferences>(),
@@ -315,6 +335,7 @@ Future<void> _registerServices() async {
   sl.registerSingleton<NotificationService>(
     NotificationService(
       logEventUsecase: sl<LogEventUsecase>(),
+      userAnalyticsService: sl<UserAnalyticsService>(),
     ),
   );
 }
@@ -333,6 +354,7 @@ Future<void> _registerBlocs() async {
     () => SplashBloc(
       prefs: sl<SharedPreferences>(),
       hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
+      userAnalyticsService: sl<UserAnalyticsService>(),
     ),
   );
   sl.registerBloc<ProductListingBloc>(
@@ -346,6 +368,7 @@ Future<void> _registerBlocs() async {
       prefs: sl<SharedPreferences>(),
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
+      userAnalyticsService: sl<UserAnalyticsService>(),
     ),
   );
   sl.registerBloc<SearchBloc>(
@@ -373,6 +396,7 @@ Future<void> _registerBlocs() async {
       addScanToHistoryUsecase: sl<AddScanToHistoryUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
       notificationService: sl<NotificationService>(),
+      userAnalyticsService: sl<UserAnalyticsService>(),
       prefs: sl<SharedPreferences>(),
     ),
   );
@@ -432,6 +456,7 @@ Future<void> _registerBlocs() async {
     () => PaywallBloc(
       hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
       logEventUsecase: sl<LogEventUsecase>(),
+      userAnalyticsService: sl<UserAnalyticsService>(),
     ),
   );
 }
