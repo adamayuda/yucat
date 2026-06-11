@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 
 /// Shows the "guiding, not prescribing" medical disclaimer as a modal
@@ -21,6 +22,7 @@ class _MedicalDisclaimerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       decoration: const BoxDecoration(
         color: DSColors.surfaceCard,
@@ -65,19 +67,19 @@ class _MedicalDisclaimerSheet extends StatelessWidget {
               ),
               const SizedBox(height: DSDimens.sizeS),
               Text(
-                'Guiding, not prescribing',
+                l10n.disclaimerTitle,
                 style: DSTextStyles.headlineMd,
               ),
               const SizedBox(height: DSDimens.sizeXs),
               Text(
-                'YuCat suggests foods based on your cat\'s profile and the ingredients we read off each product. It is not a substitute for veterinary advice.',
+                l10n.disclaimerBody1,
                 style: DSTextStyles.bodyMd.copyWith(
                   color: DSColors.inkSecondary,
                 ),
               ),
               const SizedBox(height: DSDimens.sizeXs),
               Text(
-                'For diagnosed conditions or sudden changes in weight, appetite, or behavior, please consult a licensed veterinarian.',
+                l10n.disclaimerBody2,
                 style: DSTextStyles.bodyMd.copyWith(
                   color: DSColors.inkSecondary,
                 ),
@@ -85,7 +87,7 @@ class _MedicalDisclaimerSheet extends StatelessWidget {
               const SizedBox(height: DSDimens.sizeL),
               Center(
                 child: DSPillButton(
-                  label: 'Got it',
+                  label: l10n.commonGotIt,
                   showChevron: false,
                   onPressed: () => Navigator.of(context).pop(),
                 ),

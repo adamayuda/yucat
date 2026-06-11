@@ -7,6 +7,7 @@ import 'package:yucat/features/cat_listing/widgets/cat_listing_empty_page.dart';
 import 'package:yucat/features/cat_listing/widgets/cat_listing_error_page.dart';
 import 'package:yucat/features/cat_listing/widgets/cat_listing_loading_page.dart';
 import 'package:yucat/features/cat_listing/widgets/cat_listing_loaded_page.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 
 @RoutePage()
@@ -32,25 +33,29 @@ class _CatListingPageState extends State<CatListingPage> {
     return BlocBuilder<CatListingBloc, CatListingState>(
       bloc: _bloc,
       buildWhen: (previous, current) => previous != current,
-      builder: (context, state) => Scaffold(
-        backgroundColor: DSColors.tintLavender,
-        body: Column(
-          children: [
-            SafeArea(
-              bottom: false,
-              child: DSAppBar.modal(
-                title: 'My cats',
-                onBack: () => Navigator.of(context).pop(),
+      builder: (context, state) {
+        final l10n = AppLocalizations.of(context);
+        return Scaffold(
+          backgroundColor: DSColors.tintLavender,
+          body: Column(
+            children: [
+              SafeArea(
+                bottom: false,
+                child: DSAppBar.modal(
+                  title: l10n.catListingTitle,
+                  onBack: () => Navigator.of(context).pop(),
+                ),
               ),
-            ),
-            Expanded(child: _onStateChangeBuilder(state)),
-          ],
-        ),
-      ),
+              Expanded(child: _onStateChangeBuilder(context, state)),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _onStateChangeBuilder(CatListingState state) {
+  Widget _onStateChangeBuilder(BuildContext context, CatListingState state) {
+    final l10n = AppLocalizations.of(context);
     switch (state) {
       case CatListingLoadingState():
         return const CatListingLoadingWidget();
@@ -62,7 +67,7 @@ class _CatListingPageState extends State<CatListingPage> {
         );
       case CatListingErrorState():
         return CatListingErrorWidget(
-          message: state.message,
+          message: l10n.catListingErrorGeneric,
           onPressed: () => _bloc.add(const CatListingFetchCatsEvent()),
         );
       case CatListingEmptyState():

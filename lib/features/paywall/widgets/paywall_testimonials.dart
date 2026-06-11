@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_dot_indicator.dart';
 
 /// Success-stories carousel shown on the paywall.
@@ -18,7 +19,7 @@ class _Testimonial {
   final String detail;
   final String avatarImage;
 
-  const _Testimonial({
+  _Testimonial({
     required this.quote,
     required this.name,
     required this.flag,
@@ -27,32 +28,26 @@ class _Testimonial {
   });
 }
 
-const _testimonials = [
+List<_Testimonial> _buildTestimonials(AppLocalizations l10n) => [
   _Testimonial(
-    quote:
-        "I'd been guessing for years. YuCat narrowed down a senior food "
-        "that's gentle on Lulu's stomach in one afternoon.",
-    name: 'Sophie',
+    quote: l10n.paywallTestimonial1Quote,
+    name: l10n.paywallTestimonial1Name,
     flag: '🇬🇧',
-    detail: 'Senior cat · sensitive stomach',
+    detail: l10n.paywallTestimonial1Detail,
     avatarImage: 'assets/images/image.png',
   ),
   _Testimonial(
-    quote:
-        "Scanned our kitten's kibble and finally understood what was in "
-        "it. Switched brands the same week.",
-    name: 'Marco',
+    quote: l10n.paywallTestimonial2Quote,
+    name: l10n.paywallTestimonial2Name,
     flag: '🇮🇹',
-    detail: 'Kitten · picky eater',
+    detail: l10n.paywallTestimonial2Detail,
     avatarImage: 'assets/images/image2.png',
   ),
   _Testimonial(
-    quote:
-        'Two cats, two very different needs. Now I know which food '
-        'actually fits each of them.',
-    name: 'Priya',
+    quote: l10n.paywallTestimonial3Quote,
+    name: l10n.paywallTestimonial3Name,
     flag: '🇮🇳',
-    detail: 'Multi-cat household',
+    detail: l10n.paywallTestimonial3Detail,
     avatarImage: 'assets/images/image3.png',
   ),
 ];
@@ -68,11 +63,13 @@ class _PaywallTestimonialsState extends State<PaywallTestimonials> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final testimonials = _buildTestimonials(l10n);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          'Success stories\nfrom cat parents',
+          l10n.paywallSuccessStoriesHeading,
           textAlign: TextAlign.center,
           style: DSTextStyles.displayLg,
         ),
@@ -82,7 +79,7 @@ class _PaywallTestimonialsState extends State<PaywallTestimonials> {
           child: PageView(
             controller: _controller,
             children: [
-              for (final t in _testimonials)
+              for (final t in testimonials)
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: DSDimens.sizeXs,
@@ -96,7 +93,7 @@ class _PaywallTestimonialsState extends State<PaywallTestimonials> {
         Center(
           child: DSDotIndicator(
             controller: _controller,
-            count: _testimonials.length,
+            count: testimonials.length,
           ),
         ),
       ],

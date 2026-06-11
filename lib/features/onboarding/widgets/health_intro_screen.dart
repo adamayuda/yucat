@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
@@ -13,9 +14,10 @@ class HealthIntroScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return OnboardingScaffold(
       gradient: DSGradients.onboardingHealthIntro,
-      footer: DSPillButton(label: "Let's go", onPressed: onAddCat),
+      footer: DSPillButton(label: l10n.onboardingLetsGo, onPressed: onAddCat),
       child: Stack(
         children: [
           Column(
@@ -23,7 +25,7 @@ class HealthIntroScreen extends StatelessWidget {
             children: [
               const SizedBox(height: DSDimens.sizeS),
               Text(
-                "Now tell us\nabout your cat's\nhealth",
+                l10n.onboardingHealthIntroTitle,
                 textAlign: TextAlign.center,
                 style: DSTextStyles.displayHero,
               ),

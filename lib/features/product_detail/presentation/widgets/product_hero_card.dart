@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/hatched_placeholder.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 class ProductHeroCard extends StatelessWidget {
   final ProductDisplayModel product;
@@ -79,6 +80,7 @@ class ProductHeroCard extends StatelessWidget {
 class _AiIdentifiedPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: DSDimens.sizeXs,
@@ -89,7 +91,7 @@ class _AiIdentifiedPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(DSRadii.pill),
       ),
       child: Text(
-        '* AI IDENTIFIED',
+        l10n.productDetailAiIdentifiedPill,
         style: DSTextStyles.caption.copyWith(
           color: DSColors.accentSuccess,
           fontWeight: FontWeight.w700,

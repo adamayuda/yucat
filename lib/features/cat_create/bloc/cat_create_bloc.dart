@@ -289,9 +289,8 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
         currentStep: (state as CatCreateLoadedState).currentStep,
         cat: (state as CatCreateLoadedState).cat,
         isSubmitting: false,
-        transientError: isEditMode
-            ? "Couldn't save your changes. Please try again."
-            : "Couldn't create the profile. Please try again.",
+        transientError:
+            isEditMode ? CatCreateError.save : CatCreateError.create,
         errorTick: _errorTick,
       ));
     }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/onboarding_floating_button.dart';
+import 'package:yucat/presentation/utils/localized_asset.dart';
 
 class ProofChartScreen extends StatelessWidget {
   final VoidCallback onNext;
@@ -13,6 +15,7 @@ class ProofChartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final width = MediaQuery.sizeOf(context).width;
 
     return Scaffold(
@@ -35,17 +38,21 @@ class ProofChartScreen extends StatelessWidget {
                   // Clear the back chip overlaid by onboarding_page.dart.
                   const SizedBox(height: 48),
                   Text(
-                    'YuCat provides\nlong-term results',
+                    l10n.onboardingProofChartTitle,
                     textAlign: TextAlign.center,
                     style: DSTextStyles.displayLg,
                   ),
                   const Spacer(),
                   SvgPicture.asset(
-                    'assets/images/onboarding-graph.svg',
+                    localizedAssetPath(
+                      context,
+                      'assets/images/onboarding-graph',
+                      'svg',
+                      available: const {'en', 'es', 'fr', 'hu'},
+                    ),
                     width: width * 0.82,
                   ),
                   const Spacer(),
-                  // TODO: replace placeholder stat with a real, cited figure.
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
@@ -70,17 +77,16 @@ class ProofChartScreen extends StatelessWidget {
                               style: DSTextStyles.bodyMd.copyWith(
                                 color: DSColors.inkSecondary,
                               ),
-                              children: const [
+                              children: [
                                 TextSpan(
-                                  text: '76% YuCat users ',
-                                  style: TextStyle(
+                                  text: l10n.onboardingProofChartCalloutBold,
+                                  style: const TextStyle(
                                     color: DSColors.inkPrimary,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                                 TextSpan(
-                                  text:
-                                      'find a better-fit food in under 2 weeks',
+                                  text: l10n.onboardingProofChartCalloutRest,
                                 ),
                               ],
                             ),
@@ -89,7 +95,7 @@ class ProofChartScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  OnboardingFloatingButton(label: 'Next', onPressed: onNext),
+                  OnboardingFloatingButton(label: l10n.commonNext, onPressed: onNext),
                 ],
               ),
             ),

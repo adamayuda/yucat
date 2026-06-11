@@ -17,6 +17,7 @@ import 'package:yucat/features/onboarding/widgets/scan_demo_screen.dart';
 import 'package:yucat/features/onboarding/widgets/welcome_screen.dart';
 import 'package:yucat/features/onboarding/widgets/why_yucat_screen.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
+import 'package:yucat/presentation/utils/localized_asset.dart';
 
 @RoutePage()
 class OnBoardingPage extends StatefulWidget {
@@ -47,7 +48,14 @@ class _OnBoardingPage extends State<OnBoardingPage> {
 
     // Warm the flutter_svg compile cache so the proof-chart graph doesn't
     // compile on the frame the page slides in (which caused visible jank).
-    const loader = SvgAssetLoader('assets/images/onboarding-graph.svg');
+    final loader = SvgAssetLoader(
+      localizedAssetPath(
+        context,
+        'assets/images/onboarding-graph',
+        'svg',
+        available: const {'en', 'es', 'fr', 'hu'},
+      ),
+    );
     svg.cache.putIfAbsent(loader.cacheKey(null), () => loader.loadBytes(null));
   }
 

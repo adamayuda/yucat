@@ -12,6 +12,7 @@ import 'package:yucat/features/paywall/utils/paywall_format.dart';
 import 'package:yucat/features/paywall/widgets/paywall_package_row.dart';
 import 'package:yucat/features/paywall/widgets/paywall_testimonials.dart';
 import 'package:yucat/features/paywall/widgets/paywall_value_props.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 
 class PaywallLoadedWidget extends StatefulWidget {
@@ -35,9 +36,9 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
   // the eye. Only meaningful when the annual plan has an eligible intro offer.
   bool _promoOn = false;
 
-  String? _badgeFor(Package pkg) {
+  String? _badgeFor(Package pkg, AppLocalizations l10n) {
     if (pkg.packageType == PackageType.annual) {
-      return 'BEST VALUE';
+      return l10n.paywallBadgeBestValue;
     }
     return null;
   }
@@ -49,6 +50,7 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final state = widget.state;
     final bloc = widget.bloc;
     final packages = state.packages;
@@ -84,8 +86,8 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
                     if (promoAvailable) ...[
                       _PromoSwitch(
                         label: introSavingsLabelFor(annual) != null
-                            ? 'Limited-time offer · ${introSavingsLabelFor(annual)}'
-                            : 'Limited-time offer',
+                            ? l10n.paywallLimitedTimeOfferWithSavings(introSavingsLabelFor(annual)!)
+                            : l10n.paywallLimitedTimeOffer,
                         value: _promoOn,
                         onChanged: (on) {
                           setState(() => _promoOn = on);
@@ -108,7 +110,7 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
                         allPackages: packages,
                         selected: visible[i].identifier ==
                             state.selectedPackage.identifier,
-                        badge: _badgeFor(visible[i]),
+                        badge: _badgeFor(visible[i], l10n),
                         showIntro: promoActive,
                         onTap: () => bloc.add(
                           PaywallPackageSelectedEvent(package: visible[i]),
@@ -173,7 +175,7 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
                     Center(
                       heightFactor: 1,
                       child: DSPillButton(
-                        label: ctaLabelFor(state.selectedPackage),
+                        label: ctaLabelFor(state.selectedPackage, l10n),
                         onPressed: () =>
                             bloc.add(const PaywallPurchaseEvent()),
                         loading: state.isPurchasing,
@@ -189,7 +191,7 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
                         onPressed: () =>
                             bloc.add(const PaywallDismissEvent()),
                         child: Text(
-                          'Skip paywall (debug)',
+                          l10n.paywallSkipDebug,
                           style: DSTextStyles.caption.copyWith(
                             color: DSColors.inkTertiary,
                             fontWeight: FontWeight.w700,
@@ -335,6 +337,7 @@ class _Hero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final width = MediaQuery.sizeOf(context).width;
     final topInset = MediaQuery.viewPaddingOf(context).top;
     // cat-cloud.svg is 391×378; rendered at full width its white cloud base
@@ -415,7 +418,7 @@ class _Hero extends StatelessWidget {
                       borderRadius: BorderRadius.circular(DSRadii.sm),
                     ),
                     child: Text(
-                      'Plus',
+                      l10n.paywallPlusBadge,
                       style: DSTextStyles.titleMd.copyWith(
                         color: DSColors.inkInverse,
                       ),
@@ -424,22 +427,30 @@ class _Hero extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: DSDimens.sizeS),
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: DSTextStyles.displayLg,
-                  children: [
-                    const TextSpan(text: 'Know '),
-                    TextSpan(
-                      text: 'exactly',
-                      style: DSTextStyles.displayLg.copyWith(
-                        color: DSColors.paywallAccent,
+              () {
+                final headline = l10n.paywallHeroHeadline;
+                final highlight = l10n.paywallHeroHighlight;
+                final idx = headline.indexOf(highlight);
+                final before = idx >= 0 ? headline.substring(0, idx) : headline;
+                final highlighted = idx >= 0 ? highlight : '';
+                final after = idx >= 0 ? headline.substring(idx + highlight.length) : '';
+                return RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: DSTextStyles.displayLg,
+                    children: [
+                      TextSpan(text: before),
+                      TextSpan(
+                        text: highlighted,
+                        style: DSTextStyles.displayLg.copyWith(
+                          color: DSColors.paywallAccent,
+                        ),
                       ),
-                    ),
-                    const TextSpan(text: "\nwhat's in the bowl"),
-                  ],
-                ),
-              ),
+                      TextSpan(text: after),
+                    ],
+                  ),
+                );
+              }(),
             ],
           ),
         ),
@@ -504,11 +515,12 @@ class _LaurelStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: const [
-        _LaurelStat(value: '4.7', label: 'average\nrating'),
-        _LaurelStat(value: '1M+', label: 'cat parents\nworldwide'),
+      children: [
+        _LaurelStat(value: '4.7', label: l10n.paywallStatRatingLabel),
+        _LaurelStat(value: '1M+', label: l10n.paywallStatCatParentsLabel),
       ],
     );
   }
@@ -554,6 +566,7 @@ class _Reassurance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -564,7 +577,7 @@ class _Reassurance extends StatelessWidget {
         ),
         const SizedBox(width: DSDimens.sizeXxs),
         Text(
-          'Cancel anytime.',
+          l10n.paywallCancelAnytime,
           style: DSTextStyles.caption.copyWith(color: DSColors.inkSecondary),
         ),
       ],
@@ -577,10 +590,9 @@ class _AutoRenewDisclosure extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Text(
-      'Your subscription auto-renews unless cancelled at least 24 hours before '
-      'the end of the current term. Cancel anytime in the App Store at no '
-      'extra cost.',
+      l10n.paywallAutoRenewDisclosure,
       textAlign: TextAlign.center,
       style: DSTextStyles.caption.copyWith(color: DSColors.inkTertiary),
     );
@@ -600,16 +612,17 @@ class _LegalLinks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        DSTextLink(label: 'Restore purchases', onPressed: onRestore),
+        DSTextLink(label: l10n.paywallRestorePurchases, onPressed: onRestore),
         DSTextLink(
-          label: 'Terms',
+          label: l10n.commonTerms,
           onPressed: () => _open(Uri.parse(kTermsUrl)),
         ),
         DSTextLink(
-          label: 'Privacy',
+          label: l10n.commonPrivacy,
           onPressed: () => _open(Uri.parse(kPrivacyUrl)),
         ),
       ],

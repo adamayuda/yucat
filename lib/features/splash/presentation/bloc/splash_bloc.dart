@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
+import 'package:yucat/features/auth/domain/usecase/signin_anonymously_usecase.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 
 part 'splash_event.dart';
@@ -19,14 +21,20 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   final SharedPreferences _prefs;
   final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
   final UserAnalyticsService _userAnalyticsService;
+  final CurrentUserUsecase _currentUserUsecase;
+  final SigninAnonymouslyUsecase _signinAnonymouslyUsecase;
 
   SplashBloc({
     required SharedPreferences prefs,
     required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
     required UserAnalyticsService userAnalyticsService,
+    required CurrentUserUsecase currentUserUsecase,
+    required SigninAnonymouslyUsecase signinAnonymouslyUsecase,
   })  : _prefs = prefs,
         _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
         _userAnalyticsService = userAnalyticsService,
+        _currentUserUsecase = currentUserUsecase,
+        _signinAnonymouslyUsecase = signinAnonymouslyUsecase,
         super(SplashLoadingState()) {
     on<SplashInitialEvent>(_onSplashInitialEvent);
   }
@@ -37,6 +45,13 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   ) async {
     emit(SplashLoadingState());
     final router = event.context.router;
+
+    // Bootstrap auth before routing anywhere. Every launch passes through here
+    // first, so guaranteeing an anonymous Firebase session now means the uid is
+    // ready for any downstream screen — including the cat-create wizard that
+    // runs *inside* onboarding (which previously failed because anonymous
+    // sign-in only happened once Home loaded).
+    await _ensureSignedIn();
 
     final isCompleted = _prefs.getBool(_onboardingCompletedKey) ?? false;
 
@@ -73,6 +88,23 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
         ),
       );
       router.replace(const HomeRoute());
+    }
+  }
+
+  /// Ensures an anonymous Firebase session exists and binds the Mixpanel
+  /// profile to its uid. Awaited at boot so the uid is ready for every route.
+  /// Safe to call repeatedly; never throws to the caller.
+  Future<void> _ensureSignedIn() async {
+    try {
+      if (_currentUserUsecase() == null) {
+        await _signinAnonymouslyUsecase();
+      }
+      final user = _currentUserUsecase();
+      if (user != null) {
+        await _userAnalyticsService.identify(user.uid);
+      }
+    } catch (e) {
+      debugPrint('SplashBloc._ensureSignedIn error: $e');
     }
   }
 }

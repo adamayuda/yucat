@@ -6,6 +6,7 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/hatched_placeholder.dart';
 import 'package:yucat/features/saved_products/presentation/bloc/saved_products_bloc.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
@@ -96,15 +97,16 @@ class _LoadedList extends StatelessWidget {
       itemBuilder: (context, index) {
         if (index == 0) {
           final n = products.length;
+          final l10n = AppLocalizations.of(context);
           return Padding(
             padding: const EdgeInsets.only(bottom: DSDimens.sizeS),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Saved products', style: DSTextStyles.displayLg),
+                Text(l10n.savedProductsTitle, style: DSTextStyles.displayLg),
                 const SizedBox(height: DSDimens.sizeXxxs),
                 Text(
-                  '$n saved',
+                  l10n.savedProductsCount(n),
                   style: DSTextStyles.bodyMd.copyWith(
                     color: DSColors.inkSecondary,
                   ),
@@ -211,10 +213,11 @@ class _SavedProductRow extends StatelessWidget {
 class _EmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const DSStateView.empty(
+    final l10n = AppLocalizations.of(context);
+    return DSStateView.empty(
       illustrationAsset: 'assets/images/Illustrations/empty-state.gif',
-      headline: 'No saved products yet',
-      body: 'Tap the bookmark on a product detail page to save it here.',
+      headline: l10n.savedProductsEmptyHeadline,
+      body: l10n.savedProductsEmptyBody,
     );
   }
 }

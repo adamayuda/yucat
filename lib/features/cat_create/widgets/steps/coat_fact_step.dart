@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 /// Coat-health interstitial for the cat-create wizard (step 8).
 ///
@@ -11,15 +12,14 @@ import 'package:yucat/config/themes/theme.dart';
 class CoatFactStep extends StatelessWidget {
   const CoatFactStep({super.key});
 
-  static const String _headline = 'Long-haired cats need\nmore omega-3';
-  static const String _highlight = 'more omega-3';
-  static const String _body =
-      'Omega-3 keeps their coat glossy and skin healthy.';
-
   @override
   Widget build(BuildContext context) {
-    final parts = _headline.split(_highlight);
-    final hasHighlight = _highlight.isNotEmpty && parts.length == 2;
+    final l10n = AppLocalizations.of(context);
+    final headline = l10n.coatFactHeadline;
+    final highlight = l10n.coatFactHighlight;
+    final body = l10n.coatFactBody;
+    final parts = headline.split(highlight);
+    final hasHighlight = highlight.isNotEmpty && parts.length == 2;
 
     // The warm sunburst backdrop (bg-light.svg) is painted full-screen by the
     // host WizardStepShell via its `backgroundChild`, so this step only layers
@@ -43,9 +43,11 @@ class CoatFactStep extends StatelessWidget {
                       TextSpan(
                         children: [
                           TextSpan(text: parts[0]),
-                          const TextSpan(
-                            text: _highlight,
-                            style: TextStyle(color: DSColors.accentSuccess),
+                          TextSpan(
+                            text: highlight,
+                            style: const TextStyle(
+                              color: DSColors.accentSuccess,
+                            ),
                           ),
                           TextSpan(text: parts[1]),
                         ],
@@ -54,7 +56,7 @@ class CoatFactStep extends StatelessWidget {
                       style: DSTextStyles.displayLg,
                     )
                   : Text(
-                      _headline,
+                      headline,
                       textAlign: TextAlign.center,
                       style: DSTextStyles.displayLg,
                     ),
@@ -63,7 +65,7 @@ class CoatFactStep extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
               child: Text(
-                _body,
+                body,
                 textAlign: TextAlign.center,
                 style: DSTextStyles.bodyLg.copyWith(
                   color: DSColors.inkSecondary,

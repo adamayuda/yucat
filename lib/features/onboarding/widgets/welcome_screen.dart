@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/core/legal_urls.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -20,6 +21,7 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final size = MediaQuery.sizeOf(context);
 
     return Scaffold(
@@ -65,7 +67,7 @@ class WelcomeScreen extends StatelessWidget {
                 children: [
                   SizedBox(height: size.height * 0.30),
                   Text(
-                    'Decode\nevery\ncat\nfood',
+                    l10n.onboardingWelcomeHeadline,
                     textAlign: TextAlign.center,
                     style: DSTextStyles.title(76),
                   ),
@@ -74,7 +76,7 @@ class WelcomeScreen extends StatelessWidget {
                     width: double.infinity,
                     child: Align(
                       child: DSPillButton(
-                        label: 'Get started',
+                        label: l10n.onboardingGetStarted,
                         onPressed: onGetStarted,
                         showChevron: false,
                         verticalPadding: DSDimens.sizeXs,
@@ -85,20 +87,20 @@ class WelcomeScreen extends StatelessWidget {
                   Text.rich(
                     TextSpan(
                       children: [
-                        const TextSpan(
-                          text: "By continuing you're accepting our\n",
+                        TextSpan(
+                          text: l10n.onboardingLegalPrefix,
                         ),
                         TextSpan(
-                          text: 'Terms of Use',
+                          text: l10n.onboardingTermsOfUse,
                           style: const TextStyle(
                             decoration: TextDecoration.underline,
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () => _openUrl(kTermsUrl),
                         ),
-                        const TextSpan(text: ' and '),
+                        TextSpan(text: l10n.onboardingLegalAnd),
                         TextSpan(
-                          text: 'Privacy Notice',
+                          text: l10n.onboardingPrivacyNotice,
                           style: const TextStyle(
                             decoration: TextDecoration.underline,
                           ),

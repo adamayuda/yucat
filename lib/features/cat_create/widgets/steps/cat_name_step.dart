@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
 class CatNameStep extends StatelessWidget {
@@ -14,11 +15,12 @@ class CatNameStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const MascotSpeechBubble(
-          question: 'What\'s your cat\'s name?',
+        MascotSpeechBubble(
+          question: l10n.catNameQuestion,
         ),
         Expanded(
           child: Center(
@@ -26,7 +28,7 @@ class CatNameStep extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Name your cat',
+                  l10n.catNameLabel,
                   style: DSTextStyles.bodyLg.copyWith(
                     color: DSColors.inkTertiary,
                   ),
@@ -39,8 +41,8 @@ class CatNameStep extends StatelessWidget {
                   autofocus: true,
                   cursorColor: DSColors.coralAccent,
                   style: DSTextStyles.displayLg,
-                  decoration: const InputDecoration(
-                    hintText: 'Caramel',
+                  decoration: InputDecoration(
+                    hintText: l10n.catNameHint,
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
@@ -52,7 +54,7 @@ class CatNameStep extends StatelessWidget {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a cat name';
+                      return l10n.catNameValidationEmpty;
                     }
                     return null;
                   },

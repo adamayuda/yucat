@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
@@ -14,6 +15,7 @@ class ProfileIntroScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return OnboardingScaffold(
       background: _background,
       child: Column(
@@ -27,7 +29,7 @@ class ProfileIntroScreen extends StatelessWidget {
           ),
           const SizedBox(height: DSDimens.size3xl),
           Text(
-            "Let's set up\nyour cat's profile",
+            l10n.onboardingProfileIntroTitle,
             textAlign: TextAlign.center,
             style: DSTextStyles.displayHero,
           ),
@@ -45,7 +47,7 @@ class ProfileIntroScreen extends StatelessWidget {
           // Center so the stretch crossAxisAlignment doesn't force the pill to
           // full width.
           Center(
-            child: OnboardingFloatingButton(label: 'Next', onPressed: onNext),
+            child: OnboardingFloatingButton(label: l10n.commonNext, onPressed: onNext),
           ),
         ],
       ),
@@ -56,6 +58,7 @@ class ProfileIntroScreen extends StatelessWidget {
 class _QuoteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(DSDimens.sizeS),
       decoration: BoxDecoration(
@@ -65,11 +68,11 @@ class _QuoteCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text('2 min', style: DSTextStyles.displayLg.copyWith(fontSize: 22)),
+          Text(l10n.onboardingProfileIntroTime, style: DSTextStyles.displayLg.copyWith(fontSize: 22)),
           const SizedBox(width: DSDimens.sizeS),
           Expanded(
             child: Text(
-              'A quick profile unlocks tailored verdicts on every bag',
+              l10n.onboardingProfileIntroQuote,
               style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkPrimary),
             ),
           ),

@@ -8,6 +8,7 @@ import 'package:yucat/features/cat_detail/presentation/widgets/cat_detail_skelet
 import 'package:yucat/features/cat_detail/presentation/widgets/cat_hero_section.dart';
 import 'package:yucat/features/cat_detail/presentation/widgets/cat_stat_tile.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 
@@ -39,9 +40,10 @@ class _CatDetailPageState extends State<CatDetailPage> {
         if (state is CatDetailDeletedState) {
           Navigator.of(context).pop(true);
         } else if (state is CatDetailErrorState) {
+          final l10n = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.message),
+              content: Text(l10n.catDetailDeleteError),
               backgroundColor: DSColors.accentDanger,
             ),
           );
@@ -129,25 +131,26 @@ class _CatDetailPageState extends State<CatDetailPage> {
   ) {
     return showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Delete $catName?'),
-        content: const Text(
-          'Are you sure you want to delete this cat profile? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: DSColors.accentDanger,
+      builder: (context) {
+        final l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(l10n.catDetailDeleteTitle(catName)),
+          content: Text(l10n.catDetailDeleteBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.catDetailDeleteCancel),
             ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: DSColors.accentDanger,
+              ),
+              child: Text(l10n.catDetailDeleteConfirm),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -159,6 +162,7 @@ class _ProfileCompletionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final fields = [
       cat.breed,
       cat.age,
@@ -181,7 +185,7 @@ class _ProfileCompletionCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Profile completion',
+                l10n.catDetailProfileCompletion,
                 style: DSTextStyles.titleMd,
               ),
               Text(
@@ -227,13 +231,14 @@ class _DetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const notSet = 'Not set';
+    final l10n = AppLocalizations.of(context);
+    final notSet = l10n.catDetailNotSet;
     final tiles = <_TileSpec>[
-      _TileSpec(Icons.pets_rounded, 'Breed', cat.breed ?? notSet),
+      _TileSpec(Icons.pets_rounded, l10n.catDetailBreedLabel, cat.breed ?? notSet),
       _TileSpec(
         Icons.cake_rounded,
-        'Age',
-        cat.age != null ? _formatAge(cat.age!) : notSet,
+        l10n.catDetailAgeLabel,
+        cat.age != null ? _formatAge(cat.age!, l10n) : notSet,
       ),
       _TileSpec(
         cat.gender?.toLowerCase() == 'male'
@@ -241,34 +246,34 @@ class _DetailsCard extends StatelessWidget {
             : cat.gender?.toLowerCase() == 'female'
                 ? Icons.female_rounded
                 : Icons.transgender_rounded,
-        'Gender',
-        cat.gender != null ? _formatGender(cat.gender!) : notSet,
+        l10n.catDetailGenderLabel,
+        cat.gender != null ? _formatGender(cat.gender!, l10n) : notSet,
       ),
       _TileSpec(
         Icons.brush_rounded,
-        'Coat',
-        cat.coatType != null ? _formatCoatType(cat.coatType!) : notSet,
+        l10n.catDetailCoatLabel,
+        cat.coatType != null ? _formatCoatType(cat.coatType!, l10n) : notSet,
       ),
       _TileSpec(
         Icons.directions_run_rounded,
-        'Activity',
+        l10n.catDetailActivityLabel,
         cat.activityLevel != null
-            ? _formatActivityLevel(cat.activityLevel!)
+            ? _formatActivityLevel(cat.activityLevel!, l10n)
             : notSet,
       ),
       _TileSpec(
         Icons.monitor_weight_rounded,
-        'Body',
+        l10n.catDetailBodyLabel,
         cat.weightCategory != null
-            ? _formatBodyCondition(cat.weightCategory!)
+            ? _formatBodyCondition(cat.weightCategory!, l10n)
             : notSet,
       ),
       _TileSpec(
         Icons.medical_services_rounded,
-        'Status',
+        l10n.catDetailStatusLabel,
         cat.neuteredStatus != null
-            ? _formatNeuteredStatus(cat.neuteredStatus!)
-            : (cat.neutered ? 'Neutered' : 'Intact'),
+            ? _formatNeuteredStatus(cat.neuteredStatus!, l10n)
+            : (cat.neutered ? l10n.catDetailStatusNeutered : l10n.neuteredIntact),
       ),
     ];
 
@@ -277,7 +282,7 @@ class _DetailsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Details', style: DSTextStyles.titleMd),
+          Text(l10n.catDetailDetailsSection, style: DSTextStyles.titleMd),
           const SizedBox(height: DSDimens.sizeS),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -304,61 +309,62 @@ class _DetailsCard extends StatelessWidget {
     );
   }
 
-  String _formatAge(int ageInMonths) {
+  String _formatAge(int ageInMonths, AppLocalizations l10n) {
     final years = ageInMonths ~/ 12;
     final months = ageInMonths % 12;
-    if (years == 0) return '$months mo';
-    if (months == 0) return '$years ${years == 1 ? 'yr' : 'yrs'}';
-    return '$years ${years == 1 ? 'yr' : 'yrs'} $months mo';
+    if (years == 0) return '$months ${l10n.ageUnitMonth}';
+    final yearStr = '$years ${years == 1 ? l10n.ageUnitYear : l10n.catDetailAgeYears}';
+    if (months == 0) return yearStr;
+    return '$yearStr $months ${l10n.ageUnitMonth}';
   }
 
-  String _formatGender(String gender) {
+  String _formatGender(String gender, AppLocalizations l10n) {
     return switch (gender.toLowerCase()) {
-      'male' => 'Male',
-      'female' => 'Female',
+      'male' => l10n.genderMale,
+      'female' => l10n.genderFemale,
       _ => _formatSnakeCase(gender),
     };
   }
 
-  String _formatActivityLevel(String level) {
+  String _formatActivityLevel(String level, AppLocalizations l10n) {
     return switch (level.toLowerCase()) {
-      'low' => 'Low',
-      'moderate' => 'Moderate',
-      'medium' => 'Medium',
-      'high' => 'High',
+      'low' => l10n.activityLowLabel,
+      'moderate' => l10n.catDetailActivityModerate,
+      'medium' => l10n.activityMediumLabel,
+      'high' => l10n.activityHighLabel,
       _ => _formatSnakeCase(level),
     };
   }
 
-  String _formatBodyCondition(String category) {
+  String _formatBodyCondition(String category, AppLocalizations l10n) {
     return switch (category.toLowerCase()) {
-      'underweight' => 'Underweight',
-      'normal' => 'Ideal weight',
-      'overweight' => 'Overweight',
-      'obese' => 'Obese',
+      'underweight' => l10n.bodyUnderweightLabel,
+      'normal' => l10n.catDetailBodyNormal,
+      'overweight' => l10n.bodyOverweightLabel,
+      'obese' => l10n.bodyObeseLabel,
       _ => _formatSnakeCase(category),
     };
   }
 
-  String _formatNeuteredStatus(String status) {
+  String _formatNeuteredStatus(String status, AppLocalizations l10n) {
     return switch (status.toLowerCase()) {
-      'neutered' => 'Neutered',
-      'spayed' => 'Spayed',
-      'intact' => 'Intact',
-      'pregnant' => 'Pregnant',
-      'lactating' => 'Lactating',
+      'neutered' => l10n.catDetailStatusNeutered,
+      'spayed' => l10n.catDetailStatusSpayed,
+      'intact' => l10n.neuteredIntact,
+      'pregnant' => l10n.neuteredPregnant,
+      'lactating' => l10n.neuteredLactating,
       _ => _formatSnakeCase(status),
     };
   }
 
-  String _formatCoatType(String coatType) {
+  String _formatCoatType(String coatType, AppLocalizations l10n) {
     return switch (coatType.toLowerCase()) {
-      'short' => 'Short hair',
-      'short_hair' => 'Short hair',
-      'medium' => 'Medium hair',
-      'long' => 'Long hair',
-      'long_hair' => 'Long hair',
-      'hairless' => 'Hairless',
+      'short' => l10n.coatShortHair,
+      'short_hair' => l10n.coatShortHair,
+      'medium' => l10n.catDetailCoatMedium,
+      'long' => l10n.coatLongHair,
+      'long_hair' => l10n.coatLongHair,
+      'hairless' => l10n.coatHairless,
       _ => _formatSnakeCase(coatType),
     };
   }
@@ -382,12 +388,13 @@ class _ConditionsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DSCard(
       padding: const EdgeInsets.all(DSDimens.sizeS),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Health conditions', style: DSTextStyles.titleMd),
+          Text(l10n.catDetailHealthConditionsSection, style: DSTextStyles.titleMd),
           const SizedBox(height: DSDimens.sizeS),
           Wrap(
             spacing: DSDimens.sizeXxs,
@@ -409,6 +416,7 @@ class _ConditionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: DSDimens.sizeS,
@@ -419,13 +427,29 @@ class _ConditionChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(DSRadii.pill),
       ),
       child: Text(
-        _formatSnakeCase(condition),
+        _localizeCondition(condition, l10n),
         style: DSTextStyles.label.copyWith(
           color: DSColors.accentDanger,
           fontWeight: FontWeight.w600,
         ),
       ),
     );
+  }
+
+  String _localizeCondition(String condition, AppLocalizations l10n) {
+    return switch (condition.toLowerCase()) {
+      'urinary_issues' => l10n.healthUrinaryIssues,
+      'kidney_disease' => l10n.healthKidneyDisease,
+      'sensitive_stomach' => l10n.healthSensitiveStomach,
+      'skin_allergies' => l10n.healthSkinAllergies,
+      'food_allergies' => l10n.healthFoodAllergies,
+      'diabetes' => l10n.healthDiabetes,
+      'dental_problems' => l10n.healthDentalProblems,
+      'hairball_issues' => l10n.healthHairballIssues,
+      'heart_condition' => l10n.healthHeartCondition,
+      'joint_issues' => l10n.healthJointIssues,
+      _ => _formatSnakeCase(condition),
+    };
   }
 
   String _formatSnakeCase(String text) {
@@ -447,6 +471,7 @@ class _DeleteLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: TextButton(
         onPressed: onTap,
@@ -458,7 +483,7 @@ class _DeleteLink extends StatelessWidget {
           ),
         ),
         child: Text(
-          'Delete profile',
+          l10n.catDetailDeleteProfile,
           style: DSTextStyles.bodyMd.copyWith(
             color: DSColors.inkSecondary,
             decoration: TextDecoration.underline,

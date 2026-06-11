@@ -156,6 +156,42 @@ healthIntro`). Three complementary views — start with the first:
 > Use `Onboarding Step Viewed` (not the generic `Screen View`) for onboarding analysis: it's
 > scoped to onboarding, ordered by `step_index`, and has no name gaps.
 
+### Combined new-user journey funnel — first screen → paying subscriber
+
+The whole signup flow as one ordered funnel: onboarding screens → cat wizard → paywall →
+subscription. **Create New → Funnels**, measure **Unique users**, window **1 day**. Add the
+**26 steps** below, then **rename each step** (step's `⋮` → *Rename step*, or click its name) to
+the friendly label so the funnel reads as the journey — the leading number keeps the order.
+
+**⚠ The wizard starts at `Gender` (`step_index 1`), NOT `CatName` (0).** Onboarding pre-fills the
+cat's name on the `profileName` screen, so the wizard opens on Gender and the `CatName` screen is
+never shown in this path (`create_cat_page.dart` → `_initialStep = _seededFromOnboarding ? 1 : 0`).
+Filtering the wizard half on `step_index = 0` returns 0% — use `1→11`.
+
+| # | Event | Step filter | Rename to |
+|--|--|--|--|
+|1–12|`Onboarding Step Viewed`|`step_index` = 0,1,…,11|`1 welcome` … `12 healthIntro` |
+|13–23|`Cat Wizard Step Viewed`|`step_index` = **1,2,…,11** **AND** `is_edit_mode` = false|`13 Gender` … `23 Breed` |
+|24|`Cat Created`|—|`24 Cat Created` |
+|25|`Paywall Shown`|`trigger` = `onboarding_complete`|`25 Paywall Shown` |
+|26|`Subscription Completed`|`trigger` = `onboarding_complete`|`26 Subscribed` |
+
+Onboarding step→label and wizard step→label:
+`1 welcome · 2 scanDemo · 3 attribution · 4 proofChart · 5 whyYucat · 6 nutritionFact ·
+7 profileIntro · 8 profileName · 9 rating · 10 notifPrimer · 11 reminders · 12 healthIntro` /
+`13 Gender · 14 ProfilePhoto · 15 Age · 16 BodyCondition · 17 Activity · 18 WaterIntakeFact ·
+19 NeuteredStatus · 20 Coat · 21 CoatFact · 22 HealthConditions · 23 Breed`.
+
+**Key drop signals to watch:**
+- **12 → 13** (healthIntro → Gender): finished onboarding screens but didn't start the cat wizard.
+- **23 → 24/25** (Breed → Cat Created / Paywall): abandoned the wizard before saving / before the paywall.
+- **25 → 26** (Paywall Shown → Subscribed): saw the hard paywall but didn't purchase — your revenue gate.
+
+Put `is_edit_mode = false` and `trigger = onboarding_complete` as **per-step** filters, not global
+ones — a global filter drops events that lack that property and breaks the earlier steps. Step
+renames are display-only (saved with this funnel); the Lexicon Custom-Events route is a heavier
+fallback if your Mixpanel version lacks per-step rename. Save as **"New-user journey"**.
+
 ---
 
 ## §3 — Cohorts (segments to slice every report)

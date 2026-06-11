@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_option_row.dart';
 import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
@@ -12,12 +13,12 @@ class _AttributionOption {
   const _AttributionOption(this.key, this.asset, this.label);
 }
 
-const _options = [
-  _AttributionOption('instagram', 'assets/images/camera.svg', 'Instagram'),
-  _AttributionOption('tiktok', 'assets/images/Hand-2.svg', 'TikTok'),
-  _AttributionOption('youtube', 'assets/images/TV.svg', 'YouTube'),
-  _AttributionOption('app_store', 'assets/images/apple.svg', 'App Store search'),
-  _AttributionOption('friend', 'assets/images/Hand.svg', 'Friends/family'),
+List<_AttributionOption> _buildOptions(AppLocalizations l10n) => [
+  _AttributionOption('instagram', 'assets/images/camera.svg', l10n.onboardingAttributionInstagram),
+  _AttributionOption('tiktok', 'assets/images/Hand-2.svg', l10n.onboardingAttributionTikTok),
+  _AttributionOption('youtube', 'assets/images/TV.svg', l10n.onboardingAttributionYouTube),
+  _AttributionOption('app_store', 'assets/images/apple.svg', l10n.onboardingAttributionAppStore),
+  _AttributionOption('friend', 'assets/images/Hand.svg', l10n.onboardingAttributionFriends),
 ];
 
 class AttributionScreen extends StatefulWidget {
@@ -47,6 +48,8 @@ class _AttributionScreenState extends State<AttributionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final options = _buildOptions(l10n);
     final hasSelection = _selected != null;
 
     return OnboardingScaffold(
@@ -56,7 +59,7 @@ class _AttributionScreenState extends State<AttributionScreen> {
         children: [
           const SizedBox(height: DSDimens.sizeS),
           Text(
-            'How did you hear\nabout us?',
+            l10n.onboardingAttributionTitle,
             textAlign: TextAlign.center,
             style: DSTextStyles.displayLg,
           ),
@@ -64,11 +67,11 @@ class _AttributionScreenState extends State<AttributionScreen> {
           Expanded(
             child: ListView.separated(
               padding: EdgeInsets.zero,
-              itemCount: _options.length,
+              itemCount: options.length,
               separatorBuilder: (_, __) =>
                   const SizedBox(height: DSDimens.sizeXs),
               itemBuilder: (context, index) {
-                final opt = _options[index];
+                final opt = options[index];
                 return DSOptionRow(
                   label: opt.label,
                   leadingAsset: opt.asset,
@@ -79,7 +82,7 @@ class _AttributionScreenState extends State<AttributionScreen> {
             ),
           ),
           OnboardingFloatingButton(
-            label: hasSelection ? 'Next' : 'Skip',
+            label: hasSelection ? l10n.commonNext : l10n.commonSkip,
             onPressed: hasSelection
                 ? () => widget.onSelect(_selected!)
                 : widget.onSkip,

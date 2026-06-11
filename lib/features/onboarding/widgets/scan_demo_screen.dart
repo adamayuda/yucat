@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
+import 'package:yucat/presentation/utils/localized_asset.dart';
 
 /// Step right after Welcome — scan demo card that lands the value-prop
 /// before the survey starts.
@@ -15,6 +17,7 @@ class ScanDemoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final width = MediaQuery.sizeOf(context).width;
 
     return OnboardingScaffold(
@@ -37,7 +40,12 @@ class ScanDemoScreen extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio: 888 / 1032,
                 child: Image.asset(
-                  'assets/images/onboarding-scan.png',
+                  localizedAssetPath(
+                    context,
+                    'assets/images/onboarding-scan',
+                    'png',
+                    available: const {'en', 'es', 'fr', 'hu'},
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -45,20 +53,20 @@ class ScanDemoScreen extends StatelessWidget {
           ),
           const SizedBox(height: DSDimens.size3xl),
           Text(
-            "Track\nwhat's inside",
+            l10n.onboardingScanDemoTitle,
             textAlign: TextAlign.center,
             style: DSTextStyles.title(48),
           ),
           const SizedBox(height: DSDimens.sizeS),
           Text(
-            'Point your camera at any\ncat food and get a verdict',
+            l10n.onboardingScanDemoSubtitle,
             textAlign: TextAlign.center,
             style: DSTextStyles.bodyMd.copyWith(
               color: DSColors.inkSecondary,
             ),
           ),
           const Spacer(flex: 2),
-          OnboardingFloatingButton(label: 'Next', onPressed: onNext),
+          OnboardingFloatingButton(label: l10n.commonNext, onPressed: onNext),
         ],
       ),
     );

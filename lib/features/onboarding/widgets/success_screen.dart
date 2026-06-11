@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 
 class SuccessScreen extends StatelessWidget {
@@ -20,6 +21,7 @@ class SuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final name = summary?.name.trim();
     final hasName = name != null && name.isNotEmpty;
 
@@ -46,7 +48,9 @@ class SuccessScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        hasName ? '$name is\nall set!' : "You're all\nset!",
+                        hasName
+                            ? l10n.onboardingSuccessWithName(name)
+                            : l10n.onboardingSuccessNoName,
                         textAlign: TextAlign.center,
                         style: DSTextStyles.displayHero,
                       ),
@@ -122,7 +126,7 @@ class SuccessScreen extends StatelessWidget {
                   child: Center(
                     heightFactor: 1,
                     child: DSPillButton(
-                      label: 'Start scanning',
+                      label: l10n.onboardingStartScanning,
                       onPressed: onStart,
                     ),
                   ),
@@ -143,9 +147,10 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const notSet = 'Not set';
+    final l10n = AppLocalizations.of(context);
+    final notSet = l10n.onboardingSuccessNotSet;
     final healthValue = summary.healthLabels.isEmpty
-        ? 'None'
+        ? l10n.onboardingSuccessNone
         : summary.healthLabels.join(', ');
 
     // Every attribute is always shown; anything the user skipped reads
@@ -154,49 +159,49 @@ class _SummaryCard extends StatelessWidget {
       _SummaryRow(
         icon: Icons.cake_rounded,
         tint: DSColors.tintMint,
-        label: 'Age',
+        label: l10n.onboardingSuccessRowAge,
         value: summary.ageLabel ?? notSet,
         muted: summary.ageLabel == null,
       ),
       _SummaryRow(
         icon: Icons.bolt_rounded,
         tint: DSColors.tintSand,
-        label: 'Activity',
+        label: l10n.onboardingSuccessRowActivity,
         value: summary.activityLabel ?? notSet,
         muted: summary.activityLabel == null,
       ),
       _SummaryRow(
         icon: Icons.monitor_weight_rounded,
         tint: DSColors.tintMintSoft,
-        label: 'Body condition',
+        label: l10n.onboardingSuccessRowBodyCondition,
         value: summary.bodyConditionLabel ?? notSet,
         muted: summary.bodyConditionLabel == null,
       ),
       _SummaryRow(
         icon: Icons.brush_rounded,
         tint: DSColors.tintLavender,
-        label: 'Coat',
+        label: l10n.onboardingSuccessRowCoat,
         value: summary.coatLabel ?? notSet,
         muted: summary.coatLabel == null,
       ),
       _SummaryRow(
         icon: Icons.medical_services_rounded,
         tint: DSColors.tintSky,
-        label: 'Neuter status',
+        label: l10n.onboardingSuccessRowNeuterStatus,
         value: summary.neuterLabel ?? notSet,
         muted: summary.neuterLabel == null,
       ),
       _SummaryRow(
         icon: Icons.pets_rounded,
         tint: DSColors.tintCoral,
-        label: 'Breed',
+        label: l10n.onboardingSuccessRowBreed,
         value: summary.breed ?? notSet,
         muted: summary.breed == null,
       ),
       _SummaryRow(
         icon: Icons.favorite_rounded,
         tint: DSColors.coralSurface,
-        label: 'Health conditions',
+        label: l10n.onboardingSuccessRowHealthConditions,
         value: healthValue,
       ),
     ];
@@ -214,9 +219,9 @@ class _SummaryCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const _HintCallout(
-            title: 'Profile ready',
-            body: "You can edit these details anytime in your cat's profile.",
+          _HintCallout(
+            title: l10n.onboardingSuccessProfileReadyTitle,
+            body: l10n.onboardingSuccessProfileReadyBody,
           ),
           const SizedBox(height: DSDimens.sizeL),
           for (var i = 0; i < rows.length; i++) ...[

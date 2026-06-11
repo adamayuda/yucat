@@ -1,0 +1,620 @@
+{
+  "@@locale": "en",
+  "commonNext": "Next",
+  "@commonNext": {
+    "description": "Generic wizard CTA to advance to the next step"
+  },
+  "commonGotIt": "Got it",
+  "@commonGotIt": {
+    "description": "Generic acknowledgement CTA (interstitials, disclaimer)"
+  },
+  "commonSkip": "Skip",
+  "@commonSkip": {
+    "description": "Generic CTA to skip an optional step"
+  },
+  "catNameQuestion": "What's your cat's name?",
+  "@catNameQuestion": {
+    "description": "Mascot question on the cat-create name step"
+  },
+  "catNameLabel": "Name your cat",
+  "@catNameLabel": {
+    "description": "Label above the cat name input"
+  },
+  "catNameHint": "Caramel",
+  "@catNameHint": {
+    "description": "Placeholder example cat name in the name input"
+  },
+  "catNameValidationEmpty": "Please enter a cat name",
+  "@catNameValidationEmpty": {
+    "description": "Validation error when the cat name is empty"
+  },
+  "genderQuestion": "What's your cat's gender?",
+  "@genderQuestion": {
+    "description": "Mascot question on the gender step"
+  },
+  "genderFemale": "Female",
+  "genderMale": "Male",
+  "photoQuestion": "Add a photo of your cat",
+  "@photoQuestion": {
+    "description": "Mascot question on the profile photo step"
+  },
+  "photoSheetTitle": "Add a photo",
+  "@photoSheetTitle": {
+    "description": "Title of the photo source bottom sheet"
+  },
+  "photoSheetTakePhoto": "Take a photo",
+  "photoSheetUploadLibrary": "Upload from library",
+  "photoCameraError": "Couldn't access the camera. Check permissions in Settings.",
+  "@photoCameraError": {
+    "description": "Snackbar when the camera can't be opened"
+  },
+  "photoLibraryError": "Couldn't open your photos. Check permissions in Settings.",
+  "@photoLibraryError": {
+    "description": "Snackbar when the photo library can't be opened"
+  },
+  "ageQuestion": "How old is your cat?",
+  "ageColumnYears": "Years",
+  "ageColumnMonths": "Months",
+  "ageUnitYear": "yr",
+  "@ageUnitYear": {
+    "description": "Short unit suffix for years on the age picker"
+  },
+  "ageUnitMonth": "mo",
+  "@ageUnitMonth": {
+    "description": "Short unit suffix for months on the age picker"
+  },
+  "ageStageKitten": "About {years} years old — a kitten.",
+  "@ageStageKitten": {
+    "description": "Age summary line shown for cats under 1 year",
+    "placeholders": {
+      "years": {
+        "type": "String",
+        "example": "0.5"
+      }
+    }
+  },
+  "ageStageAdult": "About {years} years old — an adult.",
+  "@ageStageAdult": {
+    "description": "Age summary line shown for adult cats (1–7 years)",
+    "placeholders": {
+      "years": {
+        "type": "String",
+        "example": "3.0"
+      }
+    }
+  },
+  "ageStageSenior": "About {years} years old — a senior.",
+  "@ageStageSenior": {
+    "description": "Age summary line shown for senior cats (7+ years)",
+    "placeholders": {
+      "years": {
+        "type": "String",
+        "example": "9.0"
+      }
+    }
+  },
+  "bodyConditionQuestion": "What's your cat's body shape?",
+  "bodyUnderweightLabel": "Underweight",
+  "bodyUnderweightDesc": "Ribs and spine show, very little fat",
+  "bodyNormalLabel": "Just right",
+  "bodyNormalDesc": "Ribs felt easily, visible waist",
+  "bodyOverweightLabel": "Overweight",
+  "bodyOverweightDesc": "Ribs hard to feel, rounded belly",
+  "bodyObeseLabel": "Obese",
+  "bodyObeseDesc": "Heavy fat cover, no waist",
+  "activityQuestion": "How active is your cat?",
+  "activityLowLabel": "Low",
+  "activityLowDesc": "Mostly naps, rarely chases",
+  "activityMediumLabel": "Medium",
+  "activityMediumDesc": "Plays a few times a day",
+  "activityHighLabel": "High",
+  "activityHighDesc": "Climbs, sprints, hunts toys",
+  "waterFactHeadline": "Hydration protects your cat's kidneys and urinary health",
+  "@waterFactHeadline": {
+    "description": "Headline of the hydration interstitial. Must contain waterFactHighlight verbatim so it can be colour-highlighted."
+  },
+  "waterFactHighlight": "kidneys and urinary health",
+  "@waterFactHighlight": {
+    "description": "Substring of waterFactHeadline that is colour-highlighted. Keep it identical to the matching part of the headline."
+  },
+  "waterFactBody": "Moisture-rich food lowers the risk of urinary and kidney issues — we weigh hydration into every assessment.",
+  "neuteredQuestion": "Is your cat neutered or spayed?",
+  "neuteredIntact": "Intact",
+  "neuteredNeutered": "Neutered / Spayed",
+  "neuteredPregnant": "Pregnant",
+  "neuteredLactating": "Lactating",
+  "coatQuestion": "What type of coat?",
+  "coatShortHair": "Short hair",
+  "coatLongHair": "Long hair",
+  "coatHairless": "Hairless",
+  "coatFactHeadline": "Long-haired cats need\nmore omega-3",
+  "@coatFactHeadline": {
+    "description": "Headline of the coat-health interstitial. Must contain coatFactHighlight verbatim so it can be colour-highlighted."
+  },
+  "coatFactHighlight": "more omega-3",
+  "@coatFactHighlight": {
+    "description": "Substring of coatFactHeadline that is colour-highlighted. Keep it identical to the matching part of the headline."
+  },
+  "coatFactBody": "Omega-3 keeps their coat glossy and skin healthy.",
+  "healthQuestion": "Any health considerations?",
+  "healthNone": "None",
+  "healthUrinaryIssues": "Urinary issues",
+  "healthKidneyDisease": "Kidney disease",
+  "healthSensitiveStomach": "Sensitive stomach",
+  "healthSkinAllergies": "Skin allergies",
+  "healthFoodAllergies": "Food allergies",
+  "healthDiabetes": "Diabetes",
+  "healthDentalProblems": "Dental problems",
+  "healthHairballIssues": "Hairball issues",
+  "healthHeartCondition": "Heart condition",
+  "healthJointIssues": "Joint or mobility issues",
+  "breedQuestion": "What breed is your cat?",
+  "breedUnknownPrefix": "Don't know the breed? ",
+  "@breedUnknownPrefix": {
+    "description": "Leading text before the tappable 'Mixed / unknown' affordance"
+  },
+  "breedMixedUnknown": "Mixed / unknown",
+  "disclaimerTitle": "Guiding, not prescribing",
+  "disclaimerBody1": "YuCat suggests foods based on your cat's profile and the ingredients we read off each product. It is not a substitute for veterinary advice.",
+  "disclaimerBody2": "For diagnosed conditions or sudden changes in weight, appetite, or behavior, please consult a licensed veterinarian.",
+  "catCreateCtaCreateProfile": "Create profile",
+  "@catCreateCtaCreateProfile": {
+    "description": "Final CTA when creating a new cat"
+  },
+  "catCreateCtaSaveChanges": "Save changes",
+  "@catCreateCtaSaveChanges": {
+    "description": "Final CTA when editing an existing cat"
+  },
+  "catCreateCtaNoneOfThese": "None of these",
+  "@catCreateCtaNoneOfThese": {
+    "description": "Alt CTA on the health-conditions step to proceed with no selection"
+  },
+  "catCreateErrorCreate": "Couldn't create the profile. Please try again.",
+  "@catCreateErrorCreate": {
+    "description": "Snackbar shown when creating a cat profile fails"
+  },
+  "catCreateErrorSave": "Couldn't save your changes. Please try again.",
+  "@catCreateErrorSave": {
+    "description": "Snackbar shown when saving edits to a cat fails"
+  },
+  "onboardingWelcomeHeadline": "Decode\nevery\ncat\nfood",
+  "onboardingGetStarted": "Get started",
+  "onboardingLegalPrefix": "By continuing you're accepting our\n",
+  "onboardingTermsOfUse": "Terms of Use",
+  "onboardingLegalAnd": " and ",
+  "onboardingPrivacyNotice": "Privacy Notice",
+  "onboardingWhyYucatTitle": "Why YuCat's\nunique approach\nworks",
+  "onboardingLetsGo": "Let's go",
+  "onboardingHealthIntroTitle": "Now tell us\nabout your cat's\nhealth",
+  "onboardingCouldNotOpenLink": "Could not open this link.",
+  "onboardingNutritionFactHeadlinePart1": "A kitten needs\n",
+  "onboardingNutritionFactHighlight": "2.5× more protein",
+  "onboardingNutritionFactHeadlinePart2": "\nthan a senior cat",
+  "onboardingNutritionFactBody": "Life stage, weight, activity and health conditions all change what belongs in your cat's bowl.",
+  "onboardingMerckManualName": "Merck Veterinary Manual ",
+  "onboardingMerckManualQuote": "notes a cat's protein and amino-acid needs change with life stage — kittens require more protein than adults and are more sensitive to amino-acid balance.",
+  "onboardingSourceLink": "Source of recommendations",
+  "onboardingScanDemoTitle": "Track\nwhat's inside",
+  "onboardingScanDemoSubtitle": "Point your camera at any\ncat food and get a verdict",
+  "onboardingProfileIntroTitle": "Let's set up\nyour cat's profile",
+  "onboardingProfileIntroTime": "2 min",
+  "onboardingProfileIntroQuote": "A quick profile unlocks tailored verdicts on every bag",
+  "onboardingProfileNameLabel": "Name your cat",
+  "onboardingProfileNameHint": "Mochi",
+  "onboardingProofChartTitle": "YuCat provides\nlong-term results",
+  "onboardingProofChartCalloutBold": "A better-fit food ",
+  "onboardingProofChartCalloutRest": "tailored to your cat's needs, in just a few scans",
+  "onboardingRatingEyebrow": "Help us grow",
+  "onboardingRatingTitle": "Give us rating",
+  "onboardingRatingStatValue": "Loved",
+  "onboardingRatingStatLabel": "by cat parents",
+  "onboardingRatingPeopleLabel": "Cat parents like you",
+  "onboardingReview1Headline": "Exactly what I needed!",
+  "onboardingReview1Body": "I scanned my cat's kibble and finally understood what was in it. Switched brands the same week and never looked back.",
+  "onboardingReview2Headline": "Loving this app!!!",
+  "onboardingReview2Body": "Amazing app, so easy to use. I just upload pictures of the food and it tells me everything great!",
+  "onboardingReview3Headline": "A senior-cat lifesaver",
+  "onboardingReview3Body": "YuCat narrowed down a senior food that's gentle on Lulu's stomach in one afternoon.",
+  "onboardingReview4Headline": "Finally feel confident",
+  "onboardingReview4Body": "I used to just grab whatever was on sale. Now I actually know which foods match my kitten's needs. Total peace of mind.",
+  "onboardingReview5Headline": "So simple to use",
+  "onboardingReview5Body": "Snap a photo and you get a clear breakdown in seconds. My vet was even impressed when I showed her.",
+  "onboardingReview6Headline": "Two cats, two diets",
+  "onboardingReview6Body": "Managing food for an overweight tabby and a picky Siamese was a nightmare. YuCat made it effortless for both.",
+  "onboardingAttributionTitle": "How did you hear\nabout us?",
+  "onboardingAttributionInstagram": "Instagram",
+  "onboardingAttributionTikTok": "TikTok",
+  "onboardingAttributionYouTube": "YouTube",
+  "onboardingAttributionAppStore": "App Store search",
+  "onboardingAttributionFriends": "Friends/family",
+  "onboardingNotifPrimerTitle": "We'll keep an eye on\nyour cat's food",
+  "onboardingSetUpReminders": "Set up reminders",
+  "onboardingNotifMatchDropped": "Match dropped",
+  "onboardingNotifMockBody": "Luna's food changed recipe — see the new verdict 🔍",
+  "onboardingRemindersTitle": "What should we\nping you about?",
+  "commonDone": "Done",
+  "onboardingSetUpLater": "Set up later",
+  "onboardingRemindersOptionFoodChange": "When a saved food changes",
+  "onboardingRemindersOptionBetterFit": "When a better fit is found",
+  "onboardingRemindersOptionMonthly": "Monthly check-in",
+  "onboardingRemindersCalloutPart1": "Reminders build healthy eating habits ",
+  "onboardingRemindersCalloutBold": "2x faster",
+  "onboardingSuccessWithName": "{name} is\nall set!",
+  "@onboardingSuccessWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingSuccessNoName": "You're all\nset!",
+  "onboardingStartScanning": "Start scanning",
+  "onboardingSuccessNotSet": "Not set",
+  "onboardingSuccessNone": "None",
+  "onboardingSuccessRowAge": "Age",
+  "onboardingSuccessRowActivity": "Activity",
+  "onboardingSuccessRowBodyCondition": "Body condition",
+  "onboardingSuccessRowCoat": "Coat",
+  "onboardingSuccessRowNeuterStatus": "Neuter status",
+  "onboardingSuccessRowBreed": "Breed",
+  "onboardingSuccessRowHealthConditions": "Health conditions",
+  "onboardingSuccessProfileReadyTitle": "Profile ready",
+  "onboardingSuccessProfileReadyBody": "You can edit these details anytime in your cat's profile.",
+  "paywallHeroHeadline": "Know exactly\nwhat's in the bowl",
+  "paywallHeroHighlight": "exactly",
+  "paywallPlusBadge": "Plus",
+  "paywallBadgeBestValue": "BEST VALUE",
+  "paywallLimitedTimeOffer": "Limited-time offer",
+  "paywallLimitedTimeOfferWithSavings": "Limited-time offer · {savings}",
+  "@paywallLimitedTimeOfferWithSavings": {
+    "placeholders": {
+      "savings": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallEverythingYouGet": "Everything you get",
+  "paywallFeatureIngredientScannerTitle": "Ingredient scanner",
+  "paywallFeatureIngredientScannerBenefit": "Scan any label in seconds",
+  "paywallFeaturePersonalizedVerdictsTitle": "Personalized verdicts",
+  "paywallFeaturePersonalizedVerdictsBenefit": "Matched to your cat's age, breed & health",
+  "paywallFeatureUnlimitedScansTitle": "Unlimited scans",
+  "paywallFeatureUnlimitedScansBenefit": "No daily caps, ever",
+  "paywallFeatureReformulationAlertsTitle": "Reformulation alerts",
+  "paywallFeatureReformulationAlertsBenefit": "Know the moment a recipe changes",
+  "paywallFeatureSavedFoodsTitle": "Saved foods & history",
+  "paywallFeatureSavedFoodsBenefit": "Every food you've checked, in one place",
+  "paywallFeatureMultiCatTitle": "Multi-cat profiles",
+  "paywallFeatureMultiCatBenefit": "A tailored profile for each of your cats",
+  "paywallSuccessStoriesHeading": "Success stories\nfrom cat parents",
+  "paywallTestimonial1Quote": "I'd been guessing for years. YuCat narrowed down a senior food that's gentle on Lulu's stomach in one afternoon.",
+  "paywallTestimonial1Name": "Sophie",
+  "paywallTestimonial1Detail": "Senior cat · sensitive stomach",
+  "paywallTestimonial2Quote": "Scanned our kitten's kibble and finally understood what was in it. Switched brands the same week.",
+  "paywallTestimonial2Name": "Marco",
+  "paywallTestimonial2Detail": "Kitten · picky eater",
+  "paywallTestimonial3Quote": "Two cats, two very different needs. Now I know which food actually fits each of them.",
+  "paywallTestimonial3Name": "Priya",
+  "paywallTestimonial3Detail": "Multi-cat household",
+  "paywallStatRatingLabel": "average\nrating",
+  "paywallStatCatParentsLabel": "cat parents\nworldwide",
+  "paywallCancelAnytime": "Cancel anytime.",
+  "paywallAutoRenewDisclosure": "Your subscription auto-renews unless cancelled at least 24 hours before the end of the current term. Cancel anytime in the App Store at no extra cost.",
+  "paywallRestorePurchases": "Restore purchases",
+  "commonTerms": "Terms",
+  "commonPrivacy": "Privacy",
+  "commonClose": "Close",
+  "paywallPeriodAnnual": "Annual",
+  "paywallPeriod6Months": "6 months",
+  "paywallPeriod3Months": "3 months",
+  "paywallPeriod2Months": "2 months",
+  "paywallPeriodMonthly": "Monthly",
+  "paywallPeriodWeekly": "Weekly",
+  "paywallPeriodLifetime": "Lifetime",
+  "paywallCtaUnlockPlus": "Unlock Yucat Plus",
+  "paywallSkipDebug": "Skip paywall (debug)",
+  "paywallErroriOSOnly": "Subscriptions are only available on iOS.",
+  "paywallErrorCouldNotLoadPlans": "Could not load plans.",
+  "paywallErrorNoPlansAvailable": "No subscription plans are available right now.",
+  "paywallErrorPurchaseNotComplete": "Purchase did not complete. Please try again.",
+  "paywallErrorPurchaseFailed": "Purchase failed. Please try again.",
+  "paywallErrorSomethingWentWrong": "Something went wrong. Please try again.",
+  "paywallErrorNoActiveSubscription": "No active subscription found.",
+  "paywallErrorRestoreFailed": "Could not restore purchases. Please try again.",
+  "commonGoBack": "Go back",
+  "productDetailLoadError": "Could not load this product.",
+  "productDetailOverallAnalysis": "OVERALL ANALYSIS",
+  "productDetailAiIdentifiedPill": "* AI IDENTIFIED",
+  "productDetailMyCatScore": "My cat's score",
+  "productDetailNoCatPrompt": "Create a cat profile to see a personalized score for your cat.",
+  "productDetailAddACat": "Add a cat",
+  "productDetailForYourCats": "For your cats",
+  "productDetailCatsCount": "{count} CATS",
+  "@productDetailCatsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productDetailPickACat": "Pick a cat to see how this product fits its profile.",
+  "productDetailPersonalizedScore": "Personalized score based on your cat's profile.",
+  "productDetailDimHealth": "HEALTH",
+  "productDetailDimWeight": "WEIGHT",
+  "productDetailDimAge": "AGE",
+  "productDetailDimActivity": "ACTIVITY",
+  "productDetailDimNeuteredStatus": "NEUTERED STATUS",
+  "productDetailDimBreed": "BREED",
+  "productDetailNeutralFit": "No strong matches for this cat — neutral fit.",
+  "productDetailAgeGroupKitten": "Kitten",
+  "productDetailAgeGroupAdult": "Adult",
+  "productDetailAgeGroupSenior": "Senior",
+  "productDetailNutrientProtein": "Protein",
+  "productDetailNutrientFat": "Fat",
+  "productDetailNutrientMoisture": "Moisture",
+  "productDetailNutrientFiber": "Fiber",
+  "productDetailNutrientCarbs": "Carbs",
+  "productDetailVerdictExcellent": "A great everyday pick",
+  "productDetailVerdictGood": "A solid everyday pick",
+  "productDetailVerdictAverage": "A reasonable choice",
+  "productDetailVerdictPoor": "Best to skip this one",
+  "productDetailImagePlaceholder": "PRODUCT",
+  "productDetailScoreSemantics": "Score {score} out of {maxScore}",
+  "@productDetailScoreSemantics": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      },
+      "maxScore": {
+        "type": "int"
+      }
+    }
+  },
+  "assessmentKittenHighProtein": "High protein (>35%) which is beneficial for kittens",
+  "assessmentKittenHighFat": "High fat (>18%) which supports kitten growth",
+  "assessmentKittenSeniorFormula": "Senior-targeted formula is not ideal for kittens",
+  "assessmentKittenLowProtein": "Low protein (<28%) may not meet kitten needs",
+  "assessmentSeniorModerateProtein": "Moderate protein (30–35%) is appropriate for seniors",
+  "assessmentSeniorHighFat": "Very high fat (>20%) may be unsuitable for seniors",
+  "assessmentSeniorJointSupport": "Contains joint support ingredients (e.g. glucosamine, chondroitin)",
+  "assessmentSeniorKidneyFriendly": "Kidney-friendly formulation (e.g. lower phosphorus)",
+  "assessmentUnderweightHighCalories": "High calories (>380 kcal/100g) can help an underweight cat gain weight",
+  "assessmentUnderweightHighFat": "High fat (>18%) supports weight gain for underweight cats",
+  "assessmentOverweightHighCalories": "High calories (>360 kcal/100g) may not be ideal for an overweight cat",
+  "assessmentOverweightLowCalories": "Lower calories (<320 kcal/100g) help manage weight in overweight cats",
+  "assessmentOverweightHighFiber": "Higher fiber (>4%) can help with satiety for overweight cats",
+  "assessmentObeseHighFat": "High fat (>15%) is not suitable for obese cats",
+  "assessmentObeseHighCalories": "High calories (>330 kcal/100g) are not ideal for obese cats",
+  "assessmentObeseLeanProtein": "Lean, high-protein formula (>40% protein, <12% fat) is good for obese cats",
+  "assessmentLowActivityHighCalories": "High calories (>360 kcal/100g) may not suit a low-activity cat",
+  "assessmentLowActivityModerateCalories": "Moderate calories (<330 kcal/100g) are better for low-activity cats",
+  "assessmentHighActivityHighCalories": "Higher calories (>380 kcal/100g) support a highly active cat",
+  "assessmentHighActivityHighProtein": "High protein (>35%) helps maintain muscle in active cats",
+  "assessmentNeuteredHighCalories": "Very calorie-dense food (>380 kcal/100g) can promote weight gain in neutered cats",
+  "assessmentNeuteredUrinarySupport": "Contains urinary support ingredients, good for neutered cats",
+  "assessmentNeuteredHighFat": "High fat (>16%) may not be ideal for neutered cats",
+  "assessmentPregnantHighProtein": "Very high protein (>35%) supports the increased needs of pregnant/lactating cats",
+  "assessmentPregnantHighFat": "High fat (>20%) provides extra energy for pregnant/lactating cats",
+  "assessmentPregnantHighCalories": "Very calorie-dense food (>400 kcal/100g) helps meet energy demands in pregnancy/lactation",
+  "assessmentMaineCoonJointSupport": "Contains joint support ingredients, helpful for Maine Coons",
+  "assessmentMaineCoonHighProtein": "High protein (>35%) supports large-breed Maine Coons",
+  "assessmentPersianHairball": "Hairball-control style formula (fiber 4–6% or hairball claims)",
+  "assessmentPersianOmega3": "Includes omega-3 rich ingredients, good for Persian coat/skin",
+  "assessmentPersianHighCarbs": "High carbohydrate (>30%) may not be ideal for Persians",
+  "assessmentSiameseDigestible": "Uses easily digestible proteins, good for Siamese cats",
+  "assessmentSiameseFillers": "Contains many fillers (corn, wheat, soy) which may not suit Siamese cats",
+  "assessmentSphynxHighFat": "Higher fat (>18%) can support Sphynx skin health",
+  "assessmentSphynxLowFat": "Low-fat formula (<12%) may not provide enough support for Sphynx skin",
+  "assessmentBritishHighCalories": "High-calorie food may promote weight gain in British Shorthairs",
+  "assessmentBritishWeightManagement": "Weight-management style formula is suitable for British Shorthairs",
+  "assessmentBengalHighProtein": "High protein (>38%) matches Bengal energy needs",
+  "assessmentBengalLowProtein": "Low protein (<30%) may be insufficient for Bengals",
+  "assessmentUrinaryLowAsh": "Formulated with low ash content, supportive for urinary issues",
+  "assessmentUrinarySupport": "Includes urinary-support ingredients like cranberry or DL-methionine",
+  "assessmentUrinaryHighMinerals": "High mineral content may not be ideal for urinary issues",
+  "assessmentKidneyHighProtein": "High protein (>32%) may not be ideal for kidney disease",
+  "assessmentKidneyPhosphorus": "Contains phosphorus sources that may be problematic in kidney disease",
+  "assessmentKidneyRenalSupport": "Formulated as a renal-support diet",
+  "assessmentSensitiveStomachLimitedIngredient": "Limited-ingredient style recipe can help sensitive stomachs",
+  "assessmentSensitiveStomachLongIngredients": "Very long ingredient list may not suit sensitive stomachs",
+  "assessmentFoodAllergyCommonAllergens": "Contains common allergens like chicken, fish, or beef",
+  "assessmentFoodAllergyNovelProteins": "Uses novel proteins (e.g. duck, venison) which may help with allergies",
+  "assessmentSkinAllergyOmega3": "Omega-3 rich formulation can support skin and coat health",
+  "assessmentSkinAllergyArtificialColor": "Contains artificial colors which may aggravate skin allergies",
+  "assessmentDiabetesHighCarbs": "High carbohydrates (>20%) are less suitable for diabetic cats",
+  "assessmentDiabetesHighProtein": "Very high protein (>40%) can support blood sugar control in diabetes",
+  "assessmentDentalHighMoisture": "High-moisture (wet-style) food is easier to eat with dental problems",
+  "assessmentDentalLargeKibble": "Very large kibble pieces may be hard to chew with dental issues",
+  "assessmentHairballControl": "Hairball control style diet (fiber 4–6% or hairball claims)",
+  "homeScanProduct": "Scan a product",
+  "homeScanProductSubtitle": "Take a photo of the package",
+  "homeGreetingHey": "Hey 👋",
+  "homeGreetingWelcome": "Welcome",
+  "homeReadyForCat": "Ready to find food for {name}?",
+  "@homeReadyForCat": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeReadyToScan": "Ready to scan a product?",
+  "homeAddCatTitle": "Add your cat",
+  "homeAddCatBody": "Create a profile to get personalized food scores.",
+  "homeAddCatButton": "Add a cat",
+  "homeSavedProductsTitle": "Saved products",
+  "homeSeeAll": "See all",
+  "homeNoSavedProductsTitle": "No saved products yet",
+  "homeNoSavedProductsBody": "Tap the bookmark on a product to save it here.",
+  "homeLoadingStepScanning": "Scanning product",
+  "homeLoadingStepScanningDesc": "Identifying the product...",
+  "homeLoadingStepFetching": "Fetching product data",
+  "homeLoadingStepFetchingDesc": "Retrieving information...",
+  "homeLoadingStepAnalyzing": "Analyzing ingredients",
+  "homeLoadingStepAnalyzingDesc": "Processing nutritional data...",
+  "homeLoadingStepPreparing": "Preparing results",
+  "homeLoadingStepPreparingDesc": "Almost ready...",
+  "homeLoadingStepDone": "Done",
+  "homeCameraUnavailable": "Camera unavailable",
+  "homeCameraUnavailableBody": "Enable camera access for YuCat in Settings, or pick a photo from your gallery instead.",
+  "homeChooseFromGallery": "Choose from gallery",
+  "homeErrorProductNotFound": "Product not found",
+  "homeErrorTimeout": "The request took too long. Please try again.",
+  "homeErrorNoInternet": "No internet connection. Please check your network and try again.",
+  "homeErrorGeneric": "Something went wrong. Please try again.",
+  "homeCatKitten": "Kitten",
+  "homeCatAdult": "Adult",
+  "homeCatSenior": "Senior",
+  "homeCatUnderweight": "Underweight",
+  "homeCatHealthyWeight": "Healthy weight",
+  "homeCatOverweight": "Overweight",
+  "homeCatObese": "Obese",
+  "homeCatConditionCount": "{count, plural, =1{1 condition} other{{count} conditions}}",
+  "@homeCatConditionCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "scanHistoryTitle": "Scan history",
+  "scanHistoryScanCount": "{count, plural, =1{1 scan} other{{count} scans}}",
+  "@scanHistoryScanCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "scanHistoryEmptyTitle": "No scans yet",
+  "scanHistoryEmptyBody": "Foods you scan will show up here.",
+  "commonTryAgain": "Try again",
+  "searchTabTitle": "Search",
+  "searchHint": "Search for a cat food",
+  "searchRecentLabel": "Recent",
+  "searchClearLabel": "Clear",
+  "searchPopularBrands": "Popular brands",
+  "searchNoMatchesHeadline": "No matches",
+  "searchNoMatchesBody": "Try a different name, or browse popular brands.",
+  "searchResultsCount": "{count, plural, =1{1 result} other{{count} results}}",
+  "@searchResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchErrorBody": "Something went wrong while searching.",
+  "bottomNavSearch": "Search",
+  "bottomNavHome": "Home",
+  "bottomNavProfile": "Profile",
+  "productListingEmpty": "No products found for this brand.",
+  "commonAgeGroupKitten": "Kitten",
+  "commonAgeGroupAdult": "Adult",
+  "commonAgeGroupSenior": "Senior",
+  "profileTitle": "Profile",
+  "profileLinkError": "Couldn't open that link.",
+  "profileSubscriptionLinkError": "Couldn't open App Store subscriptions.",
+  "profileEmailError": "Couldn't open {email}.",
+  "@profileEmailError": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "profilePrivacyError": "Couldn't open Privacy Policy.",
+  "profileTermsError": "Couldn't open Terms and Conditions.",
+  "profileSubscriptionActive": "Active subscription",
+  "profileRestorePurchases": "Restore purchases",
+  "profileManageSubscription": "Manage subscription",
+  "profileYourCats": "Your cats",
+  "profileManage": "Manage",
+  "profileAddCat": "Add cat",
+  "profileSavedProductsLabel": "Saved products",
+  "profileSavedProductsEmpty": "No saved products yet",
+  "profileSavedProductsCount": "{count, plural, =1{1 product saved} other{{count} products saved}}",
+  "@profileSavedProductsCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "profileScanHistoryLabel": "Scan history",
+  "profileScanHistoryEmpty": "No scans yet",
+  "profileScanHistoryCount": "{count, plural, =1{1 scan} other{{count} scans}}",
+  "@profileScanHistoryCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "profileContactUs": "Contact us",
+  "profilePrivacyPolicy": "Privacy Policy",
+  "profileTermsAndConditions": "Terms & Conditions",
+  "profileResetOnboarding": "Reset onboarding",
+  "profileDebugOnly": "Debug only",
+  "profileRestoreNotAvailable": "Restore is only available on iOS.",
+  "profileRestoreSuccess": "Subscription restored successfully!",
+  "profileNoSubscriptionFound": "No active subscription found.",
+  "profileRestoreError": "Couldn't restore your purchases. Please try again.",
+  "savedProductsTitle": "Saved products",
+  "savedProductsCount": "{count, plural, =1{1 product} other{{count} products}}",
+  "@savedProductsCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "savedProductsEmptyHeadline": "No saved products yet",
+  "savedProductsEmptyBody": "Bookmark products to find them here",
+  "catDetailDeleteError": "Couldn't delete your cat. Please try again.",
+  "catDetailDeleteTitle": "Delete {name}?",
+  "@catDetailDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "catDetailDeleteBody": "This will permanently delete their profile.",
+  "catDetailDeleteCancel": "Cancel",
+  "catDetailDeleteConfirm": "Delete",
+  "catDetailProfileCompletion": "Profile completion",
+  "catDetailNotSet": "Not set",
+  "catDetailBreedLabel": "Breed",
+  "catDetailAgeLabel": "Age",
+  "catDetailAgeYears": "yrs",
+  "catDetailGenderLabel": "Gender",
+  "catDetailCoatLabel": "Coat",
+  "catDetailActivityLabel": "Activity",
+  "catDetailBodyLabel": "Body condition",
+  "catDetailStatusLabel": "Status",
+  "catDetailStatusNeutered": "Neutered / Spayed",
+  "catDetailStatusSpayed": "Spayed",
+  "catDetailDetailsSection": "Details",
+  "catDetailActivityModerate": "Moderate",
+  "catDetailBodyNormal": "Normal",
+  "catDetailCoatMedium": "Medium hair",
+  "catDetailHealthConditionsSection": "Health conditions",
+  "catDetailDeleteProfile": "Delete profile",
+  "catListingTitle": "Your cats",
+  "catListingErrorGeneric": "Something went wrong",
+  "catListingEmptyHeadline": "No cats yet",
+  "catListingEmptyBody": "Add your first cat to get personalized recommendations",
+  "catListingEmptyCta": "Add your cat",
+  "catListingAddAnotherCat": "Add another cat",
+  "catListingCreateNewProfile": "Create a new profile",
+  "catListingCatFallback": "Cat",
+  "catListingConditionsCount": "{count, plural, =1{1 condition} other{{count} conditions}}",
+  "@catListingConditionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  }
+}

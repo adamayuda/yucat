@@ -17,9 +17,9 @@ class SearchTextField extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onChanged,
+    required this.hintText,
     this.onClear,
     this.onSubmitted,
-    this.hintText = 'Search for a cat food',
   });
 
   @override

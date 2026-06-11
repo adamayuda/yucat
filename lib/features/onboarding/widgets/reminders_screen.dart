@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_option_row.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
@@ -32,10 +33,10 @@ class _ReminderOption {
   const _ReminderOption(this.asset, this.label);
 }
 
-const _options = [
-  _ReminderOption('assets/images/girl-1.svg', 'When a saved food changes'),
-  _ReminderOption('assets/images/Magic.svg', 'When a better fit is found'),
-  _ReminderOption('assets/images/Calendar.svg', 'Monthly check-in'),
+List<_ReminderOption> _buildReminderOptions(AppLocalizations l10n) => [
+  _ReminderOption('assets/images/girl-1.svg', l10n.onboardingRemindersOptionFoodChange),
+  _ReminderOption('assets/images/Magic.svg', l10n.onboardingRemindersOptionBetterFit),
+  _ReminderOption('assets/images/Calendar.svg', l10n.onboardingRemindersOptionMonthly),
 ];
 
 class _RemindersScreenState extends State<RemindersScreen> {
@@ -50,17 +51,19 @@ class _RemindersScreenState extends State<RemindersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final options = _buildReminderOptions(l10n);
     return OnboardingScaffold(
       gradient: DSGradients.onboardingReminders,
       footer: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          DSPillButton(label: 'Done', onPressed: _onDone),
+          DSPillButton(label: l10n.commonDone, onPressed: _onDone),
           const SizedBox(height: DSDimens.sizeXxs),
           TextButton(
             onPressed: widget.onNext,
             child: Text(
-              'Set up later',
+              l10n.onboardingSetUpLater,
               style: DSTextStyles.label.copyWith(
                 color: DSColors.inkSecondary,
               ),
@@ -99,15 +102,15 @@ class _RemindersScreenState extends State<RemindersScreen> {
             children: [
               const SizedBox(height: DSDimens.sizeS),
               Text(
-                'What should we\nping you about?',
+                l10n.onboardingRemindersTitle,
                 textAlign: TextAlign.center,
                 style: DSTextStyles.displayLg,
               ),
               const SizedBox(height: DSDimens.size3xl),
-              for (var i = 0; i < _options.length; i++) ...[
+              for (var i = 0; i < options.length; i++) ...[
                 DSOptionRow(
-                  leadingAsset: _options[i].asset,
-                  label: _options[i].label,
+                  leadingAsset: options[i].asset,
+                  label: options[i].label,
                   showTrailingRadio: true,
                   trailingSize: 18,
                   selected: _selected.contains(i),
@@ -115,7 +118,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                     if (!_selected.add(i)) _selected.remove(i);
                   }),
                 ),
-                if (i != _options.length - 1)
+                if (i != options.length - 1)
                   const SizedBox(height: DSDimens.sizeXxs),
               ],
               const SizedBox(height: DSDimens.sizeL),
@@ -137,13 +140,13 @@ class _RemindersScreenState extends State<RemindersScreen> {
                           style: DSTextStyles.bodyMd.copyWith(
                             color: DSColors.inkSecondary,
                           ),
-                          children: const [
+                          children: [
                             TextSpan(
-                              text: 'Reminders build healthy eating habits ',
+                              text: l10n.onboardingRemindersCalloutPart1,
                             ),
                             TextSpan(
-                              text: '2x faster',
-                              style: TextStyle(
+                              text: l10n.onboardingRemindersCalloutBold,
+                              style: const TextStyle(
                                 color: DSColors.inkPrimary,
                                 fontWeight: FontWeight.w700,
                               ),

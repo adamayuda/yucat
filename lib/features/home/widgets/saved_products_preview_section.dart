@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/hatched_placeholder.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/ring_score.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
@@ -24,6 +25,7 @@ class SavedProductsPreviewSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final hasSaved = savedProducts.isNotEmpty;
     final preview = savedProducts.take(_previewCount).toList();
 
@@ -34,15 +36,15 @@ class SavedProductsPreviewSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
-              child: Text('Saved products', style: DSTextStyles.displayLg),
+              child: Text(l10n.homeSavedProductsTitle, style: DSTextStyles.displayLg),
             ),
             if (hasSaved)
-              DSTextLink(label: 'See all', onPressed: onSeeAll),
+              DSTextLink(label: l10n.homeSeeAll, onPressed: onSeeAll),
           ],
         ),
         const SizedBox(height: DSDimens.sizeS),
         if (!hasSaved)
-          const _EmptyCard()
+          _EmptyCard()
         else
           for (var i = 0; i < preview.length; i++) ...[
             if (i > 0) const SizedBox(height: DSDimens.sizeS),
@@ -132,10 +134,9 @@ class _SavedProductRow extends StatelessWidget {
 }
 
 class _EmptyCard extends StatelessWidget {
-  const _EmptyCard();
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DSCard(
       padding: const EdgeInsets.all(DSDimens.sizeL),
       child: Row(
@@ -159,10 +160,10 @@ class _EmptyCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('No saved products yet', style: DSTextStyles.titleMd),
+                Text(l10n.homeNoSavedProductsTitle, style: DSTextStyles.titleMd),
                 const SizedBox(height: 2),
                 Text(
-                  'Tap the bookmark on a product to save it here.',
+                  l10n.homeNoSavedProductsBody,
                   style: DSTextStyles.bodyMd.copyWith(
                     color: DSColors.inkSecondary,
                   ),

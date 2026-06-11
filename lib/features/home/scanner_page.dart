@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/home/bloc/home_bloc.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 @RoutePage()
 class ScannerPage extends StatefulWidget {
@@ -240,6 +241,7 @@ class _CameraErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ColoredBox(
       color: DSColors.inkPrimary,
       child: Center(
@@ -255,7 +257,7 @@ class _CameraErrorView extends StatelessWidget {
               ),
               const SizedBox(height: DSDimens.sizeL),
               Text(
-                'Camera unavailable',
+                l10n.homeCameraUnavailable,
                 style: DSTextStyles.titleMd.copyWith(
                   color: DSColors.inkInverse,
                 ),
@@ -263,8 +265,7 @@ class _CameraErrorView extends StatelessWidget {
               ),
               const SizedBox(height: DSDimens.sizeXs),
               Text(
-                'Enable camera access for YuCat in Settings, or pick a photo '
-                'from your gallery instead.',
+                l10n.homeCameraUnavailableBody,
                 style: DSTextStyles.bodyMd.copyWith(
                   color: DSColors.inkInverse.withValues(alpha: 0.7),
                 ),
@@ -274,7 +275,7 @@ class _CameraErrorView extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onPickFromGallery,
                 icon: const Icon(Icons.photo_outlined),
-                label: const Text('Choose from gallery'),
+                label: Text(l10n.homeChooseFromGallery),
               ),
             ],
           ),

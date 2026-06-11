@@ -1,15 +1,16 @@
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 /// Human-readable plan title from a [Package].
-String periodTitleFor(Package pkg) {
+String periodTitleFor(Package pkg, AppLocalizations l10n) {
   return switch (pkg.packageType) {
-    PackageType.annual => 'Annual',
-    PackageType.sixMonth => '6 months',
-    PackageType.threeMonth => '3 months',
-    PackageType.twoMonth => '2 months',
-    PackageType.monthly => 'Monthly',
-    PackageType.weekly => 'Weekly',
-    PackageType.lifetime => 'Lifetime',
+    PackageType.annual => l10n.paywallPeriodAnnual,
+    PackageType.sixMonth => l10n.paywallPeriod6Months,
+    PackageType.threeMonth => l10n.paywallPeriod3Months,
+    PackageType.twoMonth => l10n.paywallPeriod2Months,
+    PackageType.monthly => l10n.paywallPeriodMonthly,
+    PackageType.weekly => l10n.paywallPeriodWeekly,
+    PackageType.lifetime => l10n.paywallPeriodLifetime,
     _ => pkg.identifier,
   };
 }
@@ -62,8 +63,8 @@ String? introSavingsLabelFor(Package pkg) {
 }
 
 /// CTA label. No free trial: paying is immediate, so the label is fixed.
-String ctaLabelFor(Package pkg) {
-  return 'Unlock Yucat Plus';
+String ctaLabelFor(Package pkg, AppLocalizations l10n) {
+  return l10n.paywallCtaUnlockPlus;
 }
 
 String _periodSuffixFor(Package pkg) {

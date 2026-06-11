@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 
 class NutritionFactScreen extends StatelessWidget {
@@ -15,18 +16,19 @@ class NutritionFactScreen extends StatelessWidget {
   );
 
   Future<void> _openSource(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     try {
       if (!await launchUrl(_sourceUri, mode: LaunchMode.inAppWebView)) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open this link.')),
+            SnackBar(content: Text(l10n.onboardingCouldNotOpenLink)),
           );
         }
       }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open this link.')),
+          SnackBar(content: Text(l10n.onboardingCouldNotOpenLink)),
         );
       }
     }
@@ -34,6 +36,7 @@ class NutritionFactScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: DSColors.tintSkyBright,
       body: SafeArea(
@@ -61,14 +64,14 @@ class NutritionFactScreen extends StatelessWidget {
                 text: TextSpan(
                   style: DSTextStyles.displayLg,
                   children: [
-                    const TextSpan(text: 'A kitten needs\n'),
+                    TextSpan(text: l10n.onboardingNutritionFactHeadlinePart1),
                     TextSpan(
-                      text: '2.5× more protein',
+                      text: l10n.onboardingNutritionFactHighlight,
                       style: DSTextStyles.displayLg.copyWith(
                         color: DSColors.accentInfo,
                       ),
                     ),
-                    const TextSpan(text: '\nthan a senior cat'),
+                    TextSpan(text: l10n.onboardingNutritionFactHeadlinePart2),
                   ],
                 ),
               ),
@@ -76,8 +79,7 @@ class NutritionFactScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeS),
                 child: Text(
-                  "Life stage, weight, activity and health conditions all change "
-                  "what belongs in your cat's bowl.",
+                  l10n.onboardingNutritionFactBody,
                   textAlign: TextAlign.center,
                   style: DSTextStyles.bodyMd.copyWith(
                     color: DSColors.inkSecondary,
@@ -114,20 +116,16 @@ class NutritionFactScreen extends StatelessWidget {
                           style: DSTextStyles.caption.copyWith(
                             color: DSColors.inkSecondary,
                           ),
-                          children: const [
+                          children: [
                             TextSpan(
-                              text: 'Merck Veterinary Manual ',
-                              style: TextStyle(
+                              text: l10n.onboardingMerckManualName,
+                              style: const TextStyle(
                                 color: DSColors.inkPrimary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                             TextSpan(
-                              text:
-                                  "notes a cat's protein and amino-acid "
-                                  'needs change with life stage — kittens '
-                                  'require more protein than adults and are '
-                                  'more sensitive to amino-acid balance.',
+                              text: l10n.onboardingMerckManualQuote,
                             ),
                           ],
                         ),
@@ -140,14 +138,14 @@ class NutritionFactScreen extends StatelessWidget {
               GestureDetector(
                 onTap: () => _openSource(context),
                 child: Text(
-                  'Source of recommendations',
+                  l10n.onboardingSourceLink,
                   style: DSTextStyles.caption.copyWith(
                     color: DSColors.inkTertiary,
                     decoration: TextDecoration.underline,
                   ),
                 ),
               ),
-              OnboardingFloatingButton(label: "Let's go", onPressed: onNext),
+              OnboardingFloatingButton(label: l10n.onboardingLetsGo, onPressed: onNext),
             ],
           ),
         ),

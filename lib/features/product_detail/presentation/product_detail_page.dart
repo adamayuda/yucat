@@ -9,6 +9,7 @@ import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
 import 'package:yucat/features/product_detail/presentation/bloc/product_detail_bloc.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/analysis_card.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/cat_assessment_card.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/nutrition_grid_card.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/product_detail_skeleton.dart';
@@ -227,10 +228,11 @@ class _ErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Builder(
       builder: (context) => DSStateView.error(
-        body: 'Could not load this product.',
-        ctaLabel: 'Go back',
+        body: l10n.productDetailLoadError,
+        ctaLabel: l10n.commonGoBack,
         onCtaPressed: () => Navigator.of(context).pop(),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 // ---------------------------------------------------------------------------
 // Thresholds
@@ -169,15 +170,16 @@ class _DimensionResult {
 CatProductAssessment evaluateCatProduct(
   CatEntity cat,
   ProductDisplayModel product,
+  AppLocalizations l10n,
 ) {
   final text = _normalizeText(product);
 
-  final age = _evaluateAge(cat, product, text);
-  final weight = _evaluateWeight(cat, product);
-  final activity = _evaluateActivity(cat, product);
-  final neutered = _evaluateNeutered(cat, product, text);
-  final breed = _evaluateBreed(cat, product, text);
-  final health = _evaluateHealth(cat, product, text);
+  final age = _evaluateAge(cat, product, text, l10n);
+  final weight = _evaluateWeight(cat, product, l10n);
+  final activity = _evaluateActivity(cat, product, l10n);
+  final neutered = _evaluateNeutered(cat, product, text, l10n);
+  final breed = _evaluateBreed(cat, product, text, l10n);
+  final health = _evaluateHealth(cat, product, text, l10n);
 
   // Weight category overrides neutered status when they pull in opposite
   // directions. An underweight neutered cat needs calories — drop the
@@ -233,6 +235,7 @@ _DimensionResult _evaluateAge(
   CatEntity cat,
   ProductDisplayModel product,
   String text,
+  AppLocalizations l10n,
 ) {
   final pros = <CatProductFinding>[];
   final cons = <CatProductFinding>[];
@@ -241,22 +244,22 @@ _DimensionResult _evaluateAge(
   switch (_norm(cat.ageGroup)) {
     case 'kitten':
       if (product.protein > _kittenProteinHigh) {
-        pros.add(_p('High protein (>35%) which is beneficial for kittens',
+        pros.add(_p(l10n.assessmentKittenHighProtein,
             CatAssessmentDimension.age));
         delta += 8;
       }
       if (product.fat > _kittenFatHigh) {
-        pros.add(_p('High fat (>18%) which supports kitten growth',
+        pros.add(_p(l10n.assessmentKittenHighFat,
             CatAssessmentDimension.age));
         delta += 6;
       }
       if (_containsAny(text, _kSenior)) {
-        cons.add(_p('Senior-targeted formula is not ideal for kittens',
+        cons.add(_p(l10n.assessmentKittenSeniorFormula,
             CatAssessmentDimension.age));
         delta -= 10;
       }
       if (product.protein < _kittenProteinMin) {
-        cons.add(_p('Low protein (<28%) may not meet kitten needs',
+        cons.add(_p(l10n.assessmentKittenLowProtein,
             CatAssessmentDimension.age));
         delta -= 10;
       }
@@ -267,23 +270,23 @@ _DimensionResult _evaluateAge(
     case 'senior':
       if (product.protein >= _seniorProteinLow &&
           product.protein <= _seniorProteinHigh) {
-        pros.add(_p('Moderate protein (30–35%) is appropriate for seniors',
+        pros.add(_p(l10n.assessmentSeniorModerateProtein,
             CatAssessmentDimension.age));
         delta += 6;
       }
       if (product.fat > _seniorFatMax) {
-        cons.add(_p('Very high fat (>20%) may be unsuitable for seniors',
+        cons.add(_p(l10n.assessmentSeniorHighFat,
             CatAssessmentDimension.age));
         delta -= 8;
       }
       if (_containsAny(text, _kJointSupport)) {
         pros.add(_p(
-            'Contains joint support ingredients (e.g. glucosamine, chondroitin)',
+            l10n.assessmentSeniorJointSupport,
             CatAssessmentDimension.age));
         delta += 8;
       }
       if (_containsAny(text, _kKidneyFriendly)) {
-        pros.add(_p('Kidney-friendly formulation (e.g. lower phosphorus)',
+        pros.add(_p(l10n.assessmentSeniorKidneyFriendly,
             CatAssessmentDimension.age));
         delta += 10;
       }
@@ -293,7 +296,11 @@ _DimensionResult _evaluateAge(
   return _DimensionResult(pros: pros, cons: cons, delta: delta);
 }
 
-_DimensionResult _evaluateWeight(CatEntity cat, ProductDisplayModel product) {
+_DimensionResult _evaluateWeight(
+  CatEntity cat,
+  ProductDisplayModel product,
+  AppLocalizations l10n,
+) {
   final pros = <CatProductFinding>[];
   final cons = <CatProductFinding>[];
   var delta = 0;
@@ -302,12 +309,12 @@ _DimensionResult _evaluateWeight(CatEntity cat, ProductDisplayModel product) {
     case 'underweight':
       if (product.calories > _underweightCaloriesHigh) {
         pros.add(_p(
-            'High calories (>380 kcal/100g) can help an underweight cat gain weight',
+            l10n.assessmentUnderweightHighCalories,
             CatAssessmentDimension.weight));
         delta += 8;
       }
       if (product.fat > _underweightFatHigh) {
-        pros.add(_p('High fat (>18%) supports weight gain for underweight cats',
+        pros.add(_p(l10n.assessmentUnderweightHighFat,
             CatAssessmentDimension.weight));
         delta += 6;
       }
@@ -317,39 +324,39 @@ _DimensionResult _evaluateWeight(CatEntity cat, ProductDisplayModel product) {
     case 'overweight':
       if (product.calories > _overweightCaloriesHigh) {
         cons.add(_p(
-            'High calories (>360 kcal/100g) may not be ideal for an overweight cat',
+            l10n.assessmentOverweightHighCalories,
             CatAssessmentDimension.weight));
         delta -= 10;
       }
       if (product.calories >= _overweightCaloriesLowMin &&
           product.calories < _overweightCaloriesLowMax) {
         pros.add(_p(
-            'Lower calories (<320 kcal/100g) help manage weight in overweight cats',
+            l10n.assessmentOverweightLowCalories,
             CatAssessmentDimension.weight));
         delta += 8;
       }
       if (product.fiber > _overweightFiberHigh) {
         pros.add(_p(
-            'Higher fiber (>4%) can help with satiety for overweight cats',
+            l10n.assessmentOverweightHighFiber,
             CatAssessmentDimension.weight));
         delta += 6;
       }
       break;
     case 'obese':
       if (product.fat > _obeseFatMax) {
-        cons.add(_p('High fat (>15%) is not suitable for obese cats',
+        cons.add(_p(l10n.assessmentObeseHighFat,
             CatAssessmentDimension.weight));
         delta -= 10;
       }
       if (product.calories > _obeseCaloriesMax) {
-        cons.add(_p('High calories (>330 kcal/100g) are not ideal for obese cats',
+        cons.add(_p(l10n.assessmentObeseHighCalories,
             CatAssessmentDimension.weight));
         delta -= 10;
       }
       if (product.protein > _obeseLeanProteinMin &&
           product.fat < _obeseLeanFatMax) {
         pros.add(_p(
-            'Lean, high-protein formula (>40% protein, <12% fat) is good for obese cats',
+            l10n.assessmentObeseLeanProtein,
             CatAssessmentDimension.weight));
         delta += 10;
       }
@@ -359,7 +366,11 @@ _DimensionResult _evaluateWeight(CatEntity cat, ProductDisplayModel product) {
   return _DimensionResult(pros: pros, cons: cons, delta: delta);
 }
 
-_DimensionResult _evaluateActivity(CatEntity cat, ProductDisplayModel product) {
+_DimensionResult _evaluateActivity(
+  CatEntity cat,
+  ProductDisplayModel product,
+  AppLocalizations l10n,
+) {
   final pros = <CatProductFinding>[];
   final cons = <CatProductFinding>[];
   var delta = 0;
@@ -368,13 +379,13 @@ _DimensionResult _evaluateActivity(CatEntity cat, ProductDisplayModel product) {
     case 'low':
       if (product.calories > _lowActivityCaloriesHigh) {
         cons.add(_p(
-            'High calories (>360 kcal/100g) may not suit a low-activity cat',
+            l10n.assessmentLowActivityHighCalories,
             CatAssessmentDimension.activity));
         delta -= 8;
       }
       if (product.calories < _lowActivityCaloriesLow) {
         pros.add(_p(
-            'Moderate calories (<330 kcal/100g) are better for low-activity cats',
+            l10n.assessmentLowActivityModerateCalories,
             CatAssessmentDimension.activity));
         delta += 6;
       }
@@ -382,12 +393,12 @@ _DimensionResult _evaluateActivity(CatEntity cat, ProductDisplayModel product) {
     case 'high':
       if (product.calories > _highActivityCaloriesHigh) {
         pros.add(_p(
-            'Higher calories (>380 kcal/100g) support a highly active cat',
+            l10n.assessmentHighActivityHighCalories,
             CatAssessmentDimension.activity));
         delta += 6;
       }
       if (product.protein > _highActivityProteinHigh) {
-        pros.add(_p('High protein (>35%) helps maintain muscle in active cats',
+        pros.add(_p(l10n.assessmentHighActivityHighProtein,
             CatAssessmentDimension.activity));
         delta += 6;
       }
@@ -401,6 +412,7 @@ _DimensionResult _evaluateNeutered(
   CatEntity cat,
   ProductDisplayModel product,
   String text,
+  AppLocalizations l10n,
 ) {
   final pros = <CatProductFinding>[];
   final cons = <CatProductFinding>[];
@@ -410,18 +422,18 @@ _DimensionResult _evaluateNeutered(
     case 'neutered':
       if (product.calories > _neuteredCaloriesHigh) {
         cons.add(_p(
-            'Very calorie-dense food (>380 kcal/100g) can promote weight gain in neutered cats',
+            l10n.assessmentNeuteredHighCalories,
             CatAssessmentDimension.neutered));
         delta -= 8;
       }
       if (_containsAny(text, _kUrinaryClaim)) {
         pros.add(_p(
-            'Contains urinary support ingredients, good for neutered cats',
+            l10n.assessmentNeuteredUrinarySupport,
             CatAssessmentDimension.neutered));
         delta += 8;
       }
       if (product.fat > _neuteredFatHigh) {
-        cons.add(_p('High fat (>16%) may not be ideal for neutered cats',
+        cons.add(_p(l10n.assessmentNeuteredHighFat,
             CatAssessmentDimension.neutered));
         delta -= 6;
       }
@@ -430,19 +442,19 @@ _DimensionResult _evaluateNeutered(
     case 'lactating':
       if (product.protein > _pregnantProteinHigh) {
         pros.add(_p(
-            'Very high protein (>35%) supports the increased needs of pregnant/lactating cats',
+            l10n.assessmentPregnantHighProtein,
             CatAssessmentDimension.neutered));
         delta += 8;
       }
       if (product.fat > _pregnantFatHigh) {
         pros.add(_p(
-            'High fat (>20%) provides extra energy for pregnant/lactating cats',
+            l10n.assessmentPregnantHighFat,
             CatAssessmentDimension.neutered));
         delta += 8;
       }
       if (product.calories > _pregnantCaloriesHigh) {
         pros.add(_p(
-            'Very calorie-dense food (>400 kcal/100g) helps meet energy demands in pregnancy/lactation',
+            l10n.assessmentPregnantHighCalories,
             CatAssessmentDimension.neutered));
         delta += 6;
       }
@@ -456,6 +468,7 @@ _DimensionResult _evaluateBreed(
   CatEntity cat,
   ProductDisplayModel product,
   String text,
+  AppLocalizations l10n,
 ) {
   final pros = <CatProductFinding>[];
   final cons = <CatProductFinding>[];
@@ -468,12 +481,12 @@ _DimensionResult _evaluateBreed(
     case 'maine coon':
       if (_containsAny(text, _kJointSupport)) {
         pros.add(_p(
-            'Contains joint support ingredients, helpful for Maine Coons',
+            l10n.assessmentMaineCoonJointSupport,
             CatAssessmentDimension.breed));
         delta += 6;
       }
       if (product.protein > _maineCoonProteinHigh) {
-        pros.add(_p('High protein (>35%) supports large-breed Maine Coons',
+        pros.add(_p(l10n.assessmentMaineCoonHighProtein,
             CatAssessmentDimension.breed));
         delta += 6;
       }
@@ -483,44 +496,44 @@ _DimensionResult _evaluateBreed(
               product.fiber <= _persianFiberHigh) ||
           _containsAny(text, _kHairball)) {
         pros.add(_p(
-            'Hairball-control style formula (fiber 4–6% or hairball claims)',
+            l10n.assessmentPersianHairball,
             CatAssessmentDimension.breed));
         delta += 6;
       }
       if (_containsAny(text, _kOmega3)) {
         pros.add(_p(
-            'Includes omega-3 rich ingredients, good for Persian coat/skin',
+            l10n.assessmentPersianOmega3,
             CatAssessmentDimension.breed));
         delta += 6;
       }
       if (product.carbs > _persianCarbsHigh) {
-        cons.add(_p('High carbohydrate (>30%) may not be ideal for Persians',
+        cons.add(_p(l10n.assessmentPersianHighCarbs,
             CatAssessmentDimension.breed));
         delta -= 6;
       }
       break;
     case 'siamese':
       if (_containsAny(text, _kDigestible)) {
-        pros.add(_p('Uses easily digestible proteins, good for Siamese cats',
+        pros.add(_p(l10n.assessmentSiameseDigestible,
             CatAssessmentDimension.breed));
         delta += 6;
       }
       if (_hasManyFillersWordBoundary(text)) {
         cons.add(_p(
-            'Contains many fillers (corn, wheat, soy) which may not suit Siamese cats',
+            l10n.assessmentSiameseFillers,
             CatAssessmentDimension.breed));
         delta -= 8;
       }
       break;
     case 'sphynx':
       if (product.fat > _sphynxFatHigh) {
-        pros.add(_p('Higher fat (>18%) can support Sphynx skin health',
+        pros.add(_p(l10n.assessmentSphynxHighFat,
             CatAssessmentDimension.breed));
         delta += 6;
       }
       if (product.fat < _sphynxFatLow) {
         cons.add(_p(
-            'Low-fat formula (<12%) may not provide enough support for Sphynx skin',
+            l10n.assessmentSphynxLowFat,
             CatAssessmentDimension.breed));
         delta -= 8;
       }
@@ -528,25 +541,25 @@ _DimensionResult _evaluateBreed(
     case 'british shorthair':
       if (product.calories > _britishCaloriesHigh) {
         cons.add(_p(
-            'High-calorie food may promote weight gain in British Shorthairs',
+            l10n.assessmentBritishHighCalories,
             CatAssessmentDimension.breed));
         delta -= 8;
       }
       if (_containsAny(text, _kWeightManagement)) {
         pros.add(_p(
-            'Weight-management style formula is suitable for British Shorthairs',
+            l10n.assessmentBritishWeightManagement,
             CatAssessmentDimension.breed));
         delta += 8;
       }
       break;
     case 'bengal':
       if (product.protein > _bengalProteinHigh) {
-        pros.add(_p('High protein (>38%) matches Bengal energy needs',
+        pros.add(_p(l10n.assessmentBengalHighProtein,
             CatAssessmentDimension.breed));
         delta += 6;
       }
       if (product.protein < _bengalProteinLow) {
-        cons.add(_p('Low protein (<30%) may be insufficient for Bengals',
+        cons.add(_p(l10n.assessmentBengalLowProtein,
             CatAssessmentDimension.breed));
         delta -= 6;
       }
@@ -560,6 +573,7 @@ _DimensionResult _evaluateHealth(
   CatEntity cat,
   ProductDisplayModel product,
   String text,
+  AppLocalizations l10n,
 ) {
   final pros = <CatProductFinding>[];
   final cons = <CatProductFinding>[];
@@ -575,18 +589,18 @@ _DimensionResult _evaluateHealth(
   if (conditions.contains('urinary_issues')) {
     if (_containsAny(text, _kLowAsh)) {
       pros.add(_p(
-          'Formulated with low ash content, supportive for urinary issues',
+          l10n.assessmentUrinaryLowAsh,
           CatAssessmentDimension.health));
       delta += 8;
     }
     if (_containsAny(text, _kUrinarySupport)) {
       pros.add(_p(
-          'Includes urinary-support ingredients like cranberry or DL-methionine',
+          l10n.assessmentUrinarySupport,
           CatAssessmentDimension.health));
       delta += 10;
     }
     if (_containsAny(text, _kHighMinerals)) {
-      cons.add(_p('High mineral content may not be ideal for urinary issues',
+      cons.add(_p(l10n.assessmentUrinaryHighMinerals,
           CatAssessmentDimension.health));
       delta -= 8;
     }
@@ -594,18 +608,18 @@ _DimensionResult _evaluateHealth(
 
   if (conditions.contains('kidney_disease')) {
     if (product.protein > _kidneyProteinMax) {
-      cons.add(_p('High protein (>32%) may not be ideal for kidney disease',
+      cons.add(_p(l10n.assessmentKidneyHighProtein,
           CatAssessmentDimension.health));
       delta -= 12;
     }
     if (text.contains(_kPhosphorus) && !text.contains(_kLowPhosphorus)) {
       cons.add(_p(
-          'Contains phosphorus sources that may be problematic in kidney disease',
+          l10n.assessmentKidneyPhosphorus,
           CatAssessmentDimension.health));
       delta -= 10;
     }
     if (_containsAny(text, _kRenalSupport)) {
-      pros.add(_p('Formulated as a renal-support diet',
+      pros.add(_p(l10n.assessmentKidneyRenalSupport,
           CatAssessmentDimension.health));
       delta += 12;
     }
@@ -614,12 +628,12 @@ _DimensionResult _evaluateHealth(
   if (conditions.contains('sensitive_stomach')) {
     if (_containsAny(text, _kLimitedIngredient)) {
       pros.add(_p(
-          'Limited-ingredient style recipe can help sensitive stomachs',
+          l10n.assessmentSensitiveStomachLimitedIngredient,
           CatAssessmentDimension.health));
       delta += 8;
     }
     if (ingredientCount > _sensitiveStomachIngredientMax) {
-      cons.add(_p('Very long ingredient list may not suit sensitive stomachs',
+      cons.add(_p(l10n.assessmentSensitiveStomachLongIngredients,
           CatAssessmentDimension.health));
       delta -= 6;
     }
@@ -627,13 +641,13 @@ _DimensionResult _evaluateHealth(
 
   if (conditions.contains('food_allergies')) {
     if (_containsAny(text, _kCommonAllergens)) {
-      cons.add(_p('Contains common allergens like chicken, fish, or beef',
+      cons.add(_p(l10n.assessmentFoodAllergyCommonAllergens,
           CatAssessmentDimension.health));
       delta -= 12;
     }
     if (_containsAny(text, _kNovelProteins)) {
       pros.add(_p(
-          'Uses novel proteins (e.g. duck, venison) which may help with allergies',
+          l10n.assessmentFoodAllergyNovelProteins,
           CatAssessmentDimension.health));
       delta += 10;
     }
@@ -641,13 +655,13 @@ _DimensionResult _evaluateHealth(
 
   if (conditions.contains('skin_allergies')) {
     if (_containsAny(text, _kOmega3)) {
-      pros.add(_p('Omega-3 rich formulation can support skin and coat health',
+      pros.add(_p(l10n.assessmentSkinAllergyOmega3,
           CatAssessmentDimension.health));
       delta += 6;
     }
     if (_containsAny(text, _kArtificialColor)) {
       cons.add(_p(
-          'Contains artificial colors which may aggravate skin allergies',
+          l10n.assessmentSkinAllergyArtificialColor,
           CatAssessmentDimension.health));
       delta -= 8;
     }
@@ -655,13 +669,13 @@ _DimensionResult _evaluateHealth(
 
   if (conditions.contains('diabetes')) {
     if (product.carbs > _diabetesCarbsMax) {
-      cons.add(_p('High carbohydrates (>20%) are less suitable for diabetic cats',
+      cons.add(_p(l10n.assessmentDiabetesHighCarbs,
           CatAssessmentDimension.health));
       delta -= 10;
     }
     if (product.protein > _diabetesProteinHigh) {
       pros.add(_p(
-          'Very high protein (>40%) can support blood sugar control in diabetes',
+          l10n.assessmentDiabetesHighProtein,
           CatAssessmentDimension.health));
       delta += 8;
     }
@@ -670,13 +684,13 @@ _DimensionResult _evaluateHealth(
   if (conditions.contains('dental_problems')) {
     if (product.moisture > _dentalMoistureMin) {
       pros.add(_p(
-          'High-moisture (wet-style) food is easier to eat with dental problems',
+          l10n.assessmentDentalHighMoisture,
           CatAssessmentDimension.health));
       delta += 6;
     }
     if (_containsAny(text, _kLargeKibble)) {
       cons.add(_p(
-          'Very large kibble pieces may be hard to chew with dental issues',
+          l10n.assessmentDentalLargeKibble,
           CatAssessmentDimension.health));
       delta -= 6;
     }
@@ -686,7 +700,7 @@ _DimensionResult _evaluateHealth(
     if ((product.fiber >= _hairballFiberLow &&
             product.fiber <= _hairballFiberHigh) ||
         _containsAny(text, _kHairball)) {
-      pros.add(_p('Hairball control style diet (fiber 4–6% or hairball claims)',
+      pros.add(_p(l10n.assessmentHairballControl,
           CatAssessmentDimension.health));
       delta += 6;
     }

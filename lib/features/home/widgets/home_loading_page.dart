@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 class HomeLoadingWidget extends StatefulWidget {
   const HomeLoadingWidget({super.key});
@@ -10,31 +11,20 @@ class HomeLoadingWidget extends StatefulWidget {
 
 class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
     with SingleTickerProviderStateMixin {
-  final List<LoadingStep> _steps = [
-    const LoadingStep(
-      icon: Icons.qr_code_scanner_rounded,
-      title: 'Scanning product',
-      description: 'Identifying the product...',
-      gifPath: 'assets/images/Illustrations/loading-scanning.gif',
-    ),
-    const LoadingStep(
-      icon: Icons.cloud_download_rounded,
-      title: 'Fetching product data',
-      description: 'Retrieving information...',
-      gifPath: 'assets/images/Illustrations/loading-fetching.gif',
-    ),
-    const LoadingStep(
-      icon: Icons.science_rounded,
-      title: 'Analyzing ingredients',
-      description: 'Processing nutritional data...',
-      gifPath: 'assets/images/Illustrations/loading-analyzing.gif',
-    ),
-    const LoadingStep(
-      icon: Icons.assignment_rounded,
-      title: 'Preparing results',
-      description: 'Almost ready...',
-      gifPath: 'assets/images/Illustrations/loading-almost-ready.gif',
-    ),
+  static const _stepCount = 4;
+
+  static const _gifPaths = [
+    'assets/images/Illustrations/loading-scanning.gif',
+    'assets/images/Illustrations/loading-fetching.gif',
+    'assets/images/Illustrations/loading-analyzing.gif',
+    'assets/images/Illustrations/loading-almost-ready.gif',
+  ];
+
+  static const _icons = [
+    Icons.qr_code_scanner_rounded,
+    Icons.cloud_download_rounded,
+    Icons.science_rounded,
+    Icons.assignment_rounded,
   ];
 
   int _currentStepIndex = 0;
@@ -57,7 +47,7 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
   void _startStepCycle() {
     Future.delayed(const Duration(milliseconds: 3000), () {
       if (!mounted) return;
-      if (_currentStepIndex < _steps.length - 1) {
+      if (_currentStepIndex < _stepCount - 1) {
         setState(() {
           _currentStepIndex++;
         });
@@ -74,6 +64,34 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final steps = [
+      LoadingStep(
+        icon: _icons[0],
+        title: l10n.homeLoadingStepScanning,
+        description: l10n.homeLoadingStepScanningDesc,
+        gifPath: _gifPaths[0],
+      ),
+      LoadingStep(
+        icon: _icons[1],
+        title: l10n.homeLoadingStepFetching,
+        description: l10n.homeLoadingStepFetchingDesc,
+        gifPath: _gifPaths[1],
+      ),
+      LoadingStep(
+        icon: _icons[2],
+        title: l10n.homeLoadingStepAnalyzing,
+        description: l10n.homeLoadingStepAnalyzingDesc,
+        gifPath: _gifPaths[2],
+      ),
+      LoadingStep(
+        icon: _icons[3],
+        title: l10n.homeLoadingStepPreparing,
+        description: l10n.homeLoadingStepPreparingDesc,
+        gifPath: _gifPaths[3],
+      ),
+    ];
+
     return ColoredBox(
       color: DSColors.tintLavender,
       child: Center(
@@ -87,8 +105,8 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
                 switchInCurve: Curves.easeIn,
                 switchOutCurve: Curves.easeOut,
                 child: Image.asset(
-                  _steps[_currentStepIndex].gifPath,
-                  key: ValueKey(_steps[_currentStepIndex].gifPath),
+                  steps[_currentStepIndex].gifPath,
+                  key: ValueKey(steps[_currentStepIndex].gifPath),
                   width: 200,
                   height: 200,
                   fit: BoxFit.contain,
@@ -98,8 +116,8 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
               IntrinsicWidth(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.generate(_steps.length, (index) {
-                    final step = _steps[index];
+                  children: List.generate(_stepCount, (index) {
+                    final step = steps[index];
                     final isCompleted = index < _currentStepIndex;
                     final isCurrent = index == _currentStepIndex;
 
@@ -130,7 +148,7 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  isCompleted ? 'Done' : step.description,
+                                  isCompleted ? l10n.homeLoadingStepDone : step.description,
                                   style: DSTextStyles.caption.copyWith(
                                     color: isCompleted
                                         ? DSColors.accentSuccess

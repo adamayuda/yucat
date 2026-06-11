@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 
 /// Push-notification warm-up screen.
@@ -15,6 +16,7 @@ class NotifPrimerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: DSColors.tintCoralSoft,
       body: DecoratedBox(
@@ -69,7 +71,7 @@ class NotifPrimerScreen extends StatelessWidget {
                     // Clear the back chip overlaid by onboarding_page.dart.
                     const SizedBox(height: 48),
                     Text(
-                      "We'll keep an eye on\nyour cat's food",
+                      l10n.onboardingNotifPrimerTitle,
                       textAlign: TextAlign.center,
                       style: DSTextStyles.displayLg,
                     ),
@@ -89,7 +91,7 @@ class NotifPrimerScreen extends StatelessWidget {
                 top: false,
                 child: Center(
                   child: OnboardingFloatingButton(
-                    label: 'Set up reminders',
+                    label: l10n.onboardingSetUpReminders,
                     onPressed: onNext,
                   ),
                 ),
@@ -181,6 +183,7 @@ class _MockNotification extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: DSDimens.sizeS,
@@ -213,7 +216,7 @@ class _MockNotification extends StatelessWidget {
                     const _HeartMeter(filled: 1, total: 4),
                     const SizedBox(width: DSDimens.sizeXxs),
                     Text(
-                      'Match dropped',
+                      l10n.onboardingNotifMatchDropped,
                       style: DSTextStyles.caption.copyWith(
                         color: DSColors.inkTertiary,
                         fontWeight: FontWeight.w600,
@@ -223,7 +226,7 @@ class _MockNotification extends StatelessWidget {
                 ),
                 const SizedBox(height: DSDimens.sizeXxxs),
                 Text(
-                  "Luna's food changed recipe — see the new verdict 🔍",
+                  l10n.onboardingNotifMockBody,
                   style: DSTextStyles.bodyMd.copyWith(
                     color: DSColors.inkPrimary,
                   ),

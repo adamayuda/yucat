@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 /// Hydration-themed interstitial for the cat-create wizard (step 5).
 ///
@@ -21,17 +22,14 @@ class WaterIntakeFactStep extends StatelessWidget {
   /// so render it at the natural ratio to keep cups aligned across the row.
   static const double _pourHeight = _glassHeight * (305 / 108);
 
-  static const String _headline =
-      "Hydration protects your cat's kidneys and urinary health";
-  static const String _highlight = 'kidneys and urinary health';
-  static const String _body =
-      'Moisture-rich food lowers the risk of urinary and kidney issues — we '
-      'weigh hydration into every assessment.';
-
   @override
   Widget build(BuildContext context) {
-    final parts = _headline.split(_highlight);
-    final hasHighlight = _highlight.isNotEmpty && parts.length == 2;
+    final l10n = AppLocalizations.of(context);
+    final headline = l10n.waterFactHeadline;
+    final highlight = l10n.waterFactHighlight;
+    final body = l10n.waterFactBody;
+    final parts = headline.split(highlight);
+    final hasHighlight = highlight.isNotEmpty && parts.length == 2;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -77,7 +75,7 @@ class WaterIntakeFactStep extends StatelessWidget {
                     children: [
                       TextSpan(text: parts[0]),
                       TextSpan(
-                        text: _highlight,
+                        text: highlight,
                         style: const TextStyle(color: DSColors.accentInfo),
                       ),
                       TextSpan(text: parts[1]),
@@ -87,7 +85,7 @@ class WaterIntakeFactStep extends StatelessWidget {
                   style: DSTextStyles.displayLg,
                 )
               : Text(
-                  _headline,
+                  headline,
                   textAlign: TextAlign.center,
                   style: DSTextStyles.displayLg,
                 ),
@@ -96,7 +94,7 @@ class WaterIntakeFactStep extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: DSDimens.size3xl),
           child: Text(
-            _body,
+            body,
             textAlign: TextAlign.center,
             style: DSTextStyles.bodyLg.copyWith(color: DSColors.inkSecondary),
           ),

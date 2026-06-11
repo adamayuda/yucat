@@ -1,39 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 class PaywallValueProps extends StatelessWidget {
   const PaywallValueProps({super.key});
 
-  static const _features = <_Feature>[
+  static List<_Feature> _features(AppLocalizations l10n) => [
     _Feature(
       icon: Icons.document_scanner_outlined,
-      title: 'Ingredient scanner',
-      benefit: 'Scan any label in seconds',
+      title: l10n.paywallFeatureIngredientScannerTitle,
+      benefit: l10n.paywallFeatureIngredientScannerBenefit,
     ),
     _Feature(
       icon: Icons.favorite_rounded,
-      title: 'Personalized verdicts',
-      benefit: "Matched to your cat's age, breed & health",
+      title: l10n.paywallFeaturePersonalizedVerdictsTitle,
+      benefit: l10n.paywallFeaturePersonalizedVerdictsBenefit,
     ),
     _Feature(
       icon: Icons.all_inclusive_rounded,
-      title: 'Unlimited scans',
-      benefit: 'No daily caps, ever',
+      title: l10n.paywallFeatureUnlimitedScansTitle,
+      benefit: l10n.paywallFeatureUnlimitedScansBenefit,
     ),
     _Feature(
       icon: Icons.notifications_active_rounded,
-      title: 'Reformulation alerts',
-      benefit: 'Know the moment a recipe changes',
+      title: l10n.paywallFeatureReformulationAlertsTitle,
+      benefit: l10n.paywallFeatureReformulationAlertsBenefit,
     ),
     _Feature(
       icon: Icons.bookmark_rounded,
-      title: 'Saved foods & history',
-      benefit: "Every food you've checked, in one place",
+      title: l10n.paywallFeatureSavedFoodsTitle,
+      benefit: l10n.paywallFeatureSavedFoodsBenefit,
     ),
     _Feature(
       icon: Icons.pets_rounded,
-      title: 'Multi-cat profiles',
-      benefit: 'A tailored profile for each of your cats',
+      title: l10n.paywallFeatureMultiCatTitle,
+      benefit: l10n.paywallFeatureMultiCatBenefit,
     ),
   ];
 
@@ -41,25 +42,27 @@ class PaywallValueProps extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final features = _features(l10n);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Center(
           child: Text(
-            'Everything you get',
+            l10n.paywallEverythingYouGet,
             textAlign: TextAlign.center,
             style: DSTextStyles.displayLg,
           ),
         ),
         const SizedBox(height: DSDimens.sizeM),
-        for (var i = 0; i < _features.length; i++) ...[
+        for (var i = 0; i < features.length; i++) ...[
           if (i > 0)
             const Padding(
               // Inset so the divider aligns under the text column, not the tile.
               padding: EdgeInsets.only(left: _tileSize + DSDimens.sizeM),
               child: Divider(height: 1, thickness: 1, color: DSColors.border),
             ),
-          _FeatureRow(feature: _features[i]),
+          _FeatureRow(feature: features[i]),
         ],
       ],
     );
@@ -71,7 +74,7 @@ class _Feature {
   final String title;
   final String benefit;
 
-  const _Feature({
+  _Feature({
     required this.icon,
     required this.title,
     required this.benefit,

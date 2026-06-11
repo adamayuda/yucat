@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 
@@ -18,7 +19,8 @@ class ActiveCatSnapshotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tags = _tags(cat);
+    final l10n = AppLocalizations.of(context);
+    final tags = _tags(cat, l10n);
     final conditions = cat.healthConditions ?? const [];
 
     return DSCard(
@@ -50,8 +52,7 @@ class ActiveCatSnapshotCard extends StatelessWidget {
                 for (final t in tags) _SnapshotPill(label: t),
                 if (conditions.isNotEmpty)
                   _SnapshotPill(
-                    label:
-                        '${conditions.length} condition${conditions.length == 1 ? '' : 's'}',
+                    label: l10n.homeCatConditionCount(conditions.length),
                     icon: Icons.warning_amber_rounded,
                     background: const Color(0xFFFCE4E1),
                     foreground: DSColors.accentDanger,
@@ -64,33 +65,33 @@ class ActiveCatSnapshotCard extends StatelessWidget {
     );
   }
 
-  List<String> _tags(CatEntity cat) {
+  List<String> _tags(CatEntity cat, AppLocalizations l10n) {
     final tags = <String>[];
-    final age = _formatAgeGroup(cat.ageGroup);
+    final age = _formatAgeGroup(cat.ageGroup, l10n);
     if (age != null) tags.add(age);
-    final weight = _formatWeightCategory(cat.weightCategory);
+    final weight = _formatWeightCategory(cat.weightCategory, l10n);
     if (weight != null) tags.add(weight);
     if (cat.breed != null && cat.breed!.isNotEmpty) tags.add(cat.breed!);
     return tags;
   }
 
-  String? _formatAgeGroup(String? ageGroup) {
+  String? _formatAgeGroup(String? ageGroup, AppLocalizations l10n) {
     if (ageGroup == null) return null;
     return switch (ageGroup.toLowerCase()) {
-      'kitten' => 'Kitten',
-      'adult' => 'Adult',
-      'senior' => 'Senior',
+      'kitten' => l10n.homeCatKitten,
+      'adult' => l10n.homeCatAdult,
+      'senior' => l10n.homeCatSenior,
       _ => ageGroup,
     };
   }
 
-  String? _formatWeightCategory(String? category) {
+  String? _formatWeightCategory(String? category, AppLocalizations l10n) {
     if (category == null || category.isEmpty) return null;
     return switch (category.toLowerCase()) {
-      'underweight' => 'Underweight',
-      'normal' => 'Healthy weight',
-      'overweight' => 'Overweight',
-      'obese' => 'Obese',
+      'underweight' => l10n.homeCatUnderweight,
+      'normal' => l10n.homeCatHealthyWeight,
+      'overweight' => l10n.homeCatOverweight,
+      'obese' => l10n.homeCatObese,
       _ => category,
     };
   }

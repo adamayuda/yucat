@@ -16,6 +16,7 @@ import 'package:yucat/features/profile/bloc/profile_event.dart';
 import 'package:yucat/features/profile/bloc/profile_state.dart';
 import 'package:yucat/features/saved_products/domain/usecases/get_saved_products_usecase.dart';
 import 'package:yucat/features/scan_history/domain/usecases/get_scan_history_usecase.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   static const String _onboardingCompletedKey = 'onboarding_completed';
@@ -105,14 +106,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       properties: {'timestamp': DateTime.now().toIso8601String()},
     );
 
-    // Capture the messenger before any await so we never touch a stale context.
+    // Capture the messenger and l10n before any await so we never touch a stale context.
     final messenger = ScaffoldMessenger.of(event.context);
+    final l10n = AppLocalizations.of(event.context);
     void snack(String message) =>
         messenger.showSnackBar(SnackBar(content: Text(message)));
 
     // RevenueCat is only configured on iOS (see main.dart).
     if (!Platform.isIOS) {
-      snack("Restore isn't available on this device.");
+      snack(l10n.profileRestoreNotAvailable);
       return;
     }
 
@@ -125,13 +127,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           eventName: 'Subscription Restored',
           properties: {'timestamp': DateTime.now().toIso8601String()},
         );
-        snack('Purchases restored.');
+        snack(l10n.profileRestoreSuccess);
       } else {
-        snack('No active subscription found.');
+        snack(l10n.profileNoSubscriptionFound);
       }
     } catch (e) {
       debugPrint('ProfileBloc.restore error: $e');
-      snack('Could not restore purchases. Please try again.');
+      snack(l10n.profileRestoreError);
     }
   }
 }

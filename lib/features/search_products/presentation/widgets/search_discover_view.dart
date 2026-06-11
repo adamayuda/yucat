@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/search_products/presentation/models/brand_display_model.dart';
 import 'package:yucat/features/search_products/presentation/widgets/search_brand_strip.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 
 /// The Search tab's pre-query state: recent searches (when any) above the
@@ -22,6 +23,7 @@ class SearchDiscoverView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final bottomInset = MediaQuery.of(context).padding.bottom + 96;
     return ListView(
       padding: EdgeInsets.fromLTRB(
@@ -34,8 +36,8 @@ class SearchDiscoverView extends StatelessWidget {
         if (recentSearches.isNotEmpty) ...[
           Row(
             children: [
-              Expanded(child: Text('Recent', style: DSTextStyles.titleMd)),
-              DSTextLink(label: 'Clear', onPressed: onClearRecents),
+              Expanded(child: Text(l10n.searchRecentLabel, style: DSTextStyles.titleMd)),
+              DSTextLink(label: l10n.searchClearLabel, onPressed: onClearRecents),
             ],
           ),
           const SizedBox(height: DSDimens.sizeXxs),

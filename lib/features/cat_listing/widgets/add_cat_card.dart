@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 
 class AddCatCard extends StatelessWidget {
@@ -9,6 +10,7 @@ class AddCatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DSCard(
       onTap: onTap,
       padding: const EdgeInsets.all(DSDimens.sizeS),
@@ -33,10 +35,10 @@ class AddCatCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Add another cat', style: DSTextStyles.titleMd),
+                Text(l10n.catListingAddAnotherCat, style: DSTextStyles.titleMd),
                 const SizedBox(height: DSDimens.sizeXxxs),
                 Text(
-                  'Create a new profile',
+                  l10n.catListingCreateNewProfile,
                   style: DSTextStyles.bodyMd.copyWith(
                     color: DSColors.inkSecondary,
                   ),

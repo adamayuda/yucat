@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
 
@@ -79,6 +80,7 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final hasName = _controller.text.trim().isNotEmpty;
 
     return OnboardingScaffold(
@@ -88,7 +90,7 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
           _SuggestButton(onTap: _randomize),
           const Spacer(),
           DSPillButton(
-            label: 'Next',
+            label: l10n.commonNext,
             onPressed: hasName
                 ? () {
                     FocusScope.of(context).unfocus();
@@ -116,7 +118,7 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
             children: [
               const Spacer(flex: 2),
               Text(
-                'Name your cat',
+                l10n.onboardingProfileNameLabel,
                 textAlign: TextAlign.center,
                 style: DSTextStyles.titleMd.copyWith(
                   color: DSColors.inkSecondary,
@@ -132,7 +134,7 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
                 cursorColor: DSColors.accentInfo,
                 decoration: InputDecoration(
                   border: InputBorder.none,
-                  hintText: 'Mochi',
+                  hintText: l10n.onboardingProfileNameHint,
                   hintStyle: DSTextStyles.displayHero.copyWith(
                     color: DSColors.inkTertiary,
                   ),

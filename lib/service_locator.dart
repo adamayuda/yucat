@@ -355,6 +355,8 @@ Future<void> _registerBlocs() async {
       prefs: sl<SharedPreferences>(),
       hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
       userAnalyticsService: sl<UserAnalyticsService>(),
+      currentUserUsecase: sl<CurrentUserUsecase>(),
+      signinAnonymouslyUsecase: sl<SigninAnonymouslyUsecase>(),
     ),
   );
   sl.registerBloc<ProductListingBloc>(

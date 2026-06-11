@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_chip.dart';
 import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
@@ -7,19 +8,21 @@ class HealthConditionsStep extends StatelessWidget {
   final List<String> selectedHealthConditions;
   final ValueChanged<List<String>> onHealthConditionsChanged;
 
-  static const List<({String label, String value})> _options = [
-    (label: 'None', value: 'none'),
-    (label: 'Urinary issues', value: 'urinary_issues'),
-    (label: 'Kidney disease', value: 'kidney_disease'),
-    (label: 'Sensitive stomach', value: 'sensitive_stomach'),
-    (label: 'Skin allergies', value: 'skin_allergies'),
-    (label: 'Food allergies', value: 'food_allergies'),
-    (label: 'Diabetes', value: 'diabetes'),
-    (label: 'Dental problems', value: 'dental_problems'),
-    (label: 'Hairball issues', value: 'hairball_issues'),
-    (label: 'Heart condition', value: 'heart_condition'),
-    (label: 'Joint or mobility issues', value: 'joint_issues'),
-  ];
+  // `value` is stable (drives the per-cat assessment); only `label` is
+  // localized.
+  List<({String label, String value})> _options(AppLocalizations l10n) => [
+        (label: l10n.healthNone, value: 'none'),
+        (label: l10n.healthUrinaryIssues, value: 'urinary_issues'),
+        (label: l10n.healthKidneyDisease, value: 'kidney_disease'),
+        (label: l10n.healthSensitiveStomach, value: 'sensitive_stomach'),
+        (label: l10n.healthSkinAllergies, value: 'skin_allergies'),
+        (label: l10n.healthFoodAllergies, value: 'food_allergies'),
+        (label: l10n.healthDiabetes, value: 'diabetes'),
+        (label: l10n.healthDentalProblems, value: 'dental_problems'),
+        (label: l10n.healthHairballIssues, value: 'hairball_issues'),
+        (label: l10n.healthHeartCondition, value: 'heart_condition'),
+        (label: l10n.healthJointIssues, value: 'joint_issues'),
+      ];
 
   const HealthConditionsStep({
     super.key,
@@ -53,11 +56,12 @@ class HealthConditionsStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const MascotSpeechBubble(
-          question: 'Any health considerations?',
+        MascotSpeechBubble(
+          question: l10n.healthQuestion,
         ),
         const SizedBox(height: DSDimens.sizeL),
         Expanded(
@@ -83,7 +87,7 @@ class HealthConditionsStep extends StatelessWidget {
                       spacing: DSDimens.sizeXxxs,
                       runSpacing: DSDimens.sizeXxxs,
                       children: [
-                        for (final option in _options)
+                        for (final option in _options(l10n))
                           DSChip(
                             label: option.label,
                             selected: selectedHealthConditions

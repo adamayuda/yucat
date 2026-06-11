@@ -3,6 +3,7 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/cat_verdict_card.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
@@ -38,6 +39,7 @@ class _CatAssessmentSectionState extends State<CatAssessmentSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final cats = widget.cats;
     if (cats.isEmpty) {
       return DSCard(
@@ -45,14 +47,14 @@ class _CatAssessmentSectionState extends State<CatAssessmentSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("My cat's score", style: DSTextStyles.titleMd),
+            Text(l10n.productDetailMyCatScore, style: DSTextStyles.titleMd),
             const SizedBox(height: DSDimens.sizeXxs),
             Text(
-              'Create a cat profile to see a personalized score for your cat.',
+              l10n.productDetailNoCatPrompt,
               style: DSTextStyles.bodyMd,
             ),
             const SizedBox(height: DSDimens.sizeS),
-            DSPillButton(label: 'Add a cat', onPressed: widget.onCreateCat),
+            DSPillButton(label: l10n.productDetailAddACat, onPressed: widget.onCreateCat),
           ],
         ),
       );
@@ -69,11 +71,11 @@ class _CatAssessmentSectionState extends State<CatAssessmentSection> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
-              child: Text('For your cats', style: DSTextStyles.displayLg),
+              child: Text(l10n.productDetailForYourCats, style: DSTextStyles.displayLg),
             ),
             if (hasMultiple)
               Text(
-                '${cats.length} CATS',
+                l10n.productDetailCatsCount(cats.length),
                 style: DSTextStyles.caption.copyWith(
                   color: DSColors.inkSecondary,
                   fontWeight: FontWeight.w700,
@@ -85,8 +87,8 @@ class _CatAssessmentSectionState extends State<CatAssessmentSection> {
         const SizedBox(height: DSDimens.sizeXxs),
         Text(
           hasMultiple
-              ? "Pick a cat to see how this product fits its profile."
-              : "Personalized score based on your cat's profile.",
+              ? l10n.productDetailPickACat
+              : l10n.productDetailPersonalizedScore,
           style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkSecondary),
         ),
         const SizedBox(height: DSDimens.sizeS),

@@ -6,6 +6,13 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>es</string>
+		<string>fr</string>
+		<string>hu</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Yucat</string>
 	<key>CFBundleExecutable</key>
@@ -32,6 +39,8 @@
 	<string>This app uses your microphone for audio recording features.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs access to your photo library to select or save photos.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app uses your location to send you timely, location-relevant notifications and reminders about your cat's nutrition.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

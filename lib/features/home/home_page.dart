@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat_listing/mappers/cat_entity_to_model_mapper.dart';
@@ -99,11 +100,11 @@ class _HomePage extends State<HomePage> {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
       bloc: _bloc,
-      builder: (context, state) => _onStateChangeBuilder(state),
+      builder: (context, state) => _onStateChangeBuilder(context, state),
     );
   }
 
-  Widget _onStateChangeBuilder(HomeState state) {
+  Widget _onStateChangeBuilder(BuildContext context, HomeState state) {
     switch (state) {
       case HomeLoadingState():
         return Scaffold(
@@ -127,11 +128,12 @@ class _HomePage extends State<HomePage> {
           onActiveCatChanged: _onActiveCatChanged,
         );
       case HomeErrorState():
+        final l10n = AppLocalizations.of(context);
         return Scaffold(
           backgroundColor: DSColors.tintLavender,
           body: SafeArea(
             child: DSStateView.error(
-              body: state.message,
+              body: _localizeError(state.errorType, l10n),
               onCtaPressed: () => _bloc.add(HomeInitialEvent()),
             ),
           ),
@@ -140,4 +142,12 @@ class _HomePage extends State<HomePage> {
         return const SizedBox.shrink();
     }
   }
+
+  String _localizeError(HomeErrorType type, AppLocalizations l10n) =>
+      switch (type) {
+        HomeErrorType.notFound => l10n.homeErrorProductNotFound,
+        HomeErrorType.timeout => l10n.homeErrorTimeout,
+        HomeErrorType.noInternet => l10n.homeErrorNoInternet,
+        HomeErrorType.generic => l10n.homeErrorGeneric,
+      };
 }

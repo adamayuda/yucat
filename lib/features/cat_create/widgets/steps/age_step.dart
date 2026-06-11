@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart'
     show CupertinoPicker, FixedExtentScrollController;
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
 class AgeStep extends StatefulWidget {
@@ -48,25 +49,24 @@ class _AgeStepState extends State<AgeStep> {
     super.dispose();
   }
 
-  String _stageLabel(int months) {
+  String _stageLabel(AppLocalizations l10n, int months) {
+    final years = (months / 12).toStringAsFixed(1);
     if (months < 12) {
-      final years = (months / 12).toStringAsFixed(1);
-      return 'About $years years old — a kitten.';
+      return l10n.ageStageKitten(years);
     }
     if (months < 84) {
-      final years = (months / 12).toStringAsFixed(1);
-      return 'About $years years old — an adult.';
+      return l10n.ageStageAdult(years);
     }
-    final years = (months / 12).toStringAsFixed(1);
-    return 'About $years years old — a senior.';
+    return l10n.ageStageSenior(years);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const MascotSpeechBubble(question: 'How old is your cat?'),
+        MascotSpeechBubble(question: l10n.ageQuestion),
         Expanded(
           child: Center(
             child: Column(
@@ -74,8 +74,8 @@ class _AgeStepState extends State<AgeStep> {
               children: [
                 Row(
                   children: [
-                    Expanded(child: _columnHeader('Years')),
-                    Expanded(child: _columnHeader('Months')),
+                    Expanded(child: _columnHeader(l10n.ageColumnYears)),
+                    Expanded(child: _columnHeader(l10n.ageColumnMonths)),
                   ],
                 ),
                 const SizedBox(height: DSDimens.sizeXs),
@@ -88,7 +88,7 @@ class _AgeStepState extends State<AgeStep> {
                           controller: _yearsController,
                           count: AgeStep.maxYears + 1,
                           current: _years,
-                          unit: 'yr',
+                          unit: l10n.ageUnitYear,
                           onChanged: (value) {
                             setState(() => _years = value);
                             widget.onAgeChanged(_totalMonths);
@@ -100,7 +100,7 @@ class _AgeStepState extends State<AgeStep> {
                           controller: _monthsController,
                           count: 12,
                           current: _months,
-                          unit: 'mo',
+                          unit: l10n.ageUnitMonth,
                           onChanged: (value) {
                             setState(() => _months = value);
                             widget.onAgeChanged(_totalMonths);
@@ -127,7 +127,7 @@ class _AgeStepState extends State<AgeStep> {
               const SizedBox(width: DSDimens.sizeXxs),
               Expanded(
                 child: Text(
-                  _stageLabel(_totalMonths),
+                  _stageLabel(l10n, _totalMonths),
                   style: DSTextStyles.bodyMd,
                 ),
               ),

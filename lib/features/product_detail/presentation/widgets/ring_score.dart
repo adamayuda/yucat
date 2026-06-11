@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 class RingScore extends StatelessWidget {
   final int score;
@@ -22,8 +23,9 @@ class RingScore extends StatelessWidget {
     final color = _accentFor(ratingColor);
     final stroke = (size / 10).clamp(4.0, 7.0);
 
+    final l10n = AppLocalizations.of(context);
     return Semantics(
-      label: 'Score $score out of $maxScore',
+      label: l10n.productDetailScoreSemantics(score, maxScore),
       excludeSemantics: true,
       child: SizedBox(
       width: size,

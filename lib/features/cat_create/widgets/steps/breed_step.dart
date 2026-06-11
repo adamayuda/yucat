@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_option_row.dart';
 import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
@@ -35,11 +36,12 @@ class BreedStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final groups = _grouped(_alphabetized);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const MascotSpeechBubble(question: 'What breed is your cat?'),
+        MascotSpeechBubble(question: l10n.breedQuestion),
         const SizedBox(height: DSDimens.sizeS),
         Expanded(
           child: ListView(
@@ -74,13 +76,13 @@ class BreedStep extends StatelessWidget {
                   onPressed: () => onBreedSelected(_mixedBreedValue),
                   child: Text.rich(
                     TextSpan(
-                      text: "Don't know the breed? ",
+                      text: l10n.breedUnknownPrefix,
                       style: DSTextStyles.bodyMd.copyWith(
                         color: DSColors.inkSecondary,
                       ),
                       children: [
                         TextSpan(
-                          text: 'Mixed / unknown',
+                          text: l10n.breedMixedUnknown,
                           style: DSTextStyles.bodyMd.copyWith(
                             color: DSColors.inkPrimary,
                             fontWeight: FontWeight.w700,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 
 class NutritionGridCard extends StatelessWidget {
@@ -16,6 +17,7 @@ class NutritionGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DSCard(
       padding: const EdgeInsets.symmetric(
         horizontal: DSDimens.sizeS,
@@ -26,35 +28,35 @@ class NutritionGridCard extends StatelessWidget {
           Expanded(
             child: _MacroCell(
               iconAsset: 'assets/images/Icons/nutrient-protein.png',
-              label: 'Protein',
+              label: l10n.productDetailNutrientProtein,
               value: _format(product.protein),
             ),
           ),
           Expanded(
             child: _MacroCell(
               iconAsset: 'assets/images/Icons/nutrient-fat.png',
-              label: 'Fat',
+              label: l10n.productDetailNutrientFat,
               value: _format(product.fat),
             ),
           ),
           Expanded(
             child: _MacroCell(
               iconAsset: 'assets/images/Icons/nutrient-moisture.png',
-              label: 'Moisture',
+              label: l10n.productDetailNutrientMoisture,
               value: _format(product.moisture),
             ),
           ),
           Expanded(
             child: _MacroCell(
               iconAsset: 'assets/images/Icons/nutrient-fiber.png',
-              label: 'Fiber',
+              label: l10n.productDetailNutrientFiber,
               value: _format(product.fiber),
             ),
           ),
           Expanded(
             child: _MacroCell(
               iconAsset: 'assets/images/Icons/nutrient-carbs.png',
-              label: 'Carbs',
+              label: l10n.productDetailNutrientCarbs,
               value: _format(product.carbs),
             ),
           ),

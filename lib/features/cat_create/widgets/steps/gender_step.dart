@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_option_row.dart';
 import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
@@ -15,10 +16,11 @@ class GenderStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const MascotSpeechBubble(question: "What's your cat's gender?"),
+        MascotSpeechBubble(question: l10n.genderQuestion),
         Expanded(
           child: Center(
             child: Column(
@@ -26,14 +28,14 @@ class GenderStep extends StatelessWidget {
               children: [
                 DSOptionRow(
                   leadingAsset: 'assets/images/Female.svg',
-                  label: 'Female',
+                  label: l10n.genderFemale,
                   selected: gender == 'female',
                   onTap: () => onGenderChanged('female'),
                 ),
                 const SizedBox(height: DSDimens.sizeXs),
                 DSOptionRow(
                   leadingAsset: 'assets/images/Male.svg',
-                  label: 'Male',
+                  label: l10n.genderMale,
                   selected: gender == 'male',
                   onTap: () => onGenderChanged('male'),
                 ),

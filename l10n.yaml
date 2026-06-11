@@ -1,0 +1,8 @@
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+# Generated into the source tree (lib/l10n), imported as
+# `package:yucat/l10n/app_localizations.dart`.
+# Non-nullable `AppLocalizations.of(context)` getter (we always wire delegates).
+nullable-getter: false

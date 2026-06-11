@@ -40,9 +40,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     Emitter<PaywallState> emit,
   ) async {
     if (!Platform.isIOS) {
-      emit(const PaywallErrorState(
-        message: 'Subscriptions are only available on iOS.',
-      ));
+      emit(const PaywallErrorState(kind: PaywallError.iosOnly));
       return;
     }
 
@@ -57,16 +55,14 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     final Offerings offerings;
     try {
       offerings = await Purchases.getOfferings();
-    } on PlatformException catch (e) {
-      emit(PaywallErrorState(message: e.message ?? 'Could not load plans.'));
+    } on PlatformException catch (_) {
+      emit(const PaywallErrorState(kind: PaywallError.couldNotLoadPlans));
       return;
     }
 
     final current = offerings.current;
     if (current == null || current.availablePackages.isEmpty) {
-      emit(const PaywallErrorState(
-        message: 'No subscription plans are available right now.',
-      ));
+      emit(const PaywallErrorState(kind: PaywallError.noPlansAvailable));
       return;
     }
 
@@ -187,7 +183,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
         _logPurchaseFailed(reason: 'not_active', packageType: current.selectedPackage.packageType.name);
         emit(current.copyWith(
           isPurchasing: false,
-          transientError: 'Purchase did not complete. Please try again.',
+          transientError: PaywallTransientError.purchaseNotComplete,
           errorTick: current.errorTick + 1,
         ));
       }
@@ -208,7 +204,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       );
       emit(current.copyWith(
         isPurchasing: false,
-        transientError: e.message ?? 'Purchase failed. Please try again.',
+        transientError: PaywallTransientError.purchaseFailed,
         errorTick: current.errorTick + 1,
       ));
     } catch (e) {
@@ -220,7 +216,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       );
       emit(current.copyWith(
         isPurchasing: false,
-        transientError: 'Something went wrong. Please try again.',
+        transientError: PaywallTransientError.somethingWentWrong,
         errorTick: current.errorTick + 1,
       ));
     }
@@ -272,7 +268,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
         _logRestoreFailed(reason: 'no_active_subscription');
         emit(current.copyWith(
           isPurchasing: false,
-          transientError: 'No active subscription found.',
+          transientError: PaywallTransientError.noActiveSubscription,
           errorTick: current.errorTick + 1,
         ));
       }
@@ -281,7 +277,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       _logRestoreFailed(reason: 'error', errorMessage: e.toString());
       emit(current.copyWith(
         isPurchasing: false,
-        transientError: 'Could not restore purchases. Please try again.',
+        transientError: PaywallTransientError.restoreFailed,
         errorTick: current.errorTick + 1,
       ));
     }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/search_products/presentation/models/brand_display_model.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 /// "Popular brands" section — a title + a horizontal strip of brand tiles.
 /// Designed to sit inside a parent scroll view (see [SearchDiscoverView]); it
@@ -14,11 +15,12 @@ class SearchBrandStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Popular brands',
+          l10n.searchPopularBrands,
           style: DSTextStyles.titleMd,
         ),
         const SizedBox(height: DSDimens.sizeS),

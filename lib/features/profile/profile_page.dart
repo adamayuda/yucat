@@ -15,6 +15,7 @@ import 'package:yucat/features/profile/bloc/profile_bloc.dart';
 import 'package:yucat/features/profile/bloc/profile_event.dart';
 import 'package:yucat/features/profile/bloc/profile_state.dart';
 import 'package:yucat/features/profile/widgets/profile_skeleton.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
@@ -43,7 +44,7 @@ class _ProfilePage extends State<ProfilePage> {
   Future<void> _launchUri(Uri uri,
       {String? errorMessage,
       LaunchMode mode = LaunchMode.platformDefault}) async {
-    final fallbackMessage = errorMessage ?? 'Could not open this link.';
+    final fallbackMessage = errorMessage ?? AppLocalizations.of(context).profileLinkError;
     try {
       if (!await launchUrl(uri, mode: mode)) {
         _showSnack(fallbackMessage);
@@ -106,12 +107,13 @@ class _ProfilePage extends State<ProfilePage> {
     );
     _launchUri(
       Uri.parse(_manageSubscriptionUrl),
-      errorMessage: 'Could not open subscription settings.',
+      errorMessage: AppLocalizations.of(context).profileSubscriptionLinkError,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return BlocBuilder<ProfileBloc, ProfileState>(
       bloc: _bloc,
       buildWhen: (previous, current) => previous != current,
@@ -130,18 +132,17 @@ class _ProfilePage extends State<ProfilePage> {
             onScanHistoryTap: _openScanHistory,
             onContactTap: () => _launchUri(
               Uri(scheme: 'mailto', path: kSupportEmail),
-              errorMessage:
-                  'Could not launch email. Please contact us at $kSupportEmail',
+              errorMessage: l10n.profileEmailError(kSupportEmail),
             ),
             onPrivacyTap: () => _launchUri(
               Uri.parse(kPrivacyUrl),
               mode: LaunchMode.externalApplication,
-              errorMessage: 'Could not open Privacy Policy',
+              errorMessage: l10n.profilePrivacyError,
             ),
             onTermsTap: () => _launchUri(
               Uri.parse(kTermsUrl),
               mode: LaunchMode.externalApplication,
-              errorMessage: 'Could not open Terms & Conditions',
+              errorMessage: l10n.profileTermsError,
             ),
             onResetOnboardingTap: () =>
                 _bloc.add(ResetOnboardingTapEvent(context: context)),
@@ -190,6 +191,7 @@ class _ProfileHub extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: DSColors.tintLavender,
       body: SafeArea(
@@ -202,7 +204,7 @@ class _ProfileHub extends StatelessWidget {
             MediaQuery.of(context).padding.bottom + kFloatingNavClearance,
           ),
           children: [
-            Text('Profile', style: DSTextStyles.displayLg),
+            Text(l10n.profileTitle, style: DSTextStyles.displayLg),
             const SizedBox(height: DSDimens.sizeL),
             _SubscriptionCard(
               onRestore: onRestore,
@@ -222,20 +224,20 @@ class _ProfileHub extends StatelessWidget {
                 children: [
                   _LibraryRow(
                     icon: Icons.bookmark_outline_rounded,
-                    label: 'Saved products',
+                    label: l10n.profileSavedProductsLabel,
                     count: savedProducts.length,
-                    emptyLabel: 'Nothing saved yet',
-                    countLabel: (n) => '$n saved',
+                    emptyLabel: l10n.profileSavedProductsEmpty,
+                    countLabel: (n) => l10n.profileSavedProductsCount(n),
                     previews: savedProducts,
                     onTap: onSavedProductsTap,
                   ),
                   const _MenuDivider(),
                   _LibraryRow(
                     icon: Icons.history_rounded,
-                    label: 'Scan history',
+                    label: l10n.profileScanHistoryLabel,
                     count: scanHistory.length,
-                    emptyLabel: 'No scans yet',
-                    countLabel: (n) => '$n scan${n == 1 ? '' : 's'}',
+                    emptyLabel: l10n.profileScanHistoryEmpty,
+                    countLabel: (n) => l10n.profileScanHistoryCount(n),
                     previews: scanHistory,
                     onTap: onScanHistoryTap,
                   ),
@@ -249,19 +251,19 @@ class _ProfileHub extends StatelessWidget {
                 children: [
                   _ProfileMenuItem(
                     icon: Icons.mail_outline_rounded,
-                    label: 'Contact us',
+                    label: l10n.profileContactUs,
                     onTap: onContactTap,
                   ),
                   const _MenuDivider(),
                   _ProfileMenuItem(
                     icon: Icons.shield_outlined,
-                    label: 'Privacy policy',
+                    label: l10n.profilePrivacyPolicy,
                     onTap: onPrivacyTap,
                   ),
                   const _MenuDivider(),
                   _ProfileMenuItem(
                     icon: Icons.description_outlined,
-                    label: 'Terms & conditions',
+                    label: l10n.profileTermsAndConditions,
                     onTap: onTermsTap,
                   ),
                   // Debug-only: compiled out of release builds via kDebugMode.
@@ -269,8 +271,8 @@ class _ProfileHub extends StatelessWidget {
                     const _MenuDivider(),
                     _ProfileMenuItem(
                       icon: Icons.refresh_rounded,
-                      label: 'Reset onboarding',
-                      sublabel: 'Debug only',
+                      label: l10n.profileResetOnboarding,
+                      sublabel: l10n.profileDebugOnly,
                       onTap: onResetOnboardingTap,
                     ),
                   ],
@@ -295,6 +297,7 @@ class _SubscriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // Hard paywall: every user who reaches Profile is an active subscriber,
     // so the card always reflects the Pro state.
     return DSCard(
@@ -326,7 +329,7 @@ class _SubscriptionCard extends StatelessWidget {
                     Text('YuCat Pro', style: DSTextStyles.titleMd),
                     const SizedBox(height: 2),
                     Text(
-                      'Your subscription is active',
+                      l10n.profileSubscriptionActive,
                       style: DSTextStyles.bodyMd.copyWith(
                         color: DSColors.inkSecondary,
                       ),
@@ -339,13 +342,13 @@ class _SubscriptionCard extends StatelessWidget {
           const SizedBox(height: DSDimens.sizeS),
           _InlineAction(
             icon: Icons.restore_rounded,
-            label: 'Restore purchases',
+            label: l10n.profileRestorePurchases,
             onTap: onRestore,
           ),
           const _MenuDivider(),
           _InlineAction(
             icon: Icons.settings_outlined,
-            label: 'Manage subscription',
+            label: l10n.profileManageSubscription,
             onTap: onManageSubscription,
           ),
         ],
@@ -369,6 +372,7 @@ class _YourCatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DSCard(
       padding: const EdgeInsets.all(DSDimens.sizeL),
       child: Column(
@@ -376,12 +380,12 @@ class _YourCatsCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text('Your cats', style: DSTextStyles.titleMd)),
+              Expanded(child: Text(l10n.profileYourCats, style: DSTextStyles.titleMd)),
               if (cats.isNotEmpty)
                 GestureDetector(
                   onTap: onManageCats,
                   child: Text(
-                    'Manage',
+                    l10n.profileManage,
                     style: DSTextStyles.label.copyWith(
                       color: DSColors.inkSecondary,
                       fontWeight: FontWeight.w600,
@@ -446,6 +450,7 @@ class _AddCatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
@@ -468,7 +473,7 @@ class _AddCatTile extends StatelessWidget {
             ),
             const SizedBox(height: DSDimens.sizeXxs),
             Text(
-              'Add',
+              l10n.profileAddCat,
               style: DSTextStyles.caption.copyWith(
                 color: DSColors.inkSecondary,
               ),

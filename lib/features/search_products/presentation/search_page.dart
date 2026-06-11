@@ -10,6 +10,7 @@ import 'package:yucat/features/search_products/presentation/widgets/product_row_
 import 'package:yucat/features/search_products/presentation/widgets/search_discover_skeleton.dart';
 import 'package:yucat/features/search_products/presentation/widgets/search_discover_view.dart';
 import 'package:yucat/features/search_products/presentation/widgets/search_text_field.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
 import 'package:yucat/presentation/components/skeletons/product_list_skeleton.dart';
@@ -86,12 +87,13 @@ class _SearchPage extends State<SearchPage> {
         buildWhen: (previous, current) =>
             previous != current &&
             current is! SearchNavigateToProductDetailState,
-        builder: (context, state) => _buildScaffold(state),
+        builder: (context, state) => _buildScaffold(context, state),
       ),
     );
   }
 
-  Widget _buildScaffold(SearchState state) {
+  Widget _buildScaffold(BuildContext context, SearchState state) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: DSColors.tintLavender,
       body: SafeArea(
@@ -99,7 +101,7 @@ class _SearchPage extends State<SearchPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            DSAppBar.tab(title: 'Search'),
+            DSAppBar.tab(title: l10n.searchTabTitle),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 DSDimens.sizeL,
@@ -109,6 +111,7 @@ class _SearchPage extends State<SearchPage> {
               ),
               child: SearchTextField(
                 controller: _searchController,
+                hintText: l10n.searchHint,
                 onChanged: _onQueryChanged,
                 onClear: _onClear,
                 onSubmitted: _onSubmitted,
@@ -177,15 +180,16 @@ class _ResultsList extends StatelessWidget {
         ),
       );
     }
+    final l10n = AppLocalizations.of(context);
     if (products.isEmpty) {
-      return const DSStateView.empty(
+      return DSStateView.empty(
         illustrationAsset: 'assets/images/Illustrations/empty-state.gif',
-        headline: 'No matches',
-        body: 'Try a different name, or browse popular brands.',
+        headline: l10n.searchNoMatchesHeadline,
+        body: l10n.searchNoMatchesBody,
       );
     }
     final n = products.length;
-    final caption = '$n result${n == 1 ? '' : 's'}';
+    final caption = l10n.searchResultsCount(n);
     final bottomInset = MediaQuery.of(context).padding.bottom + 96;
     return ListView.separated(
       padding: EdgeInsets.fromLTRB(
@@ -225,8 +229,10 @@ class _SearchError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DSStateView.error(
-      body: 'Something went wrong while searching.',
+      body: l10n.searchErrorBody,
+      ctaLabel: l10n.commonTryAgain,
       onCtaPressed: onRetry,
     );
   }

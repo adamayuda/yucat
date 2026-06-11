@@ -4,6 +4,7 @@ import 'package:yucat/features/product_detail/presentation/models/product_displa
 import 'package:yucat/features/product_detail/presentation/utils/verdict_headline.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/analysis_chip_row.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/ring_score.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 
 class AnalysisCard extends StatelessWidget {
@@ -14,7 +15,8 @@ class AnalysisCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final headline = verdictHeadlineFor(product.ratingText);
+    final l10n = AppLocalizations.of(context);
+    final headline = verdictHeadlineFor(product.ratingText, l10n);
     return DSCard(
       padding: const EdgeInsets.all(DSDimens.sizeL),
       child: Column(
@@ -28,7 +30,7 @@ class AnalysisCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'OVERALL ANALYSIS',
+                      l10n.productDetailOverallAnalysis,
                       style: DSTextStyles.caption.copyWith(
                         color: DSColors.inkSecondary,
                         fontWeight: FontWeight.w700,

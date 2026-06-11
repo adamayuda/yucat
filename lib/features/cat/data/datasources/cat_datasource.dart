@@ -69,8 +69,11 @@ class CatDataSource {
 
       return docRef;
     } catch (e) {
+      // Surface the real failure (e.g. permission-denied, network) instead of
+      // collapsing it to a generic null → "Failed to create cat", so the
+      // `Cat Creation Failed` analytics event carries the actual cause.
       debugPrint('Error creating cat: $e');
-      return null;
+      rethrow;
     }
   }
 

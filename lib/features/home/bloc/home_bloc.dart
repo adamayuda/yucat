@@ -144,7 +144,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
-        emit(HomeErrorState(message: 'Product not found'));
+        emit(const HomeErrorState(errorType: HomeErrorType.notFound));
         return;
       }
 
@@ -187,23 +187,23 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           'timestamp': DateTime.now().toIso8601String(),
         },
       );
-      emit(HomeErrorState(message: _getUserFriendlyError(e)));
+      emit(HomeErrorState(errorType: _toErrorType(e)));
     }
   }
 
-  String _getUserFriendlyError(Object e) {
+  HomeErrorType _toErrorType(Object e) {
     final message = e.toString();
     if (e is FirebaseFunctionsException &&
-        e.code == 'deadline-exceeded' ||
+            e.code == 'deadline-exceeded' ||
         message.contains('deadline-exceeded') ||
         message.contains('DEADLINE_EXCEEDED')) {
-      return 'The request took too long. Please try again.';
+      return HomeErrorType.timeout;
     }
     if (message.contains('network') ||
         message.contains('SocketException') ||
         message.contains('Connection')) {
-      return 'No internet connection. Please check your network and try again.';
+      return HomeErrorType.noInternet;
     }
-    return 'Something went wrong. Please try again.';
+    return HomeErrorType.generic;
   }
 }

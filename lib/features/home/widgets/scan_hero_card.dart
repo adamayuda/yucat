@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 
 class ScanHeroCard extends StatelessWidget {
@@ -9,6 +10,7 @@ class ScanHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DSCard(
       onTap: onTap,
       padding: const EdgeInsets.all(DSDimens.sizeL),
@@ -33,10 +35,10 @@ class ScanHeroCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Scan a product', style: DSTextStyles.headlineMd),
+                Text(l10n.homeScanProduct, style: DSTextStyles.headlineMd),
                 const SizedBox(height: DSDimens.sizeXxxs),
                 Text(
-                  'Take a photo of the package',
+                  l10n.homeScanProductSubtitle,
                   style: DSTextStyles.bodyMd.copyWith(
                     color: DSColors.inkSecondary,
                   ),

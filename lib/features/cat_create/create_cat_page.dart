@@ -27,6 +27,7 @@ import 'package:yucat/features/cat_create/widgets/medical_disclaimer_sheet.dart'
 import 'package:yucat/presentation/components/wizard_step_shell.dart';
 import 'package:yucat/service_locator.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 const _totalSteps = 12;
 
@@ -196,12 +197,16 @@ class _CreateCatPageState extends State<CreateCatPage> {
               previous.errorTick != current.errorTick),
       listener: (context, state) {
         if (state is! CatCreateLoadedState) return;
-        if (state.transientError != null) {
+        final error = state.transientError;
+        if (error != null) {
+          final l10n = AppLocalizations.of(context);
+          final message = switch (error) {
+            CatCreateError.create => l10n.catCreateErrorCreate,
+            CatCreateError.save => l10n.catCreateErrorSave,
+          };
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(content: Text(state.transientError!)),
-            );
+            ..showSnackBar(SnackBar(content: Text(message)));
         }
         if (!_pageController.hasClients) return;
         _pageController.animateToPage(
@@ -234,7 +239,10 @@ class _CreateCatPageState extends State<CreateCatPage> {
     final isEditing = widget.cat != null;
     final hasHealthSelection = cat.healthConditions.isNotEmpty;
     final hasPhoto = cat.profileImageFile != null;
-    final finalCtaLabel = isEditing ? 'Save changes' : 'Create profile';
+    final l10n = AppLocalizations.of(context);
+    final finalCtaLabel = isEditing
+        ? l10n.catCreateCtaSaveChanges
+        : l10n.catCreateCtaCreateProfile;
     return WizardStepShell(
       currentStep: currentStep - _initialStep,
       totalSteps: _totalSteps - _initialStep,
@@ -245,12 +253,12 @@ class _CreateCatPageState extends State<CreateCatPage> {
       ctaLabel: isLast
           ? finalCtaLabel
           : isFactStep
-              ? 'Got it'
-              : 'Next',
+              ? l10n.commonGotIt
+              : l10n.commonNext,
       altCtaLabel: isHealthStep
-          ? 'None of these'
+          ? l10n.catCreateCtaNoneOfThese
           : isPhotoStep
-              ? 'Skip'
+              ? l10n.commonSkip
               : null,
       hasSelection: isHealthStep
           ? hasHealthSelection

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_option_row.dart';
 import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
 
@@ -29,15 +30,14 @@ class ProfilePhotoStep extends StatelessWidget {
       }
     } catch (_) {
       if (!context.mounted) return;
+      final l10n = AppLocalizations.of(context);
       final isCamera = source == ImageSource.camera;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
             content: Text(
-              isCamera
-                  ? "Couldn't access the camera. Check permissions in Settings."
-                  : "Couldn't open your photos. Check permissions in Settings.",
+              isCamera ? l10n.photoCameraError : l10n.photoLibraryError,
             ),
           ),
         );
@@ -49,8 +49,8 @@ class ProfilePhotoStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const MascotSpeechBubble(
-          question: 'Add a photo of your cat',
+        MascotSpeechBubble(
+          question: AppLocalizations.of(context).photoQuestion,
         ),
         Expanded(
           child: Center(
@@ -80,6 +80,7 @@ class ProfilePhotoStep extends StatelessWidget {
 /// Lets the user pick where the cat photo comes from. Resolves to the chosen
 /// [ImageSource], or `null` if the sheet is dismissed.
 Future<ImageSource?> _showPhotoSourceSheet(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
   return showModalBottomSheet<ImageSource>(
     context: context,
     isScrollControlled: true,
@@ -113,17 +114,17 @@ Future<ImageSource?> _showPhotoSourceSheet(BuildContext context) {
                 ),
               ),
               const SizedBox(height: DSDimens.sizeL),
-              Text('Add a photo', style: DSTextStyles.titleMd),
+              Text(l10n.photoSheetTitle, style: DSTextStyles.titleMd),
               const SizedBox(height: DSDimens.sizeS),
               DSOptionRow(
                 leadingIcon: Icons.camera_alt_rounded,
-                label: 'Take a photo',
+                label: l10n.photoSheetTakePhoto,
                 onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
               ),
               const SizedBox(height: DSDimens.sizeXs),
               DSOptionRow(
                 leadingIcon: Icons.photo_library_rounded,
-                label: 'Upload from library',
+                label: l10n.photoSheetUploadLibrary,
                 onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
               ),
             ],

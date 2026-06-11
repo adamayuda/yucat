@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/home/widgets/active_cat_snapshot_card.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/features/home/widgets/home_cat_selector.dart';
 import 'package:yucat/features/home/widgets/home_header.dart';
 import 'package:yucat/features/home/widgets/saved_products_preview_section.dart';
@@ -111,20 +112,21 @@ class _AddCatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DSCard(
       padding: const EdgeInsets.all(DSDimens.sizeL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Add your cat', style: DSTextStyles.titleMd),
+          Text(l10n.homeAddCatTitle, style: DSTextStyles.titleMd),
           const SizedBox(height: DSDimens.sizeXxs),
           Text(
-            'Create a profile to get personalized food scores.',
+            l10n.homeAddCatBody,
             style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkSecondary),
           ),
           const SizedBox(height: DSDimens.sizeS),
           DSPillButton(
-            label: 'Add a cat',
+            label: l10n.homeAddCatButton,
             onPressed: onCreateCat,
             showChevron: false,
           ),

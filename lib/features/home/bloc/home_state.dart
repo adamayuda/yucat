@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 
+enum HomeErrorType { notFound, timeout, noInternet, generic }
+
 sealed class HomeState extends Equatable {
   const HomeState();
 }
@@ -52,12 +54,12 @@ class HomeLoadedState extends HomeState {
 }
 
 class HomeErrorState extends HomeState {
-  final String message;
+  final HomeErrorType errorType;
 
-  const HomeErrorState({required this.message});
+  const HomeErrorState({required this.errorType});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [errorType];
 }
 
 class HomeNavigateToProductDetailState extends HomeState {

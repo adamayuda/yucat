@@ -5,6 +5,7 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_listing/presentation/bloc/product_listing_bloc.dart';
 import 'package:yucat/features/search_products/presentation/widgets/product_row_card.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/skeletons/product_list_skeleton.dart';
 
@@ -83,11 +84,12 @@ class _ProductList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (products.isEmpty) {
+      final l10n = AppLocalizations.of(context);
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(DSDimens.sizeL),
           child: Text(
-            'No products found for this brand.',
+            l10n.productListingEmpty,
             textAlign: TextAlign.center,
             style: DSTextStyles.bodyMd,
           ),

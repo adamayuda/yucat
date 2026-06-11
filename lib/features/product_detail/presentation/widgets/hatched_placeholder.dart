@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 class HatchedPlaceholder extends StatelessWidget {
   final double size;
@@ -36,7 +37,7 @@ class HatchedPlaceholder extends StatelessWidget {
                 borderRadius: BorderRadius.circular(DSRadii.sm),
               ),
               child: Text(
-                'PRODUCT',
+                AppLocalizations.of(context).productDetailImagePlaceholder,
                 style: DSTextStyles.caption.copyWith(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,

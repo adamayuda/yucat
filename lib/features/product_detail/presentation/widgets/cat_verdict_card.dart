@@ -5,6 +5,7 @@ import 'package:yucat/features/product_detail/presentation/models/product_displa
 import 'package:yucat/features/product_detail/presentation/utils/cat_product_assessment.dart';
 import 'package:yucat/features/product_detail/presentation/utils/per_cat_score.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/ring_score.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 
@@ -19,13 +20,13 @@ const _dimensionOrder = [
   CatAssessmentDimension.breed,
 ];
 
-const _dimensionLabels = {
-  CatAssessmentDimension.health: 'HEALTH',
-  CatAssessmentDimension.weight: 'WEIGHT',
-  CatAssessmentDimension.age: 'AGE',
-  CatAssessmentDimension.activity: 'ACTIVITY',
-  CatAssessmentDimension.neutered: 'NEUTERED STATUS',
-  CatAssessmentDimension.breed: 'BREED',
+Map<CatAssessmentDimension, String> _dimensionLabels(AppLocalizations l10n) => {
+  CatAssessmentDimension.health: l10n.productDetailDimHealth,
+  CatAssessmentDimension.weight: l10n.productDetailDimWeight,
+  CatAssessmentDimension.age: l10n.productDetailDimAge,
+  CatAssessmentDimension.activity: l10n.productDetailDimActivity,
+  CatAssessmentDimension.neutered: l10n.productDetailDimNeuteredStatus,
+  CatAssessmentDimension.breed: l10n.productDetailDimBreed,
 };
 
 class CatVerdictCard extends StatelessWidget {
@@ -36,7 +37,8 @@ class CatVerdictCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final assessment = evaluateCatProduct(cat, product);
+    final l10n = AppLocalizations.of(context);
+    final assessment = evaluateCatProduct(cat, product, l10n);
     final perCat = derivePerCatScore(assessment);
     final hasFindings = assessment.pros.isNotEmpty || assessment.cons.isNotEmpty;
 
@@ -55,10 +57,10 @@ class CatVerdictCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(cat.name, style: DSTextStyles.titleMd),
-                    if (_subtitle(cat) != null) ...[
+                    if (_subtitle(cat, l10n) != null) ...[
                       const SizedBox(height: 2),
                       Text(
-                        _subtitle(cat)!,
+                        _subtitle(cat, l10n)!,
                         style: DSTextStyles.bodyMd.copyWith(
                           color: DSColors.inkSecondary,
                         ),
@@ -78,27 +80,26 @@ class CatVerdictCard extends StatelessWidget {
           if (!hasFindings) ...[
             const SizedBox(height: DSDimens.sizeS),
             Text(
-              'No strong matches for this cat — neutral fit.',
+              l10n.productDetailNeutralFit,
               style: DSTextStyles.bodyMd,
             ),
           ] else ...[
             const SizedBox(height: DSDimens.sizeS),
-            ..._buildGroupedFindings(assessment),
+            ..._buildGroupedFindings(assessment, l10n),
           ],
         ],
       ),
     );
   }
 
-  List<Widget> _buildGroupedFindings(CatProductAssessment assessment) {
+  List<Widget> _buildGroupedFindings(
+      CatProductAssessment assessment, AppLocalizations l10n) {
     final widgets = <Widget>[];
     var firstGroup = true;
 
     for (final dim in _dimensionOrder) {
-      final pros =
-          assessment.pros.where((f) => f.dimension == dim).toList();
-      final cons =
-          assessment.cons.where((f) => f.dimension == dim).toList();
+      final pros = assessment.pros.where((f) => f.dimension == dim).toList();
+      final cons = assessment.cons.where((f) => f.dimension == dim).toList();
       if (pros.isEmpty && cons.isEmpty) continue;
 
       if (!firstGroup) {
@@ -110,7 +111,7 @@ class CatVerdictCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(bottom: DSDimens.sizeXxxs),
           child: Text(
-            _dimensionLabels[dim]!,
+            _dimensionLabels(l10n)[dim]!,
             style: DSTextStyles.caption.copyWith(
               color: DSColors.inkSecondary,
               fontWeight: FontWeight.w700,
@@ -130,21 +131,21 @@ class CatVerdictCard extends StatelessWidget {
     return widgets;
   }
 
-  String? _subtitle(CatEntity cat) {
+  String? _subtitle(CatEntity cat, AppLocalizations l10n) {
     final parts = <String>[];
-    final age = _formatAgeGroup(cat.ageGroup);
+    final age = _formatAgeGroup(cat.ageGroup, l10n);
     if (age != null) parts.add(age);
     if (cat.breed != null && cat.breed!.isNotEmpty) parts.add(cat.breed!);
     if (parts.isEmpty) return null;
     return parts.join(' · ');
   }
 
-  String? _formatAgeGroup(String? ageGroup) {
+  String? _formatAgeGroup(String? ageGroup, AppLocalizations l10n) {
     if (ageGroup == null) return null;
     return switch (ageGroup.toLowerCase()) {
-      'kitten' => 'Kitten',
-      'adult' => 'Adult',
-      'senior' => 'Senior',
+      'kitten' => l10n.productDetailAgeGroupKitten,
+      'adult' => l10n.productDetailAgeGroupAdult,
+      'senior' => l10n.productDetailAgeGroupSenior,
       _ => ageGroup,
     };
   }

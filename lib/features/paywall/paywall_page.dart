@@ -8,6 +8,7 @@ import 'package:yucat/features/paywall/bloc/paywall_state.dart';
 import 'package:yucat/features/paywall/widgets/paywall_error_widget.dart';
 import 'package:yucat/features/paywall/widgets/paywall_loaded_widget.dart';
 import 'package:yucat/features/paywall/widgets/paywall_skeleton.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 @RoutePage()
 class PaywallPage extends StatefulWidget {
@@ -82,9 +83,10 @@ class _PaywallPage extends State<PaywallPage> {
         Navigator.of(context).pop(true);
         break;
       case PaywallLoadedState(:final transientError) when transientError != null:
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(transientError),
+            content: Text(_transientErrorText(l10n, transientError)),
             backgroundColor: DSColors.inkPrimary,
           ),
         );
@@ -94,10 +96,26 @@ class _PaywallPage extends State<PaywallPage> {
     }
   }
 
+  String _transientErrorText(
+    AppLocalizations l10n,
+    PaywallTransientError error,
+  ) {
+    return switch (error) {
+      PaywallTransientError.purchaseNotComplete =>
+        l10n.paywallErrorPurchaseNotComplete,
+      PaywallTransientError.purchaseFailed => l10n.paywallErrorPurchaseFailed,
+      PaywallTransientError.somethingWentWrong =>
+        l10n.paywallErrorSomethingWentWrong,
+      PaywallTransientError.noActiveSubscription =>
+        l10n.paywallErrorNoActiveSubscription,
+      PaywallTransientError.restoreFailed => l10n.paywallErrorRestoreFailed,
+    };
+  }
+
   Widget _onStateChangeBuilder(PaywallState state) {
     return switch (state) {
       PaywallLoadingState() => const PaywallSkeleton(),
-      PaywallErrorState(:final message) => PaywallErrorWidget(message: message),
+      PaywallErrorState(:final kind) => PaywallErrorWidget(kind: kind),
       PaywallLoadedState() => PaywallLoadedWidget(
         state: state,
         bloc: _bloc,

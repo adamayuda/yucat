@@ -6,6 +6,7 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/hatched_placeholder.dart';
 import 'package:yucat/features/scan_history/presentation/bloc/scan_history_bloc.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
@@ -83,6 +84,7 @@ class _LoadedList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(
         DSDimens.sizeL,
@@ -100,10 +102,10 @@ class _LoadedList extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Scan history', style: DSTextStyles.displayLg),
+                Text(l10n.scanHistoryTitle, style: DSTextStyles.displayLg),
                 const SizedBox(height: DSDimens.sizeXxxs),
                 Text(
-                  '$n scan${n == 1 ? '' : 's'}',
+                  l10n.scanHistoryScanCount(n),
                   style: DSTextStyles.bodyMd.copyWith(
                     color: DSColors.inkSecondary,
                   ),
@@ -210,10 +212,11 @@ class _ScanHistoryRow extends StatelessWidget {
 class _EmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const DSStateView.empty(
+    final l10n = AppLocalizations.of(context);
+    return DSStateView.empty(
       illustrationAsset: 'assets/images/Illustrations/empty-state.gif',
-      headline: 'No scans yet',
-      body: 'Foods you scan will show up here.',
+      headline: l10n.scanHistoryEmptyTitle,
+      body: l10n.scanHistoryEmptyBody,
     );
   }
 }

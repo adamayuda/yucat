@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/onboarding_floating_button.dart';
+import 'package:yucat/presentation/utils/localized_asset.dart';
 
 class WhyYucatScreen extends StatelessWidget {
   final VoidCallback onNext;
@@ -9,6 +11,7 @@ class WhyYucatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final width = MediaQuery.sizeOf(context).width;
 
     return Scaffold(
@@ -30,7 +33,7 @@ class WhyYucatScreen extends StatelessWidget {
                   // Clear the back chip overlaid by onboarding_page.dart.
                   const SizedBox(height: 48),
                   Text(
-                    "Why YuCat's\nunique approach\nworks",
+                    l10n.onboardingWhyYucatTitle,
                     textAlign: TextAlign.center,
                     style: DSTextStyles.displayLg,
                   ),
@@ -42,14 +45,19 @@ class WhyYucatScreen extends StatelessWidget {
                     child: AspectRatio(
                       aspectRatio: 1027 / 1168,
                       child: Image.asset(
-                        'assets/images/onboarding-cards.png',
+                        localizedAssetPath(
+                          context,
+                          'assets/images/onboarding-cards',
+                          'png',
+                          available: const {'en', 'es', 'fr', 'hu'},
+                        ),
                         fit: BoxFit.contain,
                       ),
                     ),
                   ),
                   const Spacer(),
                   OnboardingFloatingButton(
-                    label: "Let's go",
+                    label: l10n.onboardingLetsGo,
                     onPressed: onNext,
                   ),
                 ],

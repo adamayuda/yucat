@@ -13,6 +13,7 @@ import 'firebase_options.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat_listing/bloc/cat_listing_bloc.dart';
@@ -128,8 +129,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
-        // localizationsDelegates: AppLocalizations.localizationsDelegates,
-        // supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         routerConfig: _appRouter.config(
           navigatorObservers: () => [
             ...AutoRouterDelegate.defaultNavigatorObserversBuilder(),

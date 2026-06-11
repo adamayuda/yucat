@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 
 /// Social-proof screen — App Store rating + a stack of reviews.
@@ -34,6 +35,8 @@ class RatingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final reviews = _buildReviews(l10n);
     return Scaffold(
       // Placeholder cream background; decorative art (stars, cat, laurels) will
       // be layered back in as individual assets are provided.
@@ -89,7 +92,7 @@ class RatingScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: DSDimens.sizeXxl),
                       Text(
-                        'Help us grow',
+                        l10n.onboardingRatingEyebrow,
                         style: DSTextStyles.caption.copyWith(
                           color: _mutedLabel,
                           fontWeight: FontWeight.w600,
@@ -97,7 +100,7 @@ class RatingScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: DSDimens.sizeXxs),
                       Text(
-                        'Give us rating',
+                        l10n.onboardingRatingTitle,
                         textAlign: TextAlign.center,
                         style: DSTextStyles.displayLg,
                       ),
@@ -114,9 +117,9 @@ class RatingScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: DSDimens.sizeL),
-                          const _StatBlock(
-                            value: '4.8',
-                            label: 'average rating',
+                          _StatBlock(
+                            value: l10n.onboardingRatingStatValue,
+                            label: l10n.onboardingRatingStatLabel,
                           ),
                           const SizedBox(width: DSDimens.size4xl),
                           const _PeopleBlock(),
@@ -128,9 +131,9 @@ class RatingScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: DSDimens.sizeXxl),
-                      for (var i = 0; i < _reviews.length; i++) ...[
+                      for (var i = 0; i < reviews.length; i++) ...[
                         if (i > 0) const SizedBox(height: DSDimens.sizeXxs),
-                        _ReviewCard(review: _reviews[i]),
+                        _ReviewCard(review: reviews[i]),
                       ],
                     ],
                   ),
@@ -166,7 +169,7 @@ class RatingScreen extends StatelessWidget {
                     top: false,
                     child: Center(
                       child: OnboardingFloatingButton(
-                        label: 'Next',
+                        label: l10n.commonNext,
                         onPressed: _handleNext,
                       ),
                     ),
@@ -224,52 +227,40 @@ class _Review {
 }
 
 // TODO: replace placeholder reviews with real, attributed App Store reviews.
-const _reviews = [
+List<_Review> _buildReviews(AppLocalizations l10n) => [
   _Review(
-    headline: 'Exactly what I needed!',
-    body:
-        "I scanned my cat's kibble and finally understood what was in it. "
-        'Switched brands the same week and never looked back.',
+    headline: l10n.onboardingReview1Headline,
+    body: l10n.onboardingReview1Body,
     author: 'Felicia',
     avatar: 'assets/images/image.png',
   ),
   _Review(
-    headline: 'Loving this app!!!',
-    body:
-        'Amazing app, so easy to use. I just upload pictures of the food and '
-        'it tells me everything great!',
+    headline: l10n.onboardingReview2Headline,
+    body: l10n.onboardingReview2Body,
     author: 'Joshua_la',
     avatar: 'assets/images/image2.png',
   ),
   _Review(
-    headline: 'A senior-cat lifesaver',
-    body:
-        "YuCat narrowed down a senior food that's gentle on Lulu's stomach "
-        'in one afternoon.',
+    headline: l10n.onboardingReview3Headline,
+    body: l10n.onboardingReview3Body,
     author: 'Sophie',
     avatar: 'assets/images/image3.png',
   ),
   _Review(
-    headline: 'Finally feel confident',
-    body:
-        'I used to just grab whatever was on sale. Now I actually know which '
-        "foods match my kitten's needs. Total peace of mind.",
+    headline: l10n.onboardingReview4Headline,
+    body: l10n.onboardingReview4Body,
     author: 'Marcus_T',
     avatar: 'assets/images/image5.png',
   ),
   _Review(
-    headline: 'So simple to use',
-    body:
-        'Snap a photo and you get a clear breakdown in seconds. My vet was '
-        'even impressed when I showed her.',
+    headline: l10n.onboardingReview5Headline,
+    body: l10n.onboardingReview5Body,
     author: 'Priya',
     avatar: 'assets/images/image4.png',
   ),
   _Review(
-    headline: 'Two cats, two diets',
-    body:
-        'Managing food for an overweight tabby and a picky Siamese was a '
-        'nightmare. YuCat made it effortless for both.',
+    headline: l10n.onboardingReview6Headline,
+    body: l10n.onboardingReview6Body,
     author: 'Dani_R',
     avatar: 'assets/images/image6.jpeg',
   ),
@@ -310,6 +301,7 @@ class _PeopleBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -349,7 +341,7 @@ class _PeopleBlock extends StatelessWidget {
         ),
         const SizedBox(height: DSDimens.sizeXxs),
         Text(
-          '2M+ people',
+          l10n.onboardingRatingPeopleLabel,
           style: DSTextStyles.caption.copyWith(color: _mutedLabel),
         ),
       ],

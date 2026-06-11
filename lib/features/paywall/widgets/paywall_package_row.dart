@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/paywall/utils/paywall_format.dart';
+import 'package:yucat/l10n/app_localizations.dart';
 
 class PaywallPackageRow extends StatelessWidget {
   final Package package;
@@ -27,7 +28,8 @@ class PaywallPackageRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final period = periodTitleFor(package);
+    final l10n = AppLocalizations.of(context);
+    final period = periodTitleFor(package, l10n);
     final price = package.storeProduct.priceString;
     final showIntroOffer = showIntro && hasIntroOffer(package);
     final introPrice = introPriceStringFor(package);
