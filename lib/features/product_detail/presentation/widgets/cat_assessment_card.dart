@@ -42,20 +42,26 @@ class _CatAssessmentSectionState extends State<CatAssessmentSection> {
     final l10n = AppLocalizations.of(context);
     final cats = widget.cats;
     if (cats.isEmpty) {
-      return DSCard(
-        padding: const EdgeInsets.all(DSDimens.sizeL),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.productDetailMyCatScore, style: DSTextStyles.titleMd),
-            const SizedBox(height: DSDimens.sizeXxs),
-            Text(
-              l10n.productDetailNoCatPrompt,
-              style: DSTextStyles.bodyMd,
-            ),
-            const SizedBox(height: DSDimens.sizeS),
-            DSPillButton(label: l10n.productDetailAddACat, onPressed: widget.onCreateCat),
-          ],
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+        child: DSCard(
+          padding: const EdgeInsets.all(DSDimens.sizeL),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.productDetailMyCatScore, style: DSTextStyles.titleMd),
+              const SizedBox(height: DSDimens.sizeXxs),
+              Text(
+                l10n.productDetailNoCatPrompt,
+                style: DSTextStyles.bodyMd,
+              ),
+              const SizedBox(height: DSDimens.sizeS),
+              DSPillButton(
+                label: l10n.productDetailAddACat,
+                onPressed: widget.onCreateCat,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -67,29 +73,40 @@ class _CatAssessmentSectionState extends State<CatAssessmentSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: Text(l10n.productDetailForYourCats, style: DSTextStyles.displayLg),
-            ),
-            if (hasMultiple)
-              Text(
-                l10n.productDetailCatsCount(cats.length),
-                style: DSTextStyles.caption.copyWith(
-                  color: DSColors.inkSecondary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.productDetailForYourCats,
+                      style: DSTextStyles.displayLg,
+                    ),
+                  ),
+                  if (hasMultiple)
+                    Text(
+                      l10n.productDetailCatsCount(cats.length),
+                      style: DSTextStyles.caption.copyWith(
+                        color: DSColors.inkSecondary,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                ],
               ),
-          ],
-        ),
-        const SizedBox(height: DSDimens.sizeXxs),
-        Text(
-          hasMultiple
-              ? l10n.productDetailPickACat
-              : l10n.productDetailPersonalizedScore,
-          style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkSecondary),
+              const SizedBox(height: DSDimens.sizeXxs),
+              Text(
+                hasMultiple
+                    ? l10n.productDetailPickACat
+                    : l10n.productDetailPersonalizedScore,
+                style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkSecondary),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: DSDimens.sizeS),
         if (hasMultiple) ...[
@@ -100,11 +117,14 @@ class _CatAssessmentSectionState extends State<CatAssessmentSection> {
           ),
           const SizedBox(height: DSDimens.sizeS),
         ],
-        CatVerdictCard(
-          // Rebuild the card when the selection changes.
-          key: ValueKey(selectedCat.id ?? selectedCat.name),
-          cat: selectedCat,
-          product: widget.product,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+          child: CatVerdictCard(
+            // Rebuild the card when the selection changes.
+            key: ValueKey(selectedCat.id ?? selectedCat.name),
+            cat: selectedCat,
+            product: widget.product,
+          ),
         ),
       ],
     );
@@ -126,10 +146,13 @@ class _CatSelectorRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      // Leading/trailing inset aligns the first chip with the page content;
+      // because this row is full-bleed, chips scroll under the screen edges.
+      padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
       child: Row(
         children: [
           for (var i = 0; i < cats.length; i++) ...[
-            if (i > 0) const SizedBox(width: DSDimens.sizeXs),
+            if (i > 0) const SizedBox(width: DSDimens.sizeXxs),
             _CatSelectorChip(
               cat: cats[i],
               selected: i == selectedIndex,
@@ -169,10 +192,12 @@ class _CatSelectorChip extends StatelessWidget {
             DSDimens.sizeXxs,
           ),
           decoration: BoxDecoration(
-            color: selected ? DSColors.inkPrimary : DSColors.surfaceCard,
+            color:
+                selected ? DSColors.accentSuccessSoft : DSColors.surfaceCard,
             borderRadius: BorderRadius.circular(DSRadii.pill),
             border: Border.all(
-              color: selected ? DSColors.inkPrimary : DSColors.surfaceCardDim,
+              color: selected ? DSColors.accentSuccess : DSColors.surfaceCardDim,
+              width: selected ? 1.5 : 1,
             ),
           ),
           child: Row(
@@ -187,8 +212,7 @@ class _CatSelectorChip extends StatelessWidget {
               Text(
                 cat.name,
                 style: DSTextStyles.label.copyWith(
-                  color:
-                      selected ? DSColors.inkInverse : DSColors.inkPrimary,
+                  color: DSColors.inkPrimary,
                   fontWeight: FontWeight.w600,
                 ),
               ),

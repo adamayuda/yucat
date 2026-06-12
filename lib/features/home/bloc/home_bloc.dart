@@ -128,7 +128,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       },
     );
 
-    emit(HomeScanningState());
+    emit(HomeScanningState(imageBase64: event.imageBase64));
 
     try {
       final product = await _fetchProductByImageUsecase.call(

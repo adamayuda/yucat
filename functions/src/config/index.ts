@@ -13,7 +13,7 @@ export const config = {
     apiKey: process.env.ANTHROPIC_API_KEY || "",
     model: "claude-haiku-4-5-20251001",
     temperature: 0.1,
-    maxWebSearches: 3,
+    maxWebSearches: 5,
   },
 
   // Algolia Configuration

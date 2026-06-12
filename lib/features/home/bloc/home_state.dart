@@ -15,14 +15,18 @@ class HomeLoadingState extends HomeState {
   List<Object?> get props => [];
 }
 
-/// Loading state for an in-progress product scan — drives the multi-step
-/// "Scanning → Analyzing" animation. Kept distinct from [HomeLoadingState]
-/// (the plain dashboard load) so the scan theater never shows on ordinary loads.
+/// Loading state for an in-progress product scan — drives the playful scan
+/// animation. Kept distinct from [HomeLoadingState] (the plain dashboard load)
+/// so the scan theater never shows on ordinary loads.
 class HomeScanningState extends HomeState {
-  const HomeScanningState();
+  /// The just-captured photo (base64), shown under the sweeping scan line so
+  /// the loading screen reflects what the user actually scanned.
+  final String imageBase64;
+
+  const HomeScanningState({required this.imageBase64});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [imageBase64];
 }
 
 class HomeHiddenState extends HomeState {

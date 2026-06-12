@@ -8,6 +8,7 @@ import {
   generateAnalysisSystemPrompt,
   generateAnalysisUserPrompt,
 } from "../prompts/analyze-product";
+import {generateFindImagePrompt} from "../prompts/find-image";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let anthropicClient: any = null;
@@ -251,11 +252,12 @@ const MAX_CONTINUATIONS = 3;
  */
 export async function analyzeProductImage(
   imageBase64: string,
-  mimeType: string
+  mimeType: string,
+  identification?: ProductIdentification
 ): Promise<{product: Product | null; rawResponse: string}> {
   const mediaType = normalizeMediaType(mimeType);
   const systemText = generateAnalysisSystemPrompt();
-  const userText = generateAnalysisUserPrompt();
+  const userText = generateAnalysisUserPrompt(identification);
 
   const systemBlocks = [
     {
@@ -357,6 +359,130 @@ export async function analyzeProductImage(
     product,
     rawResponse: JSON.stringify(submit.input),
   };
+}
+
+const IMAGE_TOOLS: Anthropic.Tool[] = [
+  {
+    name: "submit_image_url",
+    description:
+      "Submit the direct product image URL found via web search (or empty " +
+      "string if none was found).",
+    input_schema: {
+      type: "object",
+      required: ["imageUrl"],
+      properties: {
+        imageUrl: {
+          type: "string",
+          description:
+            "Direct image file URL (.jpg/.png/.webp) of the product shot, or " +
+            "\"\" if no suitable image was found.",
+        },
+      },
+    },
+  },
+];
+
+/**
+ * Image-only backfill — finds a product-shot URL via web_search for a product
+ * we already identified but whose cached `imageUrl` is empty. Returns the raw
+ * (un-validated, un-hosted) URL, or "" if none was found. The caller is
+ * responsible for validating + re-hosting via processProductImage.
+ *
+ * Like analyzeProductImage, web_search is a server-side tool that can pause
+ * (stop_reason "pause_turn"), so we resume the turn up to MAX_CONTINUATIONS.
+ */
+export async function findProductImageUrl(
+  brand: string,
+  name: string
+): Promise<string> {
+  if (!brand && !name) return "";
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const webSearchTool: any = {
+    type: "web_search_20250305",
+    name: "web_search",
+    max_uses: 3,
+  };
+  const prompt = generateFindImagePrompt(brand, name);
+  const messages: Anthropic.MessageParam[] = [
+    {role: "user", content: [{type: "text", text: prompt}]},
+  ];
+
+  try {
+    // Phase 1 — force a real search. Only the web_search tool is available, so
+    // the model cannot short-circuit by submitting an empty URL without looking.
+    for (let i = 0; i <= MAX_CONTINUATIONS; i++) {
+      const response = await withRetry("findProductImageUrl:search", () =>
+        getClient().messages.create({
+          model: config.anthropic.model,
+          max_tokens: 1500,
+          temperature: config.anthropic.temperature,
+          messages,
+          tools: [webSearchTool],
+          tool_choice: {type: "auto"},
+        })
+      );
+
+      messages.push({role: "assistant", content: response.content});
+      if ((response.stop_reason as string) === "pause_turn") {
+        continue;
+      }
+      break;
+    }
+
+    // Phase 2 — force a structured answer from what the search turned up.
+    messages.push({
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text:
+            "Based on your search results, submit the single best DIRECT " +
+            "image file URL (.jpg/.png/.webp) for this exact product via the " +
+            "submit_image_url tool. If none of the results is a direct image " +
+            "URL for this product, submit an empty string.",
+        },
+      ],
+    });
+
+    const final = await withRetry("findProductImageUrl:submit", () =>
+      getClient().messages.create({
+        model: config.anthropic.model,
+        max_tokens: 512,
+        temperature: config.anthropic.temperature,
+        messages,
+        tools: [webSearchTool, ...IMAGE_TOOLS],
+        tool_choice: {type: "tool", name: "submit_image_url"},
+      })
+    );
+
+    const submit = findToolUse(final.content, "submit_image_url");
+    const url = submit?.input?.imageUrl;
+    if (typeof url === "string" && url.trim() !== "") {
+      logger.info("findProductImageUrl found candidate", {
+        brand,
+        name,
+        imageUrl: url.trim(),
+        structuredData: true,
+      });
+      return url.trim();
+    }
+
+    logger.info("findProductImageUrl found no image", {
+      brand,
+      name,
+      structuredData: true,
+    });
+    return "";
+  } catch (error) {
+    logger.warn("findProductImageUrl failed", {
+      brand,
+      name,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return "";
+  }
 }
 
 /**

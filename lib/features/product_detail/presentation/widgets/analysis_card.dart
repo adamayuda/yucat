@@ -16,7 +16,13 @@ class AnalysisCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final headline = verdictHeadlineFor(product.ratingText, l10n);
+    final noData = product.dataUnavailable;
+    // When no guaranteed analysis was found, show a neutral "no info yet"
+    // headline and a localized body — never the red score-0 "Poor" verdict or
+    // the jargony backend description.
+    final headline =
+        noData ? l10n.productDetailNoDataHeadline : verdictHeadlineFor(product.ratingText, l10n);
+    final body = noData ? l10n.productDetailNoDataBody : description;
     return DSCard(
       padding: const EdgeInsets.all(DSDimens.sizeL),
       child: Column(
@@ -42,20 +48,23 @@ class AnalysisCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: DSDimens.sizeS),
-              RingScore(
-                score: product.score,
-                maxScore: product.maxScore,
-                ratingColor: product.ratingColor,
-                size: 64,
-              ),
+              // Hide the score ring entirely when there's no data to score.
+              if (!noData) ...[
+                const SizedBox(width: DSDimens.sizeS),
+                RingScore(
+                  score: product.score,
+                  maxScore: product.maxScore,
+                  ratingColor: product.ratingColor,
+                  size: 64,
+                ),
+              ],
             ],
           ),
-          if (description != null && description!.isNotEmpty) ...[
+          if (body != null && body.isNotEmpty) ...[
             const SizedBox(height: DSDimens.sizeS),
-            Text(description!, style: DSTextStyles.bodyMd),
+            Text(body, style: DSTextStyles.bodyMd),
           ],
-          if (product.pros.isNotEmpty || product.cons.isNotEmpty) ...[
+          if (!noData && (product.pros.isNotEmpty || product.cons.isNotEmpty)) ...[
             const SizedBox(height: DSDimens.sizeS),
             AnalysisChipRow(pros: product.pros, cons: product.cons),
           ],

@@ -111,10 +111,10 @@ class _HomePage extends State<HomePage> {
           backgroundColor: DSColors.tintLavender,
           body: const HomeSkeleton(),
         );
-      case HomeScanningState():
+      case HomeScanningState(:final imageBase64):
         return Scaffold(
           backgroundColor: DSColors.tintLavender,
-          body: const HomeLoadingWidget(),
+          body: HomeLoadingWidget(imageBase64: imageBase64),
         );
       case HomeLoadedState(:final cats, :final savedProducts):
         return HomeDashboardPage(

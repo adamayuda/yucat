@@ -1530,6 +1530,24 @@ abstract class AppLocalizations {
   /// **'Best to skip this one'**
   String get productDetailVerdictPoor;
 
+  /// No description provided for @productDetailNoDataHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find the details yet'**
+  String get productDetailNoDataHeadline;
+
+  /// No description provided for @productDetailNoDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find the guaranteed analysis for this product. Try scanning the nutrition label, or check back later — we keep looking.'**
+  String get productDetailNoDataBody;
+
+  /// No description provided for @productDetailNoDataCatsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll show how this fits your cats once we have the nutrition details.'**
+  String get productDetailNoDataCatsNote;
+
   /// No description provided for @productDetailImagePlaceholder.
   ///
   /// In en, this message translates to:
@@ -1893,7 +1911,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeGreetingHey.
   ///
   /// In en, this message translates to:
-  /// **'Hey 👋'**
+  /// **'Welcome back'**
   String get homeGreetingHey;
 
   /// No description provided for @homeGreetingWelcome.
@@ -1956,59 +1974,41 @@ abstract class AppLocalizations {
   /// **'Tap the bookmark on a product to save it here.'**
   String get homeNoSavedProductsBody;
 
-  /// No description provided for @homeLoadingStepScanning.
+  /// No description provided for @homeLoadingEyebrow.
   ///
   /// In en, this message translates to:
-  /// **'Scanning product'**
-  String get homeLoadingStepScanning;
+  /// **'Hang tight'**
+  String get homeLoadingEyebrow;
 
-  /// No description provided for @homeLoadingStepScanningDesc.
+  /// No description provided for @homeLoadingMsgReading.
   ///
   /// In en, this message translates to:
-  /// **'Identifying the product...'**
-  String get homeLoadingStepScanningDesc;
+  /// **'Reading the label…'**
+  String get homeLoadingMsgReading;
 
-  /// No description provided for @homeLoadingStepFetching.
+  /// No description provided for @homeLoadingMsgSniffing.
   ///
   /// In en, this message translates to:
-  /// **'Fetching product data'**
-  String get homeLoadingStepFetching;
+  /// **'Sniffing the ingredients…'**
+  String get homeLoadingMsgSniffing;
 
-  /// No description provided for @homeLoadingStepFetchingDesc.
+  /// No description provided for @homeLoadingMsgMatching.
   ///
   /// In en, this message translates to:
-  /// **'Retrieving information...'**
-  String get homeLoadingStepFetchingDesc;
+  /// **'Matching our database…'**
+  String get homeLoadingMsgMatching;
 
-  /// No description provided for @homeLoadingStepAnalyzing.
+  /// No description provided for @homeLoadingMsgCrunching.
   ///
   /// In en, this message translates to:
-  /// **'Analyzing ingredients'**
-  String get homeLoadingStepAnalyzing;
+  /// **'Crunching the numbers…'**
+  String get homeLoadingMsgCrunching;
 
-  /// No description provided for @homeLoadingStepAnalyzingDesc.
+  /// No description provided for @homeLoadingMsgAlmost.
   ///
   /// In en, this message translates to:
-  /// **'Processing nutritional data...'**
-  String get homeLoadingStepAnalyzingDesc;
-
-  /// No description provided for @homeLoadingStepPreparing.
-  ///
-  /// In en, this message translates to:
-  /// **'Preparing results'**
-  String get homeLoadingStepPreparing;
-
-  /// No description provided for @homeLoadingStepPreparingDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Almost ready...'**
-  String get homeLoadingStepPreparingDesc;
-
-  /// No description provided for @homeLoadingStepDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Done'**
-  String get homeLoadingStepDone;
+  /// **'Almost there…'**
+  String get homeLoadingMsgAlmost;
 
   /// No description provided for @homeCameraUnavailable.
   ///
@@ -2027,6 +2027,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose from gallery'**
   String get homeChooseFromGallery;
+
+  /// No description provided for @homeScannerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point at the product label'**
+  String get homeScannerHint;
 
   /// No description provided for @homeErrorProductNotFound.
   ///

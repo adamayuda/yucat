@@ -21,6 +21,11 @@ export interface Product {
   format?: string;
   packageSize?: string;
   description?: string;
+  // Epoch ms of the last self-heal attempt. Separate stamps so an entry with
+  // nutrition but no image can retry the image without a full re-analysis (and
+  // vice-versa). Absent on pre-existing rows → treated as "never attempted".
+  lastAnalysisAttempt?: number;
+  lastImageAttempt?: number;
 }
 
 export class ProductModel implements Product {
@@ -43,6 +48,8 @@ export class ProductModel implements Product {
   format: string;
   packageSize: string;
   description: string;
+  lastAnalysisAttempt?: number;
+  lastImageAttempt?: number;
 
   constructor(
     barcode: string,
@@ -63,7 +70,9 @@ export class ProductModel implements Product {
     isAiIdentified = false,
     format = "",
     packageSize = "",
-    description = ""
+    description = "",
+    lastAnalysisAttempt?: number,
+    lastImageAttempt?: number
   ) {
     this.barcode = barcode;
     this.name = name;
@@ -84,6 +93,8 @@ export class ProductModel implements Product {
     this.format = format;
     this.packageSize = packageSize;
     this.description = description;
+    this.lastAnalysisAttempt = lastAnalysisAttempt;
+    this.lastImageAttempt = lastImageAttempt;
   }
 
   static fromObject(data: Partial<Product>): ProductModel {
@@ -106,7 +117,9 @@ export class ProductModel implements Product {
       data.isAiIdentified ?? false,
       data.format || "",
       data.packageSize || "",
-      data.description || ""
+      data.description || "",
+      data.lastAnalysisAttempt,
+      data.lastImageAttempt
     );
   }
 
@@ -131,6 +144,8 @@ export class ProductModel implements Product {
       format: this.format,
       packageSize: this.packageSize,
       description: this.description,
+      lastAnalysisAttempt: this.lastAnalysisAttempt,
+      lastImageAttempt: this.lastImageAttempt,
     };
   }
 }

@@ -788,6 +788,17 @@ class AppLocalizationsHu extends AppLocalizations {
   String get productDetailVerdictPoor => 'Érdemes kihagyni';
 
   @override
+  String get productDetailNoDataHeadline => 'Még nem találtuk meg az adatokat';
+
+  @override
+  String get productDetailNoDataBody =>
+      'Nem találtuk meg a termék garantált beltartalmi adatait. Próbáld meg beolvasni a tápértékcímkét, vagy nézz vissza később – tovább keressük.';
+
+  @override
+  String get productDetailNoDataCatsNote =>
+      'Amint meglesznek a tápértékadatok, megmutatjuk, mennyire illik a macskáidhoz.';
+
+  @override
   String get productDetailImagePlaceholder => 'TERMÉK';
 
   @override
@@ -1025,7 +1036,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get homeScanProductSubtitle => 'Készíts fotót a csomagolásról';
 
   @override
-  String get homeGreetingHey => 'Szia 👋';
+  String get homeGreetingHey => 'Üdv újra';
 
   @override
   String get homeGreetingWelcome => 'Üdvözlünk';
@@ -1062,31 +1073,22 @@ class AppLocalizationsHu extends AppLocalizations {
       'Koppints a könyvjelzőre egy terméken, hogy ide mentsd.';
 
   @override
-  String get homeLoadingStepScanning => 'Termék szkennelése';
+  String get homeLoadingEyebrow => 'Egy pillanat';
 
   @override
-  String get homeLoadingStepScanningDesc => 'A termék azonosítása...';
+  String get homeLoadingMsgReading => 'Címke beolvasása…';
 
   @override
-  String get homeLoadingStepFetching => 'Termékadatok lekérése';
+  String get homeLoadingMsgSniffing => 'Összetevők szimatolása…';
 
   @override
-  String get homeLoadingStepFetchingDesc => 'Információk beolvasása...';
+  String get homeLoadingMsgMatching => 'Egyeztetés az adatbázisunkkal…';
 
   @override
-  String get homeLoadingStepAnalyzing => 'Összetevők elemzése';
+  String get homeLoadingMsgCrunching => 'Számok elemzése…';
 
   @override
-  String get homeLoadingStepAnalyzingDesc => 'Tápanyagadatok feldolgozása...';
-
-  @override
-  String get homeLoadingStepPreparing => 'Eredmények előkészítése';
-
-  @override
-  String get homeLoadingStepPreparingDesc => 'Majdnem kész...';
-
-  @override
-  String get homeLoadingStepDone => 'Kész';
+  String get homeLoadingMsgAlmost => 'Mindjárt kész…';
 
   @override
   String get homeCameraUnavailable => 'A kamera nem elérhető';
@@ -1097,6 +1099,9 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get homeChooseFromGallery => 'Választás galériából';
+
+  @override
+  String get homeScannerHint => 'Irányítsd a termék címkéjére';
 
   @override
   String get homeErrorProductNotFound => 'A termék nem található';

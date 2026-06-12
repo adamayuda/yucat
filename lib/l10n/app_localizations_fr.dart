@@ -794,6 +794,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productDetailVerdictPoor => 'Mieux vaut éviter celui-ci';
 
   @override
+  String get productDetailNoDataHeadline =>
+      'Nous n\'avons pas encore les détails';
+
+  @override
+  String get productDetailNoDataBody =>
+      'Nous n\'avons pas trouvé l\'analyse garantie de ce produit. Essayez de scanner l\'étiquette nutritionnelle ou revenez plus tard : nous continuons à chercher.';
+
+  @override
+  String get productDetailNoDataCatsNote =>
+      'Nous vous montrerons si ce produit convient à vos chats une fois les données nutritionnelles disponibles.';
+
+  @override
   String get productDetailImagePlaceholder => 'PRODUIT';
 
   @override
@@ -1032,7 +1044,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeScanProductSubtitle => 'Photographier l\'emballage';
 
   @override
-  String get homeGreetingHey => 'Salut 👋';
+  String get homeGreetingHey => 'Bon retour';
 
   @override
   String get homeGreetingWelcome => 'Bienvenue';
@@ -1069,32 +1081,23 @@ class AppLocalizationsFr extends AppLocalizations {
       'Appuie sur le signet d\'un produit pour l\'enregistrer ici.';
 
   @override
-  String get homeLoadingStepScanning => 'Scan en cours';
+  String get homeLoadingEyebrow => 'Un instant';
 
   @override
-  String get homeLoadingStepScanningDesc => 'Identification du produit...';
+  String get homeLoadingMsgReading => 'Lecture de l’étiquette…';
 
   @override
-  String get homeLoadingStepFetching => 'Récupération des données';
+  String get homeLoadingMsgSniffing => 'On flaire les ingrédients…';
 
   @override
-  String get homeLoadingStepFetchingDesc => 'Chargement des informations...';
+  String get homeLoadingMsgMatching =>
+      'Comparaison avec notre base de données…';
 
   @override
-  String get homeLoadingStepAnalyzing => 'Analyse des ingrédients';
+  String get homeLoadingMsgCrunching => 'Analyse des chiffres…';
 
   @override
-  String get homeLoadingStepAnalyzingDesc =>
-      'Traitement des données nutritionnelles...';
-
-  @override
-  String get homeLoadingStepPreparing => 'Préparation des résultats';
-
-  @override
-  String get homeLoadingStepPreparingDesc => 'Presque prêt...';
-
-  @override
-  String get homeLoadingStepDone => 'Terminé';
+  String get homeLoadingMsgAlmost => 'On y est presque…';
 
   @override
   String get homeCameraUnavailable => 'Appareil photo indisponible';
@@ -1105,6 +1108,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get homeChooseFromGallery => 'Choisir depuis la galerie';
+
+  @override
+  String get homeScannerHint => 'Visez l\'étiquette du produit';
 
   @override
   String get homeErrorProductNotFound => 'Produit introuvable';

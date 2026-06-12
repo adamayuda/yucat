@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/l10n/app_localizations.dart';
@@ -27,35 +28,35 @@ class NutritionGridCard extends StatelessWidget {
         children: [
           Expanded(
             child: _MacroCell(
-              iconAsset: 'assets/images/Icons/nutrient-protein.png',
+              iconAsset: 'assets/images/Protein.svg',
               label: l10n.productDetailNutrientProtein,
               value: _format(product.protein),
             ),
           ),
           Expanded(
             child: _MacroCell(
-              iconAsset: 'assets/images/Icons/nutrient-fat.png',
+              iconAsset: 'assets/images/Fat.svg',
               label: l10n.productDetailNutrientFat,
               value: _format(product.fat),
             ),
           ),
           Expanded(
             child: _MacroCell(
-              iconAsset: 'assets/images/Icons/nutrient-moisture.png',
+              iconAsset: 'assets/images/Moisture.svg',
               label: l10n.productDetailNutrientMoisture,
               value: _format(product.moisture),
             ),
           ),
           Expanded(
             child: _MacroCell(
-              iconAsset: 'assets/images/Icons/nutrient-fiber.png',
+              iconAsset: 'assets/images/Fiber.svg',
               label: l10n.productDetailNutrientFiber,
               value: _format(product.fiber),
             ),
           ),
           Expanded(
             child: _MacroCell(
-              iconAsset: 'assets/images/Icons/nutrient-carbs.png',
+              iconAsset: 'assets/images/Carbs.svg',
               label: l10n.productDetailNutrientCarbs,
               value: _format(product.carbs),
             ),
@@ -82,16 +83,7 @@ class _MacroCell extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: DSColors.tintLavender,
-            borderRadius: BorderRadius.circular(DSRadii.sm),
-          ),
-          alignment: Alignment.center,
-          child: Image.asset(iconAsset, width: 18, height: 18),
-        ),
+        SvgPicture.asset(iconAsset, width: 34, height: 34),
         const SizedBox(height: DSDimens.sizeXxxs),
         Text(
           value,

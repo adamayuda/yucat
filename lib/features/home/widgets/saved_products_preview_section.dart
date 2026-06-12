@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/l10n/app_localizations.dart';
@@ -35,9 +36,23 @@ class SavedProductsPreviewSection extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Expanded(
-              child: Text(l10n.homeSavedProductsTitle, style: DSTextStyles.displayLg),
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  l10n.homeSavedProductsTitle,
+                  style: DSTextStyles.displayLg,
+                  maxLines: 1,
+                  softWrap: false,
+                ),
+              ),
             ),
+            const SizedBox(width: DSDimens.sizeXxs),
+            ExcludeSemantics(
+              child: SvgPicture.asset('assets/images/star.svg', width: 18),
+            ),
+            const Spacer(),
             if (hasSaved)
               DSTextLink(label: l10n.homeSeeAll, onPressed: onSeeAll),
           ],

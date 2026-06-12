@@ -20,6 +20,11 @@ class ProductDisplayModel {
   final String packageSize;
   final String description;
 
+  /// True when no guaranteed analysis could be found for this product (score 0,
+  /// all macros missing). Drives a neutral "no info yet" state instead of a
+  /// misleading red score-0 "Best to skip this one" verdict.
+  final bool dataUnavailable;
+
   const ProductDisplayModel({
     required this.name,
     required this.brand,
@@ -39,6 +44,7 @@ class ProductDisplayModel {
     this.format = '',
     this.packageSize = '',
     this.description = '',
+    this.dataUnavailable = false,
   });
 
   String get scoreDisplay => '$score/$maxScore';

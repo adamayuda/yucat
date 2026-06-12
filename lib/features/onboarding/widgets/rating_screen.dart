@@ -14,10 +14,26 @@ import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 /// Muted warm-grey used for the supporting labels on this screen.
 const _mutedLabel = Color(0xFFAAA498);
 
-class RatingScreen extends StatelessWidget {
+class RatingScreen extends StatefulWidget {
   final VoidCallback onNext;
 
   const RatingScreen({super.key, required this.onNext});
+
+  @override
+  State<RatingScreen> createState() => _RatingScreenState();
+}
+
+class _RatingScreenState extends State<RatingScreen> {
+  // Drives the decorative glow + stars: they translate up by this controller's
+  // offset so they scroll away with the header instead of staying pinned while
+  // the reviews scroll past them.
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   /// Requests the native review popup, then advances. Never blocks the flow
   /// on a review-prompt failure or unavailability.
@@ -30,7 +46,7 @@ class RatingScreen extends StatelessWidget {
     } catch (_) {
       // Ignore — advancing onboarding must not depend on the review prompt.
     }
-    onNext();
+    widget.onNext();
   }
 
   @override
@@ -43,36 +59,55 @@ class RatingScreen extends StatelessWidget {
       backgroundColor: DSColors.tintCream,
       body: Stack(
         children: [
-          // Radial glow as a full-width background — pinned to the very top,
-          // behind the status bar; height follows the asset's square ratio.
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: ExcludeSemantics(
-              // AspectRatio (asset is 393×450) derives the height from the
-              // constrained full width so the box matches the image exactly —
-              // no empty strip that would look like a safe-area gap.
-              child: AspectRatio(
-                aspectRatio: 393 / 450,
-                child: SvgPicture.asset(
-                  'assets/images/highlight-rating.svg',
-                  fit: BoxFit.fitWidth,
-                ),
+          // Radial glow + scattered stars. Translated up by the scroll offset
+          // so the whole decorative layer scrolls away with the header instead
+          // of staying pinned while the reviews scroll past it.
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _scrollController,
+              builder: (context, child) {
+                final offset = _scrollController.hasClients
+                    ? _scrollController.offset
+                    : 0.0;
+                return Transform.translate(
+                  offset: Offset(0, -offset),
+                  child: child,
+                );
+              },
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // AspectRatio (asset is 393×450) derives the height from the
+                  // full width so the box matches the image exactly.
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: ExcludeSemantics(
+                      child: AspectRatio(
+                        aspectRatio: 393 / 450,
+                        child: SvgPicture.asset(
+                          'assets/images/highlight-rating.svg',
+                          fit: BoxFit.fitWidth,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // ('star.svg' is the sharp glyph; 'star-blur.svg' the blurred.)
+                  const _Star(asset: 'star-blur.svg', size: 24, top: 96, left: 24),
+                  const _Star(asset: 'star.svg', size: 48, top: 96, right: 24),
+                  const _Star(asset: 'star.svg', size: 34, top: 170, left: 60),
+                  const _Star(asset: 'star-blur.svg', size: 24, top: 160, right: 60),
+                ],
               ),
             ),
           ),
-          // Decorative stars scattered around the header, flanking the cat.
-          // ('star.svg' is the sharp glyph; 'star-blur.svg' is the blurred one.)
-          const _Star(asset: 'star-blur.svg', size: 24, top: 96, left: 24),
-          const _Star(asset: 'star.svg', size: 48, top: 96, right: 24),
-          const _Star(asset: 'star.svg', size: 34, top: 170, left: 60),
-          const _Star(asset: 'star-blur.svg', size: 24, top: 160, right: 60),
           SafeArea(
             child: Stack(
               children: [
                 // The whole screen scrolls — header, stats and reviews together.
                 SingleChildScrollView(
+                  controller: _scrollController,
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(
                     DSDimens.sizeL,
@@ -105,30 +140,35 @@ class RatingScreen extends StatelessWidget {
                         style: DSTextStyles.displayLg,
                       ),
                       const SizedBox(height: DSDimens.sizeXxl),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Transform.flip(
-                            flipX: true,
-                            child: SvgPicture.asset(
+                      // FittedBox keeps the laurel + stats row from overflowing
+                      // on narrow screens (the localized labels can be wide).
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Transform.flip(
+                              flipX: true,
+                              child: SvgPicture.asset(
+                                'assets/images/wheat.svg',
+                                height: 64,
+                              ),
+                            ),
+                            const SizedBox(width: DSDimens.sizeL),
+                            _StatBlock(
+                              value: l10n.onboardingRatingStatValue,
+                              label: l10n.onboardingRatingStatLabel,
+                            ),
+                            const SizedBox(width: DSDimens.size4xl),
+                            const _PeopleBlock(),
+                            const SizedBox(width: DSDimens.sizeL),
+                            SvgPicture.asset(
                               'assets/images/wheat.svg',
                               height: 64,
                             ),
-                          ),
-                          const SizedBox(width: DSDimens.sizeL),
-                          _StatBlock(
-                            value: l10n.onboardingRatingStatValue,
-                            label: l10n.onboardingRatingStatLabel,
-                          ),
-                          const SizedBox(width: DSDimens.size4xl),
-                          const _PeopleBlock(),
-                          const SizedBox(width: DSDimens.sizeL),
-                          SvgPicture.asset(
-                            'assets/images/wheat.svg',
-                            height: 64,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       const SizedBox(height: DSDimens.sizeXxl),
                       for (var i = 0; i < reviews.length; i++) ...[

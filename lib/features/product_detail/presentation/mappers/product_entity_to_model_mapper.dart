@@ -30,6 +30,9 @@ class ProductEntityToModelMapperImpl extends ProductEntityToModelMapper {
       format: entity.format,
       packageSize: entity.packageSize,
       description: entity.description,
+      // A score of 0 means the backend found no guaranteed analysis — show the
+      // neutral "no info" state rather than a red "Poor" verdict.
+      dataUnavailable: entity.score <= 0,
     );
   }
 

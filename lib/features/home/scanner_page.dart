@@ -165,6 +165,14 @@ class _ScannerPageState extends State<ScannerPage>
               ),
             ),
 
+          // Scanning overlay — reticle + sweeping coral line. Only while the
+          // live preview is up; hidden on the error path. IgnorePointer lets
+          // the shutter/gallery taps fall through to the controls below.
+          if (_isCameraInitialized && !_hasCameraError)
+            const Positioned.fill(
+              child: IgnorePointer(child: _ScanOverlay()),
+            ),
+
           if (_hasCameraError) Positioned.fill(child: _CameraErrorView(
             onPickFromGallery: _pickFromGallery,
           )),
@@ -232,6 +240,209 @@ class _ScannerPageState extends State<ScannerPage>
       ),
     );
   }
+}
+
+/// Live-camera scanning effect: a centered reticle (corner brackets) over a
+/// gently dimmed surround, with a glowing coral line sweeping inside it.
+/// Mirrors the scan-line idiom from `home_loading_page.dart` (`_ScanCard`) so
+/// the live scanner and the post-capture loading screen feel like one motion.
+class _ScanOverlay extends StatefulWidget {
+  const _ScanOverlay();
+
+  @override
+  State<_ScanOverlay> createState() => _ScanOverlayState();
+}
+
+class _ScanOverlayState extends State<_ScanOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  // Scan window: a portrait rounded rectangle sized to fit typical packages
+  // (cans, pouches, bags). It's a soft framing guide only — the full camera
+  // frame is still captured, so loose framing never clips the label.
+  static const double _windowWidthFactor = 0.74; // fraction of screen width
+  static const double _windowAspect = 1.3; // height / width — taller than wide
+  static const double _lineHeight = 3;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final size = media.size;
+    final w = size.width * _windowWidthFactor;
+    final h = w * _windowAspect;
+    // Sit the window slightly above centre so the bottom shutter row and the
+    // hint caption have room beneath it.
+    final left = (size.width - w) / 2;
+    final top = (size.height - h) / 2 - DSDimens.size3xl;
+    final window = Rect.fromLTWH(left, top, w, h);
+
+    return Stack(
+      children: [
+        // Dim surround + corner brackets.
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _ScanReticlePainter(window: window),
+          ),
+        ),
+
+        // Sweeping glow line, clipped to the scan window.
+        Positioned.fromRect(
+          rect: window,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(DSRadii.xl),
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                final t = Curves.easeInOut.transform(_controller.value);
+                final y = t * (h - _lineHeight);
+                return Stack(
+                  children: [
+                    Positioned(
+                      top: y,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: _lineHeight,
+                        decoration: BoxDecoration(
+                          color: DSColors.coralAccent,
+                          boxShadow: [
+                            BoxShadow(
+                              color: DSColors.coralAccent
+                                  .withValues(alpha: 0.6),
+                              blurRadius: 18,
+                              spreadRadius: 3,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+
+        // Hint caption below the window.
+        Positioned(
+          left: DSDimens.sizeL,
+          right: DSDimens.sizeL,
+          top: window.bottom + DSDimens.sizeL,
+          child: Text(
+            AppLocalizations.of(context).homeScannerHint,
+            textAlign: TextAlign.center,
+            style: DSTextStyles.label.copyWith(
+              color: DSColors.inkInverse,
+              shadows: const [
+                Shadow(color: Color(0x99000000), blurRadius: 8),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Paints a translucent scrim over everything except the rounded scan window,
+/// then draws four L-shaped corner brackets framing that window.
+class _ScanReticlePainter extends CustomPainter {
+  final Rect window;
+
+  const _ScanReticlePainter({required this.window});
+
+  static const double _bracketArm = 26;
+  static const double _bracketStroke = 3;
+  static const double _radius = DSRadii.xl;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rrect = RRect.fromRectAndRadius(
+      window,
+      const Radius.circular(_radius),
+    );
+
+    // Dim surround: fill the whole canvas, then punch out the window.
+    canvas.saveLayer(Offset.zero & size, Paint());
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = DSColors.inkPrimary.withValues(alpha: 0.45),
+    );
+    canvas.drawRRect(
+      rrect,
+      Paint()..blendMode = BlendMode.clear,
+    );
+    canvas.restore();
+
+    // Corner brackets.
+    final stroke = Paint()
+      ..color = DSColors.inkInverse
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _bracketStroke
+      ..strokeCap = StrokeCap.round;
+
+    final r = _radius;
+    final l = window.left;
+    final t = window.top;
+    final right = window.right;
+    final b = window.bottom;
+
+    // Top-left
+    canvas.drawPath(
+      Path()
+        ..moveTo(l, t + r + _bracketArm)
+        ..lineTo(l, t + r)
+        ..arcToPoint(Offset(l + r, t), radius: Radius.circular(r))
+        ..lineTo(l + r + _bracketArm, t),
+      stroke,
+    );
+    // Top-right
+    canvas.drawPath(
+      Path()
+        ..moveTo(right - r - _bracketArm, t)
+        ..lineTo(right - r, t)
+        ..arcToPoint(Offset(right, t + r), radius: Radius.circular(r))
+        ..lineTo(right, t + r + _bracketArm),
+      stroke,
+    );
+    // Bottom-right
+    canvas.drawPath(
+      Path()
+        ..moveTo(right, b - r - _bracketArm)
+        ..lineTo(right, b - r)
+        ..arcToPoint(Offset(right - r, b), radius: Radius.circular(r))
+        ..lineTo(right - r - _bracketArm, b),
+      stroke,
+    );
+    // Bottom-left
+    canvas.drawPath(
+      Path()
+        ..moveTo(l + r + _bracketArm, b)
+        ..lineTo(l + r, b)
+        ..arcToPoint(Offset(l, b - r), radius: Radius.circular(r))
+        ..lineTo(l, b - r - _bracketArm),
+      stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ScanReticlePainter oldDelegate) =>
+      oldDelegate.window != window;
 }
 
 class _CameraErrorView extends StatelessWidget {

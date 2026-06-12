@@ -181,43 +181,65 @@ class _LoadedBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom + DSDimens.size3xl;
+    // No horizontal padding here — children add their own so the cat selector
+    // inside CatAssessmentSection can scroll edge-to-edge (full bleed).
+    const hPad = EdgeInsets.symmetric(horizontal: DSDimens.sizeL);
     return ListView(
-      padding: EdgeInsets.fromLTRB(
-        DSDimens.sizeL,
-        DSDimens.sizeXs,
-        DSDimens.sizeL,
-        bottomInset,
+      padding: EdgeInsets.only(
+        top: DSDimens.sizeXs,
+        bottom: bottomInset,
       ),
       children: [
-        ProductHeroCard(
-          product: product,
-          formatLine: product.formatLine,
-          aiIdentified: product.isAiIdentified,
+        Padding(
+          padding: hPad,
+          child: ProductHeroCard(
+            product: product,
+            formatLine: product.formatLine,
+          ),
         ),
         const SizedBox(height: DSDimens.sizeL),
-        AnalysisCard(
-          product: product,
-          description: product.description,
+        Padding(
+          padding: hPad,
+          child: AnalysisCard(
+            product: product,
+            description: product.description,
+          ),
         ),
         const SizedBox(height: DSDimens.sizeL),
-        NutritionGridCard(product: product),
+        Padding(
+          padding: hPad,
+          child: NutritionGridCard(product: product),
+        ),
         const SizedBox(height: DSDimens.sizeL),
-        FutureBuilder<List<CatEntity>>(
-          future: catsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: DSDimens.sizeL),
-                child: AppLoadingWidget(),
+        // Per-cat fit scores are derived from the macros, so they're meaningless
+        // when there's no guaranteed analysis. Show a note instead.
+        if (product.dataUnavailable)
+          Padding(
+            padding: hPad,
+            child: Text(
+              AppLocalizations.of(context).productDetailNoDataCatsNote,
+              style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkSecondary),
+            ),
+          )
+        else
+          FutureBuilder<List<CatEntity>>(
+            future: catsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: DSDimens.sizeL),
+                  child: AppLoadingWidget(),
+                );
+              }
+              // Full width — the section pads its own children except the
+              // edge-to-edge cat selector.
+              return CatAssessmentSection(
+                cats: snapshot.data ?? const [],
+                product: product,
+                onCreateCat: () => onCreateCat(),
               );
-            }
-            return CatAssessmentSection(
-              cats: snapshot.data ?? const [],
-              product: product,
-              onCreateCat: () => onCreateCat(),
-            );
-          },
-        ),
+            },
+          ),
       ],
     );
   }

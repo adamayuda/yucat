@@ -145,6 +145,20 @@ class DSGradients {
     end: Alignment.bottomCenter,
     colors: [Color(0xFFA5CAFF), DSColors.tintCloud],
   );
+
+  /// Soft full-page wash behind the home dashboard.
+  static const LinearGradient homeBackground = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFEDEAF7), DSColors.tintCloud],
+  );
+
+  /// Warm coral wash behind the home scan hero card.
+  static const LinearGradient homeScanCard = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [DSColors.tintCoralSoft, DSColors.tintCoral],
+  );
 }
 
 class DSDimens {

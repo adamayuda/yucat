@@ -780,6 +780,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productDetailVerdictPoor => 'Best to skip this one';
 
   @override
+  String get productDetailNoDataHeadline => 'We couldn\'t find the details yet';
+
+  @override
+  String get productDetailNoDataBody =>
+      'We couldn\'t find the guaranteed analysis for this product. Try scanning the nutrition label, or check back later — we keep looking.';
+
+  @override
+  String get productDetailNoDataCatsNote =>
+      'We\'ll show how this fits your cats once we have the nutrition details.';
+
+  @override
   String get productDetailImagePlaceholder => 'PRODUCT';
 
   @override
@@ -1018,7 +1029,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeScanProductSubtitle => 'Take a photo of the package';
 
   @override
-  String get homeGreetingHey => 'Hey 👋';
+  String get homeGreetingHey => 'Welcome back';
 
   @override
   String get homeGreetingWelcome => 'Welcome';
@@ -1055,31 +1066,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap the bookmark on a product to save it here.';
 
   @override
-  String get homeLoadingStepScanning => 'Scanning product';
+  String get homeLoadingEyebrow => 'Hang tight';
 
   @override
-  String get homeLoadingStepScanningDesc => 'Identifying the product...';
+  String get homeLoadingMsgReading => 'Reading the label…';
 
   @override
-  String get homeLoadingStepFetching => 'Fetching product data';
+  String get homeLoadingMsgSniffing => 'Sniffing the ingredients…';
 
   @override
-  String get homeLoadingStepFetchingDesc => 'Retrieving information...';
+  String get homeLoadingMsgMatching => 'Matching our database…';
 
   @override
-  String get homeLoadingStepAnalyzing => 'Analyzing ingredients';
+  String get homeLoadingMsgCrunching => 'Crunching the numbers…';
 
   @override
-  String get homeLoadingStepAnalyzingDesc => 'Processing nutritional data...';
-
-  @override
-  String get homeLoadingStepPreparing => 'Preparing results';
-
-  @override
-  String get homeLoadingStepPreparingDesc => 'Almost ready...';
-
-  @override
-  String get homeLoadingStepDone => 'Done';
+  String get homeLoadingMsgAlmost => 'Almost there…';
 
   @override
   String get homeCameraUnavailable => 'Camera unavailable';
@@ -1090,6 +1092,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeChooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get homeScannerHint => 'Point at the product label';
 
   @override
   String get homeErrorProductNotFound => 'Product not found';

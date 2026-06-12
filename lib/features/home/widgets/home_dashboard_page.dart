@@ -59,18 +59,23 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
     final activeCat = hasCats ? cats[selected] : null;
 
     return Scaffold(
-      backgroundColor: DSColors.tintLavender,
-      body: SafeArea(
+      backgroundColor: Colors.transparent,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(gradient: DSGradients.homeBackground),
+        child: SafeArea(
         bottom: false,
+        // No horizontal padding here — children add their own so the cat
+        // selector below can scroll edge-to-edge (full bleed).
         child: ListView(
-          padding: EdgeInsets.fromLTRB(
-            DSDimens.sizeL,
-            DSDimens.sizeS,
-            DSDimens.sizeL,
-            MediaQuery.of(context).padding.bottom + kFloatingNavClearance,
+          padding: EdgeInsets.only(
+            top: DSDimens.sizeS,
+            bottom: MediaQuery.of(context).padding.bottom + kFloatingNavClearance,
           ),
           children: [
-            HomeHeader(activeCat: activeCat),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+              child: HomeHeader(activeCat: activeCat),
+            ),
             const SizedBox(height: DSDimens.sizeL),
             if (cats.length > 1) ...[
               HomeCatSelector(
@@ -83,22 +88,31 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
               ),
               const SizedBox(height: DSDimens.sizeL),
             ],
-            ScanHeroCard(onTap: widget.onScanTap),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+              child: ScanHeroCard(onTap: widget.onScanTap),
+            ),
             const SizedBox(height: DSDimens.sizeM),
-            if (activeCat != null)
-              ActiveCatSnapshotCard(
-                cat: activeCat,
-                onTap: () => widget.onCatTap(activeCat),
-              )
-            else
-              _AddCatCard(onCreateCat: widget.onCreateCat),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+              child: activeCat != null
+                  ? ActiveCatSnapshotCard(
+                      cat: activeCat,
+                      onTap: () => widget.onCatTap(activeCat),
+                    )
+                  : _AddCatCard(onCreateCat: widget.onCreateCat),
+            ),
             const SizedBox(height: DSDimens.sizeL),
-            SavedProductsPreviewSection(
-              savedProducts: widget.savedProducts,
-              onProductTap: widget.onProductTap,
-              onSeeAll: widget.onSeeAllSaved,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+              child: SavedProductsPreviewSection(
+                savedProducts: widget.savedProducts,
+                onProductTap: widget.onProductTap,
+                onSeeAll: widget.onSeeAllSaved,
+              ),
             ),
           ],
+        ),
         ),
       ),
     );

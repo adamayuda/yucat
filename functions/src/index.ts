@@ -6,6 +6,7 @@ import {config} from "./config";
 import {
   identifyProductFromImage,
   analyzeProductImage,
+  findProductImageUrl,
   verifyMatchWithLLM,
 } from "./services/anthropic.service";
 import {
@@ -15,10 +16,21 @@ import {
 } from "./services/algolia.service";
 import {processProductImage, uploadUserPhoto} from "./utils/image-helpers";
 import {logScanRequest} from "./utils/scan-log";
+import {Product} from "./models/product";
 
 admin.initializeApp();
 
 const VALID_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
+
+// Self-healing cache: a cached entry can be re-attempted at most once per window.
+const REANALYZE_AFTER_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+
+// A genuinely analyzed product always scores > 0; the force-submit fallback
+// (no guaranteed analysis found) is the only path that yields score 0.
+const hasNutritionData = (p: Product): boolean => p.score > 0;
+const hasImage = (p: Product): boolean => !!p.imageUrl;
+const isStale = (ts?: number): boolean =>
+  !ts || Date.now() - ts > REANALYZE_AFTER_MS;
 
 export const fetchProductByImageV2 = onCall(
   {
@@ -91,29 +103,73 @@ export const fetchProductByImageV2 = onCall(
         }
       }
 
+      // When the cache hit is a stale no-data entry, fall through to a full
+      // re-analysis and overwrite it in place (under this object id).
+      let overwriteKey: string | undefined;
+
       if (cachedProduct) {
-        logger.info("Cache hit, skipping full analysis", {
-          brand: cachedProduct.brand,
-          name: cachedProduct.name,
-          structuredData: true,
-        });
+        const staleJunk =
+          !hasNutritionData(cachedProduct) &&
+          isStale(cachedProduct.lastAnalysisAttempt);
 
-        await logScanRequest({
-          requestId,
-          userId: userId || null,
-          userPhotoUrl,
-          identification,
-          cachedMatch: true,
-          product: cachedProduct,
-          timestamp: new Date(),
-        });
+        if (staleJunk) {
+          overwriteKey = cachedProduct.barcode;
+          logger.info("Cache hit is a stale no-data entry — re-analyzing", {
+            brand: cachedProduct.brand,
+            name: cachedProduct.name,
+            lastAnalysisAttempt: cachedProduct.lastAnalysisAttempt ?? null,
+            structuredData: true,
+          });
+        } else {
+          // Image-only backfill: the entry has nutrition data but no image and
+          // hasn't been attempted recently. Cheaper than a full re-analysis.
+          if (
+            hasNutritionData(cachedProduct) &&
+            !hasImage(cachedProduct) &&
+            isStale(cachedProduct.lastImageAttempt)
+          ) {
+            logger.info("Cache hit missing image — attempting image backfill", {
+              brand: cachedProduct.brand,
+              name: cachedProduct.name,
+              structuredData: true,
+            });
+            const foundUrl = await findProductImageUrl(
+              cachedProduct.brand,
+              cachedProduct.name
+            );
+            cachedProduct.imageUrl = await processProductImage(
+              foundUrl,
+              cachedProduct.barcode,
+              cachedProduct.name,
+              cachedProduct.brand
+            );
+            cachedProduct.lastImageAttempt = Date.now();
+            await cacheProduct(cachedProduct.barcode, cachedProduct);
+          }
 
-        return {
-          message: "Product found in cache",
-          userId: userId || null,
-          geminiResponse: "",
-          product: cachedProduct,
-        };
+          logger.info("Cache hit, skipping full analysis", {
+            brand: cachedProduct.brand,
+            name: cachedProduct.name,
+            structuredData: true,
+          });
+
+          await logScanRequest({
+            requestId,
+            userId: userId || null,
+            userPhotoUrl,
+            identification,
+            cachedMatch: true,
+            product: cachedProduct,
+            timestamp: new Date(),
+          });
+
+          return {
+            message: "Product found in cache",
+            userId: userId || null,
+            geminiResponse: "",
+            product: cachedProduct,
+          };
+        }
       }
 
       // Step 3 — full analysis with Haiku + web_search.
@@ -123,23 +179,56 @@ export const fetchProductByImageV2 = onCall(
         structuredData: true,
       });
 
-      const {product, rawResponse} = await analyzeProductImage(image, resolvedMimeType);
+      const {product, rawResponse} = await analyzeProductImage(
+        image,
+        resolvedMimeType,
+        identification
+      );
 
       if (product && product.name) {
         // Image-flow products are always AI-identified.
         product.isAiIdentified = true;
 
-        const cacheKey = `img-${product.brand}-${product.name}`
+        const derivedKey = `img-${product.brand}-${product.name}`
           .toLowerCase()
           .replace(/\s+/g, "-");
+        // Reuse the existing object id when re-analyzing a stale entry so we
+        // overwrite it in place rather than create a near-duplicate sibling.
+        const cacheKey = overwriteKey ?? derivedKey;
         product.barcode = cacheKey;
 
-        product.imageUrl = await processProductImage(
+        // Host the analyze-provided image first. If that yields nothing —
+        // empty, or a non-image page URL that fails validation — fall back to a
+        // dedicated image search and host whatever it finds.
+        let hostedImage = await processProductImage(
           product.imageUrl,
           cacheKey,
           product.name,
           product.brand
         );
+        let imageLookupRan = false;
+        if (!hostedImage) {
+          const foundUrl = await findProductImageUrl(
+            product.brand,
+            product.name
+          );
+          imageLookupRan = true;
+          if (foundUrl) {
+            hostedImage = await processProductImage(
+              foundUrl,
+              cacheKey,
+              product.name,
+              product.brand
+            );
+          }
+        }
+        product.imageUrl = hostedImage;
+
+        // Timestamps throttle the next self-heal attempt (see REANALYZE_AFTER_MS).
+        product.lastAnalysisAttempt = Date.now();
+        if (imageLookupRan) {
+          product.lastImageAttempt = Date.now();
+        }
 
         await cacheProduct(cacheKey, product);
 

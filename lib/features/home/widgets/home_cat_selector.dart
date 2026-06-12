@@ -21,10 +21,14 @@ class HomeCatSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      // Leading/trailing inset aligns the first chip with the page content;
+      // because the scroll view itself is full-bleed, chips scroll under the
+      // screen edges.
+      padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
       child: Row(
         children: [
           for (var i = 0; i < cats.length; i++) ...[
-            if (i > 0) const SizedBox(width: DSDimens.sizeXs),
+            if (i > 0) const SizedBox(width: DSDimens.sizeXxs),
             _CatSelectorChip(
               cat: cats[i],
               selected: i == selectedIndex,
@@ -64,10 +68,12 @@ class _CatSelectorChip extends StatelessWidget {
             DSDimens.sizeXxs,
           ),
           decoration: BoxDecoration(
-            color: selected ? DSColors.inkPrimary : DSColors.surfaceCard,
+            color:
+                selected ? DSColors.accentSuccessSoft : DSColors.surfaceCard,
             borderRadius: BorderRadius.circular(DSRadii.pill),
             border: Border.all(
-              color: selected ? DSColors.inkPrimary : DSColors.surfaceCardDim,
+              color: selected ? DSColors.accentSuccess : DSColors.surfaceCardDim,
+              width: selected ? 1.5 : 1,
             ),
           ),
           child: Row(
@@ -82,7 +88,7 @@ class _CatSelectorChip extends StatelessWidget {
               Text(
                 cat.name,
                 style: DSTextStyles.label.copyWith(
-                  color: selected ? DSColors.inkInverse : DSColors.inkPrimary,
+                  color: DSColors.inkPrimary,
                   fontWeight: FontWeight.w600,
                 ),
               ),

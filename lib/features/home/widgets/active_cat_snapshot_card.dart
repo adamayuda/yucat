@@ -20,8 +20,45 @@ class ActiveCatSnapshotCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final tags = _tags(cat, l10n);
+    final age = _formatAgeGroup(cat.ageGroup, l10n);
+    final weight = _formatWeightCategory(cat.weightCategory, l10n);
+    final breed =
+        (cat.breed != null && cat.breed!.isNotEmpty) ? cat.breed : null;
     final conditions = cat.healthConditions ?? const [];
+
+    // Onboarding-success-style summary rows (colored icon tile + label + value).
+    final rows = <Widget>[
+      if (age != null)
+        _SummaryRow(
+          icon: Icons.cake_rounded,
+          tint: DSColors.tintMint,
+          label: l10n.onboardingSuccessRowAge,
+          value: age,
+        ),
+      if (weight != null)
+        _SummaryRow(
+          icon: Icons.monitor_weight_rounded,
+          tint: DSColors.tintSand,
+          label: l10n.onboardingSuccessRowBodyCondition,
+          value: weight,
+        ),
+      if (breed != null)
+        _SummaryRow(
+          icon: Icons.pets_rounded,
+          tint: DSColors.tintLavender,
+          label: l10n.onboardingSuccessRowBreed,
+          value: breed,
+        ),
+      _SummaryRow(
+        icon: Icons.favorite_rounded,
+        tint: DSColors.coralSurface,
+        label: l10n.onboardingSuccessRowHealthConditions,
+        value: conditions.isEmpty
+            ? l10n.onboardingSuccessNone
+            : l10n.homeCatConditionCount(conditions.length),
+        danger: conditions.isNotEmpty,
+      ),
+    ];
 
     return DSCard(
       onTap: onTap,
@@ -43,36 +80,14 @@ class ActiveCatSnapshotCard extends StatelessWidget {
               ),
             ],
           ),
-          if (tags.isNotEmpty || conditions.isNotEmpty) ...[
-            const SizedBox(height: DSDimens.sizeS),
-            Wrap(
-              spacing: DSDimens.sizeXxs,
-              runSpacing: DSDimens.sizeXxs,
-              children: [
-                for (final t in tags) _SnapshotPill(label: t),
-                if (conditions.isNotEmpty)
-                  _SnapshotPill(
-                    label: l10n.homeCatConditionCount(conditions.length),
-                    icon: Icons.warning_amber_rounded,
-                    background: const Color(0xFFFCE4E1),
-                    foreground: DSColors.accentDanger,
-                  ),
-              ],
-            ),
+          const SizedBox(height: DSDimens.sizeM),
+          for (var i = 0; i < rows.length; i++) ...[
+            if (i > 0) const SizedBox(height: DSDimens.sizeM),
+            rows[i],
           ],
         ],
       ),
     );
-  }
-
-  List<String> _tags(CatEntity cat, AppLocalizations l10n) {
-    final tags = <String>[];
-    final age = _formatAgeGroup(cat.ageGroup, l10n);
-    if (age != null) tags.add(age);
-    final weight = _formatWeightCategory(cat.weightCategory, l10n);
-    if (weight != null) tags.add(weight);
-    if (cat.breed != null && cat.breed!.isNotEmpty) tags.add(cat.breed!);
-    return tags;
   }
 
   String? _formatAgeGroup(String? ageGroup, AppLocalizations l10n) {
@@ -97,46 +112,61 @@ class ActiveCatSnapshotCard extends StatelessWidget {
   }
 }
 
-class _SnapshotPill extends StatelessWidget {
+/// A colored icon tile + label + value row, matching the onboarding success
+/// summary card.
+class _SummaryRow extends StatelessWidget {
+  final IconData icon;
+  final Color tint;
   final String label;
-  final IconData? icon;
-  final Color background;
-  final Color foreground;
+  final String value;
 
-  const _SnapshotPill({
+  /// Renders the value in the danger colour (e.g. for active health conditions).
+  final bool danger;
+
+  const _SummaryRow({
+    required this.icon,
+    required this.tint,
     required this.label,
-    this.icon,
-    this.background = DSColors.tintLavender,
-    this.foreground = DSColors.inkPrimary,
+    required this.value,
+    this.danger = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: DSDimens.sizeXs,
-        vertical: DSDimens.sizeXxs,
-      ),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(DSRadii.pill),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, color: foreground, size: 14),
-            const SizedBox(width: DSDimens.sizeXxxs),
-          ],
-          Text(
-            label,
-            style: DSTextStyles.caption.copyWith(
-              color: foreground,
-              fontWeight: FontWeight.w600,
-            ),
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: tint,
+            borderRadius: BorderRadius.circular(DSRadii.md),
           ),
-        ],
-      ),
+          child: Icon(icon, size: 20, color: DSColors.inkPrimary),
+        ),
+        const SizedBox(width: DSDimens.sizeS),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: DSTextStyles.caption.copyWith(
+                  color: DSColors.inkTertiary,
+                ),
+              ),
+              const SizedBox(height: DSDimens.sizeXxxxs),
+              Text(
+                value,
+                style: DSTextStyles.titleMd.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: danger ? DSColors.accentDanger : DSColors.inkPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
