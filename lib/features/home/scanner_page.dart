@@ -13,7 +13,12 @@ import 'package:yucat/l10n/app_localizations.dart';
 
 @RoutePage()
 class ScannerPage extends StatefulWidget {
-  const ScannerPage({super.key});
+  /// When provided, the captured image is handed back to the caller (and the
+  /// page pops) instead of dispatching a Home scan. Used by the onboarding
+  /// current-food step so the same camera UI works outside the Home tab.
+  final void Function(String imageBase64, String mimeType)? onCaptured;
+
+  const ScannerPage({super.key, this.onCaptured});
 
   @override
   State<ScannerPage> createState() => _ScannerPageState();
@@ -90,11 +95,20 @@ class _ScannerPageState extends State<ScannerPage>
   }
 
   void _onImageCaptured(String imageBase64, String mimeType) {
+    final router = context.router;
+
+    // Caller-handled mode (e.g. onboarding): hand the image back and pop.
+    final onCaptured = widget.onCaptured;
+    if (onCaptured != null) {
+      onCaptured(imageBase64, mimeType);
+      router.maybePop();
+      return;
+    }
+
     final bloc = context.read<HomeBloc>();
     // Capture the router controller while still mounted — the scan resolves
     // after this page pops, so navigating via this page's context later would
     // throw. The controller persists past the pop.
-    final router = context.router;
     bloc.add(ImageCapturedEvent(
       imageBase64: imageBase64,
       mimeType: mimeType,

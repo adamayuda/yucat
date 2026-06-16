@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/l10n/app_localizations.dart';
@@ -30,28 +31,24 @@ class ActiveCatSnapshotCard extends StatelessWidget {
     final rows = <Widget>[
       if (age != null)
         _SummaryRow(
-          icon: Icons.cake_rounded,
-          tint: DSColors.tintMint,
+          iconAsset: 'Cake.svg',
           label: l10n.onboardingSuccessRowAge,
           value: age,
         ),
       if (weight != null)
         _SummaryRow(
-          icon: Icons.monitor_weight_rounded,
-          tint: DSColors.tintSand,
+          iconAsset: 'Body condition.svg',
           label: l10n.onboardingSuccessRowBodyCondition,
           value: weight,
         ),
       if (breed != null)
         _SummaryRow(
-          icon: Icons.pets_rounded,
-          tint: DSColors.tintLavender,
+          iconAsset: 'catwalk.svg',
           label: l10n.onboardingSuccessRowBreed,
           value: breed,
         ),
       _SummaryRow(
-        icon: Icons.favorite_rounded,
-        tint: DSColors.coralSurface,
+        iconAsset: 'Health.svg',
         label: l10n.onboardingSuccessRowHealthConditions,
         value: conditions.isEmpty
             ? l10n.onboardingSuccessNone
@@ -112,11 +109,11 @@ class ActiveCatSnapshotCard extends StatelessWidget {
   }
 }
 
-/// A colored icon tile + label + value row, matching the onboarding success
+/// A colorful icon + label + value row, matching the onboarding success
 /// summary card.
 class _SummaryRow extends StatelessWidget {
-  final IconData icon;
-  final Color tint;
+  /// Colorful attribute icon under `assets/images/` (e.g. `Cake.svg`).
+  final String iconAsset;
   final String label;
   final String value;
 
@@ -124,8 +121,7 @@ class _SummaryRow extends StatelessWidget {
   final bool danger;
 
   const _SummaryRow({
-    required this.icon,
-    required this.tint,
+    required this.iconAsset,
     required this.label,
     required this.value,
     this.danger = false,
@@ -135,14 +131,16 @@ class _SummaryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
+        SizedBox(
           width: 40,
           height: 40,
-          decoration: BoxDecoration(
-            color: tint,
-            borderRadius: BorderRadius.circular(DSRadii.md),
+          child: Center(
+            child: SvgPicture.asset(
+              'assets/images/$iconAsset',
+              width: 36,
+              height: 36,
+            ),
           ),
-          child: Icon(icon, size: 20, color: DSColors.inkPrimary),
         ),
         const SizedBox(width: DSDimens.sizeS),
         Expanded(

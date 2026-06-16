@@ -2,10 +2,13 @@ import 'package:auto_route/auto_route.dart';
 import 'package:yucat/features/cat_listing/cat_listing_page.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
 import 'package:yucat/features/cat_create/create_cat_page.dart';
+import 'package:yucat/features/cat/domain/entities/cat_narrative.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
 import 'package:yucat/features/cat_detail/presentation/cat_detail_page.dart';
+import 'package:yucat/features/onboarding/analyze_page.dart';
+import 'package:yucat/features/onboarding/current_food_page.dart';
 import 'package:yucat/features/onboarding/onboarding_page.dart';
-import 'package:yucat/features/onboarding/success_page.dart';
+import 'package:yucat/features/onboarding/result_page.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/profile/profile_page.dart';
 import 'package:yucat/features/saved_products/presentation/saved_products_page.dart';
@@ -112,11 +115,25 @@ class AppRouter extends RootStackRouter {
       reverseDurationInMilliseconds: 280,
       transitionsBuilder: _slideLeftCubic,
     ),
-    // Onboarding success screen. Pushed over the wizard when a cat is created,
-    // so it slides in forward (from the right) like the wizard itself.
+    // Onboarding analyze + result screens. Pushed over the wizard when a cat is
+    // created, so they slide in forward (from the right) like the wizard itself.
     CustomRoute(
-      page: SuccessRoute.page,
-      path: '/onboarding/success',
+      page: AnalyzeRoute.page,
+      path: '/onboarding/analyze',
+      durationInMilliseconds: 280,
+      reverseDurationInMilliseconds: 280,
+      transitionsBuilder: _slideLeftCubic,
+    ),
+    CustomRoute(
+      page: ResultRoute.page,
+      path: '/onboarding/result',
+      durationInMilliseconds: 280,
+      reverseDurationInMilliseconds: 280,
+      transitionsBuilder: _slideLeftCubic,
+    ),
+    CustomRoute(
+      page: CurrentFoodRoute.page,
+      path: '/onboarding/current-food',
       durationInMilliseconds: 280,
       reverseDurationInMilliseconds: 280,
       transitionsBuilder: _slideLeftCubic,

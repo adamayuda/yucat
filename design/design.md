@@ -143,7 +143,7 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 |---|---|---|
 | `OnboardingScaffold` | `onboarding_scaffold.dart` | Tinted bg + optional back chip + content + footer slot. Onboarding A–D screens. |
 | `WizardStepShell` | `wizard_step_shell.dart` | Top nav (× back + progress bar) + content + sticky CTA. Modes: bottom-anchored (default) or `floatingNext` overlay. Optional `altCtaLabel` ("None of these" on HealthConditions). |
-| `DSPillButton` | `ds_pill_button.dart` | Black-pill primary CTA with chevron. Variants: `primary` (black/inkInverse), `secondary` (white/inkPrimary). Props: `loading`, `leadingIcon`, `showChevron`, `verticalPadding`. Companion: `DSTextLink` for inline secondary text links. |
+| `DSPillButton` | `ds_pill_button.dart` | Black-pill primary CTA with chevron. Variants: `primary` (black/inkInverse), `secondary` (white/inkPrimary), `danger` (`accentDanger`/inkInverse, for destructive CTAs). Props: `loading`, `leadingIcon`, `showChevron`, `verticalPadding`. Companion: `DSTextLink` for inline secondary text links. |
 | `OnboardingFloatingButton` | `onboarding_floating_button.dart` | Wraps `DSPillButton` with a consistent bottom margin. Placed as the LAST child of a survey screen's content column (preceding `Spacer`/`Expanded` pushes it down) so the CTA sits bottom-anchored at the same height across onboarding screens 2–4 (scan / attribution / proof chart). |
 | `DSCard` | `ds_card.dart` | White surface, `DSRadii.xl`, `e2` shadow. Optional `onTap` ripple. Base for nearly every grouping. |
 | `DSChip` | `ds_chip.dart` | Tinted soft pill with optional leading icon. Used for emphasis chips on stat/quote screens. |
@@ -151,7 +151,9 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | `DSStatPill` | `ds_stat_pill.dart` | Soft-tinted pill, bold number + body text. Phase C0 social proof. |
 | `DSQuoteCard` | `ds_quote_card.dart` | Logo + body + underlined source link. Phase C2 domain pitch. |
 | `DSDotIndicator` | `ds_dot_indicator.dart` | Wraps `smooth_page_indicator` for value-prop carousel (A2–A4). |
-| `DSStateView` | `ds_state_view.dart` | Centered illustration + headline + body + optional CTA. Constructors `DSStateView.error()` (Error.gif default + "Try again") and `DSStateView.empty()` (caller picks illustration). All empty/error states funnel through this. |
+| `DSStateView` | `ds_state_view.dart` | Centered `MascotIllustration` + headline + body + optional CTA. Constructors `DSStateView.error()` (thinking cat on `tintCoral` + "Try again") and `DSStateView.empty()` (caller picks `mascotAsset` + `tint`). All empty/error states funnel through this. |
+| `MascotIllustration` | `mascot_illustration.dart` | Cat mascot SVG on a tinted circular halo, framed by gently-twinkling stars (native bob/twinkle, `animate` toggle). The single playful illustration for loading/empty/error — used by `AppLoadingWidget` and `DSStateView`. **No raster GIFs** (legacy `Illustrations/*.gif` removed). |
+| `DSConfirmDialog` | `ds_confirm_dialog.dart` | Centered confirmation via `showDSConfirmDialog(...)`. White `surfaceCard`, `DSRadii.xl`, tinted icon badge (`tintCoral`/`accentDanger` when `destructive`), `headlineMd` title + `bodyMd` body, stacked CTA: `DSPillButton` (`danger` variant) over a `DSTextLink` cancel. Returns `true`/`false`/`null`. The only confirmation pattern — no raw `AlertDialog`. |
 | `DSBottomNav` | `ds_bottom_nav.dart` | Floating pill nav. `DSBottomNavItem(icon, label)` per tab; `accentSuccessSoft` selection chip; `surfaceCardDim` track. |
 | `CatAvatar` | `cat_avatar.dart` | Circular cat photo or `Icons.pets` fallback on `tintLavender` disc. Default 56px; takes `size`. |
 | `MascotSpeechBubble` | `mascot_speech_bubble.dart` | Mascot illustration + speech bubble with `CustomPainter` tail. Used by every cat-create wizard step. |
@@ -168,7 +170,7 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | `RingScore` | `lib/features/product_detail/presentation/widgets/ring_score.dart` | Circular ring score: `CircularProgressIndicator(value)` + centered number. Color buckets (green / amber / coral) follow `ProductRatingColor`. Used on product analysis card and per-cat verdict cards. |
 | `HatchedPlaceholder` | `lib/features/product_detail/presentation/widgets/hatched_placeholder.dart` | 45° hatch `CustomPainter` + "PRODUCT" tag corner. Hero fallback when `imageUrl` is null. |
 | `AnalysisChipRow` | `lib/features/product_detail/presentation/widgets/analysis_chip_row.dart` | Wrapping pill chips: success (`+ ...` green) / caution (`! ...` amber). Truncates to 3 pros + 1 con. |
-| Per-screen skeletons | `ProductDetailSkeleton`, `CatDetailSkeleton`, `ProfileSkeleton`, `SearchDiscoverSkeleton`, `HomeSkeleton`, `PaywallSkeleton` (each in its feature's `widgets/`) | Layout-matched loading skeletons built from `DSShimmer` + bones, mirroring each screen's loaded body. Replace the old full-screen `AppLoadingWidget`. `HomeSkeleton` covers the dashboard load only — the 4-step scan animation (`HomeLoadingWidget`) now fires solely for a real scan (`HomeScanningState`). `PaywallSkeleton` paints on white (`surfaceCard`) to match the loaded paywall (no mint flash). `AppLoadingWidget` (`Loading.gif`) is retained only for the product-detail cat-assessment `FutureBuilder`. |
+| Per-screen skeletons | `ProductDetailSkeleton`, `CatDetailSkeleton`, `ProfileSkeleton`, `SearchDiscoverSkeleton`, `HomeSkeleton`, `PaywallSkeleton` (each in its feature's `widgets/`) | Layout-matched loading skeletons built from `DSShimmer` + bones, mirroring each screen's loaded body. Replace the old full-screen `AppLoadingWidget`. `HomeSkeleton` covers the dashboard load only — the 4-step scan animation (`HomeLoadingWidget`) now fires solely for a real scan (`HomeScanningState`). `PaywallSkeleton` paints on white (`surfaceCard`) to match the loaded paywall (no mint flash). `AppLoadingWidget` (now a `MascotIllustration`, no GIF) is retained only for the product-detail cat-assessment `FutureBuilder`. |
 
 ### 8c. App-shell layout rules
 
@@ -300,7 +302,7 @@ See `/Users/adam.ayuda/.claude/plans/lets-update-claude-md-with-fluffy-liskov.md
 3. ~~**Selection accent**~~ — **Green** (`accentSuccess #36C078`) for selection ✓; coral (`coralAccent #FF7A59`) reserved for emphasis (chips, slider, "BEST VALUE" tag).
 4. ~~**Social-proof stat (C0)**~~ — **APOP** (Association for Pet Obesity Prevention) — "61% of US cats are overweight or obese". Sourced + linked to `petobesityprevention.org`.
 5. ~~**Domain pitch source (C2)**~~ — **WSAVA Global Nutrition Guidelines** — linked to `wsava.org/global-guidelines/global-nutrition-guidelines/`. Editorial copy points at the guidelines rather than fabricating a direct quote.
-6. ~~**Cat illustration style**~~ — **GIF animations** ship today (`assets/images/Illustrations/`: Welcome, Add new cat, Loading, Error, plus the 4 multi-step home loader frames). Hand-drawn vectors deferred.
+6. ~~**Cat illustration style**~~ — **Cat-mascot SVGs** ship today. Loading / empty / error states render through `MascotIllustration` (cat SVG + tinted halo + twinkling stars, native bob animation); the home scan loader composes its own mascot scene. The legacy `assets/images/Illustrations/*.gif` were removed.
 7. ~~**Push notifications**~~ — **Deferred**. Reminders phase out of v1.
 
 ### Still open

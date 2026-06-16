@@ -7,7 +7,10 @@ class SearchByQueryUsecase {
   SearchByQueryUsecase({required SearchRepository searchRepository})
     : _searchRepository = searchRepository;
 
-  Future<List<ProductEntity>> call({required String query}) async {
-    return _searchRepository.searchByQuery(query);
+  Future<List<ProductEntity>> call({
+    required String query,
+    int? hitsPerPage,
+  }) async {
+    return _searchRepository.searchByQuery(query, hitsPerPage: hitsPerPage);
   }
 }

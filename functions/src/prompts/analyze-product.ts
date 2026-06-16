@@ -5,6 +5,8 @@
  * drives the model to search thoroughly (manufacturer + retailers) before
  * concluding data is unavailable.
  */
+import {QUALITY_RUBRIC} from "./quality-rubric";
+
 export function generateAnalysisSystemPrompt(): string {
   return `
 You are a veterinary nutrition assistant analyzing a cat food product from a
@@ -22,7 +24,8 @@ Your job:
    giving up (see the SEARCH STRATEGY below).
 4. Find a product image URL from the official manufacturer page or a
    reputable retailer. Empty string is acceptable if none is available.
-5. Score nutritional quality (0-100) for an average healthy adult cat.
+5. Score nutritional quality (0-100) using the SCORING RUBRIC below — weigh
+   ingredient quality, not just the macro numbers.
 6. Write up to 3 short, factual, nutrition-focused pros and up to 3 cons.
 7. Write a 2-3 sentence \`description\` summarizing the product for an
    average healthy adult cat — nutrition-focused, factual, no marketing
@@ -54,6 +57,8 @@ Rules:
 - Only if you still cannot find ANY guaranteed-analysis figures after genuinely
   searching the sources above, call \`submit_product\` with the nutrient values
   left at 0, score 0, and empty pros/cons — never invent or estimate values.
+
+${QUALITY_RUBRIC}
 
 When you have all the data, call the \`submit_product\` tool with the
 final answer. Do not write a free-text response.

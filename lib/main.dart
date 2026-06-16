@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat_listing/bloc/cat_listing_bloc.dart';
 import 'package:yucat/features/home/bloc/home_bloc.dart';
@@ -78,10 +79,12 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   final _appRouter = AppRouter();
 
   void _logAppOpened(String launchType) {
+    final hasOnboarded = sl<SharedPreferences>().getBool('onboarding_completed') ?? false;
     sl<LogEventUsecase>().call(
       eventName: AnalyticsEvents.appOpened,
       properties: {
         'launch_type': launchType,
+        'is_first_launch': !hasOnboarded,
         'platform': Platform.isIOS ? 'ios' : (Platform.isAndroid ? 'android' : 'other'),
         'timestamp': DateTime.now().toIso8601String(),
       },

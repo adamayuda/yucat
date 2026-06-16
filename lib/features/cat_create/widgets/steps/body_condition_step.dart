@@ -25,19 +25,19 @@ class BodyConditionStep extends StatelessWidget {
           label: l10n.bodyUnderweightLabel,
           value: 'underweight',
           desc: l10n.bodyUnderweightDesc,
-          asset: 'assets/images/Under.svg',
+          asset: 'assets/images/Underweight.svg',
         ),
         (
           label: l10n.bodyNormalLabel,
           value: 'normal',
           desc: l10n.bodyNormalDesc,
-          asset: 'assets/images/right.svg',
+          asset: 'assets/images/Just right.svg',
         ),
         (
           label: l10n.bodyOverweightLabel,
           value: 'overweight',
           desc: l10n.bodyOverweightDesc,
-          asset: 'assets/images/Over.svg',
+          asset: 'assets/images/Overweight.svg',
         ),
         (
           label: l10n.bodyObeseLabel,

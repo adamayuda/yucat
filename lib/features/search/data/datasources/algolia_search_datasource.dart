@@ -6,7 +6,7 @@ class AlgoliaSearchDataSource {
   AlgoliaSearchDataSource()
     : _client = SearchClient(
         appId: "GI8VPYUYCP",
-        apiKey: "3c0ee15455a00d73d8325e1985556008",
+        apiKey: "5b6e53aabd413a6325207b6cecb26a2d",
       );
 
   Future<List<Hit>> searchByBrand(String brandName) async {
@@ -25,9 +25,13 @@ class AlgoliaSearchDataSource {
     }
   }
 
-  Future<List<Hit>> searchByQuery(String query) async {
+  Future<List<Hit>> searchByQuery(String query, {int? hitsPerPage}) async {
     try {
-      final request = SearchForHits(indexName: "products2", query: query);
+      final request = SearchForHits(
+        indexName: "products2",
+        query: query,
+        hitsPerPage: hitsPerPage,
+      );
 
       final response = await _client.searchIndex(request: request);
 

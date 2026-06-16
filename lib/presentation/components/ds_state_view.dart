@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
+import 'package:yucat/presentation/components/mascot_illustration.dart';
 
-/// Shared empty/error placeholder. Centered illustration + optional headline +
-/// body line + optional pill CTA. Use named constructors `DSStateView.error()`
-/// and `DSStateView.empty()` for default illustrations and messaging.
+/// Shared empty/error placeholder. Centered cat-mascot illustration + optional
+/// headline + body line + optional pill CTA. Use named constructors
+/// `DSStateView.error()` and `DSStateView.empty()` for default mascots and
+/// messaging. The illustration is a [MascotIllustration] (cat SVG on a tinted
+/// halo) — never a raster GIF.
 class DSStateView extends StatelessWidget {
-  final String illustrationAsset;
+  /// Full cat-figure SVG, e.g. `assets/images/cat-thinking.svg`.
+  final String mascotAsset;
+
+  /// Halo color behind the mascot — pick a tint that matches the state's mood.
+  final Color tint;
   final String? headline;
   final String body;
   final String? ctaLabel;
@@ -15,15 +22,16 @@ class DSStateView extends StatelessWidget {
 
   const DSStateView({
     super.key,
-    required this.illustrationAsset,
+    required this.mascotAsset,
     required this.body,
+    this.tint = DSColors.tintLavender,
     this.headline,
     this.ctaLabel,
     this.onCtaPressed,
     this.illustrationSize = 200,
   });
 
-  /// Default error layout: Error.gif + body + optional Try-again CTA.
+  /// Default error layout: thinking cat on a coral halo + body + Try-again CTA.
   const DSStateView.error({
     super.key,
     required this.body,
@@ -31,13 +39,15 @@ class DSStateView extends StatelessWidget {
     this.ctaLabel = 'Try again',
     this.onCtaPressed,
     this.illustrationSize = 180,
-  }) : illustrationAsset = 'assets/images/Illustrations/Error.gif';
+  })  : mascotAsset = 'assets/images/cat-thinking.svg',
+        tint = DSColors.tintCoral;
 
-  /// Default empty layout: requires illustrationAsset, body, and CTA.
+  /// Default empty layout: requires a mascot, tint, body, and optional CTA.
   const DSStateView.empty({
     super.key,
-    required this.illustrationAsset,
+    required this.mascotAsset,
     required this.body,
+    this.tint = DSColors.tintLavender,
     this.headline,
     this.ctaLabel,
     this.onCtaPressed,
@@ -52,11 +62,10 @@ class DSStateView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              illustrationAsset,
-              width: illustrationSize,
-              height: illustrationSize,
-              fit: BoxFit.contain,
+            MascotIllustration(
+              mascotAsset: mascotAsset,
+              tint: tint,
+              size: illustrationSize,
             ),
             if (headline != null) ...[
               const SizedBox(height: DSDimens.sizeS),

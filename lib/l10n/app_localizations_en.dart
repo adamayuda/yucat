@@ -39,6 +39,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get genderMale => 'Male';
 
   @override
+  String get photoTapHint => 'Tap here';
+
+  @override
   String get photoQuestion => 'Add a photo of your cat';
 
   @override
@@ -1053,6 +1056,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeAddCatButton => 'Add a cat';
 
   @override
+  String get homeMyCatsTitle => 'My cats';
+
+  @override
   String get homeSavedProductsTitle => 'Saved products';
 
   @override
@@ -1449,5 +1455,391 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 condition',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get catDetailDietaryTipsSection => 'Dietary tips';
+
+  @override
+  String get dietTipsDisclaimer =>
+      'General guidance — always consult your vet for medical advice.';
+
+  @override
+  String homeCatTipsTitle(String name) {
+    return 'Tips for $name';
+  }
+
+  @override
+  String get dietTitleMoreProtein => 'More protein';
+
+  @override
+  String get dietTitleLessProtein => 'Less protein';
+
+  @override
+  String get dietTitleMoreFat => 'More healthy fat';
+
+  @override
+  String get dietTitleLessFat => 'Less fat';
+
+  @override
+  String get dietTitleLessCarbs => 'Fewer carbs';
+
+  @override
+  String get dietTitleMoreFiber => 'More fiber';
+
+  @override
+  String get dietTitleMoreMoisture => 'More moisture';
+
+  @override
+  String get dietTitleMoreOmega3 => 'More omega-3';
+
+  @override
+  String get dietTitleLessPhosphorus => 'Less phosphorus';
+
+  @override
+  String get dietTitleMoreCalories => 'More calories';
+
+  @override
+  String get dietTitleLessCalories => 'Fewer calories';
+
+  @override
+  String get dietTitleMoreWater => 'More water';
+
+  @override
+  String get dietWhyKittenProtein =>
+      'Growing kittens need extra protein to build muscle.';
+
+  @override
+  String get dietWhyKittenFat =>
+      'Healthy fats fuel a kitten\'s rapid growth and energy.';
+
+  @override
+  String get dietWhySeniorOmega3 =>
+      'Omega-3s support aging joints, kidneys, and coat.';
+
+  @override
+  String get dietWhySeniorPhosphorus =>
+      'Lower phosphorus eases the load on aging kidneys.';
+
+  @override
+  String get dietWhyUnderweightCalories =>
+      'Calorie-dense food helps your cat reach a healthy weight.';
+
+  @override
+  String get dietWhyUnderweightFat =>
+      'Extra healthy fat adds the calories needed to gain weight.';
+
+  @override
+  String get dietWhyOverweightCalories =>
+      'Fewer calories support gradual, healthy weight loss.';
+
+  @override
+  String get dietWhyOverweightFat =>
+      'Trimming fat lowers calorie intake for weight control.';
+
+  @override
+  String get dietWhyOverweightFiber =>
+      'Fiber keeps your cat full while eating less.';
+
+  @override
+  String get dietWhyOverweightProtein =>
+      'Lean protein preserves muscle during weight loss.';
+
+  @override
+  String get dietWhyLowActivityCalories =>
+      'A calmer cat needs fewer calories to avoid weight gain.';
+
+  @override
+  String get dietWhyHighActivityProtein =>
+      'Active cats need more protein to maintain muscle.';
+
+  @override
+  String get dietWhyHighActivityCalories =>
+      'An energetic cat burns more and needs more calories.';
+
+  @override
+  String get dietWhyNeuteredCalories =>
+      'Neutered cats burn less energy and gain weight easily.';
+
+  @override
+  String get dietWhyNeuteredFat => 'Lower fat helps a neutered cat stay trim.';
+
+  @override
+  String get dietWhyPregnantProtein =>
+      'Pregnancy and nursing demand extra protein.';
+
+  @override
+  String get dietWhyPregnantFat =>
+      'Extra fat meets the high energy needs of nursing.';
+
+  @override
+  String get dietWhyPregnantCalories =>
+      'More calories sustain pregnancy and milk production.';
+
+  @override
+  String get dietWhyMaineCoonProtein =>
+      'Large, muscular breeds thrive on high protein.';
+
+  @override
+  String get dietWhyMaineCoonOmega3 =>
+      'Omega-3s support the joints of big-boned breeds.';
+
+  @override
+  String get dietWhyPersianOmega3 =>
+      'Omega-3s keep a Persian\'s long coat healthy.';
+
+  @override
+  String get dietWhyPersianFiber =>
+      'Fiber helps move hairballs through the gut.';
+
+  @override
+  String get dietWhyPersianCarbs =>
+      'Persians tend to do better on lower-carb diets.';
+
+  @override
+  String get dietWhySphynxFat =>
+      'Hairless cats burn energy fast and need more fat.';
+
+  @override
+  String get dietWhyBengalProtein =>
+      'High-energy Bengals need plenty of protein.';
+
+  @override
+  String get dietWhyBritishCalories =>
+      'This laid-back breed gains weight easily.';
+
+  @override
+  String get dietWhyLongCoatOmega3 => 'Omega-3s nourish a long, thick coat.';
+
+  @override
+  String get dietWhyLongCoatFiber =>
+      'Fiber helps prevent hairballs in long-haired cats.';
+
+  @override
+  String get dietWhyHairlessFat =>
+      'Hairless cats need more fat to stay warm and energized.';
+
+  @override
+  String get dietWhyUrinaryWater =>
+      'More water dilutes urine and protects the urinary tract.';
+
+  @override
+  String get dietWhyKidneyPhosphorus =>
+      'Low phosphorus helps slow kidney disease.';
+
+  @override
+  String get dietWhyKidneyProtein =>
+      'Moderating protein eases strain on the kidneys.';
+
+  @override
+  String get dietWhyKidneyOmega3 =>
+      'Omega-3s help support compromised kidneys.';
+
+  @override
+  String get dietWhyDiabetesCarbs => 'Low carbs help keep blood sugar stable.';
+
+  @override
+  String get dietWhyDiabetesProtein =>
+      'Protein supports glucose control and muscle.';
+
+  @override
+  String get dietWhySkinOmega3 =>
+      'Omega-3s calm skin inflammation and irritation.';
+
+  @override
+  String get dietWhyHairballFiber =>
+      'Fiber helps your cat pass hairballs naturally.';
+
+  @override
+  String get dietWhyHairballOmega3 =>
+      'Omega-3s improve coat health to reduce shedding.';
+
+  @override
+  String get dietWhyJointOmega3 =>
+      'Omega-3s reduce joint inflammation and stiffness.';
+
+  @override
+  String get dietWhyDentalMoisture =>
+      'Moist food is gentler on sore teeth and gums.';
+
+  @override
+  String get dietWhyWaterGeneral =>
+      'Cats are prone to dehydration — wet food and fresh water help.';
+
+  @override
+  String get assessmentHeartTaurine =>
+      'Contains taurine, essential for heart health';
+
+  @override
+  String get assessmentHeartLowSodium =>
+      'Low sodium, which eases the heart\'s workload';
+
+  @override
+  String get assessmentHeartOmega3 => 'Omega-3s support heart and circulation';
+
+  @override
+  String get assessmentHeartHighSodium =>
+      'High sodium, which strains the heart';
+
+  @override
+  String get onboardingNarrativeTitle => 'Personalized for your cat';
+
+  @override
+  String onboardingNarrativeFallback(String name) {
+    return 'Here\'s the start of $name\'s nutrition plan — a few things we\'d focus on to help them thrive.';
+  }
+
+  @override
+  String get dietTitleMoreTaurine => 'More taurine';
+
+  @override
+  String get dietTitleLessSodium => 'Less sodium';
+
+  @override
+  String get dietTitleNovelProtein => 'Novel proteins';
+
+  @override
+  String get dietTitleDigestible => 'Easy-to-digest food';
+
+  @override
+  String get dietWhyHeartOmega3 =>
+      'Omega-3s (EPA & DHA) support heart muscle and circulation.';
+
+  @override
+  String get dietWhyHeartTaurine =>
+      'Taurine is essential for a healthy feline heart.';
+
+  @override
+  String get dietWhyHeartSodium =>
+      'Lower sodium eases the workload on the heart.';
+
+  @override
+  String get dietWhyAllergyNovelProtein =>
+      'Novel or limited proteins help avoid common allergy triggers.';
+
+  @override
+  String get dietWhySensitiveDigestible =>
+      'Gentle, highly digestible recipes are easier on the stomach.';
+
+  @override
+  String get onboardingNarrativeOutlookTitle => 'In about 2 weeks';
+
+  @override
+  String onboardingNarrativeOutlookFallback(String name) {
+    return 'With the right food, you may start to notice $name has more energy and a healthier, shinier coat within a couple of weeks.';
+  }
+
+  @override
+  String onboardingNarrativeFocusTitle(String name) {
+    return 'What to focus on for $name';
+  }
+
+  @override
+  String get onboardingAnalyzeEyebrow => 'Personalizing';
+
+  @override
+  String onboardingAnalyzeStep1(String name) {
+    return 'Reviewing $name\'s profile';
+  }
+
+  @override
+  String get onboardingAnalyzeStep2 => 'Checking health needs';
+
+  @override
+  String get onboardingAnalyzeStep3 => 'Matching nutrition guidance';
+
+  @override
+  String get onboardingAnalyzeStep4 => 'Personalizing recommendations';
+
+  @override
+  String onboardingResultTitle(String name) {
+    return '$name\'s plan is ready';
+  }
+
+  @override
+  String productPicksTitle(String name) {
+    return 'Top picks for $name';
+  }
+
+  @override
+  String get onboardingResultContinue => 'Continue';
+
+  @override
+  String onboardingBrandTitle(String name) {
+    return 'What are you feeding $name?';
+  }
+
+  @override
+  String get onboardingBrandSubtitle =>
+      'We\'ll check how it really stacks up for your cat.';
+
+  @override
+  String get onboardingBrandHint =>
+      'Search a brand (e.g. Whiskas, Royal Canin)';
+
+  @override
+  String get onboardingBrandAnalyzeCta => 'Check this food';
+
+  @override
+  String get onboardingBrandSkip => 'I\'m not sure';
+
+  @override
+  String onboardingBrandAnalyzing(String brand) {
+    return 'Analyzing $brand…';
+  }
+
+  @override
+  String onboardingBrandUnavailable(String brand) {
+    return 'We couldn\'t analyze $brand right now — but here\'s what we\'d recommend instead.';
+  }
+
+  @override
+  String onboardingBrandUnlockCta(String name) {
+    return 'Unlock $name\'s top picks';
+  }
+
+  @override
+  String brandTeaserFound(num count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count better foods',
+      one: '1 better food',
+    );
+    return 'We found $_temp0 for $name';
+  }
+
+  @override
+  String get brandTeaserLockedHint =>
+      'Subscribe to see them — matched to your cat\'s needs.';
+
+  @override
+  String onboardingScanTitle(String name) {
+    return 'What are you feeding $name?';
+  }
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Scan the package and we\'ll grade it for your cat.';
+
+  @override
+  String get onboardingScanCta => 'Scan the package';
+
+  @override
+  String get onboardingScanSkip => 'Skip for now';
+
+  @override
+  String get onboardingScanVerdictIntro => 'Here\'s how that food scores:';
+
+  @override
+  String get onboardingScanFailed =>
+      'We couldn\'t read that label. Try again with the front of the package in frame.';
+
+  @override
+  String get onboardingScanRetry => 'Scan again';
+
+  @override
+  String onboardingScanPersonalCon(String name, String con) {
+    return 'For $name: $con';
   }
 }

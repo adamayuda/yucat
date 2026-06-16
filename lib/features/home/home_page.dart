@@ -41,7 +41,7 @@ class _HomePage extends State<HomePage> {
   // events after calling close" from initState.
 
   void _openScanner() {
-    context.router.push(const ScannerRoute());
+    context.router.push(ScannerRoute());
   }
 
   Future<void> _openProduct(ProductDisplayModel product) async {
@@ -96,6 +96,16 @@ class _HomePage extends State<HomePage> {
     context.router.push(CreateCatRoute());
   }
 
+  void _openCatList() {
+    sl<LogEventUsecase>().call(
+      eventName: 'Home See All Cats Tapped',
+      properties: {
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+    context.router.push(const CatListingRoute());
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
@@ -124,6 +134,7 @@ class _HomePage extends State<HomePage> {
           onCatTap: _openCatDetail,
           onProductTap: _openProduct,
           onSeeAllSaved: () => _openSavedProducts(savedProducts.length),
+          onSeeAllCats: _openCatList,
           onCreateCat: _openCreateCat,
           onActiveCatChanged: _onActiveCatChanged,
         );

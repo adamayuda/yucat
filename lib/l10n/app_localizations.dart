@@ -162,6 +162,12 @@ abstract class AppLocalizations {
   /// **'Male'**
   String get genderMale;
 
+  /// No description provided for @photoTapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap here'**
+  String get photoTapHint;
+
   /// Mascot question on the profile photo step
   ///
   /// In en, this message translates to:
@@ -1950,6 +1956,12 @@ abstract class AppLocalizations {
   /// **'Add a cat'**
   String get homeAddCatButton;
 
+  /// No description provided for @homeMyCatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My cats'**
+  String get homeMyCatsTitle;
+
   /// No description provided for @homeSavedProductsTitle.
   ///
   /// In en, this message translates to:
@@ -2609,6 +2621,606 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 condition} other{{count} conditions}}'**
   String catListingConditionsCount(num count);
+
+  /// No description provided for @catDetailDietaryTipsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Dietary tips'**
+  String get catDetailDietaryTipsSection;
+
+  /// No description provided for @dietTipsDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'General guidance — always consult your vet for medical advice.'**
+  String get dietTipsDisclaimer;
+
+  /// No description provided for @homeCatTipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips for {name}'**
+  String homeCatTipsTitle(String name);
+
+  /// No description provided for @dietTitleMoreProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'More protein'**
+  String get dietTitleMoreProtein;
+
+  /// No description provided for @dietTitleLessProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Less protein'**
+  String get dietTitleLessProtein;
+
+  /// No description provided for @dietTitleMoreFat.
+  ///
+  /// In en, this message translates to:
+  /// **'More healthy fat'**
+  String get dietTitleMoreFat;
+
+  /// No description provided for @dietTitleLessFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Less fat'**
+  String get dietTitleLessFat;
+
+  /// No description provided for @dietTitleLessCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer carbs'**
+  String get dietTitleLessCarbs;
+
+  /// No description provided for @dietTitleMoreFiber.
+  ///
+  /// In en, this message translates to:
+  /// **'More fiber'**
+  String get dietTitleMoreFiber;
+
+  /// No description provided for @dietTitleMoreMoisture.
+  ///
+  /// In en, this message translates to:
+  /// **'More moisture'**
+  String get dietTitleMoreMoisture;
+
+  /// No description provided for @dietTitleMoreOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'More omega-3'**
+  String get dietTitleMoreOmega3;
+
+  /// No description provided for @dietTitleLessPhosphorus.
+  ///
+  /// In en, this message translates to:
+  /// **'Less phosphorus'**
+  String get dietTitleLessPhosphorus;
+
+  /// No description provided for @dietTitleMoreCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'More calories'**
+  String get dietTitleMoreCalories;
+
+  /// No description provided for @dietTitleLessCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer calories'**
+  String get dietTitleLessCalories;
+
+  /// No description provided for @dietTitleMoreWater.
+  ///
+  /// In en, this message translates to:
+  /// **'More water'**
+  String get dietTitleMoreWater;
+
+  /// No description provided for @dietWhyKittenProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Growing kittens need extra protein to build muscle.'**
+  String get dietWhyKittenProtein;
+
+  /// No description provided for @dietWhyKittenFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Healthy fats fuel a kitten\'s rapid growth and energy.'**
+  String get dietWhyKittenFat;
+
+  /// No description provided for @dietWhySeniorOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'Omega-3s support aging joints, kidneys, and coat.'**
+  String get dietWhySeniorOmega3;
+
+  /// No description provided for @dietWhySeniorPhosphorus.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower phosphorus eases the load on aging kidneys.'**
+  String get dietWhySeniorPhosphorus;
+
+  /// No description provided for @dietWhyUnderweightCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Calorie-dense food helps your cat reach a healthy weight.'**
+  String get dietWhyUnderweightCalories;
+
+  /// No description provided for @dietWhyUnderweightFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra healthy fat adds the calories needed to gain weight.'**
+  String get dietWhyUnderweightFat;
+
+  /// No description provided for @dietWhyOverweightCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer calories support gradual, healthy weight loss.'**
+  String get dietWhyOverweightCalories;
+
+  /// No description provided for @dietWhyOverweightFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Trimming fat lowers calorie intake for weight control.'**
+  String get dietWhyOverweightFat;
+
+  /// No description provided for @dietWhyOverweightFiber.
+  ///
+  /// In en, this message translates to:
+  /// **'Fiber keeps your cat full while eating less.'**
+  String get dietWhyOverweightFiber;
+
+  /// No description provided for @dietWhyOverweightProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Lean protein preserves muscle during weight loss.'**
+  String get dietWhyOverweightProtein;
+
+  /// No description provided for @dietWhyLowActivityCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'A calmer cat needs fewer calories to avoid weight gain.'**
+  String get dietWhyLowActivityCalories;
+
+  /// No description provided for @dietWhyHighActivityProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Active cats need more protein to maintain muscle.'**
+  String get dietWhyHighActivityProtein;
+
+  /// No description provided for @dietWhyHighActivityCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'An energetic cat burns more and needs more calories.'**
+  String get dietWhyHighActivityCalories;
+
+  /// No description provided for @dietWhyNeuteredCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Neutered cats burn less energy and gain weight easily.'**
+  String get dietWhyNeuteredCalories;
+
+  /// No description provided for @dietWhyNeuteredFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower fat helps a neutered cat stay trim.'**
+  String get dietWhyNeuteredFat;
+
+  /// No description provided for @dietWhyPregnantProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnancy and nursing demand extra protein.'**
+  String get dietWhyPregnantProtein;
+
+  /// No description provided for @dietWhyPregnantFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra fat meets the high energy needs of nursing.'**
+  String get dietWhyPregnantFat;
+
+  /// No description provided for @dietWhyPregnantCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'More calories sustain pregnancy and milk production.'**
+  String get dietWhyPregnantCalories;
+
+  /// No description provided for @dietWhyMaineCoonProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Large, muscular breeds thrive on high protein.'**
+  String get dietWhyMaineCoonProtein;
+
+  /// No description provided for @dietWhyMaineCoonOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'Omega-3s support the joints of big-boned breeds.'**
+  String get dietWhyMaineCoonOmega3;
+
+  /// No description provided for @dietWhyPersianOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'Omega-3s keep a Persian\'s long coat healthy.'**
+  String get dietWhyPersianOmega3;
+
+  /// No description provided for @dietWhyPersianFiber.
+  ///
+  /// In en, this message translates to:
+  /// **'Fiber helps move hairballs through the gut.'**
+  String get dietWhyPersianFiber;
+
+  /// No description provided for @dietWhyPersianCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Persians tend to do better on lower-carb diets.'**
+  String get dietWhyPersianCarbs;
+
+  /// No description provided for @dietWhySphynxFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Hairless cats burn energy fast and need more fat.'**
+  String get dietWhySphynxFat;
+
+  /// No description provided for @dietWhyBengalProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'High-energy Bengals need plenty of protein.'**
+  String get dietWhyBengalProtein;
+
+  /// No description provided for @dietWhyBritishCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'This laid-back breed gains weight easily.'**
+  String get dietWhyBritishCalories;
+
+  /// No description provided for @dietWhyLongCoatOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'Omega-3s nourish a long, thick coat.'**
+  String get dietWhyLongCoatOmega3;
+
+  /// No description provided for @dietWhyLongCoatFiber.
+  ///
+  /// In en, this message translates to:
+  /// **'Fiber helps prevent hairballs in long-haired cats.'**
+  String get dietWhyLongCoatFiber;
+
+  /// No description provided for @dietWhyHairlessFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Hairless cats need more fat to stay warm and energized.'**
+  String get dietWhyHairlessFat;
+
+  /// No description provided for @dietWhyUrinaryWater.
+  ///
+  /// In en, this message translates to:
+  /// **'More water dilutes urine and protects the urinary tract.'**
+  String get dietWhyUrinaryWater;
+
+  /// No description provided for @dietWhyKidneyPhosphorus.
+  ///
+  /// In en, this message translates to:
+  /// **'Low phosphorus helps slow kidney disease.'**
+  String get dietWhyKidneyPhosphorus;
+
+  /// No description provided for @dietWhyKidneyProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderating protein eases strain on the kidneys.'**
+  String get dietWhyKidneyProtein;
+
+  /// No description provided for @dietWhyKidneyOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'Omega-3s help support compromised kidneys.'**
+  String get dietWhyKidneyOmega3;
+
+  /// No description provided for @dietWhyDiabetesCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Low carbs help keep blood sugar stable.'**
+  String get dietWhyDiabetesCarbs;
+
+  /// No description provided for @dietWhyDiabetesProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein supports glucose control and muscle.'**
+  String get dietWhyDiabetesProtein;
+
+  /// No description provided for @dietWhySkinOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'Omega-3s calm skin inflammation and irritation.'**
+  String get dietWhySkinOmega3;
+
+  /// No description provided for @dietWhyHairballFiber.
+  ///
+  /// In en, this message translates to:
+  /// **'Fiber helps your cat pass hairballs naturally.'**
+  String get dietWhyHairballFiber;
+
+  /// No description provided for @dietWhyHairballOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'Omega-3s improve coat health to reduce shedding.'**
+  String get dietWhyHairballOmega3;
+
+  /// No description provided for @dietWhyJointOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'Omega-3s reduce joint inflammation and stiffness.'**
+  String get dietWhyJointOmega3;
+
+  /// No description provided for @dietWhyDentalMoisture.
+  ///
+  /// In en, this message translates to:
+  /// **'Moist food is gentler on sore teeth and gums.'**
+  String get dietWhyDentalMoisture;
+
+  /// No description provided for @dietWhyWaterGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'Cats are prone to dehydration — wet food and fresh water help.'**
+  String get dietWhyWaterGeneral;
+
+  /// No description provided for @assessmentHeartTaurine.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains taurine, essential for heart health'**
+  String get assessmentHeartTaurine;
+
+  /// No description provided for @assessmentHeartLowSodium.
+  ///
+  /// In en, this message translates to:
+  /// **'Low sodium, which eases the heart\'s workload'**
+  String get assessmentHeartLowSodium;
+
+  /// No description provided for @assessmentHeartOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'Omega-3s support heart and circulation'**
+  String get assessmentHeartOmega3;
+
+  /// No description provided for @assessmentHeartHighSodium.
+  ///
+  /// In en, this message translates to:
+  /// **'High sodium, which strains the heart'**
+  String get assessmentHeartHighSodium;
+
+  /// No description provided for @onboardingNarrativeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalized for your cat'**
+  String get onboardingNarrativeTitle;
+
+  /// No description provided for @onboardingNarrativeFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s the start of {name}\'s nutrition plan — a few things we\'d focus on to help them thrive.'**
+  String onboardingNarrativeFallback(String name);
+
+  /// No description provided for @dietTitleMoreTaurine.
+  ///
+  /// In en, this message translates to:
+  /// **'More taurine'**
+  String get dietTitleMoreTaurine;
+
+  /// No description provided for @dietTitleLessSodium.
+  ///
+  /// In en, this message translates to:
+  /// **'Less sodium'**
+  String get dietTitleLessSodium;
+
+  /// No description provided for @dietTitleNovelProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Novel proteins'**
+  String get dietTitleNovelProtein;
+
+  /// No description provided for @dietTitleDigestible.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy-to-digest food'**
+  String get dietTitleDigestible;
+
+  /// No description provided for @dietWhyHeartOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'Omega-3s (EPA & DHA) support heart muscle and circulation.'**
+  String get dietWhyHeartOmega3;
+
+  /// No description provided for @dietWhyHeartTaurine.
+  ///
+  /// In en, this message translates to:
+  /// **'Taurine is essential for a healthy feline heart.'**
+  String get dietWhyHeartTaurine;
+
+  /// No description provided for @dietWhyHeartSodium.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower sodium eases the workload on the heart.'**
+  String get dietWhyHeartSodium;
+
+  /// No description provided for @dietWhyAllergyNovelProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Novel or limited proteins help avoid common allergy triggers.'**
+  String get dietWhyAllergyNovelProtein;
+
+  /// No description provided for @dietWhySensitiveDigestible.
+  ///
+  /// In en, this message translates to:
+  /// **'Gentle, highly digestible recipes are easier on the stomach.'**
+  String get dietWhySensitiveDigestible;
+
+  /// No description provided for @onboardingNarrativeOutlookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'In about 2 weeks'**
+  String get onboardingNarrativeOutlookTitle;
+
+  /// No description provided for @onboardingNarrativeOutlookFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'With the right food, you may start to notice {name} has more energy and a healthier, shinier coat within a couple of weeks.'**
+  String onboardingNarrativeOutlookFallback(String name);
+
+  /// No description provided for @onboardingNarrativeFocusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What to focus on for {name}'**
+  String onboardingNarrativeFocusTitle(String name);
+
+  /// No description provided for @onboardingAnalyzeEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalizing'**
+  String get onboardingAnalyzeEyebrow;
+
+  /// No description provided for @onboardingAnalyzeStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewing {name}\'s profile'**
+  String onboardingAnalyzeStep1(String name);
+
+  /// No description provided for @onboardingAnalyzeStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking health needs'**
+  String get onboardingAnalyzeStep2;
+
+  /// No description provided for @onboardingAnalyzeStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching nutrition guidance'**
+  String get onboardingAnalyzeStep3;
+
+  /// No description provided for @onboardingAnalyzeStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalizing recommendations'**
+  String get onboardingAnalyzeStep4;
+
+  /// No description provided for @onboardingResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s plan is ready'**
+  String onboardingResultTitle(String name);
+
+  /// No description provided for @productPicksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Top picks for {name}'**
+  String productPicksTitle(String name);
+
+  /// No description provided for @onboardingResultContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get onboardingResultContinue;
+
+  /// No description provided for @onboardingBrandTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you feeding {name}?'**
+  String onboardingBrandTitle(String name);
+
+  /// No description provided for @onboardingBrandSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll check how it really stacks up for your cat.'**
+  String get onboardingBrandSubtitle;
+
+  /// No description provided for @onboardingBrandHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a brand (e.g. Whiskas, Royal Canin)'**
+  String get onboardingBrandHint;
+
+  /// No description provided for @onboardingBrandAnalyzeCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Check this food'**
+  String get onboardingBrandAnalyzeCta;
+
+  /// No description provided for @onboardingBrandSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m not sure'**
+  String get onboardingBrandSkip;
+
+  /// No description provided for @onboardingBrandAnalyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing {brand}…'**
+  String onboardingBrandAnalyzing(String brand);
+
+  /// No description provided for @onboardingBrandUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t analyze {brand} right now — but here\'s what we\'d recommend instead.'**
+  String onboardingBrandUnavailable(String brand);
+
+  /// No description provided for @onboardingBrandUnlockCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock {name}\'s top picks'**
+  String onboardingBrandUnlockCta(String name);
+
+  /// No description provided for @brandTeaserFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We found {count, plural, =1{1 better food} other{{count} better foods}} for {name}'**
+  String brandTeaserFound(num count, String name);
+
+  /// No description provided for @brandTeaserLockedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to see them — matched to your cat\'s needs.'**
+  String get brandTeaserLockedHint;
+
+  /// No description provided for @onboardingScanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you feeding {name}?'**
+  String onboardingScanTitle(String name);
+
+  /// No description provided for @onboardingScanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the package and we\'ll grade it for your cat.'**
+  String get onboardingScanSubtitle;
+
+  /// No description provided for @onboardingScanCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the package'**
+  String get onboardingScanCta;
+
+  /// No description provided for @onboardingScanSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get onboardingScanSkip;
+
+  /// No description provided for @onboardingScanVerdictIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s how that food scores:'**
+  String get onboardingScanVerdictIntro;
+
+  /// No description provided for @onboardingScanFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t read that label. Try again with the front of the package in frame.'**
+  String get onboardingScanFailed;
+
+  /// No description provided for @onboardingScanRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan again'**
+  String get onboardingScanRetry;
+
+  /// No description provided for @onboardingScanPersonalCon.
+  ///
+  /// In en, this message translates to:
+  /// **'For {name}: {con}'**
+  String onboardingScanPersonalCon(String name, String con);
 }
 
 class _AppLocalizationsDelegate

@@ -39,6 +39,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get genderMale => 'Hím';
 
   @override
+  String get photoTapHint => 'Koppints ide';
+
+  @override
   String get photoQuestion => 'Adj hozzá egy fotót a macskádról';
 
   @override
@@ -1060,6 +1063,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get homeAddCatButton => 'Macska hozzáadása';
 
   @override
+  String get homeMyCatsTitle => 'Macskáim';
+
+  @override
   String get homeSavedProductsTitle => 'Mentett termékek';
 
   @override
@@ -1461,5 +1467,394 @@ class AppLocalizationsHu extends AppLocalizations {
       one: '1 egészségügyi szempont',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get catDetailDietaryTipsSection => 'Táplálkozási tippek';
+
+  @override
+  String get dietTipsDisclaimer =>
+      'Általános útmutatás – orvosi kérdésekben mindig kérd ki állatorvosod véleményét.';
+
+  @override
+  String homeCatTipsTitle(String name) {
+    return 'Tippek $name számára';
+  }
+
+  @override
+  String get dietTitleMoreProtein => 'Több fehérje';
+
+  @override
+  String get dietTitleLessProtein => 'Kevesebb fehérje';
+
+  @override
+  String get dietTitleMoreFat => 'Több egészséges zsír';
+
+  @override
+  String get dietTitleLessFat => 'Kevesebb zsír';
+
+  @override
+  String get dietTitleLessCarbs => 'Kevesebb szénhidrát';
+
+  @override
+  String get dietTitleMoreFiber => 'Több rost';
+
+  @override
+  String get dietTitleMoreMoisture => 'Több nedvesség';
+
+  @override
+  String get dietTitleMoreOmega3 => 'Több omega-3';
+
+  @override
+  String get dietTitleLessPhosphorus => 'Kevesebb foszfor';
+
+  @override
+  String get dietTitleMoreCalories => 'Több kalória';
+
+  @override
+  String get dietTitleLessCalories => 'Kevesebb kalória';
+
+  @override
+  String get dietTitleMoreWater => 'Több víz';
+
+  @override
+  String get dietWhyKittenProtein =>
+      'A növekvő kölyköknek több fehérje kell az izomépítéshez.';
+
+  @override
+  String get dietWhyKittenFat =>
+      'Az egészséges zsírok táplálják a kölyök gyors növekedését és energiáját.';
+
+  @override
+  String get dietWhySeniorOmega3 =>
+      'Az omega-3 támogatja az öregedő ízületeket, vesét és szőrzetet.';
+
+  @override
+  String get dietWhySeniorPhosphorus =>
+      'A kevesebb foszfor tehermentesíti az öregedő vesét.';
+
+  @override
+  String get dietWhyUnderweightCalories =>
+      'A kalóriadús táplálék segít macskádnak elérni az egészséges testsúlyt.';
+
+  @override
+  String get dietWhyUnderweightFat =>
+      'A több egészséges zsír biztosítja a hízáshoz szükséges kalóriát.';
+
+  @override
+  String get dietWhyOverweightCalories =>
+      'A kevesebb kalória fokozatos, egészséges fogyást segít.';
+
+  @override
+  String get dietWhyOverweightFat =>
+      'A zsír csökkentése mérsékli a kalóriabevitelt a testsúly kontrolljához.';
+
+  @override
+  String get dietWhyOverweightFiber =>
+      'A rost jóllakottá teszi macskádat kevesebb táplálék mellett is.';
+
+  @override
+  String get dietWhyOverweightProtein =>
+      'A sovány fehérje megőrzi az izmokat a fogyás során.';
+
+  @override
+  String get dietWhyLowActivityCalories =>
+      'A nyugodtabb macskának kevesebb kalória kell, hogy ne hízzon el.';
+
+  @override
+  String get dietWhyHighActivityProtein =>
+      'Az aktív macskáknak több fehérje kell az izmaik fenntartásához.';
+
+  @override
+  String get dietWhyHighActivityCalories =>
+      'Az energikus macska többet éget, ezért több kalóriára van szüksége.';
+
+  @override
+  String get dietWhyNeuteredCalories =>
+      'Az ivartalanított macskák kevesebb energiát égetnek és könnyen híznak.';
+
+  @override
+  String get dietWhyNeuteredFat =>
+      'A kevesebb zsír segít az ivartalanított macskának karcsún maradni.';
+
+  @override
+  String get dietWhyPregnantProtein =>
+      'A vemhesség és a szoptatás több fehérjét igényel.';
+
+  @override
+  String get dietWhyPregnantFat =>
+      'A több zsír fedezi a szoptatás magas energiaigényét.';
+
+  @override
+  String get dietWhyPregnantCalories =>
+      'A több kalória fenntartja a vemhességet és a tejtermelést.';
+
+  @override
+  String get dietWhyMaineCoonProtein =>
+      'A nagy, izmos fajták sok fehérjével érzik jól magukat.';
+
+  @override
+  String get dietWhyMaineCoonOmega3 =>
+      'Az omega-3 támogatja a nagy testű fajták ízületeit.';
+
+  @override
+  String get dietWhyPersianOmega3 =>
+      'Az omega-3 egészségesen tartja a perzsa hosszú szőrét.';
+
+  @override
+  String get dietWhyPersianFiber =>
+      'A rost segíti a szőrlabdák áthaladását a bélrendszeren.';
+
+  @override
+  String get dietWhyPersianCarbs =>
+      'A perzsák gyakran jobban viselik az alacsony szénhidráttartalmú étrendet.';
+
+  @override
+  String get dietWhySphynxFat =>
+      'A szőrtelen macskák gyorsan égetik az energiát, ezért több zsír kell nekik.';
+
+  @override
+  String get dietWhyBengalProtein =>
+      'A nagy energiájú bengáliaknak sok fehérje kell.';
+
+  @override
+  String get dietWhyBritishCalories => 'Ez a nyugodt fajta könnyen elhízik.';
+
+  @override
+  String get dietWhyLongCoatOmega3 =>
+      'Az omega-3 táplálja a hosszú, dús szőrzetet.';
+
+  @override
+  String get dietWhyLongCoatFiber =>
+      'A rost segít megelőzni a szőrlabdákat a hosszú szőrű macskáknál.';
+
+  @override
+  String get dietWhyHairlessFat =>
+      'A szőrtelen macskáknak több zsír kell, hogy melegen és energikusan maradjanak.';
+
+  @override
+  String get dietWhyUrinaryWater =>
+      'A több víz hígítja a vizeletet és védi a húgyutakat.';
+
+  @override
+  String get dietWhyKidneyPhosphorus =>
+      'A kevés foszfor segít lassítani a vesebetegséget.';
+
+  @override
+  String get dietWhyKidneyProtein =>
+      'A fehérje mérséklése tehermentesíti a vesét.';
+
+  @override
+  String get dietWhyKidneyOmega3 =>
+      'Az omega-3 segít támogatni a károsodott vesét.';
+
+  @override
+  String get dietWhyDiabetesCarbs =>
+      'A kevés szénhidrát segít stabilan tartani a vércukorszintet.';
+
+  @override
+  String get dietWhyDiabetesProtein =>
+      'A fehérje támogatja a vércukor-szabályozást és az izmokat.';
+
+  @override
+  String get dietWhySkinOmega3 =>
+      'Az omega-3 csillapítja a bőr gyulladását és irritációját.';
+
+  @override
+  String get dietWhyHairballFiber =>
+      'A rost segít macskádnak természetes úton kiüríteni a szőrlabdákat.';
+
+  @override
+  String get dietWhyHairballOmega3 =>
+      'Az omega-3 javítja a szőrzet egészségét és csökkenti a hullást.';
+
+  @override
+  String get dietWhyJointOmega3 =>
+      'Az omega-3 csökkenti az ízületi gyulladást és merevséget.';
+
+  @override
+  String get dietWhyDentalMoisture =>
+      'A nedves táplálék kíméletesebb a fájó fogakhoz és ínyhez.';
+
+  @override
+  String get dietWhyWaterGeneral =>
+      'A macskák hajlamosak a kiszáradásra – a nedves táp és a friss víz segít.';
+
+  @override
+  String get assessmentHeartTaurine =>
+      'Taurint tartalmaz, ami elengedhetetlen a szív egészségéhez';
+
+  @override
+  String get assessmentHeartLowSodium =>
+      'Alacsony nátriumtartalmú, ami csökkenti a szív terhelését';
+
+  @override
+  String get assessmentHeartOmega3 =>
+      'Az omega-3 támogatja a szívet és a vérkeringést';
+
+  @override
+  String get assessmentHeartHighSodium =>
+      'Magas nátriumtartalmú, ami megterheli a szívet';
+
+  @override
+  String get onboardingNarrativeTitle => 'Személyre szabva a macskádnak';
+
+  @override
+  String onboardingNarrativeFallback(String name) {
+    return 'Íme $name táplálkozási tervének kezdete – néhány dolog, amire figyelnénk, hogy igazán jól érezze magát.';
+  }
+
+  @override
+  String get dietTitleMoreTaurine => 'Több taurin';
+
+  @override
+  String get dietTitleLessSodium => 'Kevesebb nátrium';
+
+  @override
+  String get dietTitleNovelProtein => 'Új típusú fehérjék';
+
+  @override
+  String get dietTitleDigestible => 'Könnyen emészthető táplálék';
+
+  @override
+  String get dietWhyHeartOmega3 =>
+      'Az omega-3 (EPA és DHA) támogatja a szívizmot és a vérkeringést.';
+
+  @override
+  String get dietWhyHeartTaurine =>
+      'A taurin nélkülözhetetlen a macska egészséges szívéhez.';
+
+  @override
+  String get dietWhyHeartSodium =>
+      'A kevesebb nátrium csökkenti a szív terhelését.';
+
+  @override
+  String get dietWhyAllergyNovelProtein =>
+      'Az új típusú vagy korlátozott fehérjék segítenek elkerülni a gyakori allergiakiváltókat.';
+
+  @override
+  String get dietWhySensitiveDigestible =>
+      'A kíméletes, könnyen emészthető receptek gyengédebbek a gyomorhoz.';
+
+  @override
+  String get onboardingNarrativeOutlookTitle => 'Körülbelül 2 hét múlva';
+
+  @override
+  String onboardingNarrativeOutlookFallback(String name) {
+    return 'A megfelelő táplálékkal pár héten belül észreveheted, hogy $name energikusabb, és egészségesebb, fényesebb a szőre.';
+  }
+
+  @override
+  String onboardingNarrativeFocusTitle(String name) {
+    return 'Mire érdemes figyelni $name esetében';
+  }
+
+  @override
+  String get onboardingAnalyzeEyebrow => 'Személyre szabás';
+
+  @override
+  String onboardingAnalyzeStep1(String name) {
+    return '$name profiljának áttekintése';
+  }
+
+  @override
+  String get onboardingAnalyzeStep2 => 'Egészségi igények ellenőrzése';
+
+  @override
+  String get onboardingAnalyzeStep3 => 'Táplálkozási útmutató összeállítása';
+
+  @override
+  String get onboardingAnalyzeStep4 => 'Ajánlások személyre szabása';
+
+  @override
+  String onboardingResultTitle(String name) {
+    return '$name terve elkészült';
+  }
+
+  @override
+  String productPicksTitle(String name) {
+    return 'Legjobb választások $name számára';
+  }
+
+  @override
+  String get onboardingResultContinue => 'Tovább';
+
+  @override
+  String onboardingBrandTitle(String name) {
+    return 'Mivel eteted $name macskát?';
+  }
+
+  @override
+  String get onboardingBrandSubtitle =>
+      'Megnézzük, valójában mennyire jó a macskádnak.';
+
+  @override
+  String get onboardingBrandHint =>
+      'Keress egy márkát (pl. Whiskas, Royal Canin)';
+
+  @override
+  String get onboardingBrandAnalyzeCta => 'Elemzés';
+
+  @override
+  String get onboardingBrandSkip => 'Nem vagyok biztos benne';
+
+  @override
+  String onboardingBrandAnalyzing(String brand) {
+    return '$brand elemzése…';
+  }
+
+  @override
+  String onboardingBrandUnavailable(String brand) {
+    return 'Most nem tudtuk elemezni a(z) $brand márkát – de íme, amit helyette ajánlanánk.';
+  }
+
+  @override
+  String onboardingBrandUnlockCta(String name) {
+    return '$name legjobb választásainak feloldása';
+  }
+
+  @override
+  String brandTeaserFound(num count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jobb táplálékot',
+      one: '1 jobb táplálékot',
+    );
+    return '$_temp0 találtunk $name számára';
+  }
+
+  @override
+  String get brandTeaserLockedHint =>
+      'Fizess elő, hogy lásd őket – a macskád igényeihez igazítva.';
+
+  @override
+  String onboardingScanTitle(String name) {
+    return 'Mivel eteted $name macskát?';
+  }
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Szkenneld be a csomagolást, és értékeljük a macskád számára.';
+
+  @override
+  String get onboardingScanCta => 'Csomagolás beolvasása';
+
+  @override
+  String get onboardingScanSkip => 'Most kihagyom';
+
+  @override
+  String get onboardingScanVerdictIntro => 'Így pontozott ez a táplálék:';
+
+  @override
+  String get onboardingScanFailed =>
+      'Nem tudtuk leolvasni a címkét. Próbáld újra úgy, hogy a csomagolás eleje jól látszódjon.';
+
+  @override
+  String get onboardingScanRetry => 'Újra beolvasás';
+
+  @override
+  String onboardingScanPersonalCon(String name, String con) {
+    return '$name számára: $con';
   }
 }

@@ -8,7 +8,11 @@ import {
   analyzeProductImage,
   findProductImageUrl,
   verifyMatchWithLLM,
+  generateCatNarrative as buildCatNarrative,
+  analyzeBrand as runAnalyzeBrand,
 } from "./services/anthropic.service";
+import {CatNarrativeInput} from "./prompts/cat-narrative";
+import {BrandVerdictInput} from "./prompts/brand-verdict";
 import {
   cacheProduct,
   fetchCandidatesByName,
@@ -36,7 +40,7 @@ export const fetchProductByImageV2 = onCall(
   {
     cors: config.functions.corsEnabled,
     timeoutSeconds: config.functions.timeoutSeconds,
-    secrets: ["ANTHROPIC_API_KEY"],
+    secrets: ["ANTHROPIC_API_KEY", "ALGOLIA_API_KEY"],
   },
   async (request) => {
     const {image, mimeType, userId} = request.data;
@@ -268,5 +272,75 @@ export const fetchProductByImageV2 = onCall(
         }`
       );
     }
+  }
+);
+
+/**
+ * Onboarding personalized narrative. Takes a freshly created cat profile plus
+ * the structured dietary tips computed on-device and returns a short, warm note
+ * written by Haiku in the requested locale. Returns `{narrative: null}` on
+ * failure so the client falls back to its local template (never throws for a
+ * missing narrative — it's a non-critical enhancement).
+ */
+export const generateCatNarrative = onCall(
+  {
+    cors: config.functions.corsEnabled,
+    timeoutSeconds: 60,
+    secrets: ["ANTHROPIC_API_KEY"],
+  },
+  async (request) => {
+    const data = request.data as Partial<CatNarrativeInput>;
+
+    if (!data?.name || typeof data.name !== "string") {
+      throw new Error("Missing required field: name");
+    }
+
+    const input: CatNarrativeInput = {
+      name: data.name,
+      lifeStage: data.lifeStage,
+      breed: data.breed,
+      gender: data.gender,
+      bodyCondition: data.bodyCondition,
+      activityLevel: data.activityLevel,
+      neuteredStatus: data.neuteredStatus,
+      coatType: data.coatType,
+      healthConditions: Array.isArray(data.healthConditions) ?
+        data.healthConditions :
+        [],
+      tips: Array.isArray(data.tips) ? data.tips : [],
+      locale: data.locale,
+    };
+
+    const result = await buildCatNarrative(input);
+    return {
+      narrative: result?.narrative ?? null,
+      outlook: result?.outlook ?? null,
+    };
+  }
+);
+
+/**
+ * Onboarding brand critique. Returns a short quality verdict for the brand the
+ * owner currently feeds, grounded by the supplied catalog context when present.
+ * Returns `{verdict: null}` on failure so the client degrades gracefully.
+ */
+export const analyzeBrand = onCall(
+  {
+    cors: config.functions.corsEnabled,
+    timeoutSeconds: 60,
+    secrets: ["ANTHROPIC_API_KEY"],
+  },
+  async (request) => {
+    const data = request.data as Partial<BrandVerdictInput>;
+    if (!data?.brand || typeof data.brand !== "string") {
+      throw new Error("Missing required field: brand");
+    }
+    const verdict = await runAnalyzeBrand({
+      brand: data.brand,
+      catName: data.catName,
+      locale: data.locale,
+      catalogContext: data.catalogContext,
+    });
+    return {verdict};
   }
 );

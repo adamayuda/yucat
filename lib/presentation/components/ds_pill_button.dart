@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 
-enum DSPillButtonVariant { primary, secondary }
+enum DSPillButtonVariant { primary, secondary, danger }
 
 class DSPillButton extends StatelessWidget {
   final String label;
@@ -25,9 +25,19 @@ class DSPillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isPrimary = variant == DSPillButtonVariant.primary;
-    final bg = isPrimary ? DSColors.inkPrimary : DSColors.surfaceCard;
-    final fg = isPrimary ? DSColors.inkInverse : DSColors.inkPrimary;
+    final Color bg;
+    final Color fg;
+    switch (variant) {
+      case DSPillButtonVariant.primary:
+        bg = DSColors.inkPrimary;
+        fg = DSColors.inkInverse;
+      case DSPillButtonVariant.secondary:
+        bg = DSColors.surfaceCard;
+        fg = DSColors.inkPrimary;
+      case DSPillButtonVariant.danger:
+        bg = DSColors.accentDanger;
+        fg = DSColors.inkInverse;
+    }
     final disabled = onPressed == null || loading;
 
     return Opacity(

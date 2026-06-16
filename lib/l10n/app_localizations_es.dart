@@ -39,6 +39,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get genderMale => 'Macho';
 
   @override
+  String get photoTapHint => 'Toca aquí';
+
+  @override
   String get photoQuestion => 'Añade una foto de tu gato';
 
   @override
@@ -1067,6 +1070,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeAddCatButton => 'Añadir un gato';
 
   @override
+  String get homeMyCatsTitle => 'Mis gatos';
+
+  @override
   String get homeSavedProductsTitle => 'Productos guardados';
 
   @override
@@ -1470,5 +1476,395 @@ class AppLocalizationsEs extends AppLocalizations {
       one: '1 condición',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get catDetailDietaryTipsSection => 'Consejos de alimentación';
+
+  @override
+  String get dietTipsDisclaimer =>
+      'Orientación general: consulta siempre a tu veterinario para temas médicos.';
+
+  @override
+  String homeCatTipsTitle(String name) {
+    return 'Consejos para $name';
+  }
+
+  @override
+  String get dietTitleMoreProtein => 'Más proteína';
+
+  @override
+  String get dietTitleLessProtein => 'Menos proteína';
+
+  @override
+  String get dietTitleMoreFat => 'Más grasa saludable';
+
+  @override
+  String get dietTitleLessFat => 'Menos grasa';
+
+  @override
+  String get dietTitleLessCarbs => 'Menos carbohidratos';
+
+  @override
+  String get dietTitleMoreFiber => 'Más fibra';
+
+  @override
+  String get dietTitleMoreMoisture => 'Más humedad';
+
+  @override
+  String get dietTitleMoreOmega3 => 'Más omega-3';
+
+  @override
+  String get dietTitleLessPhosphorus => 'Menos fósforo';
+
+  @override
+  String get dietTitleMoreCalories => 'Más calorías';
+
+  @override
+  String get dietTitleLessCalories => 'Menos calorías';
+
+  @override
+  String get dietTitleMoreWater => 'Más agua';
+
+  @override
+  String get dietWhyKittenProtein =>
+      'Los gatitos en crecimiento necesitan más proteína para formar músculo.';
+
+  @override
+  String get dietWhyKittenFat =>
+      'Las grasas saludables impulsan el rápido crecimiento y la energía del gatito.';
+
+  @override
+  String get dietWhySeniorOmega3 =>
+      'Los omega-3 cuidan las articulaciones, los riñones y el pelaje en la vejez.';
+
+  @override
+  String get dietWhySeniorPhosphorus =>
+      'Menos fósforo reduce la carga sobre unos riñones que envejecen.';
+
+  @override
+  String get dietWhyUnderweightCalories =>
+      'Una comida rica en calorías ayuda a tu gato a alcanzar un peso saludable.';
+
+  @override
+  String get dietWhyUnderweightFat =>
+      'Más grasa saludable aporta las calorías necesarias para ganar peso.';
+
+  @override
+  String get dietWhyOverweightCalories =>
+      'Menos calorías favorecen una pérdida de peso gradual y saludable.';
+
+  @override
+  String get dietWhyOverweightFat =>
+      'Reducir la grasa disminuye las calorías para controlar el peso.';
+
+  @override
+  String get dietWhyOverweightFiber =>
+      'La fibra mantiene a tu gato saciado comiendo menos.';
+
+  @override
+  String get dietWhyOverweightProtein =>
+      'La proteína magra conserva el músculo durante la pérdida de peso.';
+
+  @override
+  String get dietWhyLowActivityCalories =>
+      'Un gato más tranquilo necesita menos calorías para no engordar.';
+
+  @override
+  String get dietWhyHighActivityProtein =>
+      'Los gatos activos necesitan más proteína para mantener el músculo.';
+
+  @override
+  String get dietWhyHighActivityCalories =>
+      'Un gato enérgico gasta más y necesita más calorías.';
+
+  @override
+  String get dietWhyNeuteredCalories =>
+      'Los gatos esterilizados gastan menos energía y engordan con facilidad.';
+
+  @override
+  String get dietWhyNeuteredFat =>
+      'Menos grasa ayuda a un gato esterilizado a mantenerse en forma.';
+
+  @override
+  String get dietWhyPregnantProtein =>
+      'La gestación y la lactancia exigen más proteína.';
+
+  @override
+  String get dietWhyPregnantFat =>
+      'Más grasa cubre las altas necesidades de energía de la lactancia.';
+
+  @override
+  String get dietWhyPregnantCalories =>
+      'Más calorías sostienen la gestación y la producción de leche.';
+
+  @override
+  String get dietWhyMaineCoonProtein =>
+      'Las razas grandes y musculosas prosperan con mucha proteína.';
+
+  @override
+  String get dietWhyMaineCoonOmega3 =>
+      'Los omega-3 cuidan las articulaciones de las razas grandes.';
+
+  @override
+  String get dietWhyPersianOmega3 =>
+      'Los omega-3 mantienen sano el largo pelaje del persa.';
+
+  @override
+  String get dietWhyPersianFiber =>
+      'La fibra ayuda a mover las bolas de pelo por el intestino.';
+
+  @override
+  String get dietWhyPersianCarbs =>
+      'Los persas suelen tolerar mejor las dietas bajas en carbohidratos.';
+
+  @override
+  String get dietWhySphynxFat =>
+      'Los gatos sin pelo gastan energía rápido y necesitan más grasa.';
+
+  @override
+  String get dietWhyBengalProtein =>
+      'Los bengalíes, muy enérgicos, necesitan mucha proteína.';
+
+  @override
+  String get dietWhyBritishCalories =>
+      'Esta raza tranquila engorda con facilidad.';
+
+  @override
+  String get dietWhyLongCoatOmega3 =>
+      'Los omega-3 nutren un pelaje largo y abundante.';
+
+  @override
+  String get dietWhyLongCoatFiber =>
+      'La fibra ayuda a prevenir las bolas de pelo en gatos de pelo largo.';
+
+  @override
+  String get dietWhyHairlessFat =>
+      'Los gatos sin pelo necesitan más grasa para mantenerse calientes y con energía.';
+
+  @override
+  String get dietWhyUrinaryWater =>
+      'Más agua diluye la orina y protege las vías urinarias.';
+
+  @override
+  String get dietWhyKidneyPhosphorus =>
+      'Poco fósforo ayuda a frenar la enfermedad renal.';
+
+  @override
+  String get dietWhyKidneyProtein =>
+      'Moderar la proteína alivia la carga sobre los riñones.';
+
+  @override
+  String get dietWhyKidneyOmega3 =>
+      'Los omega-3 ayudan a cuidar unos riñones afectados.';
+
+  @override
+  String get dietWhyDiabetesCarbs =>
+      'Pocos carbohidratos ayudan a mantener estable el azúcar en sangre.';
+
+  @override
+  String get dietWhyDiabetesProtein =>
+      'La proteína favorece el control de la glucosa y el músculo.';
+
+  @override
+  String get dietWhySkinOmega3 =>
+      'Los omega-3 calman la inflamación y la irritación de la piel.';
+
+  @override
+  String get dietWhyHairballFiber =>
+      'La fibra ayuda a tu gato a expulsar las bolas de pelo de forma natural.';
+
+  @override
+  String get dietWhyHairballOmega3 =>
+      'Los omega-3 mejoran la salud del pelaje y reducen la caída.';
+
+  @override
+  String get dietWhyJointOmega3 =>
+      'Los omega-3 reducen la inflamación y la rigidez articular.';
+
+  @override
+  String get dietWhyDentalMoisture =>
+      'La comida húmeda es más suave con dientes y encías doloridos.';
+
+  @override
+  String get dietWhyWaterGeneral =>
+      'Los gatos tienden a deshidratarse: la comida húmeda y el agua fresca ayudan.';
+
+  @override
+  String get assessmentHeartTaurine =>
+      'Contiene taurina, esencial para la salud del corazón';
+
+  @override
+  String get assessmentHeartLowSodium =>
+      'Bajo en sodio, lo que reduce el esfuerzo del corazón';
+
+  @override
+  String get assessmentHeartOmega3 =>
+      'Los omega-3 cuidan el corazón y la circulación';
+
+  @override
+  String get assessmentHeartHighSodium =>
+      'Alto en sodio, lo que sobrecarga el corazón';
+
+  @override
+  String get onboardingNarrativeTitle => 'Personalizado para tu gato';
+
+  @override
+  String onboardingNarrativeFallback(String name) {
+    return 'Este es el comienzo del plan nutricional de $name: algunas cosas en las que nos centraríamos para ayudarle a estar en plena forma.';
+  }
+
+  @override
+  String get dietTitleMoreTaurine => 'Más taurina';
+
+  @override
+  String get dietTitleLessSodium => 'Menos sodio';
+
+  @override
+  String get dietTitleNovelProtein => 'Proteínas novedosas';
+
+  @override
+  String get dietTitleDigestible => 'Comida fácil de digerir';
+
+  @override
+  String get dietWhyHeartOmega3 =>
+      'Los omega-3 (EPA y DHA) cuidan el músculo cardíaco y la circulación.';
+
+  @override
+  String get dietWhyHeartTaurine =>
+      'La taurina es esencial para un corazón felino sano.';
+
+  @override
+  String get dietWhyHeartSodium =>
+      'Menos sodio reduce el esfuerzo del corazón.';
+
+  @override
+  String get dietWhyAllergyNovelProtein =>
+      'Las proteínas novedosas o limitadas ayudan a evitar los desencadenantes habituales de alergia.';
+
+  @override
+  String get dietWhySensitiveDigestible =>
+      'Las recetas suaves y muy digeribles son más amables con el estómago.';
+
+  @override
+  String get onboardingNarrativeOutlookTitle => 'En unas 2 semanas';
+
+  @override
+  String onboardingNarrativeOutlookFallback(String name) {
+    return 'Con la comida adecuada, en un par de semanas podrías empezar a notar que $name tiene más energía y un pelaje más sano y brillante.';
+  }
+
+  @override
+  String onboardingNarrativeFocusTitle(String name) {
+    return 'En qué centrarse para $name';
+  }
+
+  @override
+  String get onboardingAnalyzeEyebrow => 'Personalizando';
+
+  @override
+  String onboardingAnalyzeStep1(String name) {
+    return 'Revisando el perfil de $name';
+  }
+
+  @override
+  String get onboardingAnalyzeStep2 => 'Comprobando sus necesidades de salud';
+
+  @override
+  String get onboardingAnalyzeStep3 => 'Buscando la guía nutricional adecuada';
+
+  @override
+  String get onboardingAnalyzeStep4 => 'Personalizando las recomendaciones';
+
+  @override
+  String onboardingResultTitle(String name) {
+    return 'El plan de $name está listo';
+  }
+
+  @override
+  String productPicksTitle(String name) {
+    return 'Mejores opciones para $name';
+  }
+
+  @override
+  String get onboardingResultContinue => 'Continuar';
+
+  @override
+  String onboardingBrandTitle(String name) {
+    return '¿Qué le das de comer a $name?';
+  }
+
+  @override
+  String get onboardingBrandSubtitle =>
+      'Comprobaremos qué tal es realmente para tu gato.';
+
+  @override
+  String get onboardingBrandHint =>
+      'Busca una marca (p. ej. Whiskas, Royal Canin)';
+
+  @override
+  String get onboardingBrandAnalyzeCta => 'Analizar esta comida';
+
+  @override
+  String get onboardingBrandSkip => 'No estoy seguro';
+
+  @override
+  String onboardingBrandAnalyzing(String brand) {
+    return 'Analizando $brand…';
+  }
+
+  @override
+  String onboardingBrandUnavailable(String brand) {
+    return 'No pudimos analizar $brand ahora mismo, pero esto es lo que recomendaríamos.';
+  }
+
+  @override
+  String onboardingBrandUnlockCta(String name) {
+    return 'Desbloquear las mejores opciones de $name';
+  }
+
+  @override
+  String brandTeaserFound(num count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count comidas mejores',
+      one: '1 comida mejor',
+    );
+    return 'Encontramos $_temp0 para $name';
+  }
+
+  @override
+  String get brandTeaserLockedHint =>
+      'Suscríbete para verlas, adaptadas a las necesidades de tu gato.';
+
+  @override
+  String onboardingScanTitle(String name) {
+    return '¿Qué le das de comer a $name?';
+  }
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Escanea el paquete y lo evaluaremos para tu gato.';
+
+  @override
+  String get onboardingScanCta => 'Escanear el paquete';
+
+  @override
+  String get onboardingScanSkip => 'Omitir por ahora';
+
+  @override
+  String get onboardingScanVerdictIntro => 'Así puntúa esa comida:';
+
+  @override
+  String get onboardingScanFailed =>
+      'No pudimos leer esa etiqueta. Inténtalo de nuevo con la parte frontal del paquete a la vista.';
+
+  @override
+  String get onboardingScanRetry => 'Escanear de nuevo';
+
+  @override
+  String onboardingScanPersonalCon(String name, String con) {
+    return 'Para $name: $con';
   }
 }

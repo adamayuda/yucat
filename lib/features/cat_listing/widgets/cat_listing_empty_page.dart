@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
 
@@ -12,7 +13,8 @@ class CatListingEmptyWidget extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return SafeArea(
       child: DSStateView.empty(
-        illustrationAsset: 'assets/images/Illustrations/empty-state.gif',
+        mascotAsset: 'assets/images/cat-laught.svg',
+        tint: DSColors.tintSand,
         headline: l10n.catListingEmptyHeadline,
         body: l10n.catListingEmptyBody,
         ctaLabel: l10n.catListingEmptyCta,

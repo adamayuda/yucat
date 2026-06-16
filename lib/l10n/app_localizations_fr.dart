@@ -39,6 +39,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get genderMale => 'Mâle';
 
   @override
+  String get photoTapHint => 'Touche ici';
+
+  @override
   String get photoQuestion => 'Ajoute une photo de ton chat';
 
   @override
@@ -1068,6 +1071,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeAddCatButton => 'Ajouter un chat';
 
   @override
+  String get homeMyCatsTitle => 'Mes chats';
+
+  @override
   String get homeSavedProductsTitle => 'Produits enregistrés';
 
   @override
@@ -1470,5 +1476,394 @@ class AppLocalizationsFr extends AppLocalizations {
       one: '1 affection',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get catDetailDietaryTipsSection => 'Conseils alimentaires';
+
+  @override
+  String get dietTipsDisclaimer =>
+      'Conseils généraux — consulte toujours ton vétérinaire pour un avis médical.';
+
+  @override
+  String homeCatTipsTitle(String name) {
+    return 'Conseils pour $name';
+  }
+
+  @override
+  String get dietTitleMoreProtein => 'Plus de protéines';
+
+  @override
+  String get dietTitleLessProtein => 'Moins de protéines';
+
+  @override
+  String get dietTitleMoreFat => 'Plus de bonnes graisses';
+
+  @override
+  String get dietTitleLessFat => 'Moins de graisses';
+
+  @override
+  String get dietTitleLessCarbs => 'Moins de glucides';
+
+  @override
+  String get dietTitleMoreFiber => 'Plus de fibres';
+
+  @override
+  String get dietTitleMoreMoisture => 'Plus d\'humidité';
+
+  @override
+  String get dietTitleMoreOmega3 => 'Plus d\'oméga-3';
+
+  @override
+  String get dietTitleLessPhosphorus => 'Moins de phosphore';
+
+  @override
+  String get dietTitleMoreCalories => 'Plus de calories';
+
+  @override
+  String get dietTitleLessCalories => 'Moins de calories';
+
+  @override
+  String get dietTitleMoreWater => 'Plus d\'eau';
+
+  @override
+  String get dietWhyKittenProtein =>
+      'Les chatons en croissance ont besoin de plus de protéines pour développer leurs muscles.';
+
+  @override
+  String get dietWhyKittenFat =>
+      'Les bonnes graisses soutiennent la croissance rapide et l\'énergie du chaton.';
+
+  @override
+  String get dietWhySeniorOmega3 =>
+      'Les oméga-3 soutiennent les articulations, les reins et le pelage vieillissants.';
+
+  @override
+  String get dietWhySeniorPhosphorus =>
+      'Moins de phosphore allège la charge sur des reins vieillissants.';
+
+  @override
+  String get dietWhyUnderweightCalories =>
+      'Une alimentation riche en calories aide ton chat à atteindre un poids sain.';
+
+  @override
+  String get dietWhyUnderweightFat =>
+      'Plus de bonnes graisses apporte les calories nécessaires pour prendre du poids.';
+
+  @override
+  String get dietWhyOverweightCalories =>
+      'Moins de calories favorisent une perte de poids progressive et saine.';
+
+  @override
+  String get dietWhyOverweightFat =>
+      'Réduire les graisses diminue l\'apport calorique pour gérer le poids.';
+
+  @override
+  String get dietWhyOverweightFiber =>
+      'Les fibres rassasient ton chat tout en mangeant moins.';
+
+  @override
+  String get dietWhyOverweightProtein =>
+      'Les protéines maigres préservent les muscles pendant la perte de poids.';
+
+  @override
+  String get dietWhyLowActivityCalories =>
+      'Un chat plus calme a besoin de moins de calories pour ne pas grossir.';
+
+  @override
+  String get dietWhyHighActivityProtein =>
+      'Les chats actifs ont besoin de plus de protéines pour maintenir leurs muscles.';
+
+  @override
+  String get dietWhyHighActivityCalories =>
+      'Un chat énergique dépense plus et a besoin de plus de calories.';
+
+  @override
+  String get dietWhyNeuteredCalories =>
+      'Les chats stérilisés dépensent moins d\'énergie et grossissent facilement.';
+
+  @override
+  String get dietWhyNeuteredFat =>
+      'Moins de graisses aide un chat stérilisé à rester mince.';
+
+  @override
+  String get dietWhyPregnantProtein =>
+      'La gestation et l\'allaitement exigent plus de protéines.';
+
+  @override
+  String get dietWhyPregnantFat =>
+      'Plus de graisses couvre les besoins énergétiques élevés de l\'allaitement.';
+
+  @override
+  String get dietWhyPregnantCalories =>
+      'Plus de calories soutiennent la gestation et la production de lait.';
+
+  @override
+  String get dietWhyMaineCoonProtein =>
+      'Les races grandes et musclées s\'épanouissent avec beaucoup de protéines.';
+
+  @override
+  String get dietWhyMaineCoonOmega3 =>
+      'Les oméga-3 soutiennent les articulations des grandes races.';
+
+  @override
+  String get dietWhyPersianOmega3 =>
+      'Les oméga-3 gardent le long pelage du persan en bonne santé.';
+
+  @override
+  String get dietWhyPersianFiber =>
+      'Les fibres aident à faire transiter les boules de poils.';
+
+  @override
+  String get dietWhyPersianCarbs =>
+      'Les persans tolèrent souvent mieux les régimes pauvres en glucides.';
+
+  @override
+  String get dietWhySphynxFat =>
+      'Les chats sans poils brûlent vite de l\'énergie et ont besoin de plus de graisses.';
+
+  @override
+  String get dietWhyBengalProtein =>
+      'Les bengals, très énergiques, ont besoin de beaucoup de protéines.';
+
+  @override
+  String get dietWhyBritishCalories =>
+      'Cette race tranquille grossit facilement.';
+
+  @override
+  String get dietWhyLongCoatOmega3 =>
+      'Les oméga-3 nourrissent un pelage long et épais.';
+
+  @override
+  String get dietWhyLongCoatFiber =>
+      'Les fibres aident à prévenir les boules de poils chez les chats à poil long.';
+
+  @override
+  String get dietWhyHairlessFat =>
+      'Les chats sans poils ont besoin de plus de graisses pour rester au chaud et en forme.';
+
+  @override
+  String get dietWhyUrinaryWater =>
+      'Plus d\'eau dilue l\'urine et protège les voies urinaires.';
+
+  @override
+  String get dietWhyKidneyPhosphorus =>
+      'Peu de phosphore aide à ralentir la maladie rénale.';
+
+  @override
+  String get dietWhyKidneyProtein => 'Modérer les protéines soulage les reins.';
+
+  @override
+  String get dietWhyKidneyOmega3 =>
+      'Les oméga-3 aident à soutenir des reins fragilisés.';
+
+  @override
+  String get dietWhyDiabetesCarbs =>
+      'Peu de glucides aide à stabiliser la glycémie.';
+
+  @override
+  String get dietWhyDiabetesProtein =>
+      'Les protéines favorisent le contrôle du glucose et les muscles.';
+
+  @override
+  String get dietWhySkinOmega3 =>
+      'Les oméga-3 apaisent l\'inflammation et les irritations de la peau.';
+
+  @override
+  String get dietWhyHairballFiber =>
+      'Les fibres aident ton chat à évacuer naturellement les boules de poils.';
+
+  @override
+  String get dietWhyHairballOmega3 =>
+      'Les oméga-3 améliorent la santé du pelage et réduisent la perte de poils.';
+
+  @override
+  String get dietWhyJointOmega3 =>
+      'Les oméga-3 réduisent l\'inflammation et la raideur articulaires.';
+
+  @override
+  String get dietWhyDentalMoisture =>
+      'La nourriture humide est plus douce pour des dents et des gencives douloureuses.';
+
+  @override
+  String get dietWhyWaterGeneral =>
+      'Les chats se déshydratent facilement : la nourriture humide et l\'eau fraîche aident.';
+
+  @override
+  String get assessmentHeartTaurine =>
+      'Contient de la taurine, essentielle pour le cœur';
+
+  @override
+  String get assessmentHeartLowSodium =>
+      'Faible en sodium, ce qui allège le travail du cœur';
+
+  @override
+  String get assessmentHeartOmega3 =>
+      'Les oméga-3 soutiennent le cœur et la circulation';
+
+  @override
+  String get assessmentHeartHighSodium =>
+      'Riche en sodium, ce qui sollicite le cœur';
+
+  @override
+  String get onboardingNarrativeTitle => 'Personnalisé pour ton chat';
+
+  @override
+  String onboardingNarrativeFallback(String name) {
+    return 'Voici le début du plan nutritionnel de $name — quelques points sur lesquels nous nous concentrerions pour l\'aider à s\'épanouir.';
+  }
+
+  @override
+  String get dietTitleMoreTaurine => 'Plus de taurine';
+
+  @override
+  String get dietTitleLessSodium => 'Moins de sodium';
+
+  @override
+  String get dietTitleNovelProtein => 'Protéines nouvelles';
+
+  @override
+  String get dietTitleDigestible => 'Nourriture facile à digérer';
+
+  @override
+  String get dietWhyHeartOmega3 =>
+      'Les oméga-3 (EPA et DHA) soutiennent le muscle cardiaque et la circulation.';
+
+  @override
+  String get dietWhyHeartTaurine =>
+      'La taurine est essentielle à la santé du cœur du chat.';
+
+  @override
+  String get dietWhyHeartSodium => 'Moins de sodium allège le travail du cœur.';
+
+  @override
+  String get dietWhyAllergyNovelProtein =>
+      'Les protéines nouvelles ou limitées aident à éviter les déclencheurs d\'allergie courants.';
+
+  @override
+  String get dietWhySensitiveDigestible =>
+      'Les recettes douces et très digestes sont plus tendres pour l\'estomac.';
+
+  @override
+  String get onboardingNarrativeOutlookTitle => 'D\'ici environ 2 semaines';
+
+  @override
+  String onboardingNarrativeOutlookFallback(String name) {
+    return 'Avec la bonne alimentation, en deux semaines environ, tu pourrais commencer à remarquer que $name a plus d\'énergie et un pelage plus sain et brillant.';
+  }
+
+  @override
+  String onboardingNarrativeFocusTitle(String name) {
+    return 'Sur quoi se concentrer pour $name';
+  }
+
+  @override
+  String get onboardingAnalyzeEyebrow => 'Personnalisation';
+
+  @override
+  String onboardingAnalyzeStep1(String name) {
+    return 'Analyse du profil de $name';
+  }
+
+  @override
+  String get onboardingAnalyzeStep2 => 'Vérification de ses besoins de santé';
+
+  @override
+  String get onboardingAnalyzeStep3 => 'Recherche des conseils nutritionnels';
+
+  @override
+  String get onboardingAnalyzeStep4 => 'Personnalisation des recommandations';
+
+  @override
+  String onboardingResultTitle(String name) {
+    return 'Le plan de $name est prêt';
+  }
+
+  @override
+  String productPicksTitle(String name) {
+    return 'Meilleurs choix pour $name';
+  }
+
+  @override
+  String get onboardingResultContinue => 'Continuer';
+
+  @override
+  String onboardingBrandTitle(String name) {
+    return 'Que donnes-tu à manger à $name ?';
+  }
+
+  @override
+  String get onboardingBrandSubtitle =>
+      'On va voir ce que ça vaut vraiment pour ton chat.';
+
+  @override
+  String get onboardingBrandHint =>
+      'Cherche une marque (ex. Whiskas, Royal Canin)';
+
+  @override
+  String get onboardingBrandAnalyzeCta => 'Analyser cette nourriture';
+
+  @override
+  String get onboardingBrandSkip => 'Je ne sais pas';
+
+  @override
+  String onboardingBrandAnalyzing(String brand) {
+    return 'Analyse de $brand…';
+  }
+
+  @override
+  String onboardingBrandUnavailable(String brand) {
+    return 'Nous n\'avons pas pu analyser $brand pour l\'instant — mais voici ce que nous recommanderions.';
+  }
+
+  @override
+  String onboardingBrandUnlockCta(String name) {
+    return 'Débloquer les meilleurs choix de $name';
+  }
+
+  @override
+  String brandTeaserFound(num count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count meilleures nourritures',
+      one: '1 meilleure nourriture',
+    );
+    return 'Nous avons trouvé $_temp0 pour $name';
+  }
+
+  @override
+  String get brandTeaserLockedHint =>
+      'Abonne-toi pour les voir, adaptées aux besoins de ton chat.';
+
+  @override
+  String onboardingScanTitle(String name) {
+    return 'Que donnes-tu à manger à $name ?';
+  }
+
+  @override
+  String get onboardingScanSubtitle =>
+      'Scanne l\'emballage et nous l\'évaluerons pour ton chat.';
+
+  @override
+  String get onboardingScanCta => 'Scanner l\'emballage';
+
+  @override
+  String get onboardingScanSkip => 'Ignorer pour l\'instant';
+
+  @override
+  String get onboardingScanVerdictIntro =>
+      'Voici la note de cette nourriture :';
+
+  @override
+  String get onboardingScanFailed =>
+      'Nous n\'avons pas pu lire l\'étiquette. Réessaie avec l\'avant de l\'emballage bien visible.';
+
+  @override
+  String get onboardingScanRetry => 'Scanner à nouveau';
+
+  @override
+  String onboardingScanPersonalCon(String name, String con) {
+    return 'Pour $name : $con';
   }
 }

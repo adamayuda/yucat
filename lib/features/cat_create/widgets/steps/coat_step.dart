@@ -15,10 +15,25 @@ class CoatStep extends StatelessWidget {
   });
 
   // `value` is stable; only `label` is localized.
-  List<({String label, String value})> _options(AppLocalizations l10n) => [
-        (label: l10n.coatShortHair, value: 'short_hair'),
-        (label: l10n.coatLongHair, value: 'long_hair'),
-        (label: l10n.coatHairless, value: 'hairless'),
+  List<({String label, String value, String asset})> _options(
+    AppLocalizations l10n,
+  ) =>
+      [
+        (
+          label: l10n.coatShortHair,
+          value: 'short_hair',
+          asset: 'assets/images/Short hair.svg',
+        ),
+        (
+          label: l10n.coatLongHair,
+          value: 'long_hair',
+          asset: 'assets/images/Long hair.svg',
+        ),
+        (
+          label: l10n.coatHairless,
+          value: 'hairless',
+          asset: 'assets/images/Hairless.svg',
+        ),
       ];
 
   @override
@@ -38,6 +53,7 @@ class CoatStep extends StatelessWidget {
                 for (final option in _options(l10n)) ...[
                   DSOptionRow(
                     label: option.label,
+                    leadingAsset: option.asset,
                     selected: coatType == option.value,
                     onTap: () => onCoatTypeChanged(option.value),
                   ),

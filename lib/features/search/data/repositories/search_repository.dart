@@ -14,8 +14,10 @@ class SearchRepositoryImpl implements SearchRepository {
        _searchProductToDomainMapper = searchProductToDomainMapper;
 
   @override
-  Future<List<ProductEntity>> searchByQuery(String query) async {
-    final hits = await _algoliaDataSource.searchByQuery(query);
+  Future<List<ProductEntity>> searchByQuery(String query,
+      {int? hitsPerPage}) async {
+    final hits =
+        await _algoliaDataSource.searchByQuery(query, hitsPerPage: hitsPerPage);
     return hits.map((hit) => _searchProductToDomainMapper(hit)).toList();
   }
 

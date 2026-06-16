@@ -21,7 +21,7 @@ export const config = {
   algolia: {
     applicationId: process.env.ALGOLIA_APP_ID || "GI8VPYUYCP",
     apiKey: process.env.ALGOLIA_API_KEY ||
-      "3c0ee15455a00d73d8325e1985556008",
+      "5b6e53aabd413a6325207b6cecb26a2d",
     indexName: "products2",
     enabled: true,
     useLLMVerification: true,

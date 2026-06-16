@@ -46,33 +46,179 @@ class ProfilePhotoStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        MascotSpeechBubble(
-          question: AppLocalizations.of(context).photoQuestion,
-        ),
+        MascotSpeechBubble(question: l10n.photoQuestion),
         Expanded(
           child: Center(
             child: GestureDetector(
               onTap: () => _pick(context),
+              behavior: HitTestBehavior.opaque,
               child: profilePhoto != null
-                  ? ClipOval(
-                      child: Image.file(
-                        profilePhoto!,
-                        width: 187,
-                        height: 187,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : SvgPicture.asset(
-                      'assets/images/upload-photo.svg',
-                      width: 187,
-                    ),
+                  ? _SelectedPhoto(photo: profilePhoto!)
+                  : _PhotoTapTarget(label: l10n.photoTapHint),
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Chosen photo, clipped into the same circle as the empty tap target.
+class _SelectedPhoto extends StatelessWidget {
+  final File photo;
+
+  const _SelectedPhoto({required this.photo});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: _PhotoTapTarget.circleDiameter,
+      height: _PhotoTapTarget.circleDiameter,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: DSColors.surfaceCard, width: 6),
+        boxShadow: DSShadows.e1,
+      ),
+      child: ClipOval(child: Image.file(photo, fit: BoxFit.cover)),
+    );
+  }
+}
+
+/// Empty-state tap target: a large lavender circle with a camera badge and
+/// "Tap here" label, with the winking cat mascot gripping the top rim.
+///
+/// The mascot is split into three pieces (head, hands, tail) so the circle can
+/// sit *between* them: the head and tail tuck behind the rim while the paws
+/// drape over the front — an effect a single flat SVG can't achieve. Piece
+/// offsets are in the original 244×211 artwork frame.
+class _PhotoTapTarget extends StatelessWidget {
+  final String label;
+
+  const _PhotoTapTarget({required this.label});
+
+  static const double circleDiameter = 240;
+
+  static const Color _violet = Color(0xFF7C6CE0);
+
+  @override
+  Widget build(BuildContext context) {
+    // The SizedBox is exactly the circle, so centering it centers the *circle*
+    // in the available space. The mascot pieces overflow above it (negative
+    // tops, clip none) and don't shift the vertical centering. Offsets are in
+    // circle-local coordinates (origin = circle top-left).
+    return SizedBox(
+      width: circleDiameter,
+      height: circleDiameter,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Behind the circle: tail then head.
+          const Positioned(
+            left: 170,
+            top: -10.467,
+            child: _Piece(
+              asset: 'assets/images/tail.svg',
+              width: 77,
+              height: 53,
+            ),
+          ),
+          const Positioned(
+            left: -2,
+            top: -150,
+            child: _Piece(
+              asset: 'assets/images/head.svg',
+              width: 213,
+              height: 211,
+            ),
+          ),
+          // The tap circle: camera badge centered, label below it.
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: DSColors.tintLavender,
+                border: Border.all(color: DSColors.surfaceCard, width: 6),
+              ),
+              child: Stack(
+                children: [
+                  const Center(child: _CameraBadge(violet: _violet)),
+                  // Centered vertically in the gap between the camera badge
+                  // and the bottom of the main circle.
+                  Align(
+                    alignment: const Alignment(0, 0.7),
+                    child: Text(
+                      label,
+                      style: DSTextStyles.bodyMd.copyWith(
+                        color: _violet,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // In front of the circle: both paws resting on the rim, tilted a
+          // touch so they drape naturally over the curve.
+          Positioned(
+            left: 56.0,
+            top: -15,
+            child: Transform.rotate(
+              angle: 0.1,
+              child: const _Piece(
+                asset: 'assets/images/hands.svg',
+                width: 124,
+                height: 47,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A single mascot piece (head / hands / tail) rendered at its artwork size.
+class _Piece extends StatelessWidget {
+  final String asset;
+  final double width;
+  final double height;
+
+  const _Piece({
+    required this.asset,
+    required this.width,
+    required this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: SvgPicture.asset(asset, width: width, height: height),
+    );
+  }
+}
+
+/// White disc with a camera glyph.
+class _CameraBadge extends StatelessWidget {
+  final Color violet;
+
+  const _CameraBadge({required this.violet});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 96,
+      height: 96,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: DSColors.surfaceCard,
+      ),
+      alignment: Alignment.center,
+      child: Icon(Icons.photo_camera_rounded, color: violet, size: 40),
     );
   }
 }

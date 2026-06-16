@@ -34,6 +34,7 @@
   },
   "genderFemale": "Female",
   "genderMale": "Male",
+  "photoTapHint": "Tap here",
   "photoQuestion": "Add a photo of your cat",
   "@photoQuestion": {
     "description": "Mascot question on the profile photo step"
@@ -445,6 +446,7 @@
   "homeAddCatTitle": "Add your cat",
   "homeAddCatBody": "Create a profile to get personalized food scores.",
   "homeAddCatButton": "Add a cat",
+  "homeMyCatsTitle": "My cats",
   "homeSavedProductsTitle": "Saved products",
   "homeSeeAll": "See all",
   "homeNoSavedProductsTitle": "No saved products yet",
@@ -615,6 +617,210 @@
     "placeholders": {
       "count": {
         "type": "num"
+      }
+    }
+  },
+  "catDetailDietaryTipsSection": "Dietary tips",
+  "dietTipsDisclaimer": "General guidance — always consult your vet for medical advice.",
+  "homeCatTipsTitle": "Tips for {name}",
+  "@homeCatTipsTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dietTitleMoreProtein": "More protein",
+  "dietTitleLessProtein": "Less protein",
+  "dietTitleMoreFat": "More healthy fat",
+  "dietTitleLessFat": "Less fat",
+  "dietTitleLessCarbs": "Fewer carbs",
+  "dietTitleMoreFiber": "More fiber",
+  "dietTitleMoreMoisture": "More moisture",
+  "dietTitleMoreOmega3": "More omega-3",
+  "dietTitleLessPhosphorus": "Less phosphorus",
+  "dietTitleMoreCalories": "More calories",
+  "dietTitleLessCalories": "Fewer calories",
+  "dietTitleMoreWater": "More water",
+  "dietWhyKittenProtein": "Growing kittens need extra protein to build muscle.",
+  "dietWhyKittenFat": "Healthy fats fuel a kitten's rapid growth and energy.",
+  "dietWhySeniorOmega3": "Omega-3s support aging joints, kidneys, and coat.",
+  "dietWhySeniorPhosphorus": "Lower phosphorus eases the load on aging kidneys.",
+  "dietWhyUnderweightCalories": "Calorie-dense food helps your cat reach a healthy weight.",
+  "dietWhyUnderweightFat": "Extra healthy fat adds the calories needed to gain weight.",
+  "dietWhyOverweightCalories": "Fewer calories support gradual, healthy weight loss.",
+  "dietWhyOverweightFat": "Trimming fat lowers calorie intake for weight control.",
+  "dietWhyOverweightFiber": "Fiber keeps your cat full while eating less.",
+  "dietWhyOverweightProtein": "Lean protein preserves muscle during weight loss.",
+  "dietWhyLowActivityCalories": "A calmer cat needs fewer calories to avoid weight gain.",
+  "dietWhyHighActivityProtein": "Active cats need more protein to maintain muscle.",
+  "dietWhyHighActivityCalories": "An energetic cat burns more and needs more calories.",
+  "dietWhyNeuteredCalories": "Neutered cats burn less energy and gain weight easily.",
+  "dietWhyNeuteredFat": "Lower fat helps a neutered cat stay trim.",
+  "dietWhyPregnantProtein": "Pregnancy and nursing demand extra protein.",
+  "dietWhyPregnantFat": "Extra fat meets the high energy needs of nursing.",
+  "dietWhyPregnantCalories": "More calories sustain pregnancy and milk production.",
+  "dietWhyMaineCoonProtein": "Large, muscular breeds thrive on high protein.",
+  "dietWhyMaineCoonOmega3": "Omega-3s support the joints of big-boned breeds.",
+  "dietWhyPersianOmega3": "Omega-3s keep a Persian's long coat healthy.",
+  "dietWhyPersianFiber": "Fiber helps move hairballs through the gut.",
+  "dietWhyPersianCarbs": "Persians tend to do better on lower-carb diets.",
+  "dietWhySphynxFat": "Hairless cats burn energy fast and need more fat.",
+  "dietWhyBengalProtein": "High-energy Bengals need plenty of protein.",
+  "dietWhyBritishCalories": "This laid-back breed gains weight easily.",
+  "dietWhyLongCoatOmega3": "Omega-3s nourish a long, thick coat.",
+  "dietWhyLongCoatFiber": "Fiber helps prevent hairballs in long-haired cats.",
+  "dietWhyHairlessFat": "Hairless cats need more fat to stay warm and energized.",
+  "dietWhyUrinaryWater": "More water dilutes urine and protects the urinary tract.",
+  "dietWhyKidneyPhosphorus": "Low phosphorus helps slow kidney disease.",
+  "dietWhyKidneyProtein": "Moderating protein eases strain on the kidneys.",
+  "dietWhyKidneyOmega3": "Omega-3s help support compromised kidneys.",
+  "dietWhyDiabetesCarbs": "Low carbs help keep blood sugar stable.",
+  "dietWhyDiabetesProtein": "Protein supports glucose control and muscle.",
+  "dietWhySkinOmega3": "Omega-3s calm skin inflammation and irritation.",
+  "dietWhyHairballFiber": "Fiber helps your cat pass hairballs naturally.",
+  "dietWhyHairballOmega3": "Omega-3s improve coat health to reduce shedding.",
+  "dietWhyJointOmega3": "Omega-3s reduce joint inflammation and stiffness.",
+  "dietWhyDentalMoisture": "Moist food is gentler on sore teeth and gums.",
+  "dietWhyWaterGeneral": "Cats are prone to dehydration — wet food and fresh water help.",
+  "assessmentHeartTaurine": "Contains taurine, essential for heart health",
+  "assessmentHeartLowSodium": "Low sodium, which eases the heart's workload",
+  "assessmentHeartOmega3": "Omega-3s support heart and circulation",
+  "assessmentHeartHighSodium": "High sodium, which strains the heart",
+  "onboardingNarrativeTitle": "Personalized for your cat",
+  "onboardingNarrativeFallback": "Here's the start of {name}'s nutrition plan — a few things we'd focus on to help them thrive.",
+  "@onboardingNarrativeFallback": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dietTitleMoreTaurine": "More taurine",
+  "dietTitleLessSodium": "Less sodium",
+  "dietTitleNovelProtein": "Novel proteins",
+  "dietTitleDigestible": "Easy-to-digest food",
+  "dietWhyHeartOmega3": "Omega-3s (EPA & DHA) support heart muscle and circulation.",
+  "dietWhyHeartTaurine": "Taurine is essential for a healthy feline heart.",
+  "dietWhyHeartSodium": "Lower sodium eases the workload on the heart.",
+  "dietWhyAllergyNovelProtein": "Novel or limited proteins help avoid common allergy triggers.",
+  "dietWhySensitiveDigestible": "Gentle, highly digestible recipes are easier on the stomach.",
+  "onboardingNarrativeOutlookTitle": "In about 2 weeks",
+  "onboardingNarrativeOutlookFallback": "With the right food, you may start to notice {name} has more energy and a healthier, shinier coat within a couple of weeks.",
+  "@onboardingNarrativeOutlookFallback": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingNarrativeFocusTitle": "What to focus on for {name}",
+  "@onboardingNarrativeFocusTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingAnalyzeEyebrow": "Personalizing",
+  "onboardingAnalyzeStep1": "Reviewing {name}'s profile",
+  "@onboardingAnalyzeStep1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingAnalyzeStep2": "Checking health needs",
+  "onboardingAnalyzeStep3": "Matching nutrition guidance",
+  "onboardingAnalyzeStep4": "Personalizing recommendations",
+  "onboardingResultTitle": "{name}'s plan is ready",
+  "@onboardingResultTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productPicksTitle": "Top picks for {name}",
+  "@productPicksTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingResultContinue": "Continue",
+  "onboardingBrandTitle": "What are you feeding {name}?",
+  "@onboardingBrandTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingBrandSubtitle": "We'll check how it really stacks up for your cat.",
+  "onboardingBrandHint": "Search a brand (e.g. Whiskas, Royal Canin)",
+  "onboardingBrandAnalyzeCta": "Check this food",
+  "onboardingBrandSkip": "I'm not sure",
+  "onboardingBrandAnalyzing": "Analyzing {brand}…",
+  "@onboardingBrandAnalyzing": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingBrandUnavailable": "We couldn't analyze {brand} right now — but here's what we'd recommend instead.",
+  "@onboardingBrandUnavailable": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingBrandUnlockCta": "Unlock {name}'s top picks",
+  "@onboardingBrandUnlockCta": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "brandTeaserFound": "We found {count, plural, =1{1 better food} other{{count} better foods}} for {name}",
+  "@brandTeaserFound": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "brandTeaserLockedHint": "Subscribe to see them — matched to your cat's needs.",
+  "onboardingScanTitle": "What are you feeding {name}?",
+  "@onboardingScanTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingScanSubtitle": "Scan the package and we'll grade it for your cat.",
+  "onboardingScanCta": "Scan the package",
+  "onboardingScanSkip": "Skip for now",
+  "onboardingScanVerdictIntro": "Here's how that food scores:",
+  "onboardingScanFailed": "We couldn't read that label. Try again with the front of the package in frame.",
+  "onboardingScanRetry": "Scan again",
+  "onboardingScanPersonalCon": "For {name}: {con}",
+  "@onboardingScanPersonalCon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "con": {
+        "type": "String"
       }
     }
   }

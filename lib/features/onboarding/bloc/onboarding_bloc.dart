@@ -240,13 +240,14 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
         seededPhotoPath: current.seededPhotoPath,
         onCreated: (wizardContext, summary) {
           // A cat was actually created — mark onboarding complete and slide in
-          // the success screen over the wizard.
+          // the analyze → result screens over the wizard. The result screen's
+          // CTA finalizes (paywall) via the same onStart callback.
           _prefs.setBool(_onboardingCompletedKey, true);
           wizardContext.router.push(
-            SuccessRoute(
+            AnalyzeRoute(
               summary: summary,
-              onStart: (successContext) => add(
-                OnBoardingFinalizedEvent(context: successContext),
+              onStart: (resultContext) => add(
+                OnBoardingFinalizedEvent(context: resultContext),
               ),
             ),
           );

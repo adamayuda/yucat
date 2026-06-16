@@ -9,6 +9,21 @@ import {
   generateAnalysisUserPrompt,
 } from "../prompts/analyze-product";
 import {generateFindImagePrompt} from "../prompts/find-image";
+import {
+  CatNarrativeInput,
+  generateCatNarrativeSystemPrompt,
+  generateCatNarrativeUserPrompt,
+} from "../prompts/cat-narrative";
+import {
+  RegradeInput,
+  generateRegradeSystemPrompt,
+  generateRegradeUserPrompt,
+} from "../prompts/rescore-product";
+import {
+  BrandVerdictInput,
+  generateBrandVerdictSystemPrompt,
+  generateBrandVerdictUserPrompt,
+} from "../prompts/brand-verdict";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let anthropicClient: any = null;
@@ -359,6 +374,254 @@ export async function analyzeProductImage(
     product,
     rawResponse: JSON.stringify(submit.input),
   };
+}
+
+const NARRATIVE_TOOLS: Anthropic.Tool[] = [
+  {
+    name: "submit_narrative",
+    description:
+      "Submit the finished personalized note + forward-looking outlook for the cat owner.",
+    input_schema: {
+      type: "object",
+      required: ["narrative", "outlook"],
+      properties: {
+        narrative: {
+          type: "string",
+          description:
+            "The warm, ~50 word personalized note that acknowledges the cat's conditions, in the requested language.",
+        },
+        outlook: {
+          type: "string",
+          description:
+            "One forward-looking sentence (~25 words) about what the owner may notice in roughly two weeks, in the requested language.",
+        },
+      },
+    },
+  },
+];
+
+export interface CatNarrativeResult {
+  narrative: string;
+  outlook: string | null;
+}
+
+/**
+ * Onboarding narrative — a short, warm, personalized note plus a forward-looking
+ * "~2 weeks" outlook for a freshly created cat profile. One Haiku call, no web
+ * search; the structured dietary tips, condition care-notes, and combos ground
+ * the prose so the model speaks to THIS cat without inventing claims. Returns
+ * null on failure so the client can fall back to a local template.
+ */
+export async function generateCatNarrative(
+  input: CatNarrativeInput
+): Promise<CatNarrativeResult | null> {
+  if (!input?.name) return null;
+
+  const systemText = generateCatNarrativeSystemPrompt();
+  const userText = generateCatNarrativeUserPrompt(input);
+
+  try {
+    const response = await withRetry("generateCatNarrative", () =>
+      getClient().messages.create({
+        model: config.anthropic.model,
+        max_tokens: 400,
+        temperature: 0.7,
+        system: [
+          {
+            type: "text",
+            text: systemText,
+            cache_control: {type: "ephemeral"},
+          },
+        ],
+        messages: [{role: "user", content: [{type: "text", text: userText}]}],
+        tools: NARRATIVE_TOOLS,
+        tool_choice: {type: "tool", name: "submit_narrative"},
+      })
+    );
+
+    const submit = findToolUse(response.content, "submit_narrative");
+    const narrative = submit?.input?.narrative;
+    const outlook = submit?.input?.outlook;
+    if (typeof narrative === "string" && narrative.trim() !== "") {
+      logger.info("Cat narrative generated", {
+        name: input.name,
+        locale: input.locale ?? "en",
+        length: narrative.trim().length,
+        hasOutlook: typeof outlook === "string" && outlook.trim() !== "",
+        structuredData: true,
+      });
+      return {
+        narrative: narrative.trim(),
+        outlook: typeof outlook === "string" && outlook.trim() !== "" ?
+          outlook.trim() :
+          null,
+      };
+    }
+
+    logger.warn("generateCatNarrative returned no narrative", {
+      stopReason: response.stop_reason,
+      structuredData: true,
+    });
+    return null;
+  } catch (error) {
+    logger.warn("generateCatNarrative failed", {
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return null;
+  }
+}
+
+const SCORE_TOOLS: Anthropic.Tool[] = [
+  {
+    name: "submit_score",
+    description: "Submit the product's 0-100 nutritional quality score.",
+    input_schema: {
+      type: "object",
+      required: ["score"],
+      properties: {
+        score: {
+          type: "number",
+          minimum: 0,
+          maximum: 100,
+          description: "Nutritional quality score, 0-100.",
+        },
+      },
+    },
+  },
+];
+
+/**
+ * Re-grades a product's nutritional quality (0-100) from its stored facts using
+ * the shared QUALITY_RUBRIC. One Haiku call, no web search. Returns the new
+ * score, or null on failure (caller keeps the existing score).
+ */
+export async function regradeProductQuality(
+  input: RegradeInput
+): Promise<number | null> {
+  try {
+    const response = await withRetry("regradeProductQuality", () =>
+      getClient().messages.create({
+        model: config.anthropic.model,
+        max_tokens: 128,
+        temperature: 0,
+        // Cache the (constant) rubric system prompt so the ~700-token rubric
+        // isn't re-billed on every product during the batch re-score.
+        system: [
+          {
+            type: "text",
+            text: generateRegradeSystemPrompt(),
+            cache_control: {type: "ephemeral"},
+          },
+        ],
+        messages: [
+          {role: "user", content: [
+            {type: "text", text: generateRegradeUserPrompt(input)},
+          ]},
+        ],
+        tools: SCORE_TOOLS,
+        tool_choice: {type: "tool", name: "submit_score"},
+      })
+    );
+
+    const submit = findToolUse(response.content, "submit_score");
+    const score = submit?.input?.score;
+    if (typeof score === "number" && isFinite(score)) {
+      return Math.max(0, Math.min(100, Math.round(score)));
+    }
+    return null;
+  } catch (error) {
+    logger.warn("regradeProductQuality failed", {
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return null;
+  }
+}
+
+const BRAND_VERDICT_TOOLS: Anthropic.Tool[] = [
+  {
+    name: "submit_brand_verdict",
+    description: "Submit the brand quality verdict.",
+    input_schema: {
+      type: "object",
+      required: ["score", "headline", "reasons"],
+      properties: {
+        score: {type: "number", minimum: 0, maximum: 100},
+        headline: {type: "string"},
+        reasons: {
+          type: "array",
+          items: {type: "string"},
+          minItems: 2,
+          maxItems: 4,
+        },
+        positives: {type: "array", items: {type: "string"}, maxItems: 2},
+      },
+    },
+  },
+];
+
+export interface BrandVerdictResult {
+  score: number;
+  headline: string;
+  reasons: string[];
+  positives: string[];
+}
+
+/**
+ * Onboarding brand critique. One Haiku call, no web search; grounded by the
+ * supplied catalog context (avg score + common cons) when present. Returns the
+ * verdict, or null on failure so the client degrades gracefully.
+ */
+export async function analyzeBrand(
+  input: BrandVerdictInput
+): Promise<BrandVerdictResult | null> {
+  if (!input?.brand) return null;
+  try {
+    const response = await withRetry("analyzeBrand", () =>
+      getClient().messages.create({
+        model: config.anthropic.model,
+        max_tokens: 600,
+        temperature: 0.4,
+        system: [
+          {
+            type: "text",
+            text: generateBrandVerdictSystemPrompt(),
+            cache_control: {type: "ephemeral"},
+          },
+        ],
+        messages: [
+          {role: "user", content: [
+            {type: "text", text: generateBrandVerdictUserPrompt(input)},
+          ]},
+        ],
+        tools: BRAND_VERDICT_TOOLS,
+        tool_choice: {type: "tool", name: "submit_brand_verdict"},
+      })
+    );
+
+    const submit = findToolUse(response.content, "submit_brand_verdict");
+    const out = submit?.input;
+    if (out && typeof out.headline === "string" && Array.isArray(out.reasons)) {
+      return {
+        score: typeof out.score === "number" ?
+          Math.max(0, Math.min(100, Math.round(out.score))) :
+          0,
+        headline: out.headline.trim(),
+        reasons: out.reasons.filter((r: unknown) => typeof r === "string"),
+        positives: Array.isArray(out.positives) ?
+          out.positives.filter((r: unknown) => typeof r === "string") :
+          [],
+      };
+    }
+    return null;
+  } catch (error) {
+    logger.warn("analyzeBrand failed", {
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return null;
+  }
 }
 
 const IMAGE_TOOLS: Anthropic.Tool[] = [

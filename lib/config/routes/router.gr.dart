@@ -11,6 +11,54 @@
 part of 'router.dart';
 
 /// generated route for
+/// [AnalyzePage]
+class AnalyzeRoute extends PageRouteInfo<AnalyzeRouteArgs> {
+  AnalyzeRoute({
+    Key? key,
+    required CatSummary summary,
+    required void Function(BuildContext) onStart,
+    List<PageRouteInfo>? children,
+  }) : super(
+         AnalyzeRoute.name,
+         args: AnalyzeRouteArgs(key: key, summary: summary, onStart: onStart),
+         initialChildren: children,
+       );
+
+  static const String name = 'AnalyzeRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<AnalyzeRouteArgs>();
+      return AnalyzePage(
+        key: args.key,
+        summary: args.summary,
+        onStart: args.onStart,
+      );
+    },
+  );
+}
+
+class AnalyzeRouteArgs {
+  const AnalyzeRouteArgs({
+    this.key,
+    required this.summary,
+    required this.onStart,
+  });
+
+  final Key? key;
+
+  final CatSummary summary;
+
+  final void Function(BuildContext) onStart;
+
+  @override
+  String toString() {
+    return 'AnalyzeRouteArgs{key: $key, summary: $summary, onStart: $onStart}';
+  }
+}
+
+/// generated route for
 /// [CatDetailPage]
 class CatDetailRoute extends PageRouteInfo<CatDetailRouteArgs> {
   CatDetailRoute({
@@ -126,6 +174,58 @@ class CreateCatRouteArgs {
   @override
   String toString() {
     return 'CreateCatRouteArgs{key: $key, cat: $cat, seededName: $seededName, seededPhotoPath: $seededPhotoPath, onCreated: $onCreated}';
+  }
+}
+
+/// generated route for
+/// [CurrentFoodPage]
+class CurrentFoodRoute extends PageRouteInfo<CurrentFoodRouteArgs> {
+  CurrentFoodRoute({
+    Key? key,
+    required CatSummary summary,
+    required void Function(BuildContext) onStart,
+    List<PageRouteInfo>? children,
+  }) : super(
+         CurrentFoodRoute.name,
+         args: CurrentFoodRouteArgs(
+           key: key,
+           summary: summary,
+           onStart: onStart,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'CurrentFoodRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<CurrentFoodRouteArgs>();
+      return CurrentFoodPage(
+        key: args.key,
+        summary: args.summary,
+        onStart: args.onStart,
+      );
+    },
+  );
+}
+
+class CurrentFoodRouteArgs {
+  const CurrentFoodRouteArgs({
+    this.key,
+    required this.summary,
+    required this.onStart,
+  });
+
+  final Key? key;
+
+  final CatSummary summary;
+
+  final void Function(BuildContext) onStart;
+
+  @override
+  String toString() {
+    return 'CurrentFoodRouteArgs{key: $key, summary: $summary, onStart: $onStart}';
   }
 }
 
@@ -324,6 +424,64 @@ class ProfileRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [ResultPage]
+class ResultRoute extends PageRouteInfo<ResultRouteArgs> {
+  ResultRoute({
+    Key? key,
+    required CatSummary summary,
+    required CatNarrative? narrative,
+    required void Function(BuildContext) onStart,
+    List<PageRouteInfo>? children,
+  }) : super(
+         ResultRoute.name,
+         args: ResultRouteArgs(
+           key: key,
+           summary: summary,
+           narrative: narrative,
+           onStart: onStart,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'ResultRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<ResultRouteArgs>();
+      return ResultPage(
+        key: args.key,
+        summary: args.summary,
+        narrative: args.narrative,
+        onStart: args.onStart,
+      );
+    },
+  );
+}
+
+class ResultRouteArgs {
+  const ResultRouteArgs({
+    this.key,
+    required this.summary,
+    required this.narrative,
+    required this.onStart,
+  });
+
+  final Key? key;
+
+  final CatSummary summary;
+
+  final CatNarrative? narrative;
+
+  final void Function(BuildContext) onStart;
+
+  @override
+  String toString() {
+    return 'ResultRouteArgs{key: $key, summary: $summary, narrative: $narrative, onStart: $onStart}';
+  }
+}
+
+/// generated route for
 /// [SavedProductsPage]
 class SavedProductsRoute extends PageRouteInfo<void> {
   const SavedProductsRoute({List<PageRouteInfo>? children})
@@ -357,18 +515,41 @@ class ScanHistoryRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [ScannerPage]
-class ScannerRoute extends PageRouteInfo<void> {
-  const ScannerRoute({List<PageRouteInfo>? children})
-    : super(ScannerRoute.name, initialChildren: children);
+class ScannerRoute extends PageRouteInfo<ScannerRouteArgs> {
+  ScannerRoute({
+    Key? key,
+    void Function(String, String)? onCaptured,
+    List<PageRouteInfo>? children,
+  }) : super(
+         ScannerRoute.name,
+         args: ScannerRouteArgs(key: key, onCaptured: onCaptured),
+         initialChildren: children,
+       );
 
   static const String name = 'ScannerRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const ScannerPage();
+      final args = data.argsAs<ScannerRouteArgs>(
+        orElse: () => const ScannerRouteArgs(),
+      );
+      return ScannerPage(key: args.key, onCaptured: args.onCaptured);
     },
   );
+}
+
+class ScannerRouteArgs {
+  const ScannerRouteArgs({this.key, this.onCaptured});
+
+  final Key? key;
+
+  final void Function(String, String)? onCaptured;
+
+  @override
+  String toString() {
+    return 'ScannerRouteArgs{key: $key, onCaptured: $onCaptured}';
+  }
 }
 
 /// generated route for
@@ -401,52 +582,4 @@ class SplashRoute extends PageRouteInfo<void> {
       return const SplashPage();
     },
   );
-}
-
-/// generated route for
-/// [SuccessPage]
-class SuccessRoute extends PageRouteInfo<SuccessRouteArgs> {
-  SuccessRoute({
-    Key? key,
-    required CatSummary? summary,
-    required void Function(BuildContext) onStart,
-    List<PageRouteInfo>? children,
-  }) : super(
-         SuccessRoute.name,
-         args: SuccessRouteArgs(key: key, summary: summary, onStart: onStart),
-         initialChildren: children,
-       );
-
-  static const String name = 'SuccessRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      final args = data.argsAs<SuccessRouteArgs>();
-      return SuccessPage(
-        key: args.key,
-        summary: args.summary,
-        onStart: args.onStart,
-      );
-    },
-  );
-}
-
-class SuccessRouteArgs {
-  const SuccessRouteArgs({
-    this.key,
-    required this.summary,
-    required this.onStart,
-  });
-
-  final Key? key;
-
-  final CatSummary? summary;
-
-  final void Function(BuildContext) onStart;
-
-  @override
-  String toString() {
-    return 'SuccessRouteArgs{key: $key, summary: $summary, onStart: $onStart}';
-  }
 }

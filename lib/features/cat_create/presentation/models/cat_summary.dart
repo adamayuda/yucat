@@ -1,3 +1,4 @@
+import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_create_model.dart';
 
 /// Presentation-ready recap of a freshly created cat, surfaced on the
@@ -23,8 +24,14 @@ class CatSummary {
   /// Friendly health-condition labels (excludes "None"). Empty when healthy.
   final List<String> healthLabels;
 
+  /// The canonical cat profile, used to drive the personalized narrative and
+  /// dietary tips on the success screen (carries the raw values the rule engine
+  /// needs, unlike the display labels above).
+  final CatEntity entity;
+
   const CatSummary({
     required this.name,
+    required this.entity,
     this.ageMonths,
     this.lifeStage,
     this.gender,
@@ -66,6 +73,22 @@ class CatSummary {
 
     return CatSummary(
       name: cat.name,
+      entity: CatEntity(
+        id: cat.id,
+        name: cat.name,
+        age: cat.age,
+        weight: cat.weight,
+        neutered: cat.neutered,
+        profileImageUrl: cat.profileImageUrl,
+        ageGroup: cat.ageGroup ?? ageGroupFromMonths(cat.age),
+        neuteredStatus: cat.neuteredStatus,
+        breed: cat.breed,
+        weightCategory: cat.weightCategory,
+        activityLevel: cat.activityLevel,
+        coatType: cat.coatType,
+        gender: cat.gender,
+        healthConditions: cat.healthConditions,
+      ),
       ageMonths: age,
       lifeStage: lifeStage,
       gender: cat.gender != null ? cap(cat.gender!) : null,

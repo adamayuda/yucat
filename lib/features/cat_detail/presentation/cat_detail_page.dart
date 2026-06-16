@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
+import 'package:yucat/features/cat/presentation/utils/cat_diet_recommendations.dart';
+import 'package:yucat/features/cat/presentation/widgets/dietary_recommendations_card.dart';
+import 'package:yucat/features/cat/presentation/widgets/recommended_products_section.dart';
 import 'package:yucat/features/cat_detail/presentation/bloc/cat_detail_bloc.dart';
 import 'package:yucat/features/cat_detail/presentation/widgets/cat_detail_skeleton.dart';
 import 'package:yucat/features/cat_detail/presentation/widgets/cat_hero_section.dart';
@@ -11,6 +15,7 @@ import 'package:yucat/features/cat_listing/models/cat_model.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
+import 'package:yucat/presentation/components/ds_confirm_dialog.dart';
 
 @RoutePage()
 class CatDetailPage extends StatefulWidget {
@@ -101,6 +106,10 @@ class _CatDetailPageState extends State<CatDetailPage> {
                           conditions: cat.healthConditions!,
                         ),
                       ],
+                      const SizedBox(height: DSDimens.sizeS),
+                      _DietaryTipsCard(cat: cat),
+                      const SizedBox(height: DSDimens.sizeL),
+                      _RecommendedProductsCard(cat: cat),
                       const SizedBox(height: DSDimens.size3xl),
                       _DeleteLink(
                         onTap: () async {
@@ -129,28 +138,13 @@ class _CatDetailPageState extends State<CatDetailPage> {
     BuildContext context,
     String catName,
   ) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) {
-        final l10n = AppLocalizations.of(context);
-        return AlertDialog(
-          title: Text(l10n.catDetailDeleteTitle(catName)),
-          content: Text(l10n.catDetailDeleteBody),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(l10n.catDetailDeleteCancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: TextButton.styleFrom(
-                foregroundColor: DSColors.accentDanger,
-              ),
-              child: Text(l10n.catDetailDeleteConfirm),
-            ),
-          ],
-        );
-      },
+    final l10n = AppLocalizations.of(context);
+    return showDSConfirmDialog(
+      context,
+      title: l10n.catDetailDeleteTitle(catName),
+      body: l10n.catDetailDeleteBody,
+      confirmLabel: l10n.catDetailDeleteConfirm,
+      cancelLabel: l10n.catDetailDeleteCancel,
     );
   }
 }
@@ -234,46 +228,50 @@ class _DetailsCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final notSet = l10n.catDetailNotSet;
     final tiles = <_TileSpec>[
-      _TileSpec(Icons.pets_rounded, l10n.catDetailBreedLabel, cat.breed ?? notSet),
       _TileSpec(
-        Icons.cake_rounded,
-        l10n.catDetailAgeLabel,
-        cat.age != null ? _formatAge(cat.age!, l10n) : notSet,
+        l10n.catDetailBreedLabel,
+        cat.breed ?? notSet,
+        iconAsset: 'catwalk.svg',
       ),
       _TileSpec(
-        cat.gender?.toLowerCase() == 'male'
+        l10n.catDetailAgeLabel,
+        cat.age != null ? _formatAge(cat.age!, l10n) : notSet,
+        iconAsset: 'Cake.svg',
+      ),
+      _TileSpec(
+        l10n.catDetailGenderLabel,
+        cat.gender != null ? _formatGender(cat.gender!, l10n) : notSet,
+        icon: cat.gender?.toLowerCase() == 'male'
             ? Icons.male_rounded
             : cat.gender?.toLowerCase() == 'female'
                 ? Icons.female_rounded
                 : Icons.transgender_rounded,
-        l10n.catDetailGenderLabel,
-        cat.gender != null ? _formatGender(cat.gender!, l10n) : notSet,
       ),
       _TileSpec(
-        Icons.brush_rounded,
         l10n.catDetailCoatLabel,
         cat.coatType != null ? _formatCoatType(cat.coatType!, l10n) : notSet,
+        iconAsset: 'Coat.svg',
       ),
       _TileSpec(
-        Icons.directions_run_rounded,
         l10n.catDetailActivityLabel,
         cat.activityLevel != null
             ? _formatActivityLevel(cat.activityLevel!, l10n)
             : notSet,
+        iconAsset: 'Activity.svg',
       ),
       _TileSpec(
-        Icons.monitor_weight_rounded,
         l10n.catDetailBodyLabel,
         cat.weightCategory != null
             ? _formatBodyCondition(cat.weightCategory!, l10n)
             : notSet,
+        iconAsset: 'Body condition.svg',
       ),
       _TileSpec(
-        Icons.medical_services_rounded,
         l10n.catDetailStatusLabel,
         cat.neuteredStatus != null
             ? _formatNeuteredStatus(cat.neuteredStatus!, l10n)
             : (cat.neutered ? l10n.catDetailStatusNeutered : l10n.neuteredIntact),
+        iconAsset: 'Neuter status.svg',
       ),
     ];
 
@@ -296,6 +294,7 @@ class _DetailsCard extends StatelessWidget {
                     width: tileWidth,
                     child: CatStatTile(
                       icon: t.icon,
+                      iconAsset: t.iconAsset,
                       label: t.label,
                       value: t.value,
                     ),
@@ -494,10 +493,63 @@ class _DeleteLink extends StatelessWidget {
   }
 }
 
+/// Personalized dietary tips derived from the cat's profile. Maps the
+/// presentation [CatModel] to a [CatEntity] (field-identical) so it can reuse
+/// the shared `recommendDiet` rule engine.
+class _DietaryTipsCard extends StatelessWidget {
+  final CatModel cat;
+
+  const _DietaryTipsCard({required this.cat});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final recommendations = recommendDiet(_entityFromModel(cat), l10n);
+    if (recommendations.isEmpty) return const SizedBox.shrink();
+    return DietaryRecommendationsCard(
+      title: l10n.catDetailDietaryTipsSection,
+      recommendations: recommendations,
+    );
+  }
+}
+
+/// Recommended catalog products ranked for this cat's profile.
+class _RecommendedProductsCard extends StatelessWidget {
+  final CatModel cat;
+
+  const _RecommendedProductsCard({required this.cat});
+
+  @override
+  Widget build(BuildContext context) {
+    return RecommendedProductsSection(cat: _entityFromModel(cat));
+  }
+}
+
+/// Maps the presentation [CatModel] to a [CatEntity] (field-identical) for the
+/// shared recommendation engines.
+CatEntity _entityFromModel(CatModel m) => CatEntity(
+      id: m.id,
+      name: m.name,
+      age: m.age,
+      weight: m.weight,
+      neutered: m.neutered,
+      profileImageUrl: m.profileImageUrl,
+      ageGroup: m.ageGroup,
+      neuteredStatus: m.neuteredStatus,
+      breed: m.breed,
+      weightCategory: m.weightCategory,
+      activityLevel: m.activityLevel,
+      coatType: m.coatType,
+      gender: m.gender,
+      healthConditions: m.healthConditions,
+    );
+
 class _TileSpec {
-  final IconData icon;
+  /// Colorful SVG asset under `assets/images/`, or null to fall back to [icon].
+  final String? iconAsset;
+  final IconData? icon;
   final String label;
   final String value;
 
-  const _TileSpec(this.icon, this.label, this.value);
+  const _TileSpec(this.label, this.value, {this.iconAsset, this.icon});
 }

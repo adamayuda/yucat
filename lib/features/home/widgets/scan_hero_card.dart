@@ -104,7 +104,8 @@ class _ScanHeroCardState extends State<ScanHeroCard>
                           Text(
                             l10n.homeScanProductSubtitle,
                             style: DSTextStyles.bodyMd.copyWith(
-                              color: DSColors.inkSecondary,
+                              color: DSColors.inkPrimary.withValues(alpha: 0.72),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],

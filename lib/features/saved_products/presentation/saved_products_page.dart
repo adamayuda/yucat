@@ -215,7 +215,8 @@ class _EmptyView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return DSStateView.empty(
-      illustrationAsset: 'assets/images/Illustrations/empty-state.gif',
+      mascotAsset: 'assets/images/cat-rating.svg',
+      tint: DSColors.tintMint,
       headline: l10n.savedProductsEmptyHeadline,
       body: l10n.savedProductsEmptyBody,
     );

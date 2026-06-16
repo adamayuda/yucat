@@ -5,7 +5,13 @@ import 'package:yucat/l10n/app_localizations.dart';
 // ---------------------------------------------------------------------------
 // Thresholds
 // All numeric cutoffs live here so the rule set is editable in one place.
-// AAFCO-anchored values are noted in comments; everything else is heuristic.
+//
+// IMPORTANT: macro thresholds (protein/fat/carbs/fiber) are compared on a
+// DRY-MATTER basis — the product's as-fed percentages are normalized by
+// moisture first (see `_Nm`), so a wet food (~80% water) and a dry food are
+// judged on the same scale. Calorie thresholds stay on an AS-FED basis: energy
+// density as actually eaten is what matters for weight management (wet food is
+// genuinely lower-calorie per gram eaten).
 // ---------------------------------------------------------------------------
 
 // Age — AAFCO growth life-stage minimums (kitten); senior values are heuristic.
@@ -16,7 +22,7 @@ const _seniorProteinLow = 30.0;
 const _seniorProteinHigh = 35.0;
 const _seniorFatMax = 20.0;
 
-// Weight category — heuristic.
+// Weight category — heuristic. Calorie cutoffs are as-fed kcal/100g.
 const _underweightCaloriesHigh = 380.0;
 const _underweightFatHigh = 18.0;
 const _overweightCaloriesHigh = 360.0;
@@ -41,8 +47,7 @@ const _pregnantProteinHigh = 35.0;
 const _pregnantFatHigh = 20.0;
 const _pregnantCaloriesHigh = 400.0;
 
-// Breed — heuristic. Bengal thresholds softened from prior 40/32 → 38/30 to
-// reduce the chance one breed rule dominates the overall delta.
+// Breed — heuristic.
 const _maineCoonProteinHigh = 35.0;
 const _persianFiberLow = 4.0;
 const _persianFiberHigh = 6.0;
@@ -72,7 +77,7 @@ const _wNeutered = 6;
 const _wBreed = 5;
 
 // ---------------------------------------------------------------------------
-// Keyword sets — text scans against the LLM's pros/cons summary.
+// Keyword sets — text scans against the LLM's pros/cons summary + name/brand.
 // Hyphens are normalized to spaces before matching, so use space form here
 // (`'omega 3'`, not `'omega-3'`).
 // ---------------------------------------------------------------------------
@@ -98,14 +103,30 @@ const _kUrinarySupport = [
 ];
 const _kHighMinerals = ['high minerals', 'mineral rich', 'added minerals'];
 const _kPhosphorus = 'phosphorus';
-const _kLowPhosphorus = 'low phosphorus';
+const _kReducedPhosphorus = [
+  'low phosphorus',
+  'reduced phosphorus',
+  'controlled phosphorus',
+  'restricted phosphorus',
+];
 const _kRenalSupport = ['renal support', 'kidney support', 'renal care'];
 const _kLimitedIngredient = [
   'limited ingredient',
   'single protein',
   'single source protein',
 ];
-const _kCommonAllergens = ['chicken', 'fish', 'beef'];
+// Common feline allergens. Includes name-level proteins (salmon/tuna/lamb) since
+// the scanned text now includes the product name.
+const _kCommonAllergens = [
+  'chicken',
+  'fish',
+  'beef',
+  'salmon',
+  'tuna',
+  'lamb',
+  'dairy',
+  'egg',
+];
 const _kNovelProteins = ['duck', 'venison', 'kangaroo', 'rabbit'];
 const _kArtificialColor = [
   'artificial color',
@@ -117,11 +138,17 @@ const _kLargeKibble = ['large kibble', 'large sized kibble'];
 const _kDigestible = ['digestible', 'highly digestible'];
 const _kWeightManagement = ['weight management', 'light', 'indoor'];
 
+// Heart condition.
+const _kTaurine = ['taurine'];
+const _kLowSodium = ['low sodium', 'reduced sodium', 'low salt'];
+const _kHighSodium = ['high sodium', 'added salt', 'high salt'];
+const _kHeartOmega = ['omega 3', 'epa', 'dha', 'fish oil', 'salmon oil'];
+
 // ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------
 
-enum CatAssessmentDimension { health, weight, age, activity, neutered, breed }
+enum CatAssessmentDimension { health, weight, age, activity, neutered, breed, coat }
 
 class CatProductFinding {
   final String text;
@@ -152,6 +179,42 @@ class CatProductAssessment {
   int get score => (70 + delta).clamp(0, 100);
 }
 
+/// Nutrient view used by the rule dimensions. Macros are on a DRY-MATTER basis
+/// (normalized by moisture); calories stay as-fed (energy density as eaten);
+/// moisture is the raw as-fed percentage.
+class _Nm {
+  final double protein;
+  final double fat;
+  final double carbs;
+  final double fiber;
+  final double calories;
+  final double moisture;
+
+  const _Nm({
+    required this.protein,
+    required this.fat,
+    required this.carbs,
+    required this.fiber,
+    required this.calories,
+    required this.moisture,
+  });
+
+  factory _Nm.from(ProductDisplayModel p) {
+    // Dry-matter factor: divide out the water. Clamp moisture so the factor
+    // stays sane for malformed/extreme values.
+    final moisture = p.moisture.clamp(0.0, 95.0);
+    final f = 100.0 / (100.0 - moisture);
+    return _Nm(
+      protein: p.protein * f,
+      fat: p.fat * f,
+      carbs: p.carbs * f,
+      fiber: p.fiber * f,
+      calories: p.calories, // as-fed energy density
+      moisture: p.moisture,
+    );
+  }
+}
+
 class _DimensionResult {
   final List<CatProductFinding> pros;
   final List<CatProductFinding> cons;
@@ -173,13 +236,14 @@ CatProductAssessment evaluateCatProduct(
   AppLocalizations l10n,
 ) {
   final text = _normalizeText(product);
+  final n = _Nm.from(product);
 
-  final age = _evaluateAge(cat, product, text, l10n);
-  final weight = _evaluateWeight(cat, product, l10n);
-  final activity = _evaluateActivity(cat, product, l10n);
-  final neutered = _evaluateNeutered(cat, product, text, l10n);
-  final breed = _evaluateBreed(cat, product, text, l10n);
-  final health = _evaluateHealth(cat, product, text, l10n);
+  final age = _evaluateAge(cat, n, text, l10n);
+  final weight = _evaluateWeight(cat, n, l10n);
+  final activity = _evaluateActivity(cat, n, l10n);
+  final neutered = _evaluateNeutered(cat, n, text, l10n);
+  final breed = _evaluateBreed(cat, n, text, l10n);
+  final health = _evaluateHealth(cat, n, text, l10n);
 
   // Weight category overrides neutered status when they pull in opposite
   // directions. An underweight neutered cat needs calories — drop the
@@ -233,7 +297,7 @@ _DimensionResult _resolveWeightVsNeutered(
 
 _DimensionResult _evaluateAge(
   CatEntity cat,
-  ProductDisplayModel product,
+  _Nm n,
   String text,
   AppLocalizations l10n,
 ) {
@@ -243,12 +307,12 @@ _DimensionResult _evaluateAge(
 
   switch (_norm(cat.ageGroup)) {
     case 'kitten':
-      if (product.protein > _kittenProteinHigh) {
+      if (n.protein > _kittenProteinHigh) {
         pros.add(_p(l10n.assessmentKittenHighProtein,
             CatAssessmentDimension.age));
         delta += 8;
       }
-      if (product.fat > _kittenFatHigh) {
+      if (n.fat > _kittenFatHigh) {
         pros.add(_p(l10n.assessmentKittenHighFat,
             CatAssessmentDimension.age));
         delta += 6;
@@ -258,7 +322,7 @@ _DimensionResult _evaluateAge(
             CatAssessmentDimension.age));
         delta -= 10;
       }
-      if (product.protein < _kittenProteinMin) {
+      if (n.protein < _kittenProteinMin) {
         cons.add(_p(l10n.assessmentKittenLowProtein,
             CatAssessmentDimension.age));
         delta -= 10;
@@ -268,13 +332,13 @@ _DimensionResult _evaluateAge(
       // Neutral baseline — no strong age rules.
       break;
     case 'senior':
-      if (product.protein >= _seniorProteinLow &&
-          product.protein <= _seniorProteinHigh) {
+      if (n.protein >= _seniorProteinLow &&
+          n.protein <= _seniorProteinHigh) {
         pros.add(_p(l10n.assessmentSeniorModerateProtein,
             CatAssessmentDimension.age));
         delta += 6;
       }
-      if (product.fat > _seniorFatMax) {
+      if (n.fat > _seniorFatMax) {
         cons.add(_p(l10n.assessmentSeniorHighFat,
             CatAssessmentDimension.age));
         delta -= 8;
@@ -298,7 +362,7 @@ _DimensionResult _evaluateAge(
 
 _DimensionResult _evaluateWeight(
   CatEntity cat,
-  ProductDisplayModel product,
+  _Nm n,
   AppLocalizations l10n,
 ) {
   final pros = <CatProductFinding>[];
@@ -307,13 +371,13 @@ _DimensionResult _evaluateWeight(
 
   switch (_norm(cat.weightCategory)) {
     case 'underweight':
-      if (product.calories > _underweightCaloriesHigh) {
+      if (n.calories > _underweightCaloriesHigh) {
         pros.add(_p(
             l10n.assessmentUnderweightHighCalories,
             CatAssessmentDimension.weight));
         delta += 8;
       }
-      if (product.fat > _underweightFatHigh) {
+      if (n.fat > _underweightFatHigh) {
         pros.add(_p(l10n.assessmentUnderweightHighFat,
             CatAssessmentDimension.weight));
         delta += 6;
@@ -322,20 +386,20 @@ _DimensionResult _evaluateWeight(
     case 'normal':
       break;
     case 'overweight':
-      if (product.calories > _overweightCaloriesHigh) {
+      if (n.calories > _overweightCaloriesHigh) {
         cons.add(_p(
             l10n.assessmentOverweightHighCalories,
             CatAssessmentDimension.weight));
         delta -= 10;
       }
-      if (product.calories >= _overweightCaloriesLowMin &&
-          product.calories < _overweightCaloriesLowMax) {
+      if (n.calories >= _overweightCaloriesLowMin &&
+          n.calories < _overweightCaloriesLowMax) {
         pros.add(_p(
             l10n.assessmentOverweightLowCalories,
             CatAssessmentDimension.weight));
         delta += 8;
       }
-      if (product.fiber > _overweightFiberHigh) {
+      if (n.fiber > _overweightFiberHigh) {
         pros.add(_p(
             l10n.assessmentOverweightHighFiber,
             CatAssessmentDimension.weight));
@@ -343,18 +407,18 @@ _DimensionResult _evaluateWeight(
       }
       break;
     case 'obese':
-      if (product.fat > _obeseFatMax) {
+      if (n.fat > _obeseFatMax) {
         cons.add(_p(l10n.assessmentObeseHighFat,
             CatAssessmentDimension.weight));
         delta -= 10;
       }
-      if (product.calories > _obeseCaloriesMax) {
+      if (n.calories > _obeseCaloriesMax) {
         cons.add(_p(l10n.assessmentObeseHighCalories,
             CatAssessmentDimension.weight));
         delta -= 10;
       }
-      if (product.protein > _obeseLeanProteinMin &&
-          product.fat < _obeseLeanFatMax) {
+      if (n.protein > _obeseLeanProteinMin &&
+          n.fat < _obeseLeanFatMax) {
         pros.add(_p(
             l10n.assessmentObeseLeanProtein,
             CatAssessmentDimension.weight));
@@ -368,7 +432,7 @@ _DimensionResult _evaluateWeight(
 
 _DimensionResult _evaluateActivity(
   CatEntity cat,
-  ProductDisplayModel product,
+  _Nm n,
   AppLocalizations l10n,
 ) {
   final pros = <CatProductFinding>[];
@@ -377,13 +441,13 @@ _DimensionResult _evaluateActivity(
 
   switch (_norm(cat.activityLevel)) {
     case 'low':
-      if (product.calories > _lowActivityCaloriesHigh) {
+      if (n.calories > _lowActivityCaloriesHigh) {
         cons.add(_p(
             l10n.assessmentLowActivityHighCalories,
             CatAssessmentDimension.activity));
         delta -= 8;
       }
-      if (product.calories < _lowActivityCaloriesLow) {
+      if (n.calories < _lowActivityCaloriesLow) {
         pros.add(_p(
             l10n.assessmentLowActivityModerateCalories,
             CatAssessmentDimension.activity));
@@ -391,13 +455,13 @@ _DimensionResult _evaluateActivity(
       }
       break;
     case 'high':
-      if (product.calories > _highActivityCaloriesHigh) {
+      if (n.calories > _highActivityCaloriesHigh) {
         pros.add(_p(
             l10n.assessmentHighActivityHighCalories,
             CatAssessmentDimension.activity));
         delta += 6;
       }
-      if (product.protein > _highActivityProteinHigh) {
+      if (n.protein > _highActivityProteinHigh) {
         pros.add(_p(l10n.assessmentHighActivityHighProtein,
             CatAssessmentDimension.activity));
         delta += 6;
@@ -410,7 +474,7 @@ _DimensionResult _evaluateActivity(
 
 _DimensionResult _evaluateNeutered(
   CatEntity cat,
-  ProductDisplayModel product,
+  _Nm n,
   String text,
   AppLocalizations l10n,
 ) {
@@ -420,7 +484,7 @@ _DimensionResult _evaluateNeutered(
 
   switch (_norm(cat.neuteredStatus)) {
     case 'neutered':
-      if (product.calories > _neuteredCaloriesHigh) {
+      if (n.calories > _neuteredCaloriesHigh) {
         cons.add(_p(
             l10n.assessmentNeuteredHighCalories,
             CatAssessmentDimension.neutered));
@@ -432,7 +496,7 @@ _DimensionResult _evaluateNeutered(
             CatAssessmentDimension.neutered));
         delta += 8;
       }
-      if (product.fat > _neuteredFatHigh) {
+      if (n.fat > _neuteredFatHigh) {
         cons.add(_p(l10n.assessmentNeuteredHighFat,
             CatAssessmentDimension.neutered));
         delta -= 6;
@@ -440,19 +504,19 @@ _DimensionResult _evaluateNeutered(
       break;
     case 'pregnant':
     case 'lactating':
-      if (product.protein > _pregnantProteinHigh) {
+      if (n.protein > _pregnantProteinHigh) {
         pros.add(_p(
             l10n.assessmentPregnantHighProtein,
             CatAssessmentDimension.neutered));
         delta += 8;
       }
-      if (product.fat > _pregnantFatHigh) {
+      if (n.fat > _pregnantFatHigh) {
         pros.add(_p(
             l10n.assessmentPregnantHighFat,
             CatAssessmentDimension.neutered));
         delta += 8;
       }
-      if (product.calories > _pregnantCaloriesHigh) {
+      if (n.calories > _pregnantCaloriesHigh) {
         pros.add(_p(
             l10n.assessmentPregnantHighCalories,
             CatAssessmentDimension.neutered));
@@ -466,7 +530,7 @@ _DimensionResult _evaluateNeutered(
 
 _DimensionResult _evaluateBreed(
   CatEntity cat,
-  ProductDisplayModel product,
+  _Nm n,
   String text,
   AppLocalizations l10n,
 ) {
@@ -485,15 +549,15 @@ _DimensionResult _evaluateBreed(
             CatAssessmentDimension.breed));
         delta += 6;
       }
-      if (product.protein > _maineCoonProteinHigh) {
+      if (n.protein > _maineCoonProteinHigh) {
         pros.add(_p(l10n.assessmentMaineCoonHighProtein,
             CatAssessmentDimension.breed));
         delta += 6;
       }
       break;
     case 'persian':
-      if ((product.fiber >= _persianFiberLow &&
-              product.fiber <= _persianFiberHigh) ||
+      if ((n.fiber >= _persianFiberLow &&
+              n.fiber <= _persianFiberHigh) ||
           _containsAny(text, _kHairball)) {
         pros.add(_p(
             l10n.assessmentPersianHairball,
@@ -506,7 +570,7 @@ _DimensionResult _evaluateBreed(
             CatAssessmentDimension.breed));
         delta += 6;
       }
-      if (product.carbs > _persianCarbsHigh) {
+      if (n.carbs > _persianCarbsHigh) {
         cons.add(_p(l10n.assessmentPersianHighCarbs,
             CatAssessmentDimension.breed));
         delta -= 6;
@@ -526,12 +590,12 @@ _DimensionResult _evaluateBreed(
       }
       break;
     case 'sphynx':
-      if (product.fat > _sphynxFatHigh) {
+      if (n.fat > _sphynxFatHigh) {
         pros.add(_p(l10n.assessmentSphynxHighFat,
             CatAssessmentDimension.breed));
         delta += 6;
       }
-      if (product.fat < _sphynxFatLow) {
+      if (n.fat < _sphynxFatLow) {
         cons.add(_p(
             l10n.assessmentSphynxLowFat,
             CatAssessmentDimension.breed));
@@ -539,7 +603,7 @@ _DimensionResult _evaluateBreed(
       }
       break;
     case 'british shorthair':
-      if (product.calories > _britishCaloriesHigh) {
+      if (n.calories > _britishCaloriesHigh) {
         cons.add(_p(
             l10n.assessmentBritishHighCalories,
             CatAssessmentDimension.breed));
@@ -553,12 +617,12 @@ _DimensionResult _evaluateBreed(
       }
       break;
     case 'bengal':
-      if (product.protein > _bengalProteinHigh) {
+      if (n.protein > _bengalProteinHigh) {
         pros.add(_p(l10n.assessmentBengalHighProtein,
             CatAssessmentDimension.breed));
         delta += 6;
       }
-      if (product.protein < _bengalProteinLow) {
+      if (n.protein < _bengalProteinLow) {
         cons.add(_p(l10n.assessmentBengalLowProtein,
             CatAssessmentDimension.breed));
         delta -= 6;
@@ -571,7 +635,7 @@ _DimensionResult _evaluateBreed(
 
 _DimensionResult _evaluateHealth(
   CatEntity cat,
-  ProductDisplayModel product,
+  _Nm n,
   String text,
   AppLocalizations l10n,
 ) {
@@ -607,12 +671,15 @@ _DimensionResult _evaluateHealth(
   }
 
   if (conditions.contains('kidney_disease')) {
-    if (product.protein > _kidneyProteinMax) {
+    if (n.protein > _kidneyProteinMax) {
       cons.add(_p(l10n.assessmentKidneyHighProtein,
           CatAssessmentDimension.health));
       delta -= 12;
     }
-    if (text.contains(_kPhosphorus) && !text.contains(_kLowPhosphorus)) {
+    // Penalize uncontrolled phosphorus, but not when the product explicitly
+    // reduces/controls it (those are kidney-friendly).
+    if (text.contains(_kPhosphorus) &&
+        !_containsAny(text, _kReducedPhosphorus)) {
       cons.add(_p(
           l10n.assessmentKidneyPhosphorus,
           CatAssessmentDimension.health));
@@ -668,12 +735,12 @@ _DimensionResult _evaluateHealth(
   }
 
   if (conditions.contains('diabetes')) {
-    if (product.carbs > _diabetesCarbsMax) {
+    if (n.carbs > _diabetesCarbsMax) {
       cons.add(_p(l10n.assessmentDiabetesHighCarbs,
           CatAssessmentDimension.health));
       delta -= 10;
     }
-    if (product.protein > _diabetesProteinHigh) {
+    if (n.protein > _diabetesProteinHigh) {
       pros.add(_p(
           l10n.assessmentDiabetesHighProtein,
           CatAssessmentDimension.health));
@@ -682,7 +749,7 @@ _DimensionResult _evaluateHealth(
   }
 
   if (conditions.contains('dental_problems')) {
-    if (product.moisture > _dentalMoistureMin) {
+    if (n.moisture > _dentalMoistureMin) {
       pros.add(_p(
           l10n.assessmentDentalHighMoisture,
           CatAssessmentDimension.health));
@@ -697,12 +764,35 @@ _DimensionResult _evaluateHealth(
   }
 
   if (conditions.contains('hairball_issues')) {
-    if ((product.fiber >= _hairballFiberLow &&
-            product.fiber <= _hairballFiberHigh) ||
+    if ((n.fiber >= _hairballFiberLow &&
+            n.fiber <= _hairballFiberHigh) ||
         _containsAny(text, _kHairball)) {
       pros.add(_p(l10n.assessmentHairballControl,
           CatAssessmentDimension.health));
       delta += 6;
+    }
+  }
+
+  if (conditions.contains('heart_condition')) {
+    if (_containsAny(text, _kTaurine)) {
+      pros.add(_p(l10n.assessmentHeartTaurine,
+          CatAssessmentDimension.health));
+      delta += 8;
+    }
+    if (_containsAny(text, _kLowSodium)) {
+      pros.add(_p(l10n.assessmentHeartLowSodium,
+          CatAssessmentDimension.health));
+      delta += 8;
+    }
+    if (_containsAny(text, _kHeartOmega)) {
+      pros.add(_p(l10n.assessmentHeartOmega3,
+          CatAssessmentDimension.health));
+      delta += 6;
+    }
+    if (_containsAny(text, _kHighSodium)) {
+      cons.add(_p(l10n.assessmentHeartHighSodium,
+          CatAssessmentDimension.health));
+      delta -= 8;
     }
   }
 
@@ -725,8 +815,10 @@ String? _norm(String? value) {
   return trimmed.isEmpty ? null : trimmed;
 }
 
+/// Scanned text = pros + cons + product name + brand (so proteins/claims that
+/// only appear in the name — e.g. "Lamb", "Renal" — are still detected).
 String _normalizeText(ProductDisplayModel product) {
-  return (product.pros + product.cons)
+  return ([...product.pros, ...product.cons, product.name, product.brand])
       .join(' ')
       .toLowerCase()
       .replaceAll('-', ' ');

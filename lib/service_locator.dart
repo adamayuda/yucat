@@ -26,15 +26,23 @@ import 'package:yucat/features/auth/domain/repository/auth_repository.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/signin_anonymously_usecase.dart';
 import 'package:yucat/features/brand/data/datasources/brand_datasource.dart';
+import 'package:yucat/features/brand/data/datasources/brand_verdict_datasource.dart';
 import 'package:yucat/features/brand/data/mappers/brand_document_mapper.dart';
 import 'package:yucat/features/brand/data/repositories/brand_repository_impl.dart';
+import 'package:yucat/features/brand/data/repositories/brand_verdict_repository_impl.dart';
 import 'package:yucat/features/brand/domain/repositories/brand_repository.dart';
+import 'package:yucat/features/brand/domain/repositories/brand_verdict_repository.dart';
+import 'package:yucat/features/brand/domain/usecases/analyze_brand_usecase.dart';
 import 'package:yucat/features/brand/domain/usecases/get_brands_usecase.dart';
 import 'package:yucat/features/cat/data/datasources/cat_datasource.dart';
+import 'package:yucat/features/cat/data/datasources/cat_narrative_datasource.dart';
 import 'package:yucat/features/cat/data/mappers/cat_document_mapper.dart';
+import 'package:yucat/features/cat/data/repositories/cat_narrative_repository_impl.dart';
 import 'package:yucat/features/cat/data/repositories/cat_repository_impl.dart';
+import 'package:yucat/features/cat/domain/repositories/cat_narrative_repository.dart';
 import 'package:yucat/features/cat/domain/repositories/cat_repository.dart';
 import 'package:yucat/features/cat/domain/usecases/create_cat_usecase.dart';
+import 'package:yucat/features/cat/domain/usecases/generate_cat_narrative_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/delete_cat_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/update_cat_usecase.dart';
@@ -159,6 +167,12 @@ Future<void> _registerDataSources() async {
       storage: FirebaseStorage.instance,
     ),
   );
+  sl.registerSingleton<CatNarrativeDataSource>(
+    CatNarrativeDataSource(functions: sl<FirebaseFunctions>()),
+  );
+  sl.registerSingleton<BrandVerdictDataSource>(
+    BrandVerdictDataSource(functions: sl<FirebaseFunctions>()),
+  );
 }
 
 Future<void> _registerMappers() async {
@@ -179,6 +193,9 @@ Future<void> _registerMappers() async {
 }
 
 Future<void> _registerRepositories() async {
+  sl.registerSingleton<BrandVerdictRepository>(
+    BrandVerdictRepositoryImpl(dataSource: sl<BrandVerdictDataSource>()),
+  );
   sl.registerSingleton<BrandRepository>(
     BrandRepositoryImpl(
       dataSource: sl<BrandDataSource>(),
@@ -209,6 +226,9 @@ Future<void> _registerRepositories() async {
       mapper: sl<CatDocumentMapper>(),
     ),
   );
+  sl.registerSingleton<CatNarrativeRepository>(
+    CatNarrativeRepositoryImpl(dataSource: sl<CatNarrativeDataSource>()),
+  );
   sl.registerSingleton<AuthRepository>(
     AuthRepositoryImpl(dataSource: sl<AuthFirebaseDataSource>()),
   );
@@ -227,6 +247,12 @@ Future<void> _registerUseCases() async {
   );
   sl.registerSingleton<GetBrandsUsecase>(
     GetBrandsUsecase(repository: sl<BrandRepository>()),
+  );
+  sl.registerSingleton<AnalyzeBrandUsecase>(
+    AnalyzeBrandUsecase(
+      repository: sl<BrandVerdictRepository>(),
+      searchByBrand: sl<SearchByBrandUsecase>(),
+    ),
   );
   sl.registerSingleton<LogEventUsecase>(
     LogEventUsecase(repository: sl<AnalyticsRepository>()),
@@ -269,6 +295,9 @@ Future<void> _registerUseCases() async {
   );
   sl.registerSingleton<CreateCatUsecase>(
     CreateCatUsecase(repository: sl<CatRepository>()),
+  );
+  sl.registerSingleton<GenerateCatNarrativeUsecase>(
+    GenerateCatNarrativeUsecase(repository: sl<CatNarrativeRepository>()),
   );
   sl.registerSingleton<DeleteCatUsecase>(
     DeleteCatUsecase(repository: sl<CatRepository>()),

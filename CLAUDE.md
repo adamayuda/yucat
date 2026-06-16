@@ -263,7 +263,9 @@ Structure:
 - **`DSTextStyles`** — `displayHero` / `displayLg` / `headlineMd` (Bricolage Grotesque, wght 800 + wdth 75 condensed, via the bundled variable font); `titleMd`, `bodyLg` / `bodyMd`, `label`, `caption` (DM Sans via `google_fonts`).
 - Material3 enabled.
 
-Shared components live under `lib/presentation/components/`: `DSCard`, `DSPillButton` + `DSTextLink`, `DSAppBar`, `DSStateView`, `DSOptionRow`, `DSBottomNav`, `DSChip`, `DSDotIndicator`, `DSStatPill`, `DSQuoteCard`, `LineChartCard`, `MascotSpeechBubble`, `OnboardingScaffold`, `WizardStepShell`, `CatAvatar`. Loading indicator: `lib/presentation/widgets/app_loading_widget.dart`. Tab shell: `lib/presentation/main/main_page.dart`.
+Shared components live under `lib/presentation/components/`: `DSCard`, `DSPillButton` (variants `primary` / `secondary` / `danger`) + `DSTextLink`, `DSAppBar`, `DSStateView`, `DSConfirmDialog`, `DSOptionRow`, `DSBottomNav`, `DSChip`, `DSDotIndicator`, `DSStatPill`, `DSQuoteCard`, `LineChartCard`, `MascotSpeechBubble`, `MascotIllustration`, `OnboardingScaffold`, `WizardStepShell`, `CatAvatar`. Loading indicator: `lib/presentation/widgets/app_loading_widget.dart`. Tab shell: `lib/presentation/main/main_page.dart`. Confirmation popups go through `showDSConfirmDialog(...)` — never a raw Material `AlertDialog`.
+
+**Empty / error / loading state illustrations use cat mascots, never raster GIFs.** `MascotIllustration` (cat SVG on a tinted circular halo, framed by gently-twinkling stars, with a native bob/twinkle animation) is the single source — `AppLoadingWidget` and both `DSStateView.error()` / `DSStateView.empty()` render through it. Callers pass a full cat figure (`cat-thinking` / `cat-laught` / `cat-rating`) plus a section `tint` that matches the state's mood (e.g. `tintCoral` for errors). The legacy `assets/images/Illustrations/*.gif` were removed.
 
 **`design/design.md`** is the design-system source of truth — token rationale (§2-7), component catalog (§8), onboarding flow (§9), open decisions (§12). Update §8 when adding a shared component.
 

@@ -183,7 +183,8 @@ class _ResultsList extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     if (products.isEmpty) {
       return DSStateView.empty(
-        illustrationAsset: 'assets/images/Illustrations/empty-state.gif',
+        mascotAsset: 'assets/images/cat-thinking.svg',
+        tint: DSColors.tintSky,
         headline: l10n.searchNoMatchesHeadline,
         body: l10n.searchNoMatchesBody,
       );
