@@ -23,7 +23,6 @@ import 'package:yucat/features/cat_create/widgets/steps/coat_fact_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/neutered_status_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/profile_photo_step.dart';
 import 'package:yucat/features/cat_create/widgets/steps/water_intake_fact_step.dart';
-import 'package:yucat/features/cat_create/widgets/medical_disclaimer_sheet.dart';
 import 'package:yucat/presentation/components/wizard_step_shell.dart';
 import 'package:yucat/service_locator.dart';
 import 'package:yucat/config/themes/theme.dart';
@@ -66,7 +65,6 @@ class _CreateCatPageState extends State<CreateCatPage> {
   final _nameFieldKey = GlobalKey<FormFieldState<String>>();
   late final PageController _pageController;
 
-  bool _disclaimerShown = false;
   final ImagePicker _imagePicker = ImagePicker();
 
   static const List<String> _breeds = [
@@ -166,13 +164,6 @@ class _CreateCatPageState extends State<CreateCatPage> {
       if (!isValid) {
         return;
       }
-    }
-
-    // Surface the medical disclaimer once, right after health conditions.
-    if (step == 10 && !_disclaimerShown) {
-      _disclaimerShown = true;
-      await showMedicalDisclaimerSheet(context);
-      if (!mounted) return;
     }
 
     _bloc.add(CatCreateGoToNextStepEvent(step: step));

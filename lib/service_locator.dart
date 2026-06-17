@@ -92,6 +92,7 @@ import 'package:yucat/features/search_products/presentation/mappers/product_to_m
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
 import 'package:yucat/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:yucat/services/notification_service.dart';
+import 'package:yucat/services/remote_config_service.dart';
 import 'package:yucat/services/review_prompt_service.dart';
 import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/services/cat_tracking_service.dart';
@@ -367,6 +368,7 @@ Future<void> _registerServices() async {
       userAnalyticsService: sl<UserAnalyticsService>(),
     ),
   );
+  sl.registerSingleton<RemoteConfigService>(RemoteConfigService());
 }
 
 extension BlocProviderRegistration on GetIt {
@@ -400,6 +402,7 @@ Future<void> _registerBlocs() async {
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
       userAnalyticsService: sl<UserAnalyticsService>(),
+      remoteConfigService: sl<RemoteConfigService>(),
     ),
   );
   sl.registerBloc<SearchBloc>(

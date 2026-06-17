@@ -29,6 +29,7 @@ import 'package:yucat/features/scan_history/presentation/bloc/scan_history_bloc.
 import 'package:yucat/features/search_products/presentation/bloc/search_bloc.dart';
 import 'package:yucat/service_locator.dart';
 import 'package:yucat/services/notification_service.dart';
+import 'package:yucat/services/remote_config_service.dart';
 
 import 'config/routes/analytics_route_observer.dart';
 import 'config/routes/router.dart';
@@ -44,6 +45,10 @@ Future<void> main() async {
   }
 
   await initializeDependencies();
+
+  // Pull remote kill switches before the UI starts. Fail-open: a failure leaves
+  // the in-app defaults (everything enabled) in place.
+  await sl<RemoteConfigService>().initialize();
 
   // Initialise OneSignal (iOS only). Does not prompt for permission — that is
   // deferred to the onboarding reminders screen.

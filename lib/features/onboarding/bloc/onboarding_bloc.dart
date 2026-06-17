@@ -8,6 +8,7 @@ import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
+import 'package:yucat/services/remote_config_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 
 part 'onboarding_event.dart';
@@ -19,6 +20,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
   final LogScreenViewUsecase _logScreenViewUsecase;
   final LogEventUsecase _logEventUsecase;
   final UserAnalyticsService _userAnalyticsService;
+  final RemoteConfigService _remoteConfigService;
 
   DateTime? _onboardingStartTime;
   int _stepsViewed = 0;
@@ -28,10 +30,12 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     required LogScreenViewUsecase logScreenViewUsecase,
     required LogEventUsecase logEventUsecase,
     required UserAnalyticsService userAnalyticsService,
+    required RemoteConfigService remoteConfigService,
   }) : _prefs = prefs,
        _logScreenViewUsecase = logScreenViewUsecase,
        _logEventUsecase = logEventUsecase,
        _userAnalyticsService = userAnalyticsService,
+       _remoteConfigService = remoteConfigService,
        super(OnBoardingLoadingState()) {
     on<OnBoardingInitialEvent>(_onOnBoardingInitialEvent);
     on<OnBoardingGetStartedEvent>(_onOnBoardingGetStartedEvent);
@@ -239,10 +243,18 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
         seededName: current.seededName,
         seededPhotoPath: current.seededPhotoPath,
         onCreated: (wizardContext, summary) {
-          // A cat was created — mark onboarding complete and slide in the
-          // scan step (→ success screen). The success screen's CTA finalizes
-          // (paywall) via the same onStart callback.
+          // A cat was created — mark onboarding complete.
           _prefs.setBool(_onboardingCompletedKey, true);
+
+          // Remote kill switch: when disabled, skip the scan + recommendation
+          // cascade entirely and finalize straight from the wizard (→ paywall).
+          if (!_remoteConfigService.onboardingScanEnabled) {
+            add(OnBoardingFinalizedEvent(context: wizardContext));
+            return;
+          }
+
+          // Otherwise slide in the scan step (→ success screen). The success
+          // screen's CTA finalizes (paywall) via the same onStart callback.
           wizardContext.router.push(
             CurrentFoodRoute(
               summary: summary,
