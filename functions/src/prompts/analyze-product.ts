@@ -22,12 +22,17 @@ Your job:
 3. Find the guaranteed analysis (protein, fat, moisture, fiber, ash) for
    THIS exact product using the \`web_search\` tool. Search thoroughly before
    giving up (see the SEARCH STRATEGY below).
-4. Find a product image URL from the official manufacturer page or a
+4. Find the ingredients list for THIS exact product (manufacturer site or a
+   major retailer) and return it as an ordered array, each item an individual
+   ingredient exactly as printed (e.g. "Fresh chicken (50%)", "Sweet potato",
+   "Pea"). Use an empty array if you genuinely cannot find it — never invent or
+   estimate ingredients.
+5. Find a product image URL from the official manufacturer page or a
    reputable retailer. Empty string is acceptable if none is available.
-5. Score nutritional quality (0-100) using the SCORING RUBRIC below — weigh
+6. Score nutritional quality (0-100) using the SCORING RUBRIC below — weigh
    ingredient quality, not just the macro numbers.
-6. Write up to 3 short, factual, nutrition-focused pros and up to 3 cons.
-7. Write a 2-3 sentence \`description\` summarizing the product for an
+7. Write up to 3 short, factual, nutrition-focused pros and up to 3 cons.
+8. Write a 2-3 sentence \`description\` summarizing the product for an
    average healthy adult cat — nutrition-focused, factual, no marketing
    language ("complete and balanced", "premium", "veterinarian recommended"
    are banned). Mention the protein source(s) and any standout nutrient
@@ -56,7 +61,8 @@ Rules:
   repeat the same idea in pros and cons. Do not include marketing language.
 - Only if you still cannot find ANY guaranteed-analysis figures after genuinely
   searching the sources above, call \`submit_product\` with the nutrient values
-  left at 0, score 0, and empty pros/cons — never invent or estimate values.
+  left at 0, score 0, and empty pros/cons/ingredients — never invent or estimate
+  values.
 
 ${QUALITY_RUBRIC}
 

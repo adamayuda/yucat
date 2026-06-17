@@ -40,7 +40,7 @@ export const fetchProductByImageV2 = onCall(
   {
     cors: config.functions.corsEnabled,
     timeoutSeconds: config.functions.timeoutSeconds,
-    secrets: ["ANTHROPIC_API_KEY", "ALGOLIA_API_KEY"],
+    secrets: ["ANTHROPIC_API_KEY", "ALGOLIA_API_KEY", "SERPAPI_API_KEY"],
   },
   async (request) => {
     const {image, mimeType, userId} = request.data;

@@ -21,6 +21,9 @@ export interface Product {
   format?: string;
   packageSize?: string;
   description?: string;
+  // Ingredients list as printed on the label, in order. Empty array when not
+  // found. Optional so pre-existing rows round-trip cleanly.
+  ingredients?: string[];
   // Epoch ms of the last self-heal attempt. Separate stamps so an entry with
   // nutrition but no image can retry the image without a full re-analysis (and
   // vice-versa). Absent on pre-existing rows → treated as "never attempted".
@@ -48,6 +51,7 @@ export class ProductModel implements Product {
   format: string;
   packageSize: string;
   description: string;
+  ingredients: string[];
   lastAnalysisAttempt?: number;
   lastImageAttempt?: number;
 
@@ -71,6 +75,7 @@ export class ProductModel implements Product {
     format = "",
     packageSize = "",
     description = "",
+    ingredients: string[] = [],
     lastAnalysisAttempt?: number,
     lastImageAttempt?: number
   ) {
@@ -93,6 +98,7 @@ export class ProductModel implements Product {
     this.format = format;
     this.packageSize = packageSize;
     this.description = description;
+    this.ingredients = ingredients;
     this.lastAnalysisAttempt = lastAnalysisAttempt;
     this.lastImageAttempt = lastImageAttempt;
   }
@@ -118,6 +124,7 @@ export class ProductModel implements Product {
       data.format || "",
       data.packageSize || "",
       data.description || "",
+      data.ingredients || [],
       data.lastAnalysisAttempt,
       data.lastImageAttempt
     );
@@ -144,6 +151,7 @@ export class ProductModel implements Product {
       format: this.format,
       packageSize: this.packageSize,
       description: this.description,
+      ingredients: this.ingredients,
       lastAnalysisAttempt: this.lastAnalysisAttempt,
       lastImageAttempt: this.lastImageAttempt,
     };

@@ -8,7 +8,6 @@ import {
   generateAnalysisSystemPrompt,
   generateAnalysisUserPrompt,
 } from "../prompts/analyze-product";
-import {generateFindImagePrompt} from "../prompts/find-image";
 import {
   CatNarrativeInput,
   generateCatNarrativeSystemPrompt,
@@ -24,6 +23,8 @@ import {
   generateBrandVerdictSystemPrompt,
   generateBrandVerdictUserPrompt,
 } from "../prompts/brand-verdict";
+import {isImageUrlValid} from "./image.service";
+import {searchProductImageUrls} from "./serpapi.service";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let anthropicClient: any = null;
@@ -142,7 +143,7 @@ const ANALYSIS_TOOLS: Anthropic.Tool[] = [
       required: [
         "name", "brand", "foodType", "format", "packageSize", "description",
         "protein", "fat", "moisture", "carbs", "fiber", "ash",
-        "imageUrl", "score", "pros", "cons",
+        "imageUrl", "score", "pros", "cons", "ingredients",
       ],
       properties: {
         name: {type: "string"},
@@ -177,6 +178,14 @@ const ANALYSIS_TOOLS: Anthropic.Tool[] = [
         score: {type: "number", minimum: 0, maximum: 100},
         pros: {type: "array", items: {type: "string"}, maxItems: 3},
         cons: {type: "array", items: {type: "string"}, maxItems: 3},
+        ingredients: {
+          type: "array",
+          items: {type: "string"},
+          description:
+            "Ingredients list as printed on the label, in order, each an " +
+            "individual item (e.g. \"Fresh chicken (50%)\", \"Sweet potato\", " +
+            "\"Pea\"). Empty array if not found.",
+        },
       },
     },
   },
@@ -624,35 +633,16 @@ export async function analyzeBrand(
   }
 }
 
-const IMAGE_TOOLS: Anthropic.Tool[] = [
-  {
-    name: "submit_image_url",
-    description:
-      "Submit the direct product image URL found via web search (or empty " +
-      "string if none was found).",
-    input_schema: {
-      type: "object",
-      required: ["imageUrl"],
-      properties: {
-        imageUrl: {
-          type: "string",
-          description:
-            "Direct image file URL (.jpg/.png/.webp) of the product shot, or " +
-            "\"\" if no suitable image was found.",
-        },
-      },
-    },
-  },
-];
-
 /**
- * Image-only backfill — finds a product-shot URL via web_search for a product
- * we already identified but whose cached `imageUrl` is empty. Returns the raw
- * (un-validated, un-hosted) URL, or "" if none was found. The caller is
- * responsible for validating + re-hosting via processProductImage.
+ * Resolves a raw product-image URL for an identified product whose cached
+ * `imageUrl` is empty, via SerpAPI Google Images. Returns the first candidate
+ * whose content-type validates as an image — so the caller's
+ * processProductImage is very likely to host it. Returns "" when nothing
+ * usable is found.
  *
- * Like analyzeProductImage, web_search is a server-side tool that can pause
- * (stop_reason "pause_turn"), so we resume the turn up to MAX_CONTINUATIONS.
+ * SerpAPI-first by design: a prior Claude web_search variant produced almost no
+ * usable direct image URLs (it returns page URLs, and occasionally 400'd on a
+ * dangling tool_use), so SerpAPI is now the sole source.
  */
 export async function findProductImageUrl(
   brand: string,
@@ -660,92 +650,25 @@ export async function findProductImageUrl(
 ): Promise<string> {
   if (!brand && !name) return "";
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const webSearchTool: any = {
-    type: "web_search_20250305",
-    name: "web_search",
-    max_uses: 3,
-  };
-  const prompt = generateFindImagePrompt(brand, name);
-  const messages: Anthropic.MessageParam[] = [
-    {role: "user", content: [{type: "text", text: prompt}]},
-  ];
-
-  try {
-    // Phase 1 — force a real search. Only the web_search tool is available, so
-    // the model cannot short-circuit by submitting an empty URL without looking.
-    for (let i = 0; i <= MAX_CONTINUATIONS; i++) {
-      const response = await withRetry("findProductImageUrl:search", () =>
-        getClient().messages.create({
-          model: config.anthropic.model,
-          max_tokens: 1500,
-          temperature: config.anthropic.temperature,
-          messages,
-          tools: [webSearchTool],
-          tool_choice: {type: "auto"},
-        })
-      );
-
-      messages.push({role: "assistant", content: response.content});
-      if ((response.stop_reason as string) === "pause_turn") {
-        continue;
-      }
-      break;
-    }
-
-    // Phase 2 — force a structured answer from what the search turned up.
-    messages.push({
-      role: "user",
-      content: [
-        {
-          type: "text",
-          text:
-            "Based on your search results, submit the single best DIRECT " +
-            "image file URL (.jpg/.png/.webp) for this exact product via the " +
-            "submit_image_url tool. If none of the results is a direct image " +
-            "URL for this product, submit an empty string.",
-        },
-      ],
-    });
-
-    const final = await withRetry("findProductImageUrl:submit", () =>
-      getClient().messages.create({
-        model: config.anthropic.model,
-        max_tokens: 512,
-        temperature: config.anthropic.temperature,
-        messages,
-        tools: [webSearchTool, ...IMAGE_TOOLS],
-        tool_choice: {type: "tool", name: "submit_image_url"},
-      })
-    );
-
-    const submit = findToolUse(final.content, "submit_image_url");
-    const url = submit?.input?.imageUrl;
-    if (typeof url === "string" && url.trim() !== "") {
-      logger.info("findProductImageUrl found candidate", {
+  const candidates = await searchProductImageUrls(brand, name);
+  for (const candidate of candidates) {
+    if (await isImageUrlValid(candidate)) {
+      logger.info("findProductImageUrl using SerpAPI candidate", {
         brand,
         name,
-        imageUrl: url.trim(),
+        imageUrl: candidate,
         structuredData: true,
       });
-      return url.trim();
+      return candidate;
     }
-
-    logger.info("findProductImageUrl found no image", {
-      brand,
-      name,
-      structuredData: true,
-    });
-    return "";
-  } catch (error) {
-    logger.warn("findProductImageUrl failed", {
-      brand,
-      name,
-      error: error instanceof Error ? error.message : String(error),
-      structuredData: true,
-    });
-    return "";
   }
+
+  logger.info("findProductImageUrl found no image", {
+    brand,
+    name,
+    structuredData: true,
+  });
+  return "";
 }
 
 /**
