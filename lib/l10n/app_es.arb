@@ -519,5 +519,6 @@
   "onboardingScanVerdictIntro": "Así puntúa esa comida:",
   "onboardingScanFailed": "No pudimos leer esa etiqueta. Inténtalo de nuevo con la parte frontal del paquete a la vista.",
   "onboardingScanRetry": "Escanear de nuevo",
-  "onboardingScanPersonalCon": "Para {name}: {con}"
+  "onboardingScanPersonalCon": "Para {name}: {con}",
+  "onboardingResultWhyTitle": "Por qué no es lo ideal para {name}"
 }

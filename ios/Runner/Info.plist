@@ -12,6 +12,8 @@
 		<string>es</string>
 		<string>fr</string>
 		<string>hu</string>
+		<string>pt</string>
+		<string>de</string>
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Yucat</string>

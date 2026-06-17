@@ -823,5 +823,13 @@
         "type": "String"
       }
     }
+  },
+  "onboardingResultWhyTitle": "Why this isn't ideal for {name}",
+  "@onboardingResultWhyTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

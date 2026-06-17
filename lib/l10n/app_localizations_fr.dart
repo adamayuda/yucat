@@ -1866,4 +1866,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String onboardingScanPersonalCon(String name, String con) {
     return 'Pour $name : $con';
   }
+
+  @override
+  String onboardingResultWhyTitle(String name) {
+    return 'Pourquoi ce n\'est pas idéal pour $name';
+  }
 }

@@ -519,5 +519,6 @@
   "onboardingScanVerdictIntro": "Így pontozott ez a táplálék:",
   "onboardingScanFailed": "Nem tudtuk leolvasni a címkét. Próbáld újra úgy, hogy a csomagolás eleje jól látszódjon.",
   "onboardingScanRetry": "Újra beolvasás",
-  "onboardingScanPersonalCon": "{name} számára: {con}"
+  "onboardingScanPersonalCon": "{name} számára: {con}",
+  "onboardingResultWhyTitle": "Miért nem ideális {name} számára"
 }

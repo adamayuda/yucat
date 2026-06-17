@@ -21,7 +21,7 @@ class CurrentFoodPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return CurrentFoodScreen(
       summary: summary,
-      onStart: () => onStart(context),
+      onStart: onStart,
     );
   }
 }

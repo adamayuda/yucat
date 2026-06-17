@@ -76,23 +76,23 @@ class DSColors {
 
   // Paywall accent (feature-scoped — matches the paywall hero gradient and
   // replaces the app's green success accent within the paywall only)
-  static const Color paywallAccent = Color(0xFFEC6A6A);
-  static const Color paywallAccentSoft = Color(0xFFFBE6E6);
+  static const Color paywallAccent = Color(0xFF3F8CDB);
+  static const Color paywallAccentSoft = Color(0xFFE3EEFA);
 }
 
 class DSGradients {
-  /// Left→right pink gradient for the paywall "Plus" badges.
+  /// Left→right blue gradient for the paywall "Plus" badges.
   static const LinearGradient paywallBadge = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
-    colors: [Color(0xFFE85C5C), Color(0xFFF4A2A2)],
+    colors: [Color(0xFF2E7BC4), Color(0xFF5FA3E0)],
   );
 
-  /// Coral wash behind the paywall hero (covered by the cloud illustration).
+  /// Blue wash behind the paywall hero (covered by the cloud illustration).
   static const LinearGradient paywallHero = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFFF09595), Color(0xFFF4B6B6)],
+    colors: [Color(0xFF9FC9EF), Color(0xFFC4DEF6)],
   );
 
   // --- Onboarding section backgrounds ---

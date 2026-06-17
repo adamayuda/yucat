@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
@@ -30,7 +31,7 @@ class HealthIntroScreen extends StatelessWidget {
                 style: DSTextStyles.displayHero,
               ),
               const Spacer(flex: 2),
-              SvgPicture.asset('assets/images/cat-thinking.svg', height: 280),
+              Lottie.asset('assets/images/cat-belly-full.json', height: 280),
               const Spacer(flex: 1),
             ],
           ),

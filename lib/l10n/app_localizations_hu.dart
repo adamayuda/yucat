@@ -1857,4 +1857,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String onboardingScanPersonalCon(String name, String con) {
     return '$name számára: $con';
   }
+
+  @override
+  String onboardingResultWhyTitle(String name) {
+    return 'Miért nem ideális $name számára';
+  }
 }

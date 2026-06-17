@@ -11,54 +11,6 @@
 part of 'router.dart';
 
 /// generated route for
-/// [AnalyzePage]
-class AnalyzeRoute extends PageRouteInfo<AnalyzeRouteArgs> {
-  AnalyzeRoute({
-    Key? key,
-    required CatSummary summary,
-    required void Function(BuildContext) onStart,
-    List<PageRouteInfo>? children,
-  }) : super(
-         AnalyzeRoute.name,
-         args: AnalyzeRouteArgs(key: key, summary: summary, onStart: onStart),
-         initialChildren: children,
-       );
-
-  static const String name = 'AnalyzeRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      final args = data.argsAs<AnalyzeRouteArgs>();
-      return AnalyzePage(
-        key: args.key,
-        summary: args.summary,
-        onStart: args.onStart,
-      );
-    },
-  );
-}
-
-class AnalyzeRouteArgs {
-  const AnalyzeRouteArgs({
-    this.key,
-    required this.summary,
-    required this.onStart,
-  });
-
-  final Key? key;
-
-  final CatSummary summary;
-
-  final void Function(BuildContext) onStart;
-
-  @override
-  String toString() {
-    return 'AnalyzeRouteArgs{key: $key, summary: $summary, onStart: $onStart}';
-  }
-}
-
-/// generated route for
 /// [CatDetailPage]
 class CatDetailRoute extends PageRouteInfo<CatDetailRouteArgs> {
   CatDetailRoute({
@@ -429,7 +381,7 @@ class ResultRoute extends PageRouteInfo<ResultRouteArgs> {
   ResultRoute({
     Key? key,
     required CatSummary summary,
-    required CatNarrative? narrative,
+    ProductDisplayModel? scannedProduct,
     required void Function(BuildContext) onStart,
     List<PageRouteInfo>? children,
   }) : super(
@@ -437,7 +389,7 @@ class ResultRoute extends PageRouteInfo<ResultRouteArgs> {
          args: ResultRouteArgs(
            key: key,
            summary: summary,
-           narrative: narrative,
+           scannedProduct: scannedProduct,
            onStart: onStart,
          ),
          initialChildren: children,
@@ -452,7 +404,7 @@ class ResultRoute extends PageRouteInfo<ResultRouteArgs> {
       return ResultPage(
         key: args.key,
         summary: args.summary,
-        narrative: args.narrative,
+        scannedProduct: args.scannedProduct,
         onStart: args.onStart,
       );
     },
@@ -463,7 +415,7 @@ class ResultRouteArgs {
   const ResultRouteArgs({
     this.key,
     required this.summary,
-    required this.narrative,
+    this.scannedProduct,
     required this.onStart,
   });
 
@@ -471,13 +423,13 @@ class ResultRouteArgs {
 
   final CatSummary summary;
 
-  final CatNarrative? narrative;
+  final ProductDisplayModel? scannedProduct;
 
   final void Function(BuildContext) onStart;
 
   @override
   String toString() {
-    return 'ResultRouteArgs{key: $key, summary: $summary, narrative: $narrative, onStart: $onStart}';
+    return 'ResultRouteArgs{key: $key, summary: $summary, scannedProduct: $scannedProduct, onStart: $onStart}';
   }
 }
 

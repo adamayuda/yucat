@@ -470,7 +470,7 @@ class _HeroStar extends StatelessWidget {
     return Align(
       alignment: alignment,
       child: ExcludeSemantics(
-        child: SvgPicture.asset('assets/images/star-red.svg', width: size),
+        child: SvgPicture.asset('assets/images/star-blue.svg', width: size),
       ),
     );
   }

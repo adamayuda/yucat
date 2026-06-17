@@ -519,5 +519,6 @@
   "onboardingScanVerdictIntro": "Voici la note de cette nourriture :",
   "onboardingScanFailed": "Nous n'avons pas pu lire l'étiquette. Réessaie avec l'avant de l'emballage bien visible.",
   "onboardingScanRetry": "Scanner à nouveau",
-  "onboardingScanPersonalCon": "Pour {name} : {con}"
+  "onboardingScanPersonalCon": "Pour {name} : {con}",
+  "onboardingResultWhyTitle": "Pourquoi ce n'est pas idéal pour {name}"
 }
