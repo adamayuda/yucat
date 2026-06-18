@@ -509,16 +509,18 @@
   "onboardingBrandSkip": "No estoy seguro",
   "onboardingBrandAnalyzing": "Analizando {brand}…",
   "onboardingBrandUnavailable": "No pudimos analizar {brand} ahora mismo, pero esto es lo que recomendaríamos.",
-  "onboardingBrandUnlockCta": "Desbloquear las mejores opciones de {name}",
+  "onboardingBrandUnlockCta": "Descubre las mejores opciones de {name}",
   "brandTeaserFound": "Encontramos {count, plural, =1{1 comida mejor} other{{count} comidas mejores}} para {name}",
   "brandTeaserLockedHint": "Suscríbete para verlas, adaptadas a las necesidades de tu gato.",
-  "onboardingScanTitle": "¿Qué le das de comer a {name}?",
+  "brandTeaserRowLocked": "Desbloquea para ver",
+  "onboardingScanTitle": "Escaneemos su\nprimer paquete",
   "onboardingScanSubtitle": "Escanea el paquete y lo evaluaremos para tu gato.",
-  "onboardingScanCta": "Escanear el paquete",
+  "onboardingScanCta": "Vamos a escanear",
   "onboardingScanSkip": "Omitir por ahora",
   "onboardingScanVerdictIntro": "Así puntúa esa comida:",
   "onboardingScanFailed": "No pudimos leer esa etiqueta. Inténtalo de nuevo con la parte frontal del paquete a la vista.",
   "onboardingScanRetry": "Escanear de nuevo",
   "onboardingScanPersonalCon": "Para {name}: {con}",
-  "onboardingResultWhyTitle": "Por qué no es lo ideal para {name}"
+  "onboardingResultWhyTitle": "Por qué no es lo ideal para {name}",
+  "onboardingResultProfileTitle": "Perfil de {name}"
 }

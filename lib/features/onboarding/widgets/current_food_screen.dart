@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
@@ -52,12 +53,15 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
 
   Future<void> _runScan(String imageBase64, String mimeType) async {
     final l10n = AppLocalizations.of(context);
-    sl<LogEventUsecase>().call(eventName: 'Onboarding Scan Captured', properties: {
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    sl<LogEventUsecase>().call(
+      eventName: 'Onboarding Scan Captured',
+      properties: {'timestamp': DateTime.now().toIso8601String()},
+    );
     try {
-      final entity = await sl<FetchProductByImageUsecase>()
-          .call(imageBase64: imageBase64, mimeType: mimeType);
+      final entity = await sl<FetchProductByImageUsecase>().call(
+        imageBase64: imageBase64,
+        mimeType: mimeType,
+      );
       if (!mounted) return;
       if (entity == null) {
         _fail();
@@ -66,12 +70,14 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
       final model = sl<ProductEntityToModelMapper>()(entity);
       // Warm the per-cat picks cache so the success teaser is instant.
       unawaited(recommendProductsForCat(widget.summary.entity, l10n, limit: 3));
-      sl<LogEventUsecase>().call(eventName: 'Onboarding Scan Verdict',
-          properties: {
-            'product': model.name,
-            'score': model.score,
-            'timestamp': DateTime.now().toIso8601String(),
-          });
+      sl<LogEventUsecase>().call(
+        eventName: 'Onboarding Scan Verdict',
+        properties: {
+          'product': model.name,
+          'score': model.score,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
       _goToSuccess(model);
     } catch (_) {
       if (mounted) _fail();
@@ -79,9 +85,10 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
   }
 
   void _fail() {
-    sl<LogEventUsecase>().call(eventName: 'Onboarding Scan Failed', properties: {
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    sl<LogEventUsecase>().call(
+      eventName: 'Onboarding Scan Failed',
+      properties: {'timestamp': DateTime.now().toIso8601String()},
+    );
     setState(() => _phase = _Phase.error);
   }
 
@@ -105,71 +112,164 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
     }
 
     final l10n = AppLocalizations.of(context);
-    final name = widget.summary.name.trim();
     final isError = _phase == _Phase.error;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: DecoratedBox(
-        decoration:
-            const BoxDecoration(gradient: DSGradients.onboardingHealthIntro),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: DSDimens.sizeL),
-                Text(l10n.onboardingScanTitle(name),
-                    style: DSTextStyles.displayLg),
-                const SizedBox(height: DSDimens.sizeXs),
-                Text(
-                  isError ? l10n.onboardingScanFailed : l10n.onboardingScanSubtitle,
-                  style: DSTextStyles.bodyMd
-                      .copyWith(color: DSColors.inkSecondary),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Icon(
+        decoration: const BoxDecoration(
+          gradient: DSGradients.onboardingCurrentFood,
+        ),
+        child: Stack(
+          children: [
+            // Decorative stars + flowers scattered in the margins, behind the
+            // content. White ones sit on the purple top; lavender (C2A5E4)
+            // ones read against the lighter lower half.
+            const _Decor(
+              asset: 'star.svg',
+              size: 44,
+              color: Colors.white,
+              top: 70,
+              right: 18,
+            ),
+            const _Decor(
+              asset: 'flower.svg',
+              size: 22,
+              color: Colors.white,
+              top: 150,
+              left: 28,
+              rotation: 0.3,
+            ),
+            const _Decor(
+              asset: 'flower.svg',
+              size: 16,
+              color: Color(0xFFC2A5E4),
+              top: 250,
+              right: 36,
+              rotation: -0.2,
+            ),
+            const _Decor(
+              asset: 'star.svg',
+              size: 30,
+              color: Color(0xFFC2A5E4),
+              bottom: 220,
+              left: 20,
+            ),
+            const _Decor(
+              asset: 'flower.svg',
+              size: 20,
+              color: Color(0xFFC2A5E4),
+              bottom: 160,
+              right: 28,
+              rotation: 0.4,
+            ),
+            const _Decor(
+              asset: 'star.svg',
+              size: 26,
+              color: Colors.white,
+              top: 120,
+              right: 60,
+            ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: DSDimens.sizeL),
+                    Text(
                       isError
-                          ? Icons.image_not_supported_outlined
-                          : Icons.qr_code_scanner_rounded,
-                      size: 96,
-                      color: DSColors.inkPrimary.withValues(alpha: 0.15),
+                          ? l10n.onboardingScanFailed
+                          : l10n.onboardingScanTitle,
+                      textAlign: TextAlign.center,
+                      style: DSTextStyles.displayHero,
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: DSDimens.sizeS,
-                    bottom: DSDimens.size3xl,
-                  ),
-                  child: Column(
-                    children: [
-                      DSPillButton(
-                        label: isError
-                            ? l10n.onboardingScanRetry
-                            : l10n.onboardingScanCta,
-                        onPressed: _openScanner,
-                        leadingIcon: Icons.camera_alt_rounded,
-                        showChevron: false,
-                      ),
-                      const SizedBox(height: DSDimens.sizeXs),
-                      TextButton(
-                        onPressed: () => _goToSuccess(null),
-                        child: Text(
-                          l10n.onboardingScanSkip,
-                          style: DSTextStyles.bodyMd.copyWith(
-                            color: DSColors.inkSecondary,
-                            decoration: TextDecoration.underline,
+                    Expanded(
+                      child: Center(
+                        child: ExcludeSemantics(
+                          child: SvgPicture.asset(
+                            'assets/images/cat_phone.svg',
+                            width: 300,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: DSDimens.sizeS,
+                        bottom: DSDimens.size3xl,
+                      ),
+                      child: Column(
+                        children: [
+                          TextButton(
+                            onPressed: () => _goToSuccess(null),
+                            style: TextButton.styleFrom(
+                              overlayColor: Colors.transparent,
+                            ),
+                            child: Text(
+                              l10n.onboardingScanSkip,
+                              style: DSTextStyles.label.copyWith(
+                                color: DSColors.inkSecondary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: DSDimens.sizeXs),
+                          DSPillButton(
+                            label: isError
+                                ? l10n.onboardingScanRetry
+                                : l10n.onboardingScanCta,
+                            onPressed: _openScanner,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A recolored decorative SVG (star / flower) pinned in the screen margins.
+class _Decor extends StatelessWidget {
+  final String asset;
+  final double size;
+  final Color color;
+  final double? top;
+  final double? bottom;
+  final double? left;
+  final double? right;
+  final double rotation;
+
+  const _Decor({
+    required this.asset,
+    required this.size,
+    required this.color,
+    this.top,
+    this.bottom,
+    this.left,
+    this.right,
+    this.rotation = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: top,
+      bottom: bottom,
+      left: left,
+      right: right,
+      child: ExcludeSemantics(
+        child: Transform.rotate(
+          angle: rotation,
+          child: SvgPicture.asset(
+            'assets/images/$asset',
+            width: size,
+            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
           ),
         ),
       ),

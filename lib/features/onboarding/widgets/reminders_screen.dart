@@ -58,8 +58,6 @@ class _RemindersScreenState extends State<RemindersScreen> {
       footer: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          DSPillButton(label: l10n.commonDone, onPressed: _onDone),
-          const SizedBox(height: DSDimens.sizeXxs),
           TextButton(
             onPressed: widget.onNext,
             child: Text(
@@ -69,6 +67,8 @@ class _RemindersScreenState extends State<RemindersScreen> {
               ),
             ),
           ),
+          const SizedBox(height: DSDimens.sizeXxs),
+          DSPillButton(label: l10n.commonDone, onPressed: _onDone),
         ],
       ),
       child: Stack(

@@ -509,16 +509,18 @@
   "onboardingBrandSkip": "Ich bin nicht sicher",
   "onboardingBrandAnalyzing": "{brand} wird analysiert…",
   "onboardingBrandUnavailable": "Wir konnten {brand} gerade nicht analysieren — aber hier ist, was wir stattdessen empfehlen würden.",
-  "onboardingBrandUnlockCta": "{name}s Top-Empfehlungen freischalten",
+  "onboardingBrandUnlockCta": "{name}s Top-Empfehlungen entdecken",
   "brandTeaserFound": "Wir haben {count, plural, =1{1 besseres Futter} other{{count} bessere Futter}} für {name} gefunden",
   "brandTeaserLockedHint": "Abonniere, um sie zu sehen — abgestimmt auf die Bedürfnisse deiner Katze.",
-  "onboardingScanTitle": "Was fütterst du {name}?",
+  "brandTeaserRowLocked": "Zum Ansehen freischalten",
+  "onboardingScanTitle": "Scannen wir die\nerste Packung",
   "onboardingScanSubtitle": "Scanne die Verpackung und wir bewerten sie für deine Katze.",
-  "onboardingScanCta": "Verpackung scannen",
+  "onboardingScanCta": "Los scannen",
   "onboardingScanSkip": "Vorerst überspringen",
   "onboardingScanVerdictIntro": "So schneidet dieses Futter ab:",
   "onboardingScanFailed": "Wir konnten dieses Etikett nicht lesen. Versuche es erneut mit der Vorderseite der Verpackung im Bild.",
   "onboardingScanRetry": "Erneut scannen",
   "onboardingScanPersonalCon": "Für {name}: {con}",
-  "onboardingResultWhyTitle": "Warum das für {name} nicht ideal ist"
+  "onboardingResultWhyTitle": "Warum das für {name} nicht ideal ist",
+  "onboardingResultProfileTitle": "{name}s Profil"
 }

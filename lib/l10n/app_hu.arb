@@ -509,16 +509,18 @@
   "onboardingBrandSkip": "Nem vagyok biztos benne",
   "onboardingBrandAnalyzing": "{brand} elemzése…",
   "onboardingBrandUnavailable": "Most nem tudtuk elemezni a(z) {brand} márkát – de íme, amit helyette ajánlanánk.",
-  "onboardingBrandUnlockCta": "{name} legjobb választásainak feloldása",
+  "onboardingBrandUnlockCta": "{name} legjobb választásainak felfedezése",
   "brandTeaserFound": "{count, plural, =1{1 jobb táplálékot} other{{count} jobb táplálékot}} találtunk {name} számára",
   "brandTeaserLockedHint": "Fizess elő, hogy lásd őket – a macskád igényeihez igazítva.",
-  "onboardingScanTitle": "Mivel eteted {name} macskát?",
+  "brandTeaserRowLocked": "Feloldás a megtekintéshez",
+  "onboardingScanTitle": "Olvassuk be az\nelső csomagot",
   "onboardingScanSubtitle": "Szkenneld be a csomagolást, és értékeljük a macskád számára.",
-  "onboardingScanCta": "Csomagolás beolvasása",
+  "onboardingScanCta": "Olvassuk be",
   "onboardingScanSkip": "Most kihagyom",
   "onboardingScanVerdictIntro": "Így pontozott ez a táplálék:",
   "onboardingScanFailed": "Nem tudtuk leolvasni a címkét. Próbáld újra úgy, hogy a csomagolás eleje jól látszódjon.",
   "onboardingScanRetry": "Újra beolvasás",
   "onboardingScanPersonalCon": "{name} számára: {con}",
-  "onboardingResultWhyTitle": "Miért nem ideális {name} számára"
+  "onboardingResultWhyTitle": "Miért nem ideális {name} számára",
+  "onboardingResultProfileTitle": "{name} profilja"
 }

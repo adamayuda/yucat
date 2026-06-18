@@ -20,42 +20,50 @@ class DSChip extends StatelessWidget {
     // the chip size fixed so the others never reflow.
     final borderColor = selected ? DSColors.coralAccent : DSColors.surfaceCard;
     final dotColor = selected ? DSColors.coralAccent : DSColors.inputLightGrey;
-    return Material(
-      color: DSColors.surfaceCard,
-      borderRadius: BorderRadius.circular(DSRadii.lg),
-      child: InkWell(
+    // Inside a Wrap each chip gets unbounded width, so a long (e.g. translated)
+    // label would push the chip past the screen edge. Cap the chip to the
+    // viewport width and let the label wrap onto multiple lines instead.
+    final maxWidth =
+        MediaQuery.sizeOf(context).width - DSDimens.sizeL * 2;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: Material(
+        color: DSColors.surfaceCard,
         borderRadius: BorderRadius.circular(DSRadii.lg),
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: DSMotion.durFast,
-          curve: DSMotion.curveStandard,
-          padding: const EdgeInsets.symmetric(
-            horizontal: DSDimens.sizeS,
-            vertical: 10,
-          ),
-          decoration: BoxDecoration(
-            color: DSColors.surfaceCard,
-            borderRadius: BorderRadius.circular(DSRadii.lg),
-            // Constant border width so selecting only changes the colour — a
-            // width change would grow the chip (the border adds layout padding)
-            // and reflow every other chip.
-            border: Border.all(color: borderColor, width: 1.5),
-            boxShadow: selected ? null : DSShadows.e1,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: dotColor,
-                  shape: BoxShape.circle,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(DSRadii.lg),
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: DSMotion.durFast,
+            curve: DSMotion.curveStandard,
+            padding: const EdgeInsets.symmetric(
+              horizontal: DSDimens.sizeS,
+              vertical: 10,
+            ),
+            decoration: BoxDecoration(
+              color: DSColors.surfaceCard,
+              borderRadius: BorderRadius.circular(DSRadii.lg),
+              // Constant border width so selecting only changes the colour — a
+              // width change would grow the chip (the border adds layout padding)
+              // and reflow every other chip.
+              border: Border.all(color: borderColor, width: 1.5),
+              boxShadow: selected ? null : DSShadows.e1,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: dotColor,
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              ),
-              const SizedBox(width: DSDimens.sizeXxs),
-              Text(label, style: DSTextStyles.bodyLg),
-            ],
+                const SizedBox(width: DSDimens.sizeXxs),
+                Flexible(child: Text(label, style: DSTextStyles.bodyLg)),
+              ],
+            ),
           ),
         ),
       ),

@@ -509,16 +509,18 @@
   "onboardingBrandSkip": "Não tenho a certeza",
   "onboardingBrandAnalyzing": "A analisar {brand}…",
   "onboardingBrandUnavailable": "Não conseguimos analisar {brand} neste momento, mas é isto o que recomendaríamos.",
-  "onboardingBrandUnlockCta": "Desbloquear as melhores opções do {name}",
+  "onboardingBrandUnlockCta": "Descobrir as melhores opções do {name}",
   "brandTeaserFound": "Encontrámos {count, plural, =1{1 comida melhor} other{{count} comidas melhores}} para {name}",
   "brandTeaserLockedHint": "Subscreva para as ver — à medida das necessidades do seu gato.",
-  "onboardingScanTitle": "O que dá de comer ao {name}?",
+  "brandTeaserRowLocked": "Desbloquear para ver",
+  "onboardingScanTitle": "Vamos digitalizar\na primeira embalagem",
   "onboardingScanSubtitle": "Digitalize a embalagem e avaliá-la-emos para o seu gato.",
-  "onboardingScanCta": "Digitalizar a embalagem",
+  "onboardingScanCta": "Vamos digitalizar",
   "onboardingScanSkip": "Saltar por agora",
   "onboardingScanVerdictIntro": "Eis como essa comida pontua:",
   "onboardingScanFailed": "Não conseguimos ler esse rótulo. Tente novamente com a parte da frente da embalagem visível.",
   "onboardingScanRetry": "Digitalizar de novo",
   "onboardingScanPersonalCon": "Para {name}: {con}",
-  "onboardingResultWhyTitle": "Porque é que não é o ideal para {name}"
+  "onboardingResultWhyTitle": "Porque é que não é o ideal para {name}",
+  "onboardingResultProfileTitle": "Perfil do {name}"
 }

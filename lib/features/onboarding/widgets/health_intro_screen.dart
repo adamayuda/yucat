@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/l10n/app_localizations.dart';
@@ -41,8 +40,8 @@ class HealthIntroScreen extends StatelessWidget {
             top: 220,
             left: 28,
             child: ExcludeSemantics(
-              child: SvgPicture.asset(
-                'assets/images/apple-cloud.svg',
+              child: Lottie.asset(
+                'assets/images/apple.json',
                 width: 93,
               ),
             ),
@@ -51,8 +50,8 @@ class HealthIntroScreen extends StatelessWidget {
             top: 168,
             right: 12,
             child: ExcludeSemantics(
-              child: SvgPicture.asset(
-                'assets/images/meat-cloud.svg',
+              child: Lottie.asset(
+                'assets/images/meat.json',
                 width: 141,
               ),
             ),

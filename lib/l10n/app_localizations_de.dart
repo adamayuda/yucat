@@ -1821,7 +1821,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String onboardingBrandUnlockCta(String name) {
-    return '${name}s Top-Empfehlungen freischalten';
+    return '${name}s Top-Empfehlungen entdecken';
   }
 
   @override
@@ -1840,16 +1840,17 @@ class AppLocalizationsDe extends AppLocalizations {
       'Abonniere, um sie zu sehen — abgestimmt auf die Bedürfnisse deiner Katze.';
 
   @override
-  String onboardingScanTitle(String name) {
-    return 'Was fütterst du $name?';
-  }
+  String get brandTeaserRowLocked => 'Zum Ansehen freischalten';
+
+  @override
+  String get onboardingScanTitle => 'Scannen wir die\nerste Packung';
 
   @override
   String get onboardingScanSubtitle =>
       'Scanne die Verpackung und wir bewerten sie für deine Katze.';
 
   @override
-  String get onboardingScanCta => 'Verpackung scannen';
+  String get onboardingScanCta => 'Los scannen';
 
   @override
   String get onboardingScanSkip => 'Vorerst überspringen';
@@ -1872,5 +1873,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String onboardingResultWhyTitle(String name) {
     return 'Warum das für $name nicht ideal ist';
+  }
+
+  @override
+  String onboardingResultProfileTitle(String name) {
+    return '${name}s Profil';
   }
 }

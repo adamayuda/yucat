@@ -116,6 +116,12 @@ class DSGradients {
     colors: [Color(0xFFDFE6FD), DSColors.tintCloud],
   );
 
+  static const LinearGradient onboardingCurrentFood = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFC2A5E4), Color(0xFFEFEEF5)],
+  );
+
   static const LinearGradient onboardingSuccess = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,

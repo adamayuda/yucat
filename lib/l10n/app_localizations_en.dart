@@ -1795,7 +1795,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String onboardingBrandUnlockCta(String name) {
-    return 'Unlock $name\'s top picks';
+    return 'Discover $name\'s top picks';
   }
 
   @override
@@ -1814,16 +1814,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Subscribe to see them — matched to your cat\'s needs.';
 
   @override
-  String onboardingScanTitle(String name) {
-    return 'What are you feeding $name?';
-  }
+  String get brandTeaserRowLocked => 'Unlock to see';
+
+  @override
+  String get onboardingScanTitle => 'Let\'s scan your\nfirst package';
 
   @override
   String get onboardingScanSubtitle =>
       'Scan the package and we\'ll grade it for your cat.';
 
   @override
-  String get onboardingScanCta => 'Scan the package';
+  String get onboardingScanCta => 'Let\'s scan';
 
   @override
   String get onboardingScanSkip => 'Skip for now';
@@ -1846,5 +1847,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String onboardingResultWhyTitle(String name) {
     return 'Why this isn\'t ideal for $name';
+  }
+
+  @override
+  String onboardingResultProfileTitle(String name) {
+    return '$name\'s profile';
   }
 }

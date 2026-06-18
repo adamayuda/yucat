@@ -1810,7 +1810,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String onboardingBrandUnlockCta(String name) {
-    return '$name legjobb választásainak feloldása';
+    return '$name legjobb választásainak felfedezése';
   }
 
   @override
@@ -1829,16 +1829,17 @@ class AppLocalizationsHu extends AppLocalizations {
       'Fizess elő, hogy lásd őket – a macskád igényeihez igazítva.';
 
   @override
-  String onboardingScanTitle(String name) {
-    return 'Mivel eteted $name macskát?';
-  }
+  String get brandTeaserRowLocked => 'Feloldás a megtekintéshez';
+
+  @override
+  String get onboardingScanTitle => 'Olvassuk be az\nelső csomagot';
 
   @override
   String get onboardingScanSubtitle =>
       'Szkenneld be a csomagolást, és értékeljük a macskád számára.';
 
   @override
-  String get onboardingScanCta => 'Csomagolás beolvasása';
+  String get onboardingScanCta => 'Olvassuk be';
 
   @override
   String get onboardingScanSkip => 'Most kihagyom';
@@ -1861,5 +1862,10 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String onboardingResultWhyTitle(String name) {
     return 'Miért nem ideális $name számára';
+  }
+
+  @override
+  String onboardingResultProfileTitle(String name) {
+    return '$name profilja';
   }
 }

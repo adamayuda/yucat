@@ -3163,7 +3163,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingBrandUnlockCta.
   ///
   /// In en, this message translates to:
-  /// **'Unlock {name}\'s top picks'**
+  /// **'Discover {name}\'s top picks'**
   String onboardingBrandUnlockCta(String name);
 
   /// No description provided for @brandTeaserFound.
@@ -3178,11 +3178,17 @@ abstract class AppLocalizations {
   /// **'Subscribe to see them — matched to your cat\'s needs.'**
   String get brandTeaserLockedHint;
 
+  /// No description provided for @brandTeaserRowLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock to see'**
+  String get brandTeaserRowLocked;
+
   /// No description provided for @onboardingScanTitle.
   ///
   /// In en, this message translates to:
-  /// **'What are you feeding {name}?'**
-  String onboardingScanTitle(String name);
+  /// **'Let\'s scan your\nfirst package'**
+  String get onboardingScanTitle;
 
   /// No description provided for @onboardingScanSubtitle.
   ///
@@ -3193,7 +3199,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingScanCta.
   ///
   /// In en, this message translates to:
-  /// **'Scan the package'**
+  /// **'Let\'s scan'**
   String get onboardingScanCta;
 
   /// No description provided for @onboardingScanSkip.
@@ -3231,6 +3237,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Why this isn\'t ideal for {name}'**
   String onboardingResultWhyTitle(String name);
+
+  /// No description provided for @onboardingResultProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s profile'**
+  String onboardingResultProfileTitle(String name);
 }
 
 class _AppLocalizationsDelegate

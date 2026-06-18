@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/onboarding_floating_button.dart';
@@ -43,14 +44,18 @@ class ProofChartScreen extends StatelessWidget {
                     style: DSTextStyles.displayLg,
                   ),
                   const Spacer(),
-                  SvgPicture.asset(
-                    localizedAssetPath(
-                      context,
-                      'assets/images/onboarding-graph',
-                      'svg',
-                      available: const {'en', 'es', 'fr', 'hu'},
-                    ),
+                  SizedBox(
                     width: width * 0.82,
+                    height: width * 0.82,
+                    child: Lottie.asset(
+                      localizedAssetPath(
+                        context,
+                        'assets/images/scan',
+                        'json',
+                        available: const {'en', 'es', 'fr', 'hu', 'de', 'pt'},
+                      ),
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   const Spacer(),
                   Container(

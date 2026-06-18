@@ -779,7 +779,7 @@
       }
     }
   },
-  "onboardingBrandUnlockCta": "Unlock {name}'s top picks",
+  "onboardingBrandUnlockCta": "Discover {name}'s top picks",
   "@onboardingBrandUnlockCta": {
     "placeholders": {
       "name": {
@@ -799,16 +799,10 @@
     }
   },
   "brandTeaserLockedHint": "Subscribe to see them — matched to your cat's needs.",
-  "onboardingScanTitle": "What are you feeding {name}?",
-  "@onboardingScanTitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "brandTeaserRowLocked": "Unlock to see",
+  "onboardingScanTitle": "Let's scan your\nfirst package",
   "onboardingScanSubtitle": "Scan the package and we'll grade it for your cat.",
-  "onboardingScanCta": "Scan the package",
+  "onboardingScanCta": "Let's scan",
   "onboardingScanSkip": "Skip for now",
   "onboardingScanVerdictIntro": "Here's how that food scores:",
   "onboardingScanFailed": "We couldn't read that label. Try again with the front of the package in frame.",
@@ -826,6 +820,14 @@
   },
   "onboardingResultWhyTitle": "Why this isn't ideal for {name}",
   "@onboardingResultWhyTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingResultProfileTitle": "{name}'s profile",
+  "@onboardingResultProfileTitle": {
     "placeholders": {
       "name": {
         "type": "String"

@@ -509,16 +509,18 @@
   "onboardingBrandSkip": "Je ne sais pas",
   "onboardingBrandAnalyzing": "Analyse de {brand}…",
   "onboardingBrandUnavailable": "Nous n'avons pas pu analyser {brand} pour l'instant — mais voici ce que nous recommanderions.",
-  "onboardingBrandUnlockCta": "Débloquer les meilleurs choix de {name}",
+  "onboardingBrandUnlockCta": "Découvrir les meilleurs choix de {name}",
   "brandTeaserFound": "Nous avons trouvé {count, plural, =1{1 meilleure nourriture} other{{count} meilleures nourritures}} pour {name}",
   "brandTeaserLockedHint": "Abonne-toi pour les voir, adaptées aux besoins de ton chat.",
-  "onboardingScanTitle": "Que donnes-tu à manger à {name} ?",
+  "brandTeaserRowLocked": "Débloquer pour voir",
+  "onboardingScanTitle": "Scannons ton\npremier paquet",
   "onboardingScanSubtitle": "Scanne l'emballage et nous l'évaluerons pour ton chat.",
-  "onboardingScanCta": "Scanner l'emballage",
+  "onboardingScanCta": "Scannons",
   "onboardingScanSkip": "Ignorer pour l'instant",
   "onboardingScanVerdictIntro": "Voici la note de cette nourriture :",
   "onboardingScanFailed": "Nous n'avons pas pu lire l'étiquette. Réessaie avec l'avant de l'emballage bien visible.",
   "onboardingScanRetry": "Scanner à nouveau",
   "onboardingScanPersonalCon": "Pour {name} : {con}",
-  "onboardingResultWhyTitle": "Pourquoi ce n'est pas idéal pour {name}"
+  "onboardingResultWhyTitle": "Pourquoi ce n'est pas idéal pour {name}",
+  "onboardingResultProfileTitle": "Profil de {name}"
 }

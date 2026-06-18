@@ -75,7 +75,7 @@ class _ScannerPageState extends State<ScannerPage>
 
       _cameraController = CameraController(
         cameras.first,
-        ResolutionPreset.medium,
+        ResolutionPreset.veryHigh,
         enableAudio: false,
       );
 
@@ -168,7 +168,7 @@ class _ScannerPageState extends State<ScannerPage>
             Positioned.fill(
               child: ClipRect(
                 child: FittedBox(
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                   child: SizedBox(
                     // previewSize is reported landscape; swap for portrait UI.
                     width: _cameraController!.value.previewSize!.height,
