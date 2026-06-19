@@ -6,6 +6,7 @@ import {config} from "./config";
 import {
   identifyProductFromImage,
   analyzeProductImage,
+  analyzeProductImageParallel,
   findProductImageUrl,
   verifyMatchWithLLM,
   generateCatNarrative as buildCatNarrative,
@@ -221,11 +222,13 @@ export const fetchProductByImageV2 = onCall(
         identification.name
       ).catch(() => "");
 
-      const {product, rawResponse} = await analyzeProductImage(
-        image,
-        resolvedMimeType,
-        identification
-      );
+      const {product, rawResponse} = config.anthropic.useParallelAnalysis ?
+        await analyzeProductImageParallel(
+          image,
+          resolvedMimeType,
+          identification
+        ) :
+        await analyzeProductImage(image, resolvedMimeType, identification);
       timer.mark("analyze");
 
       if (product && product.name) {

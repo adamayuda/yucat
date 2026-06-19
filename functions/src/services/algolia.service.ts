@@ -10,6 +10,11 @@ const algoliaClient = algoliasearch(
 
 const NAME_MATCH_THRESHOLD = 0.6;
 const HITS_PER_PAGE_V2 = 5;
+// When the top string-match score isn't clearly ahead of the runner-up, the
+// match is ambiguous (e.g. a generic "Kitten" scan ties 1.0 with "Persian
+// Kitten", "Maine Coon Kitten", "Kitten Up to 12 months", ...). In that case we
+// defer to the LLM verifier instead of blindly taking the first hit.
+const AMBIGUITY_MARGIN = 0.15;
 
 function stripAccents(s: string): string {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -310,6 +315,24 @@ export async function searchProductByNameV2(
         threshold: NAME_MATCH_THRESHOLD,
         topScore: best?.score?.toFixed(2) ?? "n/a",
         topBrandMatch: best?.brandMatch ?? "n/a",
+        structuredData: true,
+      });
+      return null;
+    }
+
+    // Ambiguity guard: a short/generic scanned name matches many distinct
+    // variants equally (the one-directional wordOverlap can't tell "Kitten"
+    // apart from "Persian Kitten"). When the runner-up is about as good as the
+    // best, return null so the caller's LLM verifier disambiguates among the
+    // full candidate set instead of us silently picking the first hit.
+    const second = scored[1];
+    if (second && best.score - second.score < AMBIGUITY_MARGIN) {
+      logger.info("Algolia v2: ambiguous top match, deferring to LLM verifier", {
+        topScore: best.score.toFixed(2),
+        runnerUpScore: second.score.toFixed(2),
+        tiedNames: scored
+          .filter((s) => best.score - s.score < AMBIGUITY_MARGIN)
+          .map((s) => s.hit.name),
         structuredData: true,
       });
       return null;

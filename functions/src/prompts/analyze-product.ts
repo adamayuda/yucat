@@ -81,11 +81,14 @@ final answer. Do not write a free-text response.
  * brand/name (the identify step read the packaging) instead of re-deriving and
  * drifting to a different flavor.
  */
-export function generateAnalysisUserPrompt(identification?: {
-  brand: string;
-  name: string;
-  foodType: string;
-}): string {
+export function generateAnalysisUserPrompt(
+  identification?: {
+    brand: string;
+    name: string;
+    foodType: string;
+  },
+  sourceHint?: string,
+): string {
   const known = identification ?
     "This product has already been identified from the packaging as:\n" +
     `  brand: "${identification.brand}"\n` +
@@ -94,9 +97,19 @@ export function generateAnalysisUserPrompt(identification?: {
     "Search for THIS exact product's guaranteed analysis and keep this name.\n\n" :
     "";
 
-  return known +
+  // Source-restricted variant: used by the parallel fan-out so each instance
+  // covers a different source quickly. It must NOT roam to other sources —
+  // breadth comes from running several instances concurrently.
+  const search = sourceHint ?
+    "Analyze this cat food product. Use web_search to find the guaranteed " +
+    `analysis and ingredients for THIS product, searching ${sourceHint}. ` +
+    "Make at most one focused search of that source — do NOT search other " +
+    "sources. Then submit the final answer with the submit_product tool, using " +
+    "whatever data you found (leave fields empty rather than inventing values)." :
     "Analyze this cat food product. Use web_search to find the guaranteed " +
     "analysis — search the manufacturer site and at least one major retailer " +
     "before concluding the data is unavailable. Submit the final answer with " +
     "the submit_product tool.";
+
+  return known + search;
 }

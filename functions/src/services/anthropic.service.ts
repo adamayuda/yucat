@@ -279,9 +279,37 @@ export async function analyzeProductImage(
   mimeType: string,
   identification?: ProductIdentification
 ): Promise<{product: Product | null; rawResponse: string}> {
+  return analyzeOneSource(imageBase64, mimeType, identification, {
+    maxUses: config.anthropic.maxWebSearches,
+    label: "single",
+  });
+}
+
+interface AnalyzeSourceOptions {
+  /** Restrict the search to one source (manufacturer / a retailer). */
+  sourceHint?: string;
+  /** web_search max_uses for this call. */
+  maxUses?: number;
+  /** Log label to distinguish parallel instances. */
+  label?: string;
+}
+
+/**
+ * Runs one analyze call. With a `sourceHint` + small `maxUses` this is a fast,
+ * single-source instance used by {@link analyzeProductImageParallel}; with no
+ * hint it is the original free-search behavior (the control path).
+ */
+async function analyzeOneSource(
+  imageBase64: string,
+  mimeType: string,
+  identification: ProductIdentification | undefined,
+  opts: AnalyzeSourceOptions
+): Promise<{product: Product | null; rawResponse: string}> {
+  const label = opts.label ?? "single";
+  const maxUses = opts.maxUses ?? config.anthropic.maxWebSearches;
   const mediaType = normalizeMediaType(mimeType);
   const systemText = generateAnalysisSystemPrompt();
-  const userText = generateAnalysisUserPrompt(identification);
+  const userText = generateAnalysisUserPrompt(identification, opts.sourceHint);
 
   const systemBlocks = [
     {
@@ -311,6 +339,11 @@ export async function analyzeProductImage(
   // the analyze cost is one slow search, many pause_turn resumes, or the fallback.
   const roundTripMs: number[] = [];
   const stopReasons: (string | null | undefined)[] = [];
+  // Token usage tells us whether the time is reading-bound (large input from
+  // search results) or generation-bound (large output) — the key question for
+  // whether splitting work across parallel instances helps.
+  let inputTokens = 0;
+  let outputTokens = 0;
 
   for (let i = 0; i <= MAX_CONTINUATIONS; i++) {
     const roundStart = Date.now();
@@ -325,7 +358,7 @@ export async function analyzeProductImage(
           {
             type: "web_search_20250305",
             name: "web_search",
-            max_uses: config.anthropic.maxWebSearches,
+            max_uses: maxUses,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any,
           ...ANALYSIS_TOOLS,
@@ -335,6 +368,8 @@ export async function analyzeProductImage(
     );
     roundTripMs.push(Date.now() - roundStart);
     stopReasons.push(response.stop_reason);
+    inputTokens += response.usage?.input_tokens ?? 0;
+    outputTokens += response.usage?.output_tokens ?? 0;
 
     accumulated = accumulated.concat(response.content);
     lastStopReason = response.stop_reason;
@@ -357,10 +392,14 @@ export async function analyzeProductImage(
   ).length;
 
   logger.info("analyzeProductImage web_search timing", {
+    label,
+    maxUses,
     roundTrips: roundTripMs.length,
     roundTripMs,
     webSearchMs: roundTripMs.reduce((a, b) => a + b, 0),
     webSearchCount,
+    inputTokens,
+    outputTokens,
     stopReasons,
     structuredData: true,
   });
@@ -415,7 +454,10 @@ export async function analyzeProductImage(
         tool_choice: {type: "tool", name: "submit_product"},
       })
     );
+    inputTokens += fallback.usage?.input_tokens ?? 0;
+    outputTokens += fallback.usage?.output_tokens ?? 0;
     logger.info("analyzeProductImage fallback timing", {
+      label,
       fallbackMs: Date.now() - fallbackStart,
       usedPriorText: !!priorText,
       structuredData: true,
@@ -440,6 +482,84 @@ export async function analyzeProductImage(
     product,
     rawResponse: JSON.stringify(submit.input),
   };
+}
+
+type AnalyzeResult = {product: Product | null; rawResponse: string};
+
+/**
+ * Fan-out analysis: run several single-source instances concurrently and keep
+ * the most complete result. This is true parallelism (independent API calls),
+ * unlike the server-side web_search loop which serializes within one turn.
+ */
+export async function analyzeProductImageParallel(
+  imageBase64: string,
+  mimeType: string,
+  identification?: ProductIdentification
+): Promise<AnalyzeResult> {
+  const SOURCES: {label: string; hint: string}[] = [
+    {label: "manufacturer", hint: "the manufacturer's official website"},
+    {label: "retailer-a", hint: "a major retailer such as Chewy or Amazon"},
+    {
+      label: "retailer-b",
+      hint: "a major retailer such as zooplus, Petco, or Pets at Home",
+    },
+  ];
+
+  const started = Date.now();
+  const settled = await Promise.all(
+    SOURCES.map((s) =>
+      analyzeOneSource(imageBase64, mimeType, identification, {
+        sourceHint: s.hint,
+        maxUses: config.anthropic.parallelMaxUses,
+        label: s.label,
+      }).catch((error) => {
+        logger.warn("analyzeProductImageParallel instance failed", {
+          label: s.label,
+          error: error instanceof Error ? error.message : String(error),
+          structuredData: true,
+        });
+        return null;
+      })
+    )
+  );
+  const results = settled.filter((r): r is AnalyzeResult => r !== null);
+
+  const best = pickBestProduct(results);
+  logger.info("analyzeProductImageParallel complete", {
+    instances: SOURCES.length,
+    succeeded: results.length,
+    parallelMs: Date.now() - started,
+    chosenHasNutrition: best.product ? best.product.score > 0 : false,
+    structuredData: true,
+  });
+  return best;
+}
+
+/**
+ * Picks the most complete analysis from the fan-out instances. Ranks by data
+ * completeness (nutrition + ingredients), not image — the image is re-sourced
+ * via SerpAPI downstream regardless. Results are in source-priority order
+ * (manufacturer first), so strict-greater comparison keeps the earlier source
+ * on ties.
+ */
+function pickBestProduct(results: AnalyzeResult[]): AnalyzeResult {
+  const completeness = (p: Product | null): number => {
+    if (!p) return -1;
+    const hasNutrition = p.score > 0 ? 2 : 0;
+    const hasIngredients = (p.ingredients?.length ?? 0) > 0 ? 1 : 0;
+    return hasNutrition + hasIngredients;
+  };
+
+  let best: AnalyzeResult = results[0] ?? {product: null, rawResponse: ""};
+  let bestScore = completeness(best.product);
+  for (const r of results.slice(1)) {
+    const s = completeness(r.product);
+    if (s > bestScore) {
+      best = r;
+      bestScore = s;
+    }
+  }
+  return best;
 }
 
 const NARRATIVE_TOOLS: Anthropic.Tool[] = [
@@ -769,7 +889,12 @@ export async function verifyMatchWithLLM(
     "Pick the index of the candidate that is the SAME product (same brand, " +
     "same line/variant/flavor, same food type). If none of them is the same " +
     "product, pass -1. Differences in packaging size or pack count are fine; " +
-    "differences in life stage (kitten vs adult), flavor, or formulation are not.";
+    "differences in life stage (kitten vs adult), flavor, or formulation are not. " +
+    "Breed- or condition-specific variants (e.g. \"Persian\", \"Maine Coon\", " +
+    "\"British Shorthair\", \"Sterilised\") are DIFFERENT products from the " +
+    "generic line — only pick one if the scanned name also names that breed or " +
+    "condition. If the scan is the plain/generic product, prefer the generic " +
+    "candidate over any breed- or condition-specific variant.";
 
   const tools: Anthropic.Tool[] = [
     {

@@ -17,6 +17,13 @@ export const config = {
     // analyze step. Capped at 3 to bound latency; raise if data completeness on
     // obscure products regresses. See prompts/analyze-product SEARCH STRATEGY.
     maxWebSearches: 3,
+    // Experiment (A/B): when true, the analyze step fans out to several
+    // single-source Claude calls in parallel and keeps the most complete result,
+    // instead of one free-search call. ~3x cost; see analyzeProductImageParallel.
+    useParallelAnalysis: true,
+    // Per-instance web_search budget for the parallel fan-out (each instance
+    // covers one source, so it needs few searches).
+    parallelMaxUses: 1,
   },
 
   // Algolia Configuration
