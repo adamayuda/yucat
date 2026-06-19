@@ -20,6 +20,7 @@ import {
 } from "./services/algolia.service";
 import {processProductImage, uploadUserPhoto} from "./utils/image-helpers";
 import {logScanRequest} from "./utils/scan-log";
+import {createTimer} from "./utils/timing";
 import {Product} from "./models/product";
 
 admin.initializeApp();
@@ -60,14 +61,19 @@ export const fetchProductByImageV2 = onCall(
 
     const requestId = `scan-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
+    // Per-step latency instrumentation (measurement only — see utils/timing.ts).
+    const timer = createTimer();
+
     try {
       // Background: upload the user's scan photo to Storage.
       const userPhotoPromise = uploadUserPhoto(image, resolvedMimeType, requestId);
 
       // Step 1 — fast identification (Haiku vision, no web_search).
       const identification = await identifyProductFromImage(image, resolvedMimeType);
+      timer.mark("identify");
 
       const userPhotoUrl = await userPhotoPromise;
+      timer.mark("userPhotoUpload");
 
       if (!identification) {
         await logScanRequest({
@@ -78,6 +84,14 @@ export const fetchProductByImageV2 = onCall(
           cachedMatch: false,
           product: null,
           timestamp: new Date(),
+        });
+        timer.mark("scanLog");
+
+        logger.info("scan timings", {
+          requestId,
+          path: "not-identified",
+          ...timer.summary(),
+          structuredData: true,
         });
 
         return {
@@ -94,6 +108,7 @@ export const fetchProductByImageV2 = onCall(
         identification.name,
         identification.foodType
       );
+      timer.mark("cacheLookup");
 
       // Step 2b — optional LLM verification when string match misses.
       if (!cachedProduct && config.algolia.useLLMVerification) {
@@ -105,6 +120,7 @@ export const fetchProductByImageV2 = onCall(
         if (candidates.length > 0) {
           cachedProduct = await verifyMatchWithLLM(identification, candidates);
         }
+        timer.mark("llmVerify");
       }
 
       // When the cache hit is a stale no-data entry, fall through to a full
@@ -149,6 +165,7 @@ export const fetchProductByImageV2 = onCall(
             );
             cachedProduct.lastImageAttempt = Date.now();
             await cacheProduct(cachedProduct.barcode, cachedProduct);
+            timer.mark("imageBackfill");
           }
 
           logger.info("Cache hit, skipping full analysis", {
@@ -165,6 +182,14 @@ export const fetchProductByImageV2 = onCall(
             cachedMatch: true,
             product: cachedProduct,
             timestamp: new Date(),
+          });
+          timer.mark("scanLog");
+
+          logger.info("scan timings", {
+            requestId,
+            path: "cache-hit",
+            ...timer.summary(),
+            structuredData: true,
           });
 
           return {
@@ -183,11 +208,25 @@ export const fetchProductByImageV2 = onCall(
         structuredData: true,
       });
 
+      // Kick off the SerpAPI product-image lookup IN PARALLEL with the slow
+      // analyze step. Claude's web_search almost never returns a hostable image
+      // URL (it returns page URLs), so we need SerpAPI on essentially every cache
+      // miss anyway — running it concurrently overlaps its ~6-7s with analyze and
+      // takes it off the critical path. Uses the identification brand/name (the
+      // analyzed product.brand/name aren't available yet, and are near-identical).
+      // findProductImageUrl swallows its own errors (returns ""), but guard the
+      // unawaited promise so a rejection can never go unhandled.
+      const serpApiImageUrlPromise = findProductImageUrl(
+        identification.brand,
+        identification.name
+      ).catch(() => "");
+
       const {product, rawResponse} = await analyzeProductImage(
         image,
         resolvedMimeType,
         identification
       );
+      timer.mark("analyze");
 
       if (product && product.name) {
         // Image-flow products are always AI-identified.
@@ -202,20 +241,20 @@ export const fetchProductByImageV2 = onCall(
         product.barcode = cacheKey;
 
         // Host the analyze-provided image first. If that yields nothing —
-        // empty, or a non-image page URL that fails validation — fall back to a
-        // dedicated image search and host whatever it finds.
+        // empty, or a non-image page URL that fails validation — fall back to the
+        // SerpAPI lookup that's been running in parallel since before analyze
+        // (await here usually resolves instantly, since it overlapped analyze).
         let hostedImage = await processProductImage(
           product.imageUrl,
           cacheKey,
           product.name,
           product.brand
         );
+        timer.mark("imageHostPrimary");
         let imageLookupRan = false;
         if (!hostedImage) {
-          const foundUrl = await findProductImageUrl(
-            product.brand,
-            product.name
-          );
+          const foundUrl = await serpApiImageUrlPromise;
+          timer.mark("imageSearchSerpapi");
           imageLookupRan = true;
           if (foundUrl) {
             hostedImage = await processProductImage(
@@ -224,6 +263,7 @@ export const fetchProductByImageV2 = onCall(
               product.name,
               product.brand
             );
+            timer.mark("imageHostFallback");
           }
         }
         product.imageUrl = hostedImage;
@@ -235,6 +275,7 @@ export const fetchProductByImageV2 = onCall(
         }
 
         await cacheProduct(cacheKey, product);
+        timer.mark("cacheWrite");
 
         logger.info("Image product processing complete", {
           productName: product.name,
@@ -253,6 +294,14 @@ export const fetchProductByImageV2 = onCall(
         cachedMatch: false,
         product: product || null,
         timestamp: new Date(),
+      });
+      timer.mark("scanLog");
+
+      logger.info("scan timings", {
+        requestId,
+        path: "full-analysis",
+        ...timer.summary(),
+        structuredData: true,
       });
 
       return {

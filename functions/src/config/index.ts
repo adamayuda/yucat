@@ -13,7 +13,10 @@ export const config = {
     apiKey: process.env.ANTHROPIC_API_KEY || "",
     model: "claude-haiku-4-5-20251001",
     temperature: 0.1,
-    maxWebSearches: 5,
+    // Web searches run sequentially server-side (~2.5-3s each) and dominate the
+    // analyze step. Capped at 3 to bound latency; raise if data completeness on
+    // obscure products regresses. See prompts/analyze-product SEARCH STRATEGY.
+    maxWebSearches: 3,
   },
 
   // Algolia Configuration

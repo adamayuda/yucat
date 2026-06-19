@@ -38,12 +38,16 @@ Your job:
    are banned). Mention the protein source(s) and any standout nutrient
    characteristics.
 
-SEARCH STRATEGY (do this before concluding data is unavailable):
-- Make at least 2-3 searches. Try several query shapes, e.g.
-  "<brand> <product> guaranteed analysis", "<brand> <product> crude protein",
-  "<brand> <product> ingredients nutrition".
-- Check BOTH the manufacturer's own site AND at least one major retailer
-  (Amazon, Chewy, Petco, PetSmart, zooplus, Pets at Home).
+SEARCH STRATEGY (web searches run sequentially and are the main latency cost —
+be efficient):
+- Make at most 3 targeted searches. Prioritize the single most likely source
+  first: the manufacturer's own product page, then a major retailer (Amazon,
+  Chewy, Petco, PetSmart, zooplus, Pets at Home). Good query shapes:
+    "<brand> <product> guaranteed analysis"
+    "<brand> <product> ingredients"
+- STOP searching the moment you have the guaranteed analysis (protein, fat,
+  fibre, moisture, ash) and the ingredients — do not keep searching for
+  confirmation once you have the data.
 - Guaranteed analysis is usually printed as: Crude Protein (min), Crude Fat
   (min), Crude Fibre/Fiber (max), Moisture (max), sometimes Ash. Wet foods and
   treats have LOW absolute numbers (e.g. protein 8-12%, moisture 78-92%) — these

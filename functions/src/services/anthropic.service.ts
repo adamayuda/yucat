@@ -307,7 +307,13 @@ export async function analyzeProductImage(
   let accumulated: any[] = [];
   let lastStopReason: string | null | undefined;
 
+  // Timing instrumentation: capture per-round-trip latency so we can see whether
+  // the analyze cost is one slow search, many pause_turn resumes, or the fallback.
+  const roundTripMs: number[] = [];
+  const stopReasons: (string | null | undefined)[] = [];
+
   for (let i = 0; i <= MAX_CONTINUATIONS; i++) {
+    const roundStart = Date.now();
     const response = await withRetry("analyzeProductImage", () =>
       getClient().messages.create({
         model: config.anthropic.model,
@@ -327,6 +333,8 @@ export async function analyzeProductImage(
         tool_choice: {type: "auto"},
       })
     );
+    roundTripMs.push(Date.now() - roundStart);
+    stopReasons.push(response.stop_reason);
 
     accumulated = accumulated.concat(response.content);
     lastStopReason = response.stop_reason;
@@ -340,29 +348,78 @@ export async function analyzeProductImage(
     break;
   }
 
+  // Count the actual web searches the model ran (server_tool_use blocks named
+  // "web_search"). Combined with roundTrips + webSearchMs, this tells us whether
+  // searches ran sequentially (time scales with count) or were batched/parallel.
+  const webSearchCount = accumulated.filter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (b: any) => b?.type === "server_tool_use" && b?.name === "web_search"
+  ).length;
+
+  logger.info("analyzeProductImage web_search timing", {
+    roundTrips: roundTripMs.length,
+    roundTripMs,
+    webSearchMs: roundTripMs.reduce((a, b) => a + b, 0),
+    webSearchCount,
+    stopReasons,
+    structuredData: true,
+  });
+
   let submit = findToolUse(accumulated, "submit_product");
 
-  // Fallback — web search yielded no structured answer (no submit_product,
-  // pause cap reached, or output truncated). Force a submit_product call from
-  // the label alone (no web search). The analyze prompt instructs the model to
-  // submit with empty pros/cons rather than invent values when data is missing.
+  // Fallback — the search turn ended without a submit_product (commonly the
+  // model wrote its analysis as free text and stopped with end_turn instead of
+  // calling the tool). Rather than re-deriving from the image alone — which
+  // throws away everything the searches just found — feed the research the model
+  // already produced back in and force a submit_product call. Falls back to an
+  // image-only submit if there's no usable prior text, so robustness is kept.
   if (!submit) {
     logger.warn(
-      "analyzeProductImage: no submit_product from web search, retrying without search",
+      "analyzeProductImage: no submit_product from web search, forcing submit",
       {stopReason: lastStopReason, structuredData: true}
     );
 
-    const fallback = await withRetry("analyzeProductImage:noSearch", () =>
+    const priorText = accumulated
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .filter((b: any) => b?.type === "text" && typeof b.text === "string")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((b: any) => b.text as string)
+      .join("\n")
+      .trim();
+
+    const fallbackMessages: Anthropic.MessageParam[] = priorText ?
+      [
+        {role: "user", content: userContent},
+        {
+          role: "user",
+          content:
+            "Here is the research you already gathered for this product:\n\n" +
+            priorText +
+            "\n\nNow call the submit_product tool with the final structured " +
+            "answer using this data. If guaranteed-analysis figures were not " +
+            "found, submit with nutrient values at 0, score 0, and empty " +
+            "pros/cons/ingredients — do not invent values.",
+        },
+      ] :
+      [{role: "user", content: userContent}];
+
+    const fallbackStart = Date.now();
+    const fallback = await withRetry("analyzeProductImage:forceSubmit", () =>
       getClient().messages.create({
         model: config.anthropic.model,
         max_tokens: 4096,
         temperature: config.anthropic.temperature,
         system: systemBlocks,
-        messages: [{role: "user", content: userContent}],
+        messages: fallbackMessages,
         tools: ANALYSIS_TOOLS,
         tool_choice: {type: "tool", name: "submit_product"},
       })
     );
+    logger.info("analyzeProductImage fallback timing", {
+      fallbackMs: Date.now() - fallbackStart,
+      usedPriorText: !!priorText,
+      structuredData: true,
+    });
 
     submit = findToolUse(fallback.content, "submit_product");
     if (!submit) {
@@ -650,13 +707,24 @@ export async function findProductImageUrl(
 ): Promise<string> {
   if (!brand && !name) return "";
 
+  // Timing: split the external SerpAPI fetch from the serial HEAD validation so
+  // we know which part of the image-fallback cost is the third-party call vs ours.
+  const serpStart = Date.now();
   const candidates = await searchProductImageUrls(brand, name);
+  const serpapiMs = Date.now() - serpStart;
+
+  const validateStart = Date.now();
+  let validated = 0;
   for (const candidate of candidates) {
+    validated++;
     if (await isImageUrlValid(candidate)) {
       logger.info("findProductImageUrl using SerpAPI candidate", {
         brand,
         name,
         imageUrl: candidate,
+        serpapiMs,
+        validateMs: Date.now() - validateStart,
+        candidatesChecked: validated,
         structuredData: true,
       });
       return candidate;
@@ -666,6 +734,9 @@ export async function findProductImageUrl(
   logger.info("findProductImageUrl found no image", {
     brand,
     name,
+    serpapiMs,
+    validateMs: Date.now() - validateStart,
+    candidatesChecked: validated,
     structuredData: true,
   });
   return "";
