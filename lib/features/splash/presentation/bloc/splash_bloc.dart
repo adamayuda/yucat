@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
+import 'package:yucat/config/test_flags.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
@@ -53,6 +54,11 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     // sign-in only happened once Home loaded).
     await _ensureSignedIn();
 
+    // QA/TestFlight: replay onboarding on every launch.
+    if (kTestBuildResetOnboarding) {
+      await _prefs.remove(_onboardingCompletedKey);
+    }
+
     final isCompleted = _prefs.getBool(_onboardingCompletedKey) ?? false;
 
     // New users go through onboarding, which ends in the hard paywall.
@@ -78,7 +84,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     // of a returning user (handles lapses/renewals between sessions).
     _userAnalyticsService.syncSubscription(isSubscriber: hasSubscription);
 
-    if (hasSubscription) {
+    if (hasSubscription || kTestBuildSkipPaywall) {
       router.replace(const HomeRoute());
     } else {
       await router.push(

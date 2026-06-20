@@ -10,10 +10,7 @@ import 'package:yucat/presentation/components/ds_pill_button.dart';
 class WelcomeScreen extends StatelessWidget {
   final VoidCallback onGetStarted;
 
-  const WelcomeScreen({
-    super.key,
-    required this.onGetStarted,
-  });
+  const WelcomeScreen({super.key, required this.onGetStarted});
 
   Future<void> _openUrl(String url) async {
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
@@ -60,60 +57,58 @@ class WelcomeScreen extends StatelessWidget {
 
           // Headline + CTA stack.
           SafeArea(
+            // Don't reserve the bottom (home-indicator) inset: the legal text
+            // sits in that zone so the button can land at the same height as
+            // the other onboarding screens (which have nothing below the CTA).
+            bottom: false,
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
-              child: Column(
-                children: [
-                  SizedBox(height: size.height * 0.30),
-                  Text(
-                    l10n.onboardingWelcomeHeadline,
-                    textAlign: TextAlign.center,
-                    style: DSTextStyles.title(76),
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    width: double.infinity,
-                    child: Align(
-                      child: DSPillButton(
-                        label: l10n.onboardingGetStarted,
-                        onPressed: onGetStarted,
-                        showChevron: false,
-                        verticalPadding: DSDimens.sizeXs,
+              padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
+                  children: [
+                    SizedBox(height: size.height * 0.30),
+                    Text(
+                      l10n.onboardingWelcomeHeadline,
+                      textAlign: TextAlign.center,
+                      style: DSTextStyles.title(76),
+                    ),
+                    const Spacer(),
+                    DSPillButton(
+                      label: l10n.onboardingGetStarted,
+                      onPressed: onGetStarted,
+                      showChevron: false,
+                    ),
+                    const SizedBox(height: DSDimens.sizeL),
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(text: l10n.onboardingLegalPrefix),
+                          TextSpan(
+                            text: l10n.onboardingTermsOfUse,
+                            style: const TextStyle(
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => _openUrl(kTermsUrl),
+                          ),
+                          TextSpan(text: l10n.onboardingLegalAnd),
+                          TextSpan(
+                            text: l10n.onboardingPrivacyNotice,
+                            style: const TextStyle(
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => _openUrl(kPrivacyUrl),
+                          ),
+                        ],
                       ),
+                      textAlign: TextAlign.center,
+                      style: DSTextStyles.caption,
                     ),
-                  ),
-                  const SizedBox(height: DSDimens.sizeXxs),
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: l10n.onboardingLegalPrefix,
-                        ),
-                        TextSpan(
-                          text: l10n.onboardingTermsOfUse,
-                          style: const TextStyle(
-                            decoration: TextDecoration.underline,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => _openUrl(kTermsUrl),
-                        ),
-                        TextSpan(text: l10n.onboardingLegalAnd),
-                        TextSpan(
-                          text: l10n.onboardingPrivacyNotice,
-                          style: const TextStyle(
-                            decoration: TextDecoration.underline,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => _openUrl(kPrivacyUrl),
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                    style: DSTextStyles.caption,
-                  ),
-                  const SizedBox(height: DSDimens.sizeS),
-                ],
+                    const SizedBox(height: DSDimens.sizeS),
+                  ],
+                ),
               ),
             ),
           ),

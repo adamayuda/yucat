@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/onboarding/bloc/onboarding_bloc.dart';
 import 'package:yucat/features/onboarding/widgets/attribution_screen.dart';
@@ -46,17 +46,16 @@ class _OnBoardingPage extends State<OnBoardingPage> {
     if (_assetsWarmed) return;
     _assetsWarmed = true;
 
-    // Warm the flutter_svg compile cache so the proof-chart graph doesn't
-    // compile on the frame the page slides in (which caused visible jank).
-    final loader = SvgAssetLoader(
+    // Warm the Lottie composition cache so the proof-chart graph doesn't
+    // decode on the frame the page slides in (which caused visible jank).
+    AssetLottie(
       localizedAssetPath(
         context,
-        'assets/images/onboarding-graph',
-        'svg',
-        available: const {'en', 'es', 'fr', 'hu'},
+        'assets/images/proof-graph',
+        'json',
+        available: const {'en', 'es', 'fr', 'hu', 'de', 'pt'},
       ),
-    );
-    svg.cache.putIfAbsent(loader.cacheKey(null), () => loader.loadBytes(null));
+    ).load();
   }
 
   @override

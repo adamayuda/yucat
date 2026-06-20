@@ -50,7 +50,14 @@ class SavedProductsPreviewSection extends StatelessWidget {
             ),
             const SizedBox(width: DSDimens.sizeXxs),
             ExcludeSemantics(
-              child: SvgPicture.asset('assets/images/star.svg', width: 18),
+              child: SvgPicture.asset(
+                'assets/images/star-sharp.svg',
+                width: 18,
+                colorFilter: const ColorFilter.mode(
+                  DSColors.starGold,
+                  BlendMode.srcIn,
+                ),
+              ),
             ),
             const Spacer(),
             if (hasSaved)

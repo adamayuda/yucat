@@ -50,7 +50,7 @@ class ProofChartScreen extends StatelessWidget {
                     child: Lottie.asset(
                       localizedAssetPath(
                         context,
-                        'assets/images/scan',
+                        'assets/images/proof-graph',
                         'json',
                         available: const {'en', 'es', 'fr', 'hu', 'de', 'pt'},
                       ),

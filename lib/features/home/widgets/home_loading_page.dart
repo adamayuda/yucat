@@ -233,7 +233,8 @@ class _ScanHero extends StatelessWidget {
           ),
           // Twinkling scattered stars near the cat / top-left.
           _Star(
-            asset: 'star.svg',
+            asset: 'star-sharp.svg',
+            color: DSColors.starGold,
             size: 26,
             top: 18,
             left: 4,
@@ -241,7 +242,8 @@ class _ScanHero extends StatelessWidget {
             twinkle: twinkle,
           ),
           _Star(
-            asset: 'star-cyan.svg',
+            asset: 'star-round.svg',
+            color: DSColors.starCyan,
             size: 18,
             top: 78,
             left: 52,
@@ -250,7 +252,8 @@ class _ScanHero extends StatelessWidget {
             phaseOffset: true,
           ),
           _Star(
-            asset: 'star-green.svg',
+            asset: 'star-round.svg',
+            color: DSColors.starCyan,
             size: 15,
             bottom: 96,
             left: 0,
@@ -324,6 +327,7 @@ class _ScanPhoto extends StatelessWidget {
 class _Star extends StatelessWidget {
   const _Star({
     required this.asset,
+    required this.color,
     required this.size,
     this.top,
     this.bottom,
@@ -334,6 +338,7 @@ class _Star extends StatelessWidget {
   });
 
   final String asset;
+  final Color color;
   final double size;
   final double? top;
   final double? bottom;
@@ -350,7 +355,11 @@ class _Star extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget star = Transform.rotate(
       angle: rotation,
-      child: SvgPicture.asset('assets/images/$asset', width: size),
+      child: SvgPicture.asset(
+        'assets/images/$asset',
+        width: size,
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+      ),
     );
 
     final twinkle = this.twinkle;

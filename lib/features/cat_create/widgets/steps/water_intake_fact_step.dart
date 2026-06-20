@@ -5,22 +5,38 @@ import 'package:yucat/l10n/app_localizations.dart';
 
 /// Hydration-themed interstitial for the cat-create wizard (step 5).
 ///
-/// Renders a full-bleed row of glasses — filled on the left, a tall center
-/// glass being poured into (stream + droplets rise above the row), empty on the
-/// right — over the screen's blue→light gradient (painted by the host
-/// [WizardStepShell] via its `backgroundGradient`). Mirrors the design
-/// reference "BitePal iOS Taking eating habits quiz 9".
+/// Renders a depth-layered scatter of cat bowls (`water-bowl.svg`) over the
+/// screen's blue→light gradient (painted by the host [WizardStepShell] via its
+/// `backgroundGradient`): a faded back pair high and outward, a full mid pair,
+/// and a large front-center bowl being poured into by a water stream
+/// (`water-pour.svg`, stream column + droplets). Bowls are painted back-to-front
+/// so the front rim covers the stream's lower end for the "pouring in" read.
 class WaterIntakeFactStep extends StatelessWidget {
   const WaterIntakeFactStep({super.key});
 
-  /// Body height of the short glasses; the pour glass scales to match its cup.
-  /// Kept modest so the band + headline + body comfortably fit the step height
-  /// (the pour glass renders ~2.8× taller, so this drives the whole band).
-  static const double _glassHeight = 100;
+  /// Height of the bowl scene band; drives the stream length and overall fit so
+  /// the headline + body comfortably follow within the step height.
+  static const double _bandHeight = 270;
 
-  /// glass-pouring.svg is 101×305; ~108px of that (the cup) sits at the bottom,
-  /// so render it at the natural ratio to keep cups aligned across the row.
-  static const double _pourHeight = _glassHeight * (305 / 108);
+  /// Bowl widths by depth — closer bowls render larger (foreground bias). The
+  /// front bowl is the hero (drives the stream length too); the four others are
+  /// noticeably smaller so they read as background.
+  static const double _frontBowlWidth = 135;
+  static const double _midBowlWidth = 100;
+  static const double _backBowlWidth = 100;
+
+  /// `water-bowl.svg` intrinsic aspect (103 / 136) and the vertical fraction of
+  /// the bowl at which its water ellipse sits (cy 24.5 / height 103).
+  static const double _bowlAspect = 103 / 136;
+  static const double _bowlWaterFraction = 24.5 / 103;
+
+  /// Front bowl's rendered height, and the stream length: from the top edge down
+  /// to the front bowl's water surface (plus a few px so it plunges into the
+  /// water rather than hovering above the rim). The stream is painted *over* the
+  /// front bowl so it lands in the visible water ellipse — the "pouring in" read.
+  static const double _frontBowlHeight = _frontBowlWidth * _bowlAspect;
+  static const double _streamHeight =
+      _bandHeight - _frontBowlHeight * (1 - _bowlWaterFraction) + 8;
 
   @override
   Widget build(BuildContext context) {
@@ -35,37 +51,56 @@ class WaterIntakeFactStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const Spacer(flex: 1),
-        // Full-bleed glasses band — overflows the shell's horizontal padding so
-        // the outer glasses clip at the true screen edges. The SizedBox bounds
-        // the band height (the OverflowBox would otherwise try to fill the
-        // Column's unbounded vertical space and fail layout); the OverflowBox
-        // then lets the row paint wider than the screen.
+        // Full-bleed bowl scene — the shell pads neither side, so the Stack
+        // spans the screen width and the bowls scatter across it.
         SizedBox(
-          height: _pourHeight,
-          child: OverflowBox(
-            maxWidth: double.infinity,
-            alignment: Alignment.center,
-            child: Row(
-              // Size to the glasses, not the unbounded width the OverflowBox
-              // grants — a default (max) Row would demand an infinite width.
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _glass('assets/images/glass-full.svg'),
-                _glass('assets/images/glass-full.svg'),
-                SvgPicture.asset(
-                  'assets/images/glass-pouring.svg',
-                  height: _pourHeight,
+          width: double.infinity,
+          height: _bandHeight,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Back pair: faded + high + outward (the "far" depth).
+              _bowl(
+                width: _backBowlWidth,
+                opacity: 0.4,
+                alignment: const Alignment(-0.95, -.5),
+              ),
+              _bowl(
+                width: _backBowlWidth,
+                opacity: 0.4,
+                alignment: const Alignment(0.95, -.5),
+              ),
+              // Mid pair: near-full, between the back pair and the front bowl.
+              _bowl(
+                width: _midBowlWidth,
+                opacity: 0.82,
+                alignment: const Alignment(-0.75, 0.35),
+              ),
+              _bowl(
+                width: _midBowlWidth,
+                opacity: 0.82,
+                alignment: const Alignment(0.75, 0.35),
+              ),
+              // Front-center bowl.
+              _bowl(
+                width: _frontBowlWidth,
+                opacity: 1,
+                alignment: Alignment.bottomCenter,
+              ),
+              // Water stream from the top edge — painted *over* the front bowl so
+              // it lands in the visible water ellipse (the "pouring in" read).
+              Align(
+                alignment: Alignment.topCenter,
+                child: SvgPicture.asset(
+                  'assets/images/water-pour.svg',
+                  height: _streamHeight,
                 ),
-                _glass('assets/images/glass-empty.svg'),
-                _glass('assets/images/glass-empty.svg'),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: DSDimens.size3xl),
-        // The glasses band above is full-bleed; the text insets itself since the
+        // The bowl scene above is full-bleed; the text insets itself since the
         // shell no longer pads step content.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
@@ -104,8 +139,15 @@ class WaterIntakeFactStep extends StatelessWidget {
     );
   }
 
-  Widget _glass(String asset) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeXxs),
-        child: SvgPicture.asset(asset, height: _glassHeight),
-      );
+  Widget _bowl({
+    required double width,
+    required double opacity,
+    required Alignment alignment,
+  }) => Align(
+    alignment: alignment,
+    child: Opacity(
+      opacity: opacity,
+      child: SvgPicture.asset('assets/images/water-bowl.svg', width: width),
+    ),
+  );
 }

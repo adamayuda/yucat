@@ -63,22 +63,29 @@ class _AttributionScreenState extends State<AttributionScreen> {
             textAlign: TextAlign.center,
             style: DSTextStyles.displayLg,
           ),
-          const SizedBox(height: DSDimens.size3xl),
+          // Center the option list in the space below the title. Center +
+          // SingleChildScrollView keeps it scroll-safe on short screens.
           Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.zero,
-              itemCount: options.length,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: DSDimens.sizeXs),
-              itemBuilder: (context, index) {
-                final opt = options[index];
-                return DSOptionRow(
-                  label: opt.label,
-                  leadingAsset: opt.asset,
-                  selected: _selected == opt.key,
-                  onTap: () => setState(() => _selected = opt.key),
-                );
-              },
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(vertical: DSDimens.sizeL),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var i = 0; i < options.length; i++) ...[
+                      DSOptionRow(
+                        label: options[i].label,
+                        leadingAsset: options[i].asset,
+                        selected: _selected == options[i].key,
+                        onTap: () =>
+                            setState(() => _selected = options[i].key),
+                      ),
+                      if (i != options.length - 1)
+                        const SizedBox(height: DSDimens.sizeXs),
+                    ],
+                  ],
+                ),
+              ),
             ),
           ),
           OnboardingFloatingButton(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/onboarding_floating_button.dart';
@@ -10,10 +11,7 @@ import 'package:yucat/presentation/utils/localized_asset.dart';
 class ScanDemoScreen extends StatelessWidget {
   final VoidCallback onNext;
 
-  const ScanDemoScreen({
-    super.key,
-    required this.onNext,
-  });
+  const ScanDemoScreen({super.key, required this.onNext});
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +24,10 @@ class ScanDemoScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Spacer(flex: 1),
-          // The PNG is a self-contained rounded card on a transparent
+          // The Lottie is a self-contained rounded card on a transparent
           // background (its own ~36/888 corner radius), so we render it
           // directly — no white fill / clip — and only cast a soft shadow
-          // matching the image's corners.
+          // matching the card's corners.
           SizedBox(
             width: width * 0.74,
             child: DecoratedBox(
@@ -39,12 +37,12 @@ class ScanDemoScreen extends StatelessWidget {
               ),
               child: AspectRatio(
                 aspectRatio: 888 / 1032,
-                child: Image.asset(
+                child: Lottie.asset(
                   localizedAssetPath(
                     context,
                     'assets/images/onboarding-scan',
-                    'png',
-                    available: const {'en', 'es', 'fr', 'hu'},
+                    'json',
+                    available: const {'en', 'es', 'fr', 'hu', 'de', 'pt'},
                   ),
                   fit: BoxFit.cover,
                 ),
@@ -61,9 +59,7 @@ class ScanDemoScreen extends StatelessWidget {
           Text(
             l10n.onboardingScanDemoSubtitle,
             textAlign: TextAlign.center,
-            style: DSTextStyles.bodyMd.copyWith(
-              color: DSColors.inkSecondary,
-            ),
+            style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkSecondary),
           ),
           const Spacer(flex: 2),
           OnboardingFloatingButton(label: l10n.commonNext, onPressed: onNext),

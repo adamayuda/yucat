@@ -537,7 +537,14 @@ class _Sparkle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExcludeSemantics(
-      child: SvgPicture.asset('assets/images/star-cyan.svg', width: size),
+      child: SvgPicture.asset(
+        'assets/images/star-round.svg',
+        width: size,
+        colorFilter: const ColorFilter.mode(
+          DSColors.starCyan,
+          BlendMode.srcIn,
+        ),
+      ),
     );
   }
 }

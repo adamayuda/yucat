@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -45,26 +46,48 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
   final _focusNode = FocusNode();
   final _random = Random();
 
+  Timer? _keyboardTimer;
+
+  /// Delay before raising the keyboard once the screen becomes active. Kept
+  /// safely longer than the 280ms PageView slide so the keyboard's slide-up
+  /// doesn't overlap (and jank) the page transition.
+  static const _keyboardDelay = Duration(milliseconds: 500);
+
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialName ?? '');
     _controller.addListener(() => setState(() {}));
+    // Defensive: onboarding normally starts on an earlier phase, but if this
+    // screen mounts already-active, schedule the delayed keyboard too.
+    if (widget.active) _scheduleKeyboard();
   }
 
   @override
   void didUpdateWidget(ProfileNameScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // No auto-focus (it opens the keyboard immediately and causes lag); the
-    // user taps the field to type. Just drop focus when leaving so the keyboard
-    // doesn't linger on the next page.
-    if (!widget.active && oldWidget.active) {
+    // Raise the keyboard automatically, but only after the page transition has
+    // settled. Doing it immediately (e.g. autofocus) fights the slide animation
+    // and causes lag, so we wait _keyboardDelay before requesting focus and
+    // drop focus the moment we leave so the keyboard doesn't linger.
+    if (widget.active && !oldWidget.active) {
+      _scheduleKeyboard();
+    } else if (!widget.active && oldWidget.active) {
+      _keyboardTimer?.cancel();
       _focusNode.unfocus();
     }
   }
 
+  void _scheduleKeyboard() {
+    _keyboardTimer?.cancel();
+    _keyboardTimer = Timer(_keyboardDelay, () {
+      if (mounted && widget.active) _focusNode.requestFocus();
+    });
+  }
+
   @override
   void dispose() {
+    _keyboardTimer?.cancel();
     _focusNode.dispose();
     _controller.dispose();
     super.dispose();

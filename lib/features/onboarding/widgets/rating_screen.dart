@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:in_app_review/in_app_review.dart';
@@ -93,11 +95,37 @@ class _RatingScreenState extends State<RatingScreen> {
                       ),
                     ),
                   ),
-                  // ('star.svg' is the sharp glyph; 'star-blur.svg' the blurred.)
-                  const _Star(asset: 'star-blur.svg', size: 24, top: 96, left: 24),
-                  const _Star(asset: 'star.svg', size: 48, top: 96, right: 24),
-                  const _Star(asset: 'star.svg', size: 34, top: 170, left: 60),
-                  const _Star(asset: 'star-blur.svg', size: 24, top: 160, right: 60),
+                  // Sharp + soft mix; `blur: true` replaces the old blurred SVG.
+                  const _Star(
+                    asset: 'star-sharp.svg',
+                    color: DSColors.starGold,
+                    size: 24,
+                    top: 96,
+                    left: 24,
+                    blur: true,
+                  ),
+                  const _Star(
+                    asset: 'star-sharp.svg',
+                    color: DSColors.starGold,
+                    size: 48,
+                    top: 96,
+                    right: 24,
+                  ),
+                  const _Star(
+                    asset: 'star-sharp.svg',
+                    color: DSColors.starGold,
+                    size: 34,
+                    top: 170,
+                    left: 60,
+                  ),
+                  const _Star(
+                    asset: 'star-sharp.svg',
+                    color: DSColors.starGold,
+                    size: 24,
+                    top: 160,
+                    right: 60,
+                    blur: true,
+                  ),
                 ],
               ),
             ),
@@ -227,28 +255,45 @@ class _RatingScreenState extends State<RatingScreen> {
 /// Decorative star pinned to the header area (fixed, behind the content).
 class _Star extends StatelessWidget {
   final String asset;
+  final Color color;
   final double size;
   final double? top;
   final double? left;
   final double? right;
 
+  /// Softens the glyph (replaces the old `star-blur.svg` variant).
+  final bool blur;
+
   const _Star({
     required this.asset,
+    required this.color,
     required this.size,
     this.top,
     this.left,
     this.right,
+    this.blur = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    Widget star = SvgPicture.asset(
+      'assets/images/$asset',
+      width: size,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+    );
+
+    if (blur) {
+      star = ImageFiltered(
+        imageFilter: ui.ImageFilter.blur(sigmaX: 3.5, sigmaY: 3.5),
+        child: star,
+      );
+    }
+
     return Positioned(
       top: top,
       left: left,
       right: right,
-      child: ExcludeSemantics(
-        child: SvgPicture.asset('assets/images/$asset', width: size),
-      ),
+      child: ExcludeSemantics(child: star),
     );
   }
 }

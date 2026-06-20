@@ -18,6 +18,11 @@ class DSOptionRow extends StatelessWidget {
   final VoidCallback onTap;
   final bool showTrailingRadio;
 
+  /// Whether the trailing check icon is drawn when [selected]. Off by default —
+  /// rows signal selection via the border/tint alone. Opt in to show a
+  /// trailing checkmark on selection.
+  final bool showTrailingCheck;
+
   /// Size of the trailing radio / selected check indicator.
   final double trailingSize;
   final DSOptionRowAccent accent;
@@ -32,6 +37,7 @@ class DSOptionRow extends StatelessWidget {
     this.leadingIcon,
     this.selected = false,
     this.showTrailingRadio = false,
+    this.showTrailingCheck = false,
     this.trailingSize = 22,
     this.accent = DSOptionRowAccent.success,
   });
@@ -103,7 +109,7 @@ class DSOptionRow extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (selected)
+                if (selected && showTrailingCheck)
                   Icon(
                     Icons.check_circle,
                     color: _accentColor,

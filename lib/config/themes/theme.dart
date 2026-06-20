@@ -78,6 +78,17 @@ class DSColors {
   // replaces the app's green success accent within the paywall only)
   static const Color paywallAccent = Color(0xFF3F8CDB);
   static const Color paywallAccentSoft = Color(0xFFE3EEFA);
+
+  // --- Decorative star palette ---
+  // The two star SVGs (`star-sharp.svg` / `star-round.svg`) are color-agnostic;
+  // tint them at the call site with one of these via ColorFilter. Near-duplicate
+  // hues from the old per-color SVGs were collapsed into this small set.
+  static const Color starGold = Color(0xFFFEDD9F);
+  static const Color starCyan = Color(0xFFADE7E3); // absorbs old mint #ADE5E1
+  static const Color starBlue = Color(0xFF408AF2); // absorbs old #3F8CDB
+  static const Color starGrey = Color(0xFFCDCADB);
+  static const Color starCoral = Color(0xFFFF7761);
+  static const Color starTan = Color(0xFFF3DCD3);
 }
 
 class DSGradients {

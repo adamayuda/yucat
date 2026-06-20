@@ -24,6 +24,13 @@ class AnalyticsEvents {
   static const onboardingStepViewed = 'Onboarding Step Viewed';
   static const onboardingStepBack = 'Onboarding Step Back';
 
+  // Onboarding scan funnel
+  static const onboardingScanCaptured = 'Onboarding Scan Captured';
+  static const onboardingScanSucceeded =
+      'Onboarding Scan Succeeded'; // was 'Onboarding Scan Verdict'
+  static const onboardingScanFailed = 'Onboarding Scan Failed';
+  static const onboardingScanSkipped = 'Onboarding Scan Skipped';
+
   // Cat-create wizard
   static const catWizardStepViewed = 'Cat Wizard Step Viewed';
 }

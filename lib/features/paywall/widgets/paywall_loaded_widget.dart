@@ -470,7 +470,14 @@ class _HeroStar extends StatelessWidget {
     return Align(
       alignment: alignment,
       child: ExcludeSemantics(
-        child: SvgPicture.asset('assets/images/star-blue.svg', width: size),
+        child: SvgPicture.asset(
+          'assets/images/star-sharp.svg',
+          width: size,
+          colorFilter: const ColorFilter.mode(
+            DSColors.starBlue,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
     );
   }

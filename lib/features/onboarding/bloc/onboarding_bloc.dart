@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
+import 'package:yucat/config/test_flags.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
@@ -291,12 +292,14 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     // dismissed. push() only returns once the user has subscribed (or restored
     // an existing subscription), so we only ever reach the main app after that.
     final router = event.context.router;
-    await router.push(
-      PaywallRoute(
-        dismissible: false,
-        trigger: PaywallTrigger.onboardingComplete,
-      ),
-    );
+    if (!kTestBuildSkipPaywall) {
+      await router.push(
+        PaywallRoute(
+          dismissible: false,
+          trigger: PaywallTrigger.onboardingComplete,
+        ),
+      );
+    }
     // replaceAll (not replace) because the stack now holds onboarding → wizard
     // → success underneath; clear them all so Main is the sole route. Activate
     // the Home tab (not the default first/Search tab) to match the splash flow.

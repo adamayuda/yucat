@@ -77,21 +77,24 @@ class _RemindersScreenState extends State<RemindersScreen> {
           // content, so they sit in the transparent margins around the
           // headline (not under the option cards).
           const _Star(
-            asset: 'start-blue.svg',
+            asset: 'star-round.svg',
+            color: DSColors.starBlue,
             size: 18,
             top: 64,
             left: 2,
             rotation: -0.35,
           ),
           const _Star(
-            asset: 'star-green.svg',
+            asset: 'star-round.svg',
+            color: DSColors.starCyan,
             size: 26,
             top: 52,
             right: 2,
             rotation: 0.4,
           ),
           const _Star(
-            asset: 'star-grey.svg',
+            asset: 'star-round.svg',
+            color: DSColors.starGrey,
             size: 14,
             top: 4,
             right: 44,
@@ -106,7 +109,9 @@ class _RemindersScreenState extends State<RemindersScreen> {
                 textAlign: TextAlign.center,
                 style: DSTextStyles.displayLg,
               ),
-              const SizedBox(height: DSDimens.size3xl),
+              // Center the options + callout block in the space below the title
+              // (which stays pinned at the top like the other onboarding screens).
+              const Spacer(),
               for (var i = 0; i < options.length; i++) ...[
                 DSOptionRow(
                   leadingAsset: options[i].asset,
@@ -170,6 +175,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
 /// Decorative star pinned to the header area (fixed, behind the content).
 class _Star extends StatelessWidget {
   final String asset;
+  final Color color;
   final double size;
   final double? top;
   final double? left;
@@ -178,6 +184,7 @@ class _Star extends StatelessWidget {
 
   const _Star({
     required this.asset,
+    required this.color,
     required this.size,
     this.top,
     this.left,
@@ -194,7 +201,11 @@ class _Star extends StatelessWidget {
       child: ExcludeSemantics(
         child: Transform.rotate(
           angle: rotation,
-          child: SvgPicture.asset('assets/images/$asset', width: size),
+          child: SvgPicture.asset(
+            'assets/images/$asset',
+            width: size,
+            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+          ),
         ),
       ),
     );

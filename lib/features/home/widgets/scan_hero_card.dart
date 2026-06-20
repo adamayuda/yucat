@@ -69,7 +69,8 @@ class _ScanHeroCardState extends State<ScanHeroCard>
                 top: 12,
                 right: 78,
                 child: _TwinkleStar(
-                  asset: 'star.svg',
+                  asset: 'star-sharp.svg',
+                  color: DSColors.starGold,
                   size: 20,
                   rotation: 0.2,
                   twinkle: _twinkle,
@@ -79,7 +80,8 @@ class _ScanHeroCardState extends State<ScanHeroCard>
                 bottom: 14,
                 right: 120,
                 child: _TwinkleStar(
-                  asset: 'star-cyan.svg',
+                  asset: 'star-round.svg',
+                  color: DSColors.starCyan,
                   size: 14,
                   rotation: -0.3,
                   twinkle: _twinkle,
@@ -179,6 +181,7 @@ class _PulsingQrPill extends StatelessWidget {
 class _TwinkleStar extends StatelessWidget {
   const _TwinkleStar({
     required this.asset,
+    required this.color,
     required this.size,
     required this.twinkle,
     this.rotation = 0,
@@ -186,6 +189,7 @@ class _TwinkleStar extends StatelessWidget {
   });
 
   final String asset;
+  final Color color;
   final double size;
   final Animation<double> twinkle;
   final double rotation;
@@ -205,7 +209,11 @@ class _TwinkleStar extends StatelessWidget {
         },
         child: Transform.rotate(
           angle: rotation,
-          child: SvgPicture.asset('assets/images/$asset', width: size),
+          child: SvgPicture.asset(
+            'assets/images/$asset',
+            width: size,
+            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+          ),
         ),
       ),
     );

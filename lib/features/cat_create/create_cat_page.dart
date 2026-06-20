@@ -33,7 +33,7 @@ const _totalSteps = 12;
 /// Step indices that are non-input "did you know" interstitials.
 const _factSteps = {6, 9};
 
-/// The full-bleed hydration interstitial — its glasses band paints edge-to-edge
+/// The full-bleed hydration interstitial — its bowl scene paints edge-to-edge
 /// (no shell padding), so it is excluded from the per-step horizontal inset.
 const _waterFactStep = 6;
 
@@ -239,8 +239,6 @@ class _CreateCatPageState extends State<CreateCatPage> {
       totalSteps: _totalSteps - _initialStep,
       background: DSColors.tintCloud,
       backgroundChild: _buildFactBackdrop(context),
-      backgroundGradient:
-          currentStep == 6 ? DSGradients.catCreateBackground : null,
       ctaLabel: isLast
           ? finalCtaLabel
           : isFactStep
@@ -294,12 +292,14 @@ class _CreateCatPageState extends State<CreateCatPage> {
     }
   }
 
-  /// Full-screen sunburst backdrop for the coat fact step (step 8), driven by
-  /// the [PageController] so it slides in/out edge-to-edge in lock-step with
-  /// that page — behind the status bar, nav row and CTA — and stays off-screen
-  /// (so it never tints the neighbouring steps) the rest of the time.
+  /// Full-screen backdrops for the two fact steps, driven by the
+  /// [PageController] so each slides in/out edge-to-edge in lock-step with its
+  /// page — behind the status bar, nav row and CTA — and stays off-screen (so it
+  /// never tints the neighbouring steps) the rest of the time. Keying the
+  /// backdrops to the scroll offset (not the settled step) is what stops the
+  /// water step's gradient from hard-cutting in/out during the transition.
   Widget _buildFactBackdrop(BuildContext context) {
-    const factIndex = 9;
+    const coatFactStep = 9;
     final width = MediaQuery.sizeOf(context).width;
     return AnimatedBuilder(
       animation: _pageController,
@@ -309,23 +309,57 @@ class _CreateCatPageState extends State<CreateCatPage> {
             _pageController.position.haveDimensions) {
           page = _pageController.page ?? page;
         }
-        final delta = page - factIndex;
-        if (delta.abs() >= 1) return const SizedBox.shrink();
-        return ClipRect(
-          child: Transform.translate(
-            offset: Offset(-delta * width, 0),
-            child: ColoredBox(
-              color: const Color(0xFFFBEAC2),
-              child: SvgPicture.asset(
-                'assets/images/bg-light.svg',
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // Water fact (step 6): the blue hydration gradient, sliding in/out.
+            _slidingBackdrop(
+              page: page,
+              index: _waterFactStep,
+              width: width,
+              child: const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: DSGradients.catCreateBackground,
+                ),
               ),
             ),
-          ),
+            // Coat fact (step 9): the sunburst backdrop.
+            _slidingBackdrop(
+              page: page,
+              index: coatFactStep,
+              width: width,
+              child: ColoredBox(
+                color: const Color(0xFFFBEAC2),
+                child: SvgPicture.asset(
+                  'assets/images/bg-light.svg',
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              ),
+            ),
+          ],
         );
       },
+    );
+  }
+
+  /// Translates [child] horizontally with the [PageView] so it tracks the page
+  /// at [index]: fully on-screen when that page is settled, sliding off as the
+  /// neighbours come in, and removed entirely once more than a page away.
+  Widget _slidingBackdrop({
+    required double page,
+    required int index,
+    required double width,
+    required Widget child,
+  }) {
+    final delta = page - index;
+    if (delta.abs() >= 1) return const SizedBox.shrink();
+    return ClipRect(
+      child: Transform.translate(
+        offset: Offset(-delta * width, 0),
+        child: child,
+      ),
     );
   }
 

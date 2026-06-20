@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/cat/presentation/utils/cat_product_recommendations.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
@@ -54,7 +55,7 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
   Future<void> _runScan(String imageBase64, String mimeType) async {
     final l10n = AppLocalizations.of(context);
     sl<LogEventUsecase>().call(
-      eventName: 'Onboarding Scan Captured',
+      eventName: AnalyticsEvents.onboardingScanCaptured,
       properties: {'timestamp': DateTime.now().toIso8601String()},
     );
     try {
@@ -64,14 +65,14 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
       );
       if (!mounted) return;
       if (entity == null) {
-        _fail();
+        _fail('not_found');
         return;
       }
       final model = sl<ProductEntityToModelMapper>()(entity);
       // Warm the per-cat picks cache so the success teaser is instant.
       unawaited(recommendProductsForCat(widget.summary.entity, l10n, limit: 3));
       sl<LogEventUsecase>().call(
-        eventName: 'Onboarding Scan Verdict',
+        eventName: AnalyticsEvents.onboardingScanSucceeded,
         properties: {
           'product': model.name,
           'score': model.score,
@@ -79,17 +80,49 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
         },
       );
       _goToSuccess(model);
-    } catch (_) {
-      if (mounted) _fail();
+    } catch (e) {
+      if (mounted) _fail(_errorType(e), message: e.toString());
     }
   }
 
-  void _fail() {
+  void _fail(String errorType, {String? message}) {
     sl<LogEventUsecase>().call(
-      eventName: 'Onboarding Scan Failed',
-      properties: {'timestamp': DateTime.now().toIso8601String()},
+      eventName: AnalyticsEvents.onboardingScanFailed,
+      properties: {
+        'error_type': errorType,
+        if (message != null) 'error_message': message,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
     );
     setState(() => _phase = _Phase.error);
+  }
+
+  /// Classifies a scan exception into a coarse error type. Mirrors
+  /// `HomeBloc._toErrorType` (string-based so no cloud_functions import is
+  /// needed — the FirebaseFunctions timeout code shows up in `toString()`).
+  String _errorType(Object e) {
+    final message = e.toString();
+    if (message.contains('deadline-exceeded') ||
+        message.contains('DEADLINE_EXCEEDED')) {
+      return 'timeout';
+    }
+    if (message.contains('network') ||
+        message.contains('SocketException') ||
+        message.contains('Connection')) {
+      return 'no_internet';
+    }
+    return 'error';
+  }
+
+  void _onSkip() {
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.onboardingScanSkipped,
+      properties: {
+        'phase': _phase == _Phase.error ? 'error' : 'intro',
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+    _goToSuccess(null);
   }
 
   void _goToSuccess(ProductDisplayModel? product) {
@@ -126,7 +159,7 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
             // content. White ones sit on the purple top; lavender (C2A5E4)
             // ones read against the lighter lower half.
             const _Decor(
-              asset: 'star.svg',
+              asset: 'star-sharp.svg',
               size: 44,
               color: Colors.white,
               top: 70,
@@ -149,7 +182,7 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
               rotation: -0.2,
             ),
             const _Decor(
-              asset: 'star.svg',
+              asset: 'star-sharp.svg',
               size: 30,
               color: Color(0xFFC2A5E4),
               bottom: 220,
@@ -164,7 +197,7 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
               rotation: 0.4,
             ),
             const _Decor(
-              asset: 'star.svg',
+              asset: 'star-sharp.svg',
               size: 26,
               color: Colors.white,
               top: 120,
@@ -202,7 +235,7 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
                       child: Column(
                         children: [
                           TextButton(
-                            onPressed: () => _goToSuccess(null),
+                            onPressed: _onSkip,
                             style: TextButton.styleFrom(
                               overlayColor: Colors.transparent,
                             ),

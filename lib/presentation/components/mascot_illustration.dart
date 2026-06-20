@@ -104,7 +104,8 @@ class _MascotIllustrationState extends State<MascotIllustration>
           ),
           ExcludeSemantics(child: mascot),
           _Star(
-            asset: 'star.svg',
+            asset: 'star-sharp.svg',
+            color: DSColors.starGold,
             starSize: size * 0.16,
             top: size * 0.04,
             left: size * 0.02,
@@ -112,7 +113,8 @@ class _MascotIllustrationState extends State<MascotIllustration>
             twinkle: widget.animate ? _twinkle : null,
           ),
           _Star(
-            asset: 'star-cyan.svg',
+            asset: 'star-round.svg',
+            color: DSColors.starCyan,
             starSize: size * 0.11,
             top: size * 0.16,
             right: size * 0.0,
@@ -121,7 +123,8 @@ class _MascotIllustrationState extends State<MascotIllustration>
             phaseOffset: true,
           ),
           _Star(
-            asset: 'star-green.svg',
+            asset: 'star-round.svg',
+            color: DSColors.starCyan,
             starSize: size * 0.1,
             bottom: size * 0.08,
             right: size * 0.08,
@@ -138,6 +141,7 @@ class _MascotIllustrationState extends State<MascotIllustration>
 class _Star extends StatelessWidget {
   const _Star({
     required this.asset,
+    required this.color,
     required this.starSize,
     this.top,
     this.bottom,
@@ -149,6 +153,7 @@ class _Star extends StatelessWidget {
   });
 
   final String asset;
+  final Color color;
   final double starSize;
   final double? top;
   final double? bottom;
@@ -162,7 +167,11 @@ class _Star extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget star = Transform.rotate(
       angle: rotation,
-      child: SvgPicture.asset('assets/images/$asset', width: starSize),
+      child: SvgPicture.asset(
+        'assets/images/$asset',
+        width: starSize,
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+      ),
     );
 
     final twinkle = this.twinkle;

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
@@ -28,10 +30,35 @@ class CoatFactStep extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         // Scattered decorative stars around the mascot.
-        const _Star(asset: 'star-green.svg', size: 30, top: 192, right: 108),
-        const _Star(asset: 'star-red.svg', size: 34, top: 212, right: 40),
-        const _Star(asset: 'star-brown.svg', size: 28, top: 268, left: 32),
-        const _Star(asset: 'star-blur.svg', size: 44, top: 356, right: 52),
+        const _Star(
+          asset: 'star-round.svg',
+          color: DSColors.starCyan,
+          size: 30,
+          top: 192,
+          right: 108,
+        ),
+        const _Star(
+          asset: 'star-sharp.svg',
+          color: DSColors.starCoral,
+          size: 34,
+          top: 212,
+          right: 40,
+        ),
+        const _Star(
+          asset: 'star-sharp.svg',
+          color: DSColors.starTan,
+          size: 28,
+          top: 268,
+          left: 32,
+        ),
+        const _Star(
+          asset: 'star-sharp.svg',
+          color: DSColors.starGold,
+          size: 44,
+          top: 356,
+          right: 52,
+          blur: true,
+        ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -92,28 +119,45 @@ class CoatFactStep extends StatelessWidget {
 /// Decorative star pinned around the mascot (fixed, behind the content).
 class _Star extends StatelessWidget {
   final String asset;
+  final Color color;
   final double size;
   final double? top;
   final double? left;
   final double? right;
 
+  /// Softens the glyph (replaces the old `star-blur.svg` variant).
+  final bool blur;
+
   const _Star({
     required this.asset,
+    required this.color,
     required this.size,
     this.top,
     this.left,
     this.right,
+    this.blur = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    Widget star = SvgPicture.asset(
+      'assets/images/$asset',
+      width: size,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+    );
+
+    if (blur) {
+      star = ImageFiltered(
+        imageFilter: ui.ImageFilter.blur(sigmaX: 3.5, sigmaY: 3.5),
+        child: star,
+      );
+    }
+
     return Positioned(
       top: top,
       left: left,
       right: right,
-      child: ExcludeSemantics(
-        child: SvgPicture.asset('assets/images/$asset', width: size),
-      ),
+      child: ExcludeSemantics(child: star),
     );
   }
 }
