@@ -18,12 +18,14 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<ProductEntity?> fetchProductByImage({
     required String imageBase64,
     required String mimeType,
+    String? countryCode,
   }) async {
     debugPrint('[ProductRepository] Fetching product by image');
 
     final remoteData = await _remoteDataSource.fetchProductByImage(
       imageBase64: imageBase64,
       mimeType: mimeType,
+      countryCode: countryCode,
     );
     if (remoteData == null) {
       debugPrint('[ProductRepository] Product not found for image');

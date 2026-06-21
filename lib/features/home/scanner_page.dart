@@ -117,6 +117,11 @@ class _ScannerPageState extends State<ScannerPage>
     }
 
     final bloc = context.read<HomeBloc>();
+    // Device region (e.g. "ES") from the OS locale — biases backend web_search
+    // to the user's market. Uses platformDispatcher (the device locale), not
+    // Localizations (the app locale, which is language-only here).
+    final countryCode =
+        WidgetsBinding.instance.platformDispatcher.locale.countryCode;
     // Capture the router controller while still mounted — the scan resolves
     // after this page pops, so navigating via this page's context later would
     // throw. The controller persists past the pop.
@@ -124,6 +129,7 @@ class _ScannerPageState extends State<ScannerPage>
       imageBase64: imageBase64,
       mimeType: mimeType,
       router: router,
+      countryCode: countryCode,
     ));
     router.maybePop();
   }

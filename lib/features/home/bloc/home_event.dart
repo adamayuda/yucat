@@ -25,6 +25,11 @@ class ImageCapturedEvent extends HomeEvent {
   final String imageBase64;
   final String mimeType;
 
+  /// Device country (ISO 3166-1 alpha-2, e.g. "ES") read from the OS region
+  /// locale. Forwarded to the backend to bias product web_search to the user's
+  /// market. Null when the device exposes no region.
+  final String? countryCode;
+
   /// The router *controller* captured before the ScannerPage pops itself.
   /// We must not navigate via the page's BuildContext after the scan resolves
   /// — by then the ScannerPage is unmounted and any `context.router` lookup
@@ -36,10 +41,11 @@ class ImageCapturedEvent extends HomeEvent {
     required this.imageBase64,
     required this.mimeType,
     required this.router,
+    this.countryCode,
   });
 
   @override
-  List<Object?> get props => [imageBase64, mimeType, router];
+  List<Object?> get props => [imageBase64, mimeType, router, countryCode];
 }
 
 class PaywallDismissedEvent extends HomeEvent {

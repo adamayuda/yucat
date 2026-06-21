@@ -10,10 +10,12 @@ class FetchProductByImageUsecase {
   Future<ProductEntity?> call({
     required String imageBase64,
     required String mimeType,
+    String? countryCode,
   }) async {
     return _productRepository.fetchProductByImage(
       imageBase64: imageBase64,
       mimeType: mimeType,
+      countryCode: countryCode,
     );
   }
 }

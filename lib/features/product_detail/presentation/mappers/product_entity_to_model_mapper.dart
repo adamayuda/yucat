@@ -41,6 +41,15 @@ class ProductEntityToModelMapperImpl extends ProductEntityToModelMapper {
   /// model, so the two always agree.
   double _calculateCarbs(ProductEntity entity) {
     if (entity.carbs != 0) return entity.carbs;
+    // When the backend found no guaranteed analysis it defaults every macro to
+    // 0. Subtracting from 100 would then yield a misleading carbs=100%, so bail
+    // out and let the macro render as an em-dash like the others.
+    final hasMacroData = entity.protein != 0 ||
+        entity.fat != 0 ||
+        entity.fiber != 0 ||
+        entity.moisture != 0 ||
+        entity.ash != 0;
+    if (!hasMacroData) return 0.0;
     final derived = 100.0 -
         entity.protein -
         entity.fat -

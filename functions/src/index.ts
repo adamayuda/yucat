@@ -45,11 +45,18 @@ export const fetchProductByImageV2 = onCall(
     secrets: ["ANTHROPIC_API_KEY", "ALGOLIA_API_KEY", "SERPAPI_API_KEY"],
   },
   async (request) => {
-    const {image, mimeType, userId} = request.data;
+    const {image, mimeType, userId, countryCode} = request.data;
 
     if (!image || typeof image !== "string") {
       throw new Error("Missing required field: image (base64-encoded string)");
     }
+
+    // Optional ISO 3166-1 alpha-2 device country (e.g. "ES"); biases web_search
+    // toward the user's market. Absent → no biasing (older clients, no regression).
+    const resolvedCountry =
+      typeof countryCode === "string" && countryCode.trim() ?
+        countryCode.trim() :
+        undefined;
 
     const resolvedMimeType = VALID_MIME_TYPES.includes(mimeType) ? mimeType : "image/jpeg";
 
@@ -209,26 +216,47 @@ export const fetchProductByImageV2 = onCall(
         structuredData: true,
       });
 
-      // Kick off the SerpAPI product-image lookup IN PARALLEL with the slow
-      // analyze step. Claude's web_search almost never returns a hostable image
-      // URL (it returns page URLs), so we need SerpAPI on essentially every cache
-      // miss anyway — running it concurrently overlaps its ~6-7s with analyze and
-      // takes it off the critical path. Uses the identification brand/name (the
-      // analyzed product.brand/name aren't available yet, and are near-identical).
-      // findProductImageUrl swallows its own errors (returns ""), but guard the
-      // unawaited promise so a rejection can never go unhandled.
-      const serpApiImageUrlPromise = findProductImageUrl(
-        identification.brand,
-        identification.name
-      ).catch(() => "");
+      // Look up AND host the SerpAPI product image IN PARALLEL with the slow
+      // analyze step. Claude almost never returns a hostable image URL, so we
+      // need SerpAPI on essentially every cache miss anyway — doing the full
+      // download/optimize/upload concurrently takes it off the critical path.
+      // The filename uses a provisional key derived from the identification
+      // (the analyzed brand/name are near-identical, so it matches the final
+      // cache key in practice; a rare mismatch only changes the stored filename,
+      // not the URL's validity). overwriteKey wins when re-analyzing in place.
+      const provisionalKey =
+        overwriteKey ??
+        `img-${identification.brand}-${identification.name}`
+          .toLowerCase()
+          .replace(/\s+/g, "-");
+      // Guarded so a rejection on the unawaited promise can never go unhandled.
+      const serpApiHostedPromise = (async () => {
+        const url = await findProductImageUrl(
+          identification.brand,
+          identification.name
+        );
+        if (!url) return "";
+        return processProductImage(
+          url,
+          provisionalKey,
+          identification.name,
+          identification.brand
+        );
+      })().catch(() => "");
 
       const {product, rawResponse} = config.anthropic.useParallelAnalysis ?
         await analyzeProductImageParallel(
           image,
           resolvedMimeType,
-          identification
+          identification,
+          resolvedCountry
         ) :
-        await analyzeProductImage(image, resolvedMimeType, identification);
+        await analyzeProductImage(
+          image,
+          resolvedMimeType,
+          identification,
+          resolvedCountry
+        );
       timer.mark("analyze");
 
       if (product && product.name) {
@@ -243,42 +271,25 @@ export const fetchProductByImageV2 = onCall(
         const cacheKey = overwriteKey ?? derivedKey;
         product.barcode = cacheKey;
 
-        // Host the analyze-provided image first. If that yields nothing —
-        // empty, or a non-image page URL that fails validation — fall back to the
-        // SerpAPI lookup that's been running in parallel since before analyze
-        // (await here usually resolves instantly, since it overlapped analyze).
+        // Host the analyze-provided image first (most exact). If that yields
+        // nothing — empty, or a non-image page URL that fails validation — use
+        // the SerpAPI image already hosted in parallel during analyze (await
+        // here usually resolves instantly, since it overlapped analyze).
         let hostedImage = await processProductImage(
           product.imageUrl,
           cacheKey,
           product.name,
           product.brand
         );
-        timer.mark("imageHostPrimary");
-        let imageLookupRan = false;
         if (!hostedImage) {
-          const foundUrl = await serpApiImageUrlPromise;
-          timer.mark("imageSearchSerpapi");
-          imageLookupRan = true;
-          if (foundUrl) {
-            hostedImage = await processProductImage(
-              foundUrl,
-              cacheKey,
-              product.name,
-              product.brand
-            );
-            timer.mark("imageHostFallback");
-          }
+          hostedImage = await serpApiHostedPromise;
         }
         product.imageUrl = hostedImage;
+        timer.mark("imageHost");
 
         // Timestamps throttle the next self-heal attempt (see REANALYZE_AFTER_MS).
         product.lastAnalysisAttempt = Date.now();
-        if (imageLookupRan) {
-          product.lastImageAttempt = Date.now();
-        }
-
-        await cacheProduct(cacheKey, product);
-        timer.mark("cacheWrite");
+        product.lastImageAttempt = Date.now();
 
         logger.info("Image product processing complete", {
           productName: product.name,
@@ -287,18 +298,34 @@ export const fetchProductByImageV2 = onCall(
           cacheKey,
           structuredData: true,
         });
+        // Cache write and scan-log are independent — run concurrently. (Product
+        // is fully built above and not mutated after this, so both read the same
+        // final state with no race.)
+        await Promise.all([
+          cacheProduct(cacheKey, product),
+          logScanRequest({
+            requestId,
+            userId: userId || null,
+            userPhotoUrl,
+            identification,
+            cachedMatch: false,
+            product,
+            timestamp: new Date(),
+          }),
+        ]);
+        timer.mark("finalize");
+      } else {
+        await logScanRequest({
+          requestId,
+          userId: userId || null,
+          userPhotoUrl,
+          identification,
+          cachedMatch: false,
+          product: null,
+          timestamp: new Date(),
+        });
+        timer.mark("finalize");
       }
-
-      await logScanRequest({
-        requestId,
-        userId: userId || null,
-        userPhotoUrl,
-        identification,
-        cachedMatch: false,
-        product: product || null,
-        timestamp: new Date(),
-      });
-      timer.mark("scanLog");
 
       logger.info("scan timings", {
         requestId,

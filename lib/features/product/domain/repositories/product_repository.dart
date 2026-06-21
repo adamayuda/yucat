@@ -4,5 +4,6 @@ abstract class ProductRepository {
   Future<ProductEntity?> fetchProductByImage({
     required String imageBase64,
     required String mimeType,
+    String? countryCode,
   });
 }

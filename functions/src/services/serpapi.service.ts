@@ -11,9 +11,15 @@ import {config} from "../config";
 
 const SERPAPI_ENDPOINT = "https://serpapi.com/search.json";
 const MAX_CANDIDATES = 6;
+/** How many organic page URLs to return for the nutrition-page fallback. */
+const MAX_PAGE_CANDIDATES = 4;
 
 interface SerpImageResult {
   original?: unknown;
+}
+
+interface SerpOrganicResult {
+  link?: unknown;
 }
 
 /**
@@ -68,6 +74,68 @@ export async function searchProductImageUrls(
     return urls;
   } catch (error) {
     logger.warn("SerpAPI request errored", {
+      query,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return [];
+  }
+}
+
+/**
+ * Queries SerpAPI's Google web engine for candidate product PAGE URLs (organic
+ * results), best-first. Used by the manufacturer-page nutrition fallback to find
+ * the brand's own product page (which typically ranks first for a brand+name
+ * query and hosts the guaranteed analysis when web_search misses it). Returns []
+ * when SerpAPI is not configured, the request fails, or no results come back.
+ */
+export async function searchProductPageUrls(
+  brand: string,
+  name: string
+): Promise<string[]> {
+  if (!config.serpapi.enabled) return [];
+
+  const query = `${brand} ${name}`.trim();
+  if (!query) return [];
+
+  const params = new URLSearchParams({
+    engine: "google",
+    q: query,
+    api_key: config.serpapi.apiKey,
+    num: "10",
+  });
+
+  try {
+    const response = await fetch(`${SERPAPI_ENDPOINT}?${params.toString()}`);
+    if (!response.ok) {
+      logger.warn("SerpAPI page request failed", {
+        status: response.status,
+        query,
+        structuredData: true,
+      });
+      return [];
+    }
+
+    const data = (await response.json()) as {
+      organic_results?: SerpOrganicResult[];
+    };
+    const results: SerpOrganicResult[] = Array.isArray(data?.organic_results) ?
+      data.organic_results :
+      [];
+
+    const urls = results
+      .map((r) => (typeof r?.link === "string" ? r.link : ""))
+      .filter((u) => u.startsWith("http"))
+      .slice(0, MAX_PAGE_CANDIDATES);
+
+    logger.info("SerpAPI returned page candidates", {
+      query,
+      count: urls.length,
+      structuredData: true,
+    });
+    return urls;
+  } catch (error) {
+    logger.warn("SerpAPI page request errored", {
       query,
       error: error instanceof Error ? error.message : String(error),
       structuredData: true,

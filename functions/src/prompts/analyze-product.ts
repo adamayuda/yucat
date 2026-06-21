@@ -103,7 +103,8 @@ export function generateAnalysisUserPrompt(
   const search = sourceHint ?
     "Analyze this cat food product. Use web_search to find the guaranteed " +
     `analysis and ingredients for THIS product, searching ${sourceHint}. ` +
-    "Make at most one focused search of that source — do NOT search other " +
+    "Make at most two focused searches of that source (e.g. find the product " +
+    "page, then open it for the guaranteed analysis) — do NOT search other " +
     "sources. Then submit the final answer with the submit_product tool, using " +
     "whatever data you found (leave fields empty rather than inventing values)." :
     "Analyze this cat food product. Use web_search to find the guaranteed " +

@@ -16,6 +16,14 @@ class NutritionGridCard extends StatelessWidget {
   static String _format(double value) =>
       value <= 0 ? '—' : '${value.toStringAsFixed(1)}%';
 
+  /// Carbs is derived by subtraction (100 − protein − fat − fibre − moisture −
+  /// ash), so whenever the rest of the analysis is present we can always show
+  /// it. A derived ~0 — common for high-moisture wet food — is a real value,
+  /// not "missing", so display it instead of an em-dash. Only blank carbs when
+  /// the whole analysis is unavailable.
+  static String _formatCarbs(double carbs, bool dataUnavailable) =>
+      dataUnavailable ? '—' : '${(carbs < 0 ? 0.0 : carbs).toStringAsFixed(1)}%';
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -58,7 +66,7 @@ class NutritionGridCard extends StatelessWidget {
             child: _MacroCell(
               iconAsset: 'assets/images/Carbs.svg',
               label: l10n.productDetailNutrientCarbs,
-              value: _format(product.carbs),
+              value: _formatCarbs(product.carbs, product.dataUnavailable),
             ),
           ),
         ],

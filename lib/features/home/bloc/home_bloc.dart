@@ -137,6 +137,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final product = await _fetchProductByImageUsecase.call(
         imageBase64: event.imageBase64,
         mimeType: event.mimeType,
+        countryCode: event.countryCode,
       );
 
       if (product == null) {

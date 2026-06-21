@@ -14,6 +14,7 @@ class RemoteSearchDataSource {
   Future<Map<String, dynamic>?> fetchProductByImage({
     required String imageBase64,
     required String mimeType,
+    String? countryCode,
   }) async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -28,6 +29,10 @@ class RemoteSearchDataSource {
       final result = await callable.call({
         'image': imageBase64,
         'mimeType': mimeType,
+        // Device country (ISO 3166-1 alpha-2) lets the backend bias web_search
+        // to the user's market. Omitted when unknown.
+        if (countryCode != null && countryCode.isNotEmpty)
+          'countryCode': countryCode,
       });
 
       final data = result.data;

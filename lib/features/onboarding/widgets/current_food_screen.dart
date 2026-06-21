@@ -62,6 +62,10 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
       final entity = await sl<FetchProductByImageUsecase>().call(
         imageBase64: imageBase64,
         mimeType: mimeType,
+        // Device region (e.g. "ES") to bias backend web_search to the user's
+        // market — same source as the main scan flow.
+        countryCode:
+            WidgetsBinding.instance.platformDispatcher.locale.countryCode,
       );
       if (!mounted) return;
       if (entity == null) {

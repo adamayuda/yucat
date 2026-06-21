@@ -23,7 +23,15 @@ export const config = {
     useParallelAnalysis: true,
     // Per-instance web_search budget for the parallel fan-out (each instance
     // covers one source, so it needs few searches).
-    parallelMaxUses: 1,
+    parallelMaxUses: 2,
+    // Manufacturer-page nutrition fallback: when analyze finds no guaranteed
+    // analysis, fetch likely product pages (SerpAPI organic results) and extract
+    // the analysis directly from their HTML. Niche/non-US brands often host the
+    // data on their own site even when Claude's web_search index misses it.
+    // No-ops when SerpAPI is unconfigured. See analyzeFromProductPages.
+    useManufacturerPageFallback: true,
+    // How many candidate pages to fetch + feed to the extraction call.
+    pageFallbackMaxPages: 3,
   },
 
   // Algolia Configuration

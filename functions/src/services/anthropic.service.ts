@@ -24,7 +24,8 @@ import {
   generateBrandVerdictUserPrompt,
 } from "../prompts/brand-verdict";
 import {isImageUrlValid} from "./image.service";
-import {searchProductImageUrls} from "./serpapi.service";
+import {searchProductImageUrls, searchProductPageUrls} from "./serpapi.service";
+import {fetchPage, fetchPageText} from "../utils/page-fetch";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let anthropicClient: any = null;
@@ -277,12 +278,22 @@ const MAX_CONTINUATIONS = 3;
 export async function analyzeProductImage(
   imageBase64: string,
   mimeType: string,
-  identification?: ProductIdentification
+  identification?: ProductIdentification,
+  countryCode?: string
 ): Promise<{product: Product | null; rawResponse: string}> {
-  return analyzeOneSource(imageBase64, mimeType, identification, {
-    maxUses: config.anthropic.maxWebSearches,
-    label: "single",
-  });
+  // Run the web_search source and the manufacturer-page source concurrently,
+  // then keep the most complete (pickBestProduct). The page source overlaps the
+  // search instead of waiting behind it.
+  const [web, pages] = await Promise.all([
+    analyzeOneSource(imageBase64, mimeType, identification, {
+      maxUses: config.anthropic.maxWebSearches,
+      label: "single",
+      countryCode,
+    }),
+    analyzeFromManufacturerPages(imageBase64, mimeType, identification),
+  ]);
+  const results = [web, pages].filter((r): r is AnalyzeResult => r !== null);
+  return pickBestProduct(results);
 }
 
 interface AnalyzeSourceOptions {
@@ -292,6 +303,13 @@ interface AnalyzeSourceOptions {
   maxUses?: number;
   /** Log label to distinguish parallel instances. */
   label?: string;
+  /**
+   * Device country (ISO 3166-1 alpha-2, e.g. "ES") used to bias web_search
+   * results toward the user's market. When set, surfaces region-appropriate
+   * manufacturer/retailer pages instead of US-defaulted results — critical for
+   * niche non-US brands whose nutrition lives on their own localized site.
+   */
+  countryCode?: string;
 }
 
 /**
@@ -307,6 +325,11 @@ async function analyzeOneSource(
 ): Promise<{product: Product | null; rawResponse: string}> {
   const label = opts.label ?? "single";
   const maxUses = opts.maxUses ?? config.anthropic.maxWebSearches;
+  // Mutable: web_search only accepts an allowlist of country codes (e.g. AE is
+  // rejected). On an "unsupported country" 400 we clear this and retry without
+  // user_location, so an unsupported region degrades to no-biasing instead of
+  // failing the whole scan.
+  let country = opts.countryCode?.trim().toUpperCase() || undefined;
   const mediaType = normalizeMediaType(mimeType);
   const systemText = generateAnalysisSystemPrompt();
   const userText = generateAnalysisUserPrompt(identification, opts.sourceHint);
@@ -345,27 +368,58 @@ async function analyzeOneSource(
   let inputTokens = 0;
   let outputTokens = 0;
 
+  // Builds the request with the web_search tool, biased to `country` when set.
+  const createParams = () => ({
+    model: config.anthropic.model,
+    max_tokens: 8192,
+    temperature: config.anthropic.temperature,
+    system: systemBlocks,
+    messages,
+    tools: [
+      {
+        type: "web_search_20250305",
+        name: "web_search",
+        max_uses: maxUses,
+        // Bias results to the user's country when known (e.g. surface a
+        // Spanish brand's .es pages for an ES user). Omitted when absent so
+        // global/US brands are unaffected.
+        ...(country ?
+          {user_location: {type: "approximate", country}} :
+          {}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
+      ...ANALYSIS_TOOLS,
+    ],
+    tool_choice: {type: "auto" as const},
+  });
+
+  // web_search rejects unsupported country codes with a 400. user_location is a
+  // best-effort enhancement, so drop it and retry rather than fail the analyze.
+  const isUnsupportedCountryError = (err: unknown): boolean =>
+    /country code/i.test(err instanceof Error ? err.message : String(err));
+
   for (let i = 0; i <= MAX_CONTINUATIONS; i++) {
     const roundStart = Date.now();
-    const response = await withRetry("analyzeProductImage", () =>
-      getClient().messages.create({
-        model: config.anthropic.model,
-        max_tokens: 8192,
-        temperature: config.anthropic.temperature,
-        system: systemBlocks,
-        messages,
-        tools: [
-          {
-            type: "web_search_20250305",
-            name: "web_search",
-            max_uses: maxUses,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any,
-          ...ANALYSIS_TOOLS,
-        ],
-        tool_choice: {type: "auto"},
-      })
-    );
+    let response;
+    try {
+      response = await withRetry("analyzeProductImage", () =>
+        getClient().messages.create(createParams())
+      );
+    } catch (err) {
+      if (country && isUnsupportedCountryError(err)) {
+        logger.warn("web_search rejected country; retrying without biasing", {
+          label,
+          country,
+          structuredData: true,
+        });
+        country = undefined;
+        response = await withRetry("analyzeProductImage", () =>
+          getClient().messages.create(createParams())
+        );
+      } else {
+        throw err;
+      }
+    }
     roundTripMs.push(Date.now() - roundStart);
     stopReasons.push(response.stop_reason);
     inputTokens += response.usage?.input_tokens ?? 0;
@@ -394,6 +448,7 @@ async function analyzeOneSource(
   logger.info("analyzeProductImage web_search timing", {
     label,
     maxUses,
+    country: country ?? "none",
     roundTrips: roundTripMs.length,
     roundTripMs,
     webSearchMs: roundTripMs.reduce((a, b) => a + b, 0),
@@ -494,10 +549,17 @@ type AnalyzeResult = {product: Product | null; rawResponse: string};
 export async function analyzeProductImageParallel(
   imageBase64: string,
   mimeType: string,
-  identification?: ProductIdentification
+  identification?: ProductIdentification,
+  countryCode?: string
 ): Promise<AnalyzeResult> {
   const SOURCES: {label: string; hint: string}[] = [
-    {label: "manufacturer", hint: "the manufacturer's official website"},
+    {
+      label: "manufacturer",
+      hint:
+        "the manufacturer's official website — find the brand's own domain " +
+        "and open the specific product page (the maker often hosts the " +
+        "guaranteed analysis when retailers do not)",
+    },
     {label: "retailer-a", hint: "a major retailer such as Chewy or Amazon"},
     {
       label: "retailer-b",
@@ -506,12 +568,13 @@ export async function analyzeProductImageParallel(
   ];
 
   const started = Date.now();
-  const settled = await Promise.all(
-    SOURCES.map((s) =>
+  const settled = await Promise.all([
+    ...SOURCES.map((s) =>
       analyzeOneSource(imageBase64, mimeType, identification, {
         sourceHint: s.hint,
         maxUses: config.anthropic.parallelMaxUses,
         label: s.label,
+        countryCode,
       }).catch((error) => {
         logger.warn("analyzeProductImageParallel instance failed", {
           label: s.label,
@@ -520,13 +583,18 @@ export async function analyzeProductImageParallel(
         });
         return null;
       })
-    )
-  );
+    ),
+    // 4th source: the manufacturer's product page fetched directly (location-
+    // independent). Runs concurrently so it overlaps web_search rather than
+    // waiting behind it. Ordered last so a completeness tie keeps the image-
+    // grounded web_search result; the page wins only when it alone has nutrition.
+    analyzeFromManufacturerPages(imageBase64, mimeType, identification),
+  ]);
   const results = settled.filter((r): r is AnalyzeResult => r !== null);
 
   const best = pickBestProduct(results);
   logger.info("analyzeProductImageParallel complete", {
-    instances: SOURCES.length,
+    instances: SOURCES.length + 1,
     succeeded: results.length,
     parallelMs: Date.now() - started,
     chosenHasNutrition: best.product ? best.product.score > 0 : false,
@@ -560,6 +628,228 @@ function pickBestProduct(results: AnalyzeResult[]): AnalyzeResult {
     }
   }
   return best;
+}
+
+/**
+ * Extraction-only analyze: given product page text already fetched from the web,
+ * force a structured `submit_product` extraction. No web_search — the model
+ * reads the supplied page text (anchored to the product image) and pulls out the
+ * guaranteed analysis + ingredients. Returns null if no nutrition is recovered.
+ */
+async function analyzeFromProductPages(
+  imageBase64: string,
+  mimeType: string,
+  identification: ProductIdentification | undefined,
+  pages: {url: string; text: string}[]
+): Promise<AnalyzeResult | null> {
+  if (pages.length === 0) return null;
+
+  const mediaType = normalizeMediaType(mimeType);
+  const systemBlocks = [
+    {
+      type: "text" as const,
+      text: generateAnalysisSystemPrompt(),
+      cache_control: {type: "ephemeral" as const},
+    },
+  ];
+
+  const known = identification ?
+    `This product has been identified as brand "${identification.brand}", ` +
+    `name "${identification.name}", foodType "${identification.foodType}". ` :
+    "";
+
+  const pagesBlock = pages
+    .map((p, i) => `--- PAGE ${i + 1} (${p.url}) ---\n${p.text}`)
+    .join("\n\n");
+
+  const instruction =
+    known +
+    "Below are the text contents of web pages for this product. Do NOT search " +
+    "the web — extract from the page text only. Find the guaranteed analysis " +
+    "(protein, fat, fibre, moisture, ash) and the ingredients for THIS EXACT " +
+    "product. Use only figures explicitly labelled as analytical constituents / " +
+    "guaranteed analysis / composition (note: \"humidity\"/\"humedad\" = " +
+    "moisture). Ignore any page that is about a different product or pack. If a " +
+    "value is genuinely absent from every page, leave it at 0 — never invent " +
+    "values. Then call submit_product with the structured result.\n\n" +
+    pagesBlock;
+
+  const userContent: Anthropic.MessageParam["content"] = [
+    {
+      type: "image",
+      source: {type: "base64", media_type: mediaType, data: imageBase64},
+    },
+    {type: "text", text: instruction},
+  ];
+
+  const start = Date.now();
+  const response = await withRetry("analyzeFromProductPages", () =>
+    getClient().messages.create({
+      model: config.anthropic.model,
+      max_tokens: 4096,
+      temperature: config.anthropic.temperature,
+      system: systemBlocks,
+      messages: [{role: "user", content: userContent}],
+      tools: ANALYSIS_TOOLS,
+      tool_choice: {type: "tool", name: "submit_product"},
+    })
+  );
+
+  const submit = findToolUse(response.content, "submit_product");
+  if (!submit) {
+    logger.warn("analyzeFromProductPages: no submit_product returned", {
+      structuredData: true,
+    });
+    return null;
+  }
+
+  const product = ProductModel.fromObject({
+    ...submit.input,
+    barcode: "",
+  } as Partial<Product>).toObject();
+
+  logger.info("analyzeFromProductPages complete", {
+    pages: pages.length,
+    ms: Date.now() - start,
+    hasNutrition: product.score > 0,
+    structuredData: true,
+  });
+
+  return {product, rawResponse: JSON.stringify(submit.input)};
+}
+
+/** Distinctive tokens of a product name, for matching against URL slugs. */
+function nameTokens(s: string): string[] {
+  const stop = new Set([
+    "and", "the", "with", "for", "cat", "cats", "food", "wet", "dry", "pack",
+  ]);
+  return s
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((t) => t.length >= 3 && !stop.has(t));
+}
+
+/** Count of name tokens present in a URL — higher = better product match. */
+function slugMatchScore(url: string, tokens: string[]): number {
+  const slug = url.toLowerCase();
+  return tokens.reduce((n, t) => (slug.includes(t) ? n + 1 : n), 0);
+}
+
+/** Lowercased pathname for de-duping URLs that differ only by query string. */
+function safePath(url: string): string {
+  try {
+    return new URL(url).pathname.toLowerCase();
+  } catch {
+    return url.toLowerCase();
+  }
+}
+
+/**
+ * Manufacturer-page source. Finds candidate product pages via SerpAPI, fetches
+ * their text directly (bypassing Claude's web_search index, which misses niche
+ * non-US brands), and extracts the guaranteed analysis from the page content.
+ * Returns a complete result when nutrition is recovered, else null. Run
+ * concurrently with the web_search fan-out as a first-class source — it's
+ * location-independent, so it's the path that fixes niche brands. Never throws.
+ */
+async function analyzeFromManufacturerPages(
+  imageBase64: string,
+  mimeType: string,
+  identification: ProductIdentification | undefined
+): Promise<AnalyzeResult | null> {
+  if (!config.anthropic.useManufacturerPageFallback) return null;
+
+  const brand = identification?.brand || "";
+  const name = identification?.name || "";
+  if (!brand && !name) return null;
+
+  const started = Date.now();
+  try {
+    const urls = await searchProductPageUrls(brand, name);
+    if (urls.length === 0) return null;
+
+    const primaryUrls = urls.slice(0, config.anthropic.pageFallbackMaxPages);
+    const primary = await Promise.all(primaryUrls.map((u) => fetchPage(u)));
+
+    // Search often surfaces a brand's collection/category page above the actual
+    // product page. Follow the product-detail links those pages expose, ranked
+    // by how well their slug matches the identified name, and fetch the best
+    // couple — that's where the guaranteed analysis usually lives.
+    const tokens = nameTokens(`${brand} ${name}`);
+    const seenPaths = new Set(primaryUrls.map((u) => safePath(u)));
+    const linkScores = new Map<string, number>();
+    for (const page of primary) {
+      for (const link of page.productLinks) {
+        if (seenPaths.has(safePath(link))) continue;
+        const score = slugMatchScore(link, tokens);
+        if (score > (linkScores.get(link) ?? -1)) linkScores.set(link, score);
+      }
+    }
+    const followUrls = [...linkScores.entries()]
+      .filter(([, s]) => s >= 2)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(([link]) => link);
+    const followed = await Promise.all(followUrls.map((u) => fetchPageText(u)));
+
+    // Drop pages that returned nothing usable (404, JS-only, blocked).
+    const usable = (p: {url: string; text: string}) => p.text.length > 200;
+    const followedPages = followUrls
+      .map((url, i) => ({url, text: followed[i]}))
+      .filter(usable);
+    const primaryPages = primaryUrls
+      .map((url, i) => ({url, text: primary[i].text}))
+      .filter(usable);
+
+    // Prefer the followed product-detail pages: they carry the guaranteed
+    // analysis and avoid the token cost + wrong-product noise of feeding
+    // collection/listing pages to the extractor. Fall back to the primary
+    // search-result pages only when we couldn't follow any (e.g. SerpAPI already
+    // returned the product page directly, or the site isn't a /products/ shop).
+    const pages = (followedPages.length > 0 ? followedPages : primaryPages)
+      .slice(0, config.anthropic.pageFallbackMaxPages);
+
+    logger.info("manufacturer-page source: fetched pages", {
+      brand,
+      name,
+      candidateUrls: urls.length,
+      followedLinks: followUrls.length,
+      fetchedPages: pages.length,
+      structuredData: true,
+    });
+    if (pages.length === 0) return null;
+
+    const result = await analyzeFromProductPages(
+      imageBase64,
+      mimeType,
+      identification,
+      pages
+    );
+    if (result?.product && result.product.score > 0) {
+      logger.info("manufacturer-page source: nutrition recovered", {
+        brand,
+        name,
+        totalMs: Date.now() - started,
+        structuredData: true,
+      });
+      return result;
+    }
+    logger.info("manufacturer-page source: no nutrition in pages", {
+      brand,
+      name,
+      totalMs: Date.now() - started,
+      structuredData: true,
+    });
+    return null;
+  } catch (error) {
+    logger.warn("manufacturer-page source errored", {
+      brand,
+      name,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return null;
+  }
 }
 
 const NARRATIVE_TOOLS: Anthropic.Tool[] = [
