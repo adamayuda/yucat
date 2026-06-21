@@ -137,6 +137,8 @@ class CatDataSource {
     required Map<String, dynamic> catData,
   }) async {
     try {
+      debugPrint('CATDIAG wrote catId=$catId breed=${catData['breed']} '
+          'photo=${catData['profileImageUrl']}');
       await _firestore.collection('cats').doc(catId).update(catData);
     } catch (e) {
       debugPrint('Error updating cat: $e');

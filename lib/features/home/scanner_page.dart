@@ -28,6 +28,7 @@ class _ScannerPageState extends State<ScannerPage>
     with WidgetsBindingObserver {
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
+  bool _isInitializing = false;
   bool _isTakingPicture = false;
   bool _hasCameraError = false;
 
@@ -47,6 +48,13 @@ class _ScannerPageState extends State<ScannerPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    final controller = _cameraController;
+    // Ignore lifecycle churn while there's no live, initialized controller —
+    // notably the inactive event the iOS permission prompt itself triggers
+    // during the very first initialize(). Tearing the controller down here
+    // would race the in-flight init and leave the preview black.
+    if (controller == null || !controller.value.isInitialized) return;
+
     if (state == AppLifecycleState.inactive) {
       _disposeCamera();
     } else if (state == AppLifecycleState.resumed) {
@@ -63,7 +71,8 @@ class _ScannerPageState extends State<ScannerPage>
   }
 
   Future<void> _initCamera() async {
-    if (_isCameraInitialized) return;
+    if (_isCameraInitialized || _isInitializing) return;
+    _isInitializing = true;
 
     try {
       final cameras = await availableCameras();
@@ -91,6 +100,8 @@ class _ScannerPageState extends State<ScannerPage>
       if (mounted) {
         setState(() => _hasCameraError = true);
       }
+    } finally {
+      _isInitializing = false;
     }
   }
 

@@ -70,7 +70,7 @@ class _HomePage extends State<HomePage> {
     context.router.push(const SavedProductsRoute());
   }
 
-  void _openCatDetail(CatEntity cat) {
+  Future<void> _openCatDetail(CatEntity cat) async {
     sl<LogEventUsecase>().call(
       eventName: 'Home Cat Snapshot Tapped',
       properties: {
@@ -79,7 +79,24 @@ class _HomePage extends State<HomePage> {
       },
     );
     final model = sl<CatEntityToModelMapper>()(cat);
-    context.router.push(CatDetailRoute(cat: model));
+    await context.router.push(CatDetailRoute(cat: model));
+    // The cat may have been edited (or deleted) on the detail page — re-fetch
+    // so the snapshot, completion card, and recommendations reflect the change.
+    _bloc.add(HomeInitialEvent());
+  }
+
+  Future<void> _openEditCat(CatEntity cat) async {
+    sl<LogEventUsecase>().call(
+      eventName: 'Home Complete Profile Tapped',
+      properties: {
+        'cat_id': cat.id,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+    final model = sl<CatEntityToModelMapper>()(cat);
+    await context.router.push(CreateCatRoute(cat: model));
+    // Re-fetch so the completion card and recommendations pick up the edits.
+    _bloc.add(HomeInitialEvent());
   }
 
   void _onActiveCatChanged(CatEntity cat) {
@@ -137,6 +154,7 @@ class _HomePage extends State<HomePage> {
           onSeeAllCats: _openCatList,
           onCreateCat: _openCreateCat,
           onActiveCatChanged: _onActiveCatChanged,
+          onCompleteProfile: _openEditCat,
         );
       case HomeErrorState():
         final l10n = AppLocalizations.of(context);

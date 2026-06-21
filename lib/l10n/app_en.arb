@@ -137,6 +137,24 @@
     "description": "Substring of coatFactHeadline that is colour-highlighted. Keep it identical to the matching part of the headline."
   },
   "coatFactBody": "Omega-3 keeps their coat glossy and skin healthy.",
+  "coatFactHeadlineShort": "Short-haired cats benefit from\nextra fiber",
+  "@coatFactHeadlineShort": {
+    "description": "Headline of the coat-health interstitial for short-haired cats. Must contain coatFactHighlightShort verbatim so it can be colour-highlighted."
+  },
+  "coatFactHighlightShort": "extra fiber",
+  "@coatFactHighlightShort": {
+    "description": "Substring of coatFactHeadlineShort that is colour-highlighted. Keep it identical to the matching part of the headline."
+  },
+  "coatFactBodyShort": "Fiber helps reduce hairballs from grooming.",
+  "coatFactHeadlineHairless": "Hairless cats burn\nmore energy",
+  "@coatFactHeadlineHairless": {
+    "description": "Headline of the coat-health interstitial for hairless cats. Must contain coatFactHighlightHairless verbatim so it can be colour-highlighted."
+  },
+  "coatFactHighlightHairless": "more energy",
+  "@coatFactHighlightHairless": {
+    "description": "Substring of coatFactHeadlineHairless that is colour-highlighted. Keep it identical to the matching part of the headline."
+  },
+  "coatFactBodyHairless": "Without a coat they need extra calories to stay warm.",
   "healthQuestion": "Any health considerations?",
   "healthNone": "None",
   "healthUrinaryIssues": "Urinary issues",
@@ -312,7 +330,7 @@
   "paywallPeriodMonthly": "Monthly",
   "paywallPeriodWeekly": "Weekly",
   "paywallPeriodLifetime": "Lifetime",
-  "paywallCtaUnlockPlus": "Unlock Yucat Plus",
+  "paywallCtaUnlockPlus": "Let's get started",
   "paywallSkipDebug": "Skip paywall (debug)",
   "paywallErroriOSOnly": "Subscriptions are only available on iOS.",
   "paywallErrorCouldNotLoadPlans": "Could not load plans.",
@@ -413,6 +431,20 @@
   "assessmentBritishWeightManagement": "Weight-management style formula is suitable for British Shorthairs",
   "assessmentBengalHighProtein": "High protein (>38%) matches Bengal energy needs",
   "assessmentBengalLowProtein": "Low protein (<30%) may be insufficient for Bengals",
+  "assessmentBreedHighProtein": "High protein (>35%) supports large, muscular breeds",
+  "assessmentBreedHighFat": "Higher fat (>18%) suits fine-coated, high-metabolism breeds",
+  "assessmentBreedLowFat": "Low fat (<12%) may not be enough for fine-coated breeds",
+  "assessmentBreedHairball": "Hairball-control style formula (fiber 4–6% or hairball claims) suits long-coated breeds",
+  "assessmentBreedOmega3": "Includes omega-3 rich ingredients, good for coat and skin",
+  "assessmentBreedHighCarbs": "High carbohydrate (>30%) is not ideal for this breed",
+  "assessmentBreedDigestible": "Uses easily digestible proteins, good for lean, active breeds",
+  "assessmentBreedFillers": "Contains many fillers (corn, wheat, soy) which may not suit this breed",
+  "assessmentBreedJointSupport": "Contains joint support ingredients, helpful for this breed",
+  "assessmentBreedLowPhosphorus": "Kidney-friendly, lower-phosphorus formula suits breeds prone to renal issues",
+  "assessmentBreedHighMinerals": "High mineral content may not suit breeds prone to renal issues",
+  "assessmentBreedHighCalories": "High-calorie food may promote weight gain in this breed",
+  "assessmentBreedWeightManagement": "Weight-management style formula suits breeds prone to weight gain",
+  "assessmentBreedHighCarbsDiabetes": "High carbohydrate (>20%) may not suit breeds prone to diabetes",
   "assessmentUrinaryLowAsh": "Formulated with low ash content, supportive for urinary issues",
   "assessmentUrinarySupport": "Includes urinary-support ingredients like cranberry or DL-methionine",
   "assessmentUrinaryHighMinerals": "High mineral content may not be ideal for urinary issues",
@@ -446,6 +478,27 @@
   "homeAddCatTitle": "Add your cat",
   "homeAddCatBody": "Create a profile to get personalized food scores.",
   "homeAddCatButton": "Add a cat",
+  "homeProfileCompletionTitle": "Complete {name}'s profile",
+  "@homeProfileCompletionTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeProfileCompletionBody": "Add a few details for sharper picks.",
+  "homeProfileCompletionProgress": "{filled}/{total}",
+  "@homeProfileCompletionProgress": {
+    "placeholders": {
+      "filled": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homeProfileCompletionButton": "Complete profile",
   "homeMyCatsTitle": "My cats",
   "homeSavedProductsTitle": "Saved products",
   "homeSeeAll": "See all",
@@ -668,6 +721,14 @@
   "dietWhySphynxFat": "Hairless cats burn energy fast and need more fat.",
   "dietWhyBengalProtein": "High-energy Bengals need plenty of protein.",
   "dietWhyBritishCalories": "This laid-back breed gains weight easily.",
+  "dietWhyBreedProtein": "Large, muscular breeds thrive on high protein.",
+  "dietWhyBreedOmega3": "Omega-3s keep this breed's coat and joints healthy.",
+  "dietWhyBreedFat": "Fine-coated breeds burn energy fast and need more fat.",
+  "dietWhyBreedFiber": "Fiber helps move hairballs through the gut.",
+  "dietWhyBreedCarbs": "This breed tends to do better on lower-carb diets.",
+  "dietWhyBreedDigestibility": "Lean, active breeds do best on easily digestible food.",
+  "dietWhyBreedPhosphorus": "Lower phosphorus eases the load on breeds prone to kidney issues.",
+  "dietWhyBreedCalories": "This breed gains weight easily and needs fewer calories.",
   "dietWhyLongCoatOmega3": "Omega-3s nourish a long, thick coat.",
   "dietWhyLongCoatFiber": "Fiber helps prevent hairballs in long-haired cats.",
   "dietWhyHairlessFat": "Hairless cats need more fat to stay warm and energized.",

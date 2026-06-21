@@ -7,7 +7,9 @@ import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 
 /// Profile snapshot for the active cat — reinforces that scores are
-/// personalized. Tapping opens the cat's detail page.
+/// personalized. Lays the cat's attributes out two-per-row (mirroring the
+/// onboarding success recap), with health conditions spanning the full width.
+/// Tapping opens the cat's detail page.
 class ActiveCatSnapshotCard extends StatelessWidget {
   final CatEntity cat;
   final VoidCallback onTap;
@@ -21,40 +23,17 @@ class ActiveCatSnapshotCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final age = _formatAgeGroup(cat.ageGroup, l10n);
-    final weight = _formatWeightCategory(cat.weightCategory, l10n);
-    final breed =
-        (cat.breed != null && cat.breed!.isNotEmpty) ? cat.breed : null;
+    final notSet = l10n.onboardingSuccessNotSet;
     final conditions = cat.healthConditions ?? const [];
 
-    // Onboarding-success-style summary rows (colored icon tile + label + value).
-    final rows = <Widget>[
-      if (age != null)
-        _SummaryRow(
-          iconAsset: 'Cake.svg',
-          label: l10n.onboardingSuccessRowAge,
-          value: age,
-        ),
-      if (weight != null)
-        _SummaryRow(
-          iconAsset: 'Body condition.svg',
-          label: l10n.onboardingSuccessRowBodyCondition,
-          value: weight,
-        ),
-      if (breed != null)
-        _SummaryRow(
-          iconAsset: 'catwalk.svg',
-          label: l10n.onboardingSuccessRowBreed,
-          value: breed,
-        ),
-      _SummaryRow(
-        iconAsset: 'Health.svg',
-        label: l10n.onboardingSuccessRowHealthConditions,
-        value: conditions.isEmpty
-            ? l10n.onboardingSuccessNone
-            : l10n.homeCatConditionCount(conditions.length),
-        danger: conditions.isNotEmpty,
-      ),
+    // Six single-value facts, laid out two-per-row; health spans full width.
+    final cells = <_SummaryCell>[
+      _cell('Cake.svg', l10n.onboardingSuccessRowAge, _ageGroup(cat.ageGroup, l10n), notSet),
+      _cell('Activity.svg', l10n.onboardingSuccessRowActivity, _activity(cat.activityLevel, l10n), notSet),
+      _cell('Body condition.svg', l10n.onboardingSuccessRowBodyCondition, _weight(cat.weightCategory, l10n), notSet),
+      _cell('Coat.svg', l10n.onboardingSuccessRowCoat, _coat(cat.coatType, l10n), notSet),
+      _cell('Neuter status.svg', l10n.onboardingSuccessRowNeuterStatus, _neuter(cat.neuteredStatus, l10n), notSet),
+      _cell('catwalk.svg', l10n.onboardingSuccessRowBreed, _breed(cat.breed), notSet),
     ];
 
     return DSCard(
@@ -78,16 +57,45 @@ class ActiveCatSnapshotCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: DSDimens.sizeM),
-          for (var i = 0; i < rows.length; i++) ...[
+          for (var i = 0; i < cells.length; i += 2) ...[
             if (i > 0) const SizedBox(height: DSDimens.sizeM),
-            rows[i],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: cells[i]),
+                const SizedBox(width: DSDimens.sizeS),
+                Expanded(
+                  child: i + 1 < cells.length
+                      ? cells[i + 1]
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
           ],
+          const SizedBox(height: DSDimens.sizeM),
+          _SummaryCell(
+            iconAsset: 'Health.svg',
+            label: l10n.onboardingSuccessRowHealthConditions,
+            value: conditions.isEmpty
+                ? l10n.onboardingSuccessNone
+                : l10n.homeCatConditionCount(conditions.length),
+            valueMaxLines: 2,
+            danger: conditions.isNotEmpty,
+          ),
         ],
       ),
     );
   }
 
-  String? _formatAgeGroup(String? ageGroup, AppLocalizations l10n) {
+  _SummaryCell _cell(String icon, String label, String? value, String notSet) =>
+      _SummaryCell(
+        iconAsset: icon,
+        label: label,
+        value: value ?? notSet,
+        muted: value == null,
+      );
+
+  String? _ageGroup(String? ageGroup, AppLocalizations l10n) {
     if (ageGroup == null) return null;
     return switch (ageGroup.toLowerCase()) {
       'kitten' => l10n.homeCatKitten,
@@ -97,7 +105,7 @@ class ActiveCatSnapshotCard extends StatelessWidget {
     };
   }
 
-  String? _formatWeightCategory(String? category, AppLocalizations l10n) {
+  String? _weight(String? category, AppLocalizations l10n) {
     if (category == null || category.isEmpty) return null;
     return switch (category.toLowerCase()) {
       'underweight' => l10n.homeCatUnderweight,
@@ -107,48 +115,81 @@ class ActiveCatSnapshotCard extends StatelessWidget {
       _ => category,
     };
   }
+
+  String? _activity(String? level, AppLocalizations l10n) {
+    if (level == null || level.isEmpty) return null;
+    return switch (level.toLowerCase()) {
+      'low' => l10n.activityLowLabel,
+      'medium' => l10n.activityMediumLabel,
+      'high' => l10n.activityHighLabel,
+      _ => level,
+    };
+  }
+
+  String? _coat(String? coat, AppLocalizations l10n) {
+    if (coat == null || coat.isEmpty) return null;
+    return switch (coat.toLowerCase()) {
+      'short_hair' => l10n.coatShortHair,
+      'long_hair' => l10n.coatLongHair,
+      'hairless' => l10n.coatHairless,
+      _ => coat,
+    };
+  }
+
+  String? _neuter(String? status, AppLocalizations l10n) {
+    if (status == null || status.isEmpty) return null;
+    return switch (status.toLowerCase()) {
+      'neutered' => l10n.neuteredNeutered,
+      'intact' => l10n.neuteredIntact,
+      'pregnant' => l10n.neuteredPregnant,
+      'lactating' => l10n.neuteredLactating,
+      _ => status,
+    };
+  }
+
+  String? _breed(String? breed) =>
+      (breed != null && breed.isNotEmpty && breed != 'Other') ? breed : null;
 }
 
-/// A colorful icon + label + value row, matching the onboarding success
-/// summary card.
-class _SummaryRow extends StatelessWidget {
-  /// Colorful attribute icon under `assets/images/` (e.g. `Cake.svg`).
+/// A compact icon + label + value fact, sized to sit two-per-row in the
+/// snapshot. Mirrors the onboarding success recap cell.
+class _SummaryCell extends StatelessWidget {
   final String iconAsset;
   final String label;
   final String value;
-
-  /// Renders the value in the danger colour (e.g. for active health conditions).
+  final bool muted;
   final bool danger;
+  final int valueMaxLines;
 
-  const _SummaryRow({
+  const _SummaryCell({
     required this.iconAsset,
     required this.label,
     required this.value,
+    this.muted = false,
     this.danger = false,
+    this.valueMaxLines = 1,
   });
 
   @override
   Widget build(BuildContext context) {
+    final Color valueColor = danger
+        ? DSColors.accentDanger
+        : muted
+            ? DSColors.inkTertiary
+            : DSColors.inkPrimary;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 40,
-          height: 40,
-          child: Center(
-            child: SvgPicture.asset(
-              'assets/images/$iconAsset',
-              width: 36,
-              height: 36,
-            ),
-          ),
-        ),
-        const SizedBox(width: DSDimens.sizeS),
+        SvgPicture.asset('assets/images/$iconAsset', width: 28, height: 28),
+        const SizedBox(width: DSDimens.sizeXs),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: DSTextStyles.caption.copyWith(
                   color: DSColors.inkTertiary,
                 ),
@@ -156,9 +197,11 @@ class _SummaryRow extends StatelessWidget {
               const SizedBox(height: DSDimens.sizeXxxxs),
               Text(
                 value,
-                style: DSTextStyles.titleMd.copyWith(
+                maxLines: valueMaxLines,
+                overflow: TextOverflow.ellipsis,
+                style: DSTextStyles.bodyLg.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: danger ? DSColors.accentDanger : DSColors.inkPrimary,
+                  color: valueColor,
                 ),
               ),
             ],

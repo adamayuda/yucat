@@ -201,6 +201,72 @@ List<DietRecommendation> recommendDiet(CatEntity cat, AppLocalizations l10n) {
       add(DietNutrient.calories, DietDirection.less,
           l10n.dietWhyBritishCalories, CatAssessmentDimension.breed, _wBreed);
       break;
+    // --- Large / muscular ---
+    case 'norwegian forest cat':
+    case 'siberian':
+    case 'ragdoll':
+    case 'savannah':
+      add(DietNutrient.protein, DietDirection.more, l10n.dietWhyBreedProtein,
+          CatAssessmentDimension.breed, _wBreed);
+      add(DietNutrient.omega3, DietDirection.more, l10n.dietWhyBreedOmega3,
+          CatAssessmentDimension.breed, _wBreed);
+      break;
+    // --- Hairless / fine-coat ---
+    case 'devon rex':
+    case 'cornish rex':
+      add(DietNutrient.fat, DietDirection.more, l10n.dietWhyBreedFat,
+          CatAssessmentDimension.breed, _wBreed);
+      break;
+    // --- Brachycephalic / long-coat (Persian-like) ---
+    case 'himalayan':
+    case 'exotic shorthair':
+      add(DietNutrient.omega3, DietDirection.more, l10n.dietWhyBreedOmega3,
+          CatAssessmentDimension.breed, _wBreed);
+      add(DietNutrient.fiber, DietDirection.more, l10n.dietWhyBreedFiber,
+          CatAssessmentDimension.breed, _wBreed);
+      add(DietNutrient.carbs, DietDirection.less, l10n.dietWhyBreedCarbs,
+          CatAssessmentDimension.breed, _wBreed);
+      break;
+    // --- Lean / active digestible ---
+    case 'oriental shorthair':
+    case 'tonkinese':
+    case 'balinese':
+      add(DietNutrient.protein, DietDirection.more, l10n.dietWhyBreedProtein,
+          CatAssessmentDimension.breed, _wBreed);
+      add(DietNutrient.digestibility, DietDirection.more,
+          l10n.dietWhyBreedDigestibility, CatAssessmentDimension.breed,
+          _wBreed);
+      break;
+    // --- Kidney-watch active ---
+    case 'abyssinian':
+    case 'somali':
+      add(DietNutrient.protein, DietDirection.more, l10n.dietWhyBreedProtein,
+          CatAssessmentDimension.breed, _wBreed);
+      add(DietNutrient.phosphorus, DietDirection.less,
+          l10n.dietWhyBreedPhosphorus, CatAssessmentDimension.breed, _wBreed);
+      break;
+    // --- Obesity-prone ---
+    case 'russian blue':
+    case 'bombay':
+    case 'chartreux':
+      add(DietNutrient.calories, DietDirection.less, l10n.dietWhyBreedCalories,
+          CatAssessmentDimension.breed, _wBreed);
+      break;
+    // --- Diabetes-prone ---
+    case 'burmese':
+      add(DietNutrient.carbs, DietDirection.less, l10n.dietWhyBreedCarbs,
+          CatAssessmentDimension.breed, _wBreed);
+      break;
+    // --- Joint / cartilage ---
+    case 'scottish fold':
+      add(DietNutrient.omega3, DietDirection.more, l10n.dietWhyBreedOmega3,
+          CatAssessmentDimension.breed, _wBreed);
+      break;
+    // --- Coat / skin ---
+    case 'birman':
+      add(DietNutrient.omega3, DietDirection.more, l10n.dietWhyBreedOmega3,
+          CatAssessmentDimension.breed, _wBreed);
+      break;
   }
 
   // --- Coat --------------------------------------------------------------

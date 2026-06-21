@@ -190,6 +190,28 @@ class AppLocalizationsFr extends AppLocalizations {
       'L\'oméga-3 garde leur pelage brillant et leur peau en bonne santé.';
 
   @override
+  String get coatFactHeadlineShort =>
+      'Les chats à poil court profitent de\nplus de fibres';
+
+  @override
+  String get coatFactHighlightShort => 'plus de fibres';
+
+  @override
+  String get coatFactBodyShort =>
+      'Les fibres aident à réduire les boules de poils dues au toilettage.';
+
+  @override
+  String get coatFactHeadlineHairless =>
+      'Les chats sans poils brûlent\nplus d\'énergie';
+
+  @override
+  String get coatFactHighlightHairless => 'plus d\'énergie';
+
+  @override
+  String get coatFactBodyHairless =>
+      'Sans pelage, ils ont besoin de plus de calories pour rester au chaud.';
+
+  @override
   String get healthQuestion => 'Des problèmes de santé particuliers ?';
 
   @override
@@ -664,7 +686,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paywallPeriodLifetime => 'À vie';
 
   @override
-  String get paywallCtaUnlockPlus => 'Débloquer Yucat Plus';
+  String get paywallCtaUnlockPlus => 'C\'est parti';
 
   @override
   String get paywallSkipDebug => 'Passer le paywall (debug)';
@@ -973,6 +995,62 @@ class AppLocalizationsFr extends AppLocalizations {
       'Faible en protéines (<30 %), peut être insuffisant pour les Bengals';
 
   @override
+  String get assessmentBreedHighProtein =>
+      'Riche en protéines (>35 %), soutient les races grandes et musclées';
+
+  @override
+  String get assessmentBreedHighFat =>
+      'Teneur élevée en matières grasses (>18 %), adaptée aux races à poil fin et au métabolisme rapide';
+
+  @override
+  String get assessmentBreedLowFat =>
+      'Faible en matières grasses (<12 %), peut être insuffisant pour les races à poil fin';
+
+  @override
+  String get assessmentBreedHairball =>
+      'Formule anti-boules de poils (fibres 4–6 % ou mentions boules de poils), adaptée aux races à poil long';
+
+  @override
+  String get assessmentBreedOmega3 =>
+      'Contient des ingrédients riches en oméga-3, bons pour le pelage et la peau';
+
+  @override
+  String get assessmentBreedHighCarbs =>
+      'Riche en glucides (>30 %), pas idéal pour cette race';
+
+  @override
+  String get assessmentBreedDigestible =>
+      'Utilise des protéines facilement digestibles, bonnes pour les races minces et actives';
+
+  @override
+  String get assessmentBreedFillers =>
+      'Contient beaucoup de charges (maïs, blé, soja) qui peuvent ne pas convenir à cette race';
+
+  @override
+  String get assessmentBreedJointSupport =>
+      'Contient des ingrédients pour le soutien articulaire, utiles pour cette race';
+
+  @override
+  String get assessmentBreedLowPhosphorus =>
+      'Formule rénale à faible teneur en phosphore, adaptée aux races sujettes aux problèmes rénaux';
+
+  @override
+  String get assessmentBreedHighMinerals =>
+      'Teneur élevée en minéraux, peut ne pas convenir aux races sujettes aux problèmes rénaux';
+
+  @override
+  String get assessmentBreedHighCalories =>
+      'Une alimentation riche en calories peut favoriser la prise de poids chez cette race';
+
+  @override
+  String get assessmentBreedWeightManagement =>
+      'Formule de gestion du poids, adaptée aux races sujettes à la prise de poids';
+
+  @override
+  String get assessmentBreedHighCarbsDiabetes =>
+      'Riche en glucides (>20 %), peut ne pas convenir aux races sujettes au diabète';
+
+  @override
   String get assessmentUrinaryLowAsh =>
       'Formulé avec une faible teneur en cendres, favorable aux problèmes urinaires';
 
@@ -1069,6 +1147,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get homeAddCatButton => 'Ajouter un chat';
+
+  @override
+  String homeProfileCompletionTitle(String name) {
+    return 'Compléter le profil de $name';
+  }
+
+  @override
+  String get homeProfileCompletionBody =>
+      'Quelques détails pour de meilleures recommandations.';
+
+  @override
+  String homeProfileCompletionProgress(int filled, int total) {
+    return '$filled/$total';
+  }
+
+  @override
+  String get homeProfileCompletionButton => 'Compléter le profil';
 
   @override
   String get homeMyCatsTitle => 'Mes chats';
@@ -1629,6 +1724,38 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get dietWhyBritishCalories =>
       'Cette race tranquille grossit facilement.';
+
+  @override
+  String get dietWhyBreedProtein =>
+      'Les races grandes et musclées s\'épanouissent avec beaucoup de protéines.';
+
+  @override
+  String get dietWhyBreedOmega3 =>
+      'Les oméga-3 gardent le pelage et les articulations de cette race en bonne santé.';
+
+  @override
+  String get dietWhyBreedFat =>
+      'Les races à poil fin brûlent l\'énergie rapidement et ont besoin de plus de matières grasses.';
+
+  @override
+  String get dietWhyBreedFiber =>
+      'Les fibres aident à faire transiter les boules de poils dans l\'intestin.';
+
+  @override
+  String get dietWhyBreedCarbs =>
+      'Cette race se porte mieux avec une alimentation pauvre en glucides.';
+
+  @override
+  String get dietWhyBreedDigestibility =>
+      'Les races minces et actives se portent mieux avec une nourriture facile à digérer.';
+
+  @override
+  String get dietWhyBreedPhosphorus =>
+      'Moins de phosphore allège la charge des races sujettes aux problèmes rénaux.';
+
+  @override
+  String get dietWhyBreedCalories =>
+      'Cette race prend du poids facilement et a besoin de moins de calories.';
 
   @override
   String get dietWhyLongCoatOmega3 =>

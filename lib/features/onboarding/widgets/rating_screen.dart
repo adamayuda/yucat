@@ -31,23 +31,36 @@ class _RatingScreenState extends State<RatingScreen> {
   // the reviews scroll past them.
   final ScrollController _scrollController = ScrollController();
 
+  // Set while the review popup is showing and during the hold-back delay below.
+  // Drives the button spinner and guards against double taps.
+  bool _requesting = false;
+
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
   }
 
-  /// Requests the native review popup, then advances. Never blocks the flow
-  /// on a review-prompt failure or unavailability.
+  /// Requests the native review popup, holds the screen behind it for a beat,
+  /// then advances. `SKStoreReviewController` gives no completion callback (and
+  /// doesn't background the app, so app-lifecycle events don't fire either), so
+  /// there's no signal for when the user finishes rating. We instead show a
+  /// spinner on the button and wait ~3s so the popup isn't yanked out from
+  /// under them before advancing. Never blocks the flow on a prompt failure.
   Future<void> _handleNext() async {
+    if (_requesting) return;
+    setState(() => _requesting = true);
     try {
       final inAppReview = InAppReview.instance;
       if (await inAppReview.isAvailable()) {
         await inAppReview.requestReview();
+        // Give the user a moment with the (non-blocking) native popup.
+        await Future<void>.delayed(const Duration(seconds: 3));
       }
     } catch (_) {
       // Ignore — advancing onboarding must not depend on the review prompt.
     }
+    if (!mounted) return;
     widget.onNext();
   }
 
@@ -238,7 +251,8 @@ class _RatingScreenState extends State<RatingScreen> {
                     child: Center(
                       child: OnboardingFloatingButton(
                         label: l10n.commonNext,
-                        onPressed: _handleNext,
+                        onPressed: _requesting ? null : _handleNext,
+                        loading: _requesting,
                       ),
                     ),
                   ),

@@ -176,6 +176,14 @@ class DSGradients {
     end: Alignment.bottomRight,
     colors: [DSColors.tintCoralSoft, DSColors.tintCoral],
   );
+
+  /// Fresh mint wash behind the home "complete your profile" card —
+  /// complements the green completeness ring.
+  static const LinearGradient homeProfileCard = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFDFF6E6), Color(0xFFBFEBCF)],
+  );
 }
 
 class DSDimens {

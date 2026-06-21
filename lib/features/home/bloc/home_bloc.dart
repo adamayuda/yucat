@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
@@ -113,6 +114,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // Preview hides on read failure.
     }
 
+    debugPrint('CATDIAG home loaded cats='
+        '${cats.map((c) => '${c.name}:breed=${c.breed}:health=${c.healthConditions}').toList()}');
     emit(HomeLoadedState(cats: cats, savedProducts: savedProducts));
   }
 

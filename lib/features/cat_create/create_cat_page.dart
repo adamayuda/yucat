@@ -71,26 +71,42 @@ class _CreateCatPageState extends State<CreateCatPage> {
     'Other',
     'Abyssinian',
     'American Shorthair',
+    'Balinese',
     'Bengal',
     'Birman',
+    'Bombay',
     'British Shorthair',
     'Burmese',
+    'Chartreux',
+    'Cornish Rex',
     'Devon Rex',
     'Domestic Longhair',
     'Domestic Shorthair',
+    'Egyptian Mau',
     'Exotic Shorthair',
+    'Himalayan',
     'Maine Coon',
+    'Manx',
     'Norwegian Forest Cat',
+    'Ocicat',
     'Oriental Shorthair',
     'Persian',
+    'Ragamuffin',
     'Ragdoll',
     'Russian Blue',
+    'Savannah',
     'Scottish Fold',
+    'Selkirk Rex',
     'Siamese',
+    'Siberian',
+    'Singapura',
+    'Snowshoe',
+    'Somali',
     'Sphynx',
     'Tabby',
     'Tonkinese',
     'Turkish Angora',
+    'Turkish Van',
     'Tuxedo',
   ];
 
@@ -111,7 +127,12 @@ class _CreateCatPageState extends State<CreateCatPage> {
   @override
   void initState() {
     super.initState();
-    _bloc = context.read<CatCreateBloc>();
+    // Own a fresh bloc per wizard session. A single app-wide instance (the old
+    // root BlocProvider) leaked state across sessions: a previous create flow
+    // left an id-less model behind, and a spurious early update on that stale
+    // state clobbered the id seeded for an edit — making "Save changes" fail
+    // with "Cannot update cat without ID".
+    _bloc = sl<CatCreateBloc>();
     _pageController = PageController(initialPage: _initialStep);
 
     // Convert CatModel to CatCreateModel if editing
@@ -151,6 +172,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
   void dispose() {
     _pageController.dispose();
     _nameController.dispose();
+    _bloc.close();
     super.dispose();
   }
 
@@ -212,6 +234,10 @@ class _CreateCatPageState extends State<CreateCatPage> {
 
   Widget _onStateChangeBuilder(CatCreateState state) {
     switch (state) {
+      case CatCreateInitial():
+        // Init runs on the next microtask, so this is a single imperceptible
+        // frame — render the wizard background to avoid a flash.
+        return const Scaffold(backgroundColor: DSColors.tintCloud);
       case CatCreateLoadedState(:final currentStep, :final cat, :final isSubmitting):
         return _buildPageView(currentStep: currentStep, cat: cat, isSubmitting: isSubmitting);
     }
@@ -472,7 +498,7 @@ class _CreateCatPageState extends State<CreateCatPage> {
           },
         );
       case 9:
-        return const CoatFactStep(key: ValueKey('step_9'));
+        return CoatFactStep(key: const ValueKey('step_9'), coatType: cat.coatType);
       case 10:
         return HealthConditionsStep(
           key: const ValueKey('step_10'),

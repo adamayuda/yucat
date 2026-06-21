@@ -189,6 +189,28 @@ class AppLocalizationsHu extends AppLocalizations {
       'Az omega-3 fényes szőrt és egészséges bőrt biztosít.';
 
   @override
+  String get coatFactHeadlineShort =>
+      'A rövid szőrű macskáknak jót tesz\na több rost';
+
+  @override
+  String get coatFactHighlightShort => 'a több rost';
+
+  @override
+  String get coatFactBodyShort =>
+      'A rost segít csökkenteni a tisztálkodásból eredő szőrlabdákat.';
+
+  @override
+  String get coatFactHeadlineHairless =>
+      'A szőrtelen macskák\ntöbb energiát égetnek';
+
+  @override
+  String get coatFactHighlightHairless => 'több energiát';
+
+  @override
+  String get coatFactBodyHairless =>
+      'Szőr nélkül több kalória kell nekik, hogy melegen maradjanak.';
+
+  @override
   String get healthQuestion => 'Vannak egészségügyi szempontok?';
 
   @override
@@ -658,7 +680,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get paywallPeriodLifetime => 'Élethosszig';
 
   @override
-  String get paywallCtaUnlockPlus => 'Yucat Plus megnyitása';
+  String get paywallCtaUnlockPlus => 'Kezdjük el';
 
   @override
   String get paywallSkipDebug => 'Fizetési kapu kihagyása (debug)';
@@ -966,6 +988,62 @@ class AppLocalizationsHu extends AppLocalizations {
       'Alacsony fehérjetartalom (<30%) nem biztos, hogy elegendő Bengál macskák számára';
 
   @override
+  String get assessmentBreedHighProtein =>
+      'Magas fehérjetartalom (>35%) támogatja a nagy, izmos fajtákat';
+
+  @override
+  String get assessmentBreedHighFat =>
+      'Magasabb zsírtartalom (>18%) megfelel a finom szőrű, gyors anyagcseréjű fajtáknak';
+
+  @override
+  String get assessmentBreedLowFat =>
+      'Alacsony zsírtartalom (<12%) nem biztos, hogy elegendő a finom szőrű fajtáknak';
+
+  @override
+  String get assessmentBreedHairball =>
+      'Szőrlabda-szabályozó összetétel (rost 4–6% vagy szőrlabda jelölés) megfelel a hosszú szőrű fajtáknak';
+
+  @override
+  String get assessmentBreedOmega3 =>
+      'Omega-3-ban gazdag összetevőket tartalmaz, jó a szőrzetnek és a bőrnek';
+
+  @override
+  String get assessmentBreedHighCarbs =>
+      'Magas szénhidráttartalom (>30%) nem ideális ennek a fajtának';
+
+  @override
+  String get assessmentBreedDigestible =>
+      'Könnyen emészthető fehérjéket használ, jó a karcsú, aktív fajtáknak';
+
+  @override
+  String get assessmentBreedFillers =>
+      'Sok töltőanyagot tartalmaz (kukorica, búza, szója), amely nem biztos, hogy megfelel ennek a fajtának';
+
+  @override
+  String get assessmentBreedJointSupport =>
+      'Ízülettámogató összetevőket tartalmaz, hasznos ennek a fajtának';
+
+  @override
+  String get assessmentBreedLowPhosphorus =>
+      'Vesebarát, alacsony foszfortartalmú összetétel megfelel a vesebetegségre hajlamos fajtáknak';
+
+  @override
+  String get assessmentBreedHighMinerals =>
+      'Magas ásványianyag-tartalom nem biztos, hogy megfelel a vesebetegségre hajlamos fajtáknak';
+
+  @override
+  String get assessmentBreedHighCalories =>
+      'A magas kalóriatartalmú táp hízást okozhat ennél a fajtánál';
+
+  @override
+  String get assessmentBreedWeightManagement =>
+      'Súlykontroll-összetétel megfelel a hízásra hajlamos fajtáknak';
+
+  @override
+  String get assessmentBreedHighCarbsDiabetes =>
+      'Magas szénhidráttartalom (>20%) nem biztos, hogy megfelel a cukorbetegségre hajlamos fajtáknak';
+
+  @override
   String get assessmentUrinaryLowAsh =>
       'Alacsony hamutartalommal készült receptúra, kedvező húgyúti problémák esetén';
 
@@ -1061,6 +1139,22 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get homeAddCatButton => 'Macska hozzáadása';
+
+  @override
+  String homeProfileCompletionTitle(String name) {
+    return '$name profiljának kitöltése';
+  }
+
+  @override
+  String get homeProfileCompletionBody => 'Pár adat a jobb ajánlásokért.';
+
+  @override
+  String homeProfileCompletionProgress(int filled, int total) {
+    return '$filled/$total';
+  }
+
+  @override
+  String get homeProfileCompletionButton => 'Profil kitöltése';
 
   @override
   String get homeMyCatsTitle => 'Macskáim';
@@ -1619,6 +1713,38 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get dietWhyBritishCalories => 'Ez a nyugodt fajta könnyen elhízik.';
+
+  @override
+  String get dietWhyBreedProtein =>
+      'A nagy, izmos fajták sok fehérjével gyarapodnak.';
+
+  @override
+  String get dietWhyBreedOmega3 =>
+      'Az omega-3 egészségesen tartja a fajta szőrzetét és ízületeit.';
+
+  @override
+  String get dietWhyBreedFat =>
+      'A finom szőrű fajták gyorsan égetik az energiát, és több zsírra van szükségük.';
+
+  @override
+  String get dietWhyBreedFiber =>
+      'A rost segít átjuttatni a szőrlabdákat a bélrendszeren.';
+
+  @override
+  String get dietWhyBreedCarbs =>
+      'Ez a fajta jobban teljesít alacsonyabb szénhidráttartalmú étrenden.';
+
+  @override
+  String get dietWhyBreedDigestibility =>
+      'A karcsú, aktív fajták a könnyen emészthető táppal a legjobbak.';
+
+  @override
+  String get dietWhyBreedPhosphorus =>
+      'A kevesebb foszfor tehermentesíti a vesebetegségre hajlamos fajtákat.';
+
+  @override
+  String get dietWhyBreedCalories =>
+      'Ez a fajta könnyen hízik, és kevesebb kalóriára van szüksége.';
 
   @override
   String get dietWhyLongCoatOmega3 =>

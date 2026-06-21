@@ -5,6 +5,7 @@ import 'package:yucat/features/cat/presentation/utils/cat_diet_recommendations.d
 import 'package:yucat/features/cat/presentation/widgets/dietary_recommendations_card.dart';
 import 'package:yucat/features/cat/presentation/widgets/recommended_products_section.dart';
 import 'package:yucat/features/home/widgets/active_cat_snapshot_card.dart';
+import 'package:yucat/features/home/widgets/cat_profile_completion_card.dart';
 import 'package:yucat/features/home/widgets/home_cat_selector.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
@@ -18,6 +19,7 @@ class MyCatsSection extends StatefulWidget {
   final ValueChanged<CatEntity> onCatTap;
   final VoidCallback onCreateCat;
   final ValueChanged<CatEntity> onActiveCatChanged;
+  final ValueChanged<CatEntity> onCompleteProfile;
   final VoidCallback onSeeAll;
 
   const MyCatsSection({
@@ -26,6 +28,7 @@ class MyCatsSection extends StatefulWidget {
     required this.onCatTap,
     required this.onCreateCat,
     required this.onActiveCatChanged,
+    required this.onCompleteProfile,
     required this.onSeeAll,
   });
 
@@ -104,6 +107,19 @@ class _MyCatsSectionState extends State<MyCatsSection> {
               onTap: () => widget.onCatTap(activeCat),
             ),
           ),
+          if (!catProfileCompletion(activeCat).isComplete)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                DSDimens.sizeL,
+                DSDimens.sizeS,
+                DSDimens.sizeL,
+                0,
+              ),
+              child: CatProfileCompletionCard(
+                cat: activeCat,
+                onComplete: () => widget.onCompleteProfile(activeCat),
+              ),
+            ),
           _ActiveCatTips(cat: activeCat, onTap: () => widget.onCatTap(activeCat)),
           Padding(
             padding: const EdgeInsets.fromLTRB(

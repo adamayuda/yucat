@@ -18,6 +18,7 @@ class HomeDashboardPage extends StatelessWidget {
   final VoidCallback onSeeAllCats;
   final VoidCallback onCreateCat;
   final ValueChanged<CatEntity> onActiveCatChanged;
+  final ValueChanged<CatEntity> onCompleteProfile;
 
   const HomeDashboardPage({
     super.key,
@@ -30,6 +31,7 @@ class HomeDashboardPage extends StatelessWidget {
     required this.onSeeAllCats,
     required this.onCreateCat,
     required this.onActiveCatChanged,
+    required this.onCompleteProfile,
   });
 
   @override
@@ -66,6 +68,7 @@ class HomeDashboardPage extends StatelessWidget {
                 onCatTap: onCatTap,
                 onCreateCat: onCreateCat,
                 onActiveCatChanged: onActiveCatChanged,
+                onCompleteProfile: onCompleteProfile,
                 onSeeAll: onSeeAllCats,
               ),
               const SizedBox(height: DSDimens.sizeL),

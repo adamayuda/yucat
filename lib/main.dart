@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
-import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
 import 'package:yucat/features/cat_detail/presentation/bloc/cat_detail_bloc.dart';
 import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
 import 'package:yucat/features/splash/presentation/bloc/splash_bloc.dart';
@@ -128,7 +127,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         BlocProvider(create: (context) => sl<SavedProductsBloc>()),
         BlocProvider(create: (context) => sl<ScanHistoryBloc>()),
         BlocProvider(create: (context) => sl<CatListingBloc>()),
-        BlocProvider(create: (context) => sl<CatCreateBloc>()),
+        // CatCreateBloc is intentionally NOT provided here — CreateCatPage owns
+        // a fresh instance per session so wizard state never leaks across runs.
         BlocProvider(create: (context) => sl<CatDetailBloc>()),
         BlocProvider(create: (context) => sl<ProductListingBloc>()),
         BlocProvider(create: (context) => sl<PaywallBloc>()),

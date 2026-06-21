@@ -19,7 +19,12 @@ class MainPage extends StatelessWidget {
         final bottomInset = MediaQuery.of(context).padding.bottom;
 
         return Scaffold(
-          backgroundColor: Colors.transparent,
+          // Opaque tint behind the tabs: AutoTabsRouter cross-fades between
+          // tabs, and during the fade both pages are partially transparent —
+          // a transparent Scaffold would let the black window show through
+          // (a black blink). tintLavender matches the Search/Profile scaffolds
+          // and the nav fade gradient below.
+          backgroundColor: DSColors.tintLavender,
           // The nav floats over the page in a Stack rather than occupying a
           // bottomNavigationBar slot, so each tab paints full-bleed to the
           // bottom edge. A soft fade behind the pill lets scrolling content

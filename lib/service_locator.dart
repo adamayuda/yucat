@@ -437,12 +437,10 @@ Future<void> _registerBlocs() async {
   sl.registerBloc<ProfileBloc>(
     () => ProfileBloc(
       prefs: sl<SharedPreferences>(),
-      hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
       getCatsUsecase: sl<GetCatsUsecase>(),
       getSavedProductsUsecase: sl<GetSavedProductsUsecase>(),
       getScanHistoryUsecase: sl<GetScanHistoryUsecase>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
-      logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
   sl.registerBloc<ProductDetailBloc>(

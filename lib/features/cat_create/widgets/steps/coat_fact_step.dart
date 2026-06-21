@@ -12,14 +12,32 @@ import 'package:yucat/l10n/app_localizations.dart';
 /// reference "BitePal iOS Setting up goals 6". The backdrop lives inside the
 /// step (not the host shell) so it slides in with the content on transition.
 class CoatFactStep extends StatelessWidget {
-  const CoatFactStep({super.key});
+  /// Selected coat type (`short_hair` / `long_hair` / `hairless`) — picks which
+  /// fact variant to show. Null/unknown falls back to the long-hair copy.
+  final String? coatType;
+
+  const CoatFactStep({super.key, this.coatType});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final headline = l10n.coatFactHeadline;
-    final highlight = l10n.coatFactHighlight;
-    final body = l10n.coatFactBody;
+    final String headline;
+    final String highlight;
+    final String body;
+    switch (coatType) {
+      case 'short_hair':
+        headline = l10n.coatFactHeadlineShort;
+        highlight = l10n.coatFactHighlightShort;
+        body = l10n.coatFactBodyShort;
+      case 'hairless':
+        headline = l10n.coatFactHeadlineHairless;
+        highlight = l10n.coatFactHighlightHairless;
+        body = l10n.coatFactBodyHairless;
+      default: // long_hair / null
+        headline = l10n.coatFactHeadline;
+        highlight = l10n.coatFactHighlight;
+        body = l10n.coatFactBody;
+    }
     final parts = headline.split(highlight);
     final hasHighlight = highlight.isNotEmpty && parts.length == 2;
 

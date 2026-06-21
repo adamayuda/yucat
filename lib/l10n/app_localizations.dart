@@ -442,6 +442,42 @@ abstract class AppLocalizations {
   /// **'Omega-3 keeps their coat glossy and skin healthy.'**
   String get coatFactBody;
 
+  /// Headline of the coat-health interstitial for short-haired cats. Must contain coatFactHighlightShort verbatim so it can be colour-highlighted.
+  ///
+  /// In en, this message translates to:
+  /// **'Short-haired cats benefit from\nextra fiber'**
+  String get coatFactHeadlineShort;
+
+  /// Substring of coatFactHeadlineShort that is colour-highlighted. Keep it identical to the matching part of the headline.
+  ///
+  /// In en, this message translates to:
+  /// **'extra fiber'**
+  String get coatFactHighlightShort;
+
+  /// No description provided for @coatFactBodyShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Fiber helps reduce hairballs from grooming.'**
+  String get coatFactBodyShort;
+
+  /// Headline of the coat-health interstitial for hairless cats. Must contain coatFactHighlightHairless verbatim so it can be colour-highlighted.
+  ///
+  /// In en, this message translates to:
+  /// **'Hairless cats burn\nmore energy'**
+  String get coatFactHeadlineHairless;
+
+  /// Substring of coatFactHeadlineHairless that is colour-highlighted. Keep it identical to the matching part of the headline.
+  ///
+  /// In en, this message translates to:
+  /// **'more energy'**
+  String get coatFactHighlightHairless;
+
+  /// No description provided for @coatFactBodyHairless.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a coat they need extra calories to stay warm.'**
+  String get coatFactBodyHairless;
+
   /// No description provided for @healthQuestion.
   ///
   /// In en, this message translates to:
@@ -1303,7 +1339,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallCtaUnlockPlus.
   ///
   /// In en, this message translates to:
-  /// **'Unlock Yucat Plus'**
+  /// **'Let\'s get started'**
   String get paywallCtaUnlockPlus;
 
   /// No description provided for @paywallSkipDebug.
@@ -1804,6 +1840,90 @@ abstract class AppLocalizations {
   /// **'Low protein (<30%) may be insufficient for Bengals'**
   String get assessmentBengalLowProtein;
 
+  /// No description provided for @assessmentBreedHighProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'High protein (>35%) supports large, muscular breeds'**
+  String get assessmentBreedHighProtein;
+
+  /// No description provided for @assessmentBreedHighFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher fat (>18%) suits fine-coated, high-metabolism breeds'**
+  String get assessmentBreedHighFat;
+
+  /// No description provided for @assessmentBreedLowFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Low fat (<12%) may not be enough for fine-coated breeds'**
+  String get assessmentBreedLowFat;
+
+  /// No description provided for @assessmentBreedHairball.
+  ///
+  /// In en, this message translates to:
+  /// **'Hairball-control style formula (fiber 4–6% or hairball claims) suits long-coated breeds'**
+  String get assessmentBreedHairball;
+
+  /// No description provided for @assessmentBreedOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes omega-3 rich ingredients, good for coat and skin'**
+  String get assessmentBreedOmega3;
+
+  /// No description provided for @assessmentBreedHighCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'High carbohydrate (>30%) is not ideal for this breed'**
+  String get assessmentBreedHighCarbs;
+
+  /// No description provided for @assessmentBreedDigestible.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses easily digestible proteins, good for lean, active breeds'**
+  String get assessmentBreedDigestible;
+
+  /// No description provided for @assessmentBreedFillers.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains many fillers (corn, wheat, soy) which may not suit this breed'**
+  String get assessmentBreedFillers;
+
+  /// No description provided for @assessmentBreedJointSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains joint support ingredients, helpful for this breed'**
+  String get assessmentBreedJointSupport;
+
+  /// No description provided for @assessmentBreedLowPhosphorus.
+  ///
+  /// In en, this message translates to:
+  /// **'Kidney-friendly, lower-phosphorus formula suits breeds prone to renal issues'**
+  String get assessmentBreedLowPhosphorus;
+
+  /// No description provided for @assessmentBreedHighMinerals.
+  ///
+  /// In en, this message translates to:
+  /// **'High mineral content may not suit breeds prone to renal issues'**
+  String get assessmentBreedHighMinerals;
+
+  /// No description provided for @assessmentBreedHighCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'High-calorie food may promote weight gain in this breed'**
+  String get assessmentBreedHighCalories;
+
+  /// No description provided for @assessmentBreedWeightManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight-management style formula suits breeds prone to weight gain'**
+  String get assessmentBreedWeightManagement;
+
+  /// No description provided for @assessmentBreedHighCarbsDiabetes.
+  ///
+  /// In en, this message translates to:
+  /// **'High carbohydrate (>20%) may not suit breeds prone to diabetes'**
+  String get assessmentBreedHighCarbsDiabetes;
+
   /// No description provided for @assessmentUrinaryLowAsh.
   ///
   /// In en, this message translates to:
@@ -1959,6 +2079,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add a cat'**
   String get homeAddCatButton;
+
+  /// No description provided for @homeProfileCompletionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete {name}\'s profile'**
+  String homeProfileCompletionTitle(String name);
+
+  /// No description provided for @homeProfileCompletionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a few details for sharper picks.'**
+  String get homeProfileCompletionBody;
+
+  /// No description provided for @homeProfileCompletionProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{filled}/{total}'**
+  String homeProfileCompletionProgress(int filled, int total);
+
+  /// No description provided for @homeProfileCompletionButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete profile'**
+  String get homeProfileCompletionButton;
 
   /// No description provided for @homeMyCatsTitle.
   ///
@@ -2871,6 +3015,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This laid-back breed gains weight easily.'**
   String get dietWhyBritishCalories;
+
+  /// No description provided for @dietWhyBreedProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Large, muscular breeds thrive on high protein.'**
+  String get dietWhyBreedProtein;
+
+  /// No description provided for @dietWhyBreedOmega3.
+  ///
+  /// In en, this message translates to:
+  /// **'Omega-3s keep this breed\'s coat and joints healthy.'**
+  String get dietWhyBreedOmega3;
+
+  /// No description provided for @dietWhyBreedFat.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine-coated breeds burn energy fast and need more fat.'**
+  String get dietWhyBreedFat;
+
+  /// No description provided for @dietWhyBreedFiber.
+  ///
+  /// In en, this message translates to:
+  /// **'Fiber helps move hairballs through the gut.'**
+  String get dietWhyBreedFiber;
+
+  /// No description provided for @dietWhyBreedCarbs.
+  ///
+  /// In en, this message translates to:
+  /// **'This breed tends to do better on lower-carb diets.'**
+  String get dietWhyBreedCarbs;
+
+  /// No description provided for @dietWhyBreedDigestibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Lean, active breeds do best on easily digestible food.'**
+  String get dietWhyBreedDigestibility;
+
+  /// No description provided for @dietWhyBreedPhosphorus.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower phosphorus eases the load on breeds prone to kidney issues.'**
+  String get dietWhyBreedPhosphorus;
+
+  /// No description provided for @dietWhyBreedCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'This breed gains weight easily and needs fewer calories.'**
+  String get dietWhyBreedCalories;
 
   /// No description provided for @dietWhyLongCoatOmega3.
   ///

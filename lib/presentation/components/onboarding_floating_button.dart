@@ -13,12 +13,14 @@ class OnboardingFloatingButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final bool showChevron;
+  final bool loading;
 
   const OnboardingFloatingButton({
     super.key,
     required this.label,
     required this.onPressed,
     this.showChevron = true,
+    this.loading = false,
   });
 
   @override
@@ -32,6 +34,7 @@ class OnboardingFloatingButton extends StatelessWidget {
         label: label,
         onPressed: onPressed,
         showChevron: showChevron,
+        loading: loading,
       ),
     );
   }

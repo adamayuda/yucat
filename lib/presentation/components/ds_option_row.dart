@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/presentation/components/ds_haptics.dart';
 
 enum DSOptionRowAccent { success, danger }
 
@@ -71,7 +72,10 @@ class DSOptionRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(DSRadii.lg),
         child: InkWell(
           borderRadius: BorderRadius.circular(DSRadii.lg),
-          onTap: onTap,
+          onTap: () {
+            DSHaptics.selection();
+            onTap();
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: DSDimens.sizeS,

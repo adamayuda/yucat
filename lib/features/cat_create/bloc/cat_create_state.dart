@@ -8,6 +8,18 @@ sealed class CatCreateState extends Equatable {
   const CatCreateState();
 }
 
+/// Transient state before [CatCreateInitialEvent] seeds the working model. The
+/// page renders nothing interactive while in this state, so step widgets (in
+/// particular the eagerly-built [PageView] children) never run against an empty
+/// placeholder model — which previously let an auto-firing step clobber the
+/// seeded data (e.g. wiping the edit id, breaking "Save changes").
+class CatCreateInitial extends CatCreateState {
+  const CatCreateInitial();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class CatCreateLoadedState extends CatCreateState {
   final int currentStep;
   final CatCreateModel cat;

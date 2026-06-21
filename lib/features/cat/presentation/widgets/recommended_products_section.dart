@@ -29,13 +29,28 @@ class _RecommendedProductsSectionState
     extends State<RecommendedProductsSection> {
   bool _loading = true;
   List<ProductPick> _picks = const [];
-  String? _loadedCatId;
+  String? _loadedSignature;
+
+  /// Reload key: the cat id plus every attribute the scorer reads. Keying on id
+  /// alone would skip a refetch after an in-place edit (same id, new fields),
+  /// leaving stale picks on screen even though the cache was invalidated.
+  static String _signature(CatEntity cat) => [
+        cat.id,
+        cat.age,
+        cat.ageGroup,
+        cat.weightCategory,
+        cat.activityLevel,
+        cat.neuteredStatus,
+        cat.breed,
+        (cat.healthConditions ?? const []).toList()..sort(),
+      ].join('|');
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_loadedCatId != widget.cat.id) {
-      _loadedCatId = widget.cat.id;
+    final sig = _signature(widget.cat);
+    if (_loadedSignature != sig) {
+      _loadedSignature = sig;
       _load();
     }
   }
@@ -43,8 +58,9 @@ class _RecommendedProductsSectionState
   @override
   void didUpdateWidget(covariant RecommendedProductsSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.cat.id != widget.cat.id) {
-      _loadedCatId = widget.cat.id;
+    final sig = _signature(widget.cat);
+    if (_loadedSignature != sig) {
+      _loadedSignature = sig;
       _load();
     }
   }
@@ -54,7 +70,7 @@ class _RecommendedProductsSectionState
     final l10n = AppLocalizations.of(context);
     final picks =
         await recommendProductsForCat(widget.cat, l10n, limit: widget.limit);
-    if (!mounted || widget.cat.id != _loadedCatId) return;
+    if (!mounted || _signature(widget.cat) != _loadedSignature) return;
     setState(() {
       _picks = picks;
       _loading = false;

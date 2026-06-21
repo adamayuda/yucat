@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/presentation/components/ds_haptics.dart';
 
 class DSChip extends StatelessWidget {
   final String label;
@@ -32,7 +33,10 @@ class DSChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(DSRadii.lg),
         child: InkWell(
           borderRadius: BorderRadius.circular(DSRadii.lg),
-          onTap: onTap,
+          onTap: () {
+            DSHaptics.selection();
+            onTap();
+          },
           child: AnimatedContainer(
             duration: DSMotion.durFast,
             curve: DSMotion.curveStandard,

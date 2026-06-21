@@ -188,6 +188,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'Omega-3 keeps their coat glossy and skin healthy.';
 
   @override
+  String get coatFactHeadlineShort =>
+      'Short-haired cats benefit from\nextra fiber';
+
+  @override
+  String get coatFactHighlightShort => 'extra fiber';
+
+  @override
+  String get coatFactBodyShort => 'Fiber helps reduce hairballs from grooming.';
+
+  @override
+  String get coatFactHeadlineHairless => 'Hairless cats burn\nmore energy';
+
+  @override
+  String get coatFactHighlightHairless => 'more energy';
+
+  @override
+  String get coatFactBodyHairless =>
+      'Without a coat they need extra calories to stay warm.';
+
+  @override
   String get healthQuestion => 'Any health considerations?';
 
   @override
@@ -652,7 +672,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallPeriodLifetime => 'Lifetime';
 
   @override
-  String get paywallCtaUnlockPlus => 'Unlock Yucat Plus';
+  String get paywallCtaUnlockPlus => 'Let\'s get started';
 
   @override
   String get paywallSkipDebug => 'Skip paywall (debug)';
@@ -958,6 +978,62 @@ class AppLocalizationsEn extends AppLocalizations {
       'Low protein (<30%) may be insufficient for Bengals';
 
   @override
+  String get assessmentBreedHighProtein =>
+      'High protein (>35%) supports large, muscular breeds';
+
+  @override
+  String get assessmentBreedHighFat =>
+      'Higher fat (>18%) suits fine-coated, high-metabolism breeds';
+
+  @override
+  String get assessmentBreedLowFat =>
+      'Low fat (<12%) may not be enough for fine-coated breeds';
+
+  @override
+  String get assessmentBreedHairball =>
+      'Hairball-control style formula (fiber 4–6% or hairball claims) suits long-coated breeds';
+
+  @override
+  String get assessmentBreedOmega3 =>
+      'Includes omega-3 rich ingredients, good for coat and skin';
+
+  @override
+  String get assessmentBreedHighCarbs =>
+      'High carbohydrate (>30%) is not ideal for this breed';
+
+  @override
+  String get assessmentBreedDigestible =>
+      'Uses easily digestible proteins, good for lean, active breeds';
+
+  @override
+  String get assessmentBreedFillers =>
+      'Contains many fillers (corn, wheat, soy) which may not suit this breed';
+
+  @override
+  String get assessmentBreedJointSupport =>
+      'Contains joint support ingredients, helpful for this breed';
+
+  @override
+  String get assessmentBreedLowPhosphorus =>
+      'Kidney-friendly, lower-phosphorus formula suits breeds prone to renal issues';
+
+  @override
+  String get assessmentBreedHighMinerals =>
+      'High mineral content may not suit breeds prone to renal issues';
+
+  @override
+  String get assessmentBreedHighCalories =>
+      'High-calorie food may promote weight gain in this breed';
+
+  @override
+  String get assessmentBreedWeightManagement =>
+      'Weight-management style formula suits breeds prone to weight gain';
+
+  @override
+  String get assessmentBreedHighCarbsDiabetes =>
+      'High carbohydrate (>20%) may not suit breeds prone to diabetes';
+
+  @override
   String get assessmentUrinaryLowAsh =>
       'Formulated with low ash content, supportive for urinary issues';
 
@@ -1054,6 +1130,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeAddCatButton => 'Add a cat';
+
+  @override
+  String homeProfileCompletionTitle(String name) {
+    return 'Complete $name\'s profile';
+  }
+
+  @override
+  String get homeProfileCompletionBody =>
+      'Add a few details for sharper picks.';
+
+  @override
+  String homeProfileCompletionProgress(int filled, int total) {
+    return '$filled/$total';
+  }
+
+  @override
+  String get homeProfileCompletionButton => 'Complete profile';
 
   @override
   String get homeMyCatsTitle => 'My cats';
@@ -1607,6 +1700,37 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dietWhyBritishCalories =>
       'This laid-back breed gains weight easily.';
+
+  @override
+  String get dietWhyBreedProtein =>
+      'Large, muscular breeds thrive on high protein.';
+
+  @override
+  String get dietWhyBreedOmega3 =>
+      'Omega-3s keep this breed\'s coat and joints healthy.';
+
+  @override
+  String get dietWhyBreedFat =>
+      'Fine-coated breeds burn energy fast and need more fat.';
+
+  @override
+  String get dietWhyBreedFiber => 'Fiber helps move hairballs through the gut.';
+
+  @override
+  String get dietWhyBreedCarbs =>
+      'This breed tends to do better on lower-carb diets.';
+
+  @override
+  String get dietWhyBreedDigestibility =>
+      'Lean, active breeds do best on easily digestible food.';
+
+  @override
+  String get dietWhyBreedPhosphorus =>
+      'Lower phosphorus eases the load on breeds prone to kidney issues.';
+
+  @override
+  String get dietWhyBreedCalories =>
+      'This breed gains weight easily and needs fewer calories.';
 
   @override
   String get dietWhyLongCoatOmega3 => 'Omega-3s nourish a long, thick coat.';

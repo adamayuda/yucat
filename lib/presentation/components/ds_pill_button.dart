@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/presentation/components/ds_haptics.dart';
 
 enum DSPillButtonVariant { primary, secondary, danger }
 
@@ -47,7 +48,12 @@ class DSPillButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(DSRadii.pill),
         child: InkWell(
           borderRadius: BorderRadius.circular(DSRadii.pill),
-          onTap: disabled ? null : onPressed,
+          onTap: disabled
+              ? null
+              : () {
+                  DSHaptics.tap();
+                  onPressed!();
+                },
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: DSDimens.sizeXxl,

@@ -57,6 +57,8 @@ const _sphynxFatLow = 12.0;
 const _britishCaloriesHigh = 360.0;
 const _bengalProteinHigh = 38.0;
 const _bengalProteinLow = 30.0;
+// Shared archetype threshold for large / muscular breeds.
+const _breedProteinHigh = 35.0;
 
 // Health conditions — heuristic.
 const _kidneyProteinMax = 32.0;
@@ -626,6 +628,135 @@ _DimensionResult _evaluateBreed(
         cons.add(_p(l10n.assessmentBengalLowProtein,
             CatAssessmentDimension.breed));
         delta -= 6;
+      }
+      break;
+    // --- Large / muscular: high protein + joint support ---
+    case 'norwegian forest cat':
+    case 'siberian':
+    case 'ragdoll':
+    case 'savannah':
+      if (n.protein > _breedProteinHigh) {
+        pros.add(_p(l10n.assessmentBreedHighProtein,
+            CatAssessmentDimension.breed));
+        delta += 6;
+      }
+      if (_containsAny(text, _kJointSupport)) {
+        pros.add(_p(l10n.assessmentBreedJointSupport,
+            CatAssessmentDimension.breed));
+        delta += 6;
+      }
+      break;
+    // --- Hairless / fine-coat: higher fat ---
+    case 'devon rex':
+    case 'cornish rex':
+      if (n.fat > _sphynxFatHigh) {
+        pros.add(_p(l10n.assessmentBreedHighFat,
+            CatAssessmentDimension.breed));
+        delta += 6;
+      }
+      if (n.fat < _sphynxFatLow) {
+        cons.add(_p(l10n.assessmentBreedLowFat,
+            CatAssessmentDimension.breed));
+        delta -= 8;
+      }
+      break;
+    // --- Brachycephalic / long-coat: Persian-like ---
+    case 'himalayan':
+    case 'exotic shorthair':
+      if ((n.fiber >= _persianFiberLow && n.fiber <= _persianFiberHigh) ||
+          _containsAny(text, _kHairball)) {
+        pros.add(_p(l10n.assessmentBreedHairball,
+            CatAssessmentDimension.breed));
+        delta += 6;
+      }
+      if (_containsAny(text, _kOmega3)) {
+        pros.add(_p(l10n.assessmentBreedOmega3,
+            CatAssessmentDimension.breed));
+        delta += 6;
+      }
+      if (n.carbs > _persianCarbsHigh) {
+        cons.add(_p(l10n.assessmentBreedHighCarbs,
+            CatAssessmentDimension.breed));
+        delta -= 6;
+      }
+      break;
+    // --- Lean / active: digestible proteins, penalise fillers ---
+    case 'oriental shorthair':
+    case 'tonkinese':
+    case 'balinese':
+      if (_containsAny(text, _kDigestible)) {
+        pros.add(_p(l10n.assessmentBreedDigestible,
+            CatAssessmentDimension.breed));
+        delta += 6;
+      }
+      if (_hasManyFillersWordBoundary(text)) {
+        cons.add(_p(l10n.assessmentBreedFillers,
+            CatAssessmentDimension.breed));
+        delta -= 8;
+      }
+      break;
+    // --- Kidney-watch active: high protein but reward low phosphorus ---
+    case 'abyssinian':
+    case 'somali':
+      if (n.protein > _breedProteinHigh) {
+        pros.add(_p(l10n.assessmentBreedHighProtein,
+            CatAssessmentDimension.breed));
+        delta += 6;
+      }
+      if (_containsAny(text, _kReducedPhosphorus) ||
+          _containsAny(text, _kKidneyFriendly)) {
+        pros.add(_p(l10n.assessmentBreedLowPhosphorus,
+            CatAssessmentDimension.breed));
+        delta += 6;
+      }
+      if (_containsAny(text, _kHighMinerals)) {
+        cons.add(_p(l10n.assessmentBreedHighMinerals,
+            CatAssessmentDimension.breed));
+        delta -= 6;
+      }
+      break;
+    // --- Obesity-prone: penalise high calories, reward weight management ---
+    case 'russian blue':
+    case 'bombay':
+    case 'chartreux':
+      if (n.calories > _britishCaloriesHigh) {
+        cons.add(_p(l10n.assessmentBreedHighCalories,
+            CatAssessmentDimension.breed));
+        delta -= 8;
+      }
+      if (_containsAny(text, _kWeightManagement)) {
+        pros.add(_p(l10n.assessmentBreedWeightManagement,
+            CatAssessmentDimension.breed));
+        delta += 8;
+      }
+      break;
+    // --- Diabetes-prone: penalise high carbs ---
+    case 'burmese':
+      if (n.carbs > _diabetesCarbsMax) {
+        cons.add(_p(l10n.assessmentBreedHighCarbsDiabetes,
+            CatAssessmentDimension.breed));
+        delta -= 8;
+      }
+      break;
+    // --- Joint / cartilage: joint support + omega-3 ---
+    case 'scottish fold':
+      if (_containsAny(text, _kJointSupport)) {
+        pros.add(_p(l10n.assessmentBreedJointSupport,
+            CatAssessmentDimension.breed));
+        delta += 6;
+      }
+      if (_containsAny(text, _kOmega3)) {
+        pros.add(_p(l10n.assessmentBreedOmega3,
+            CatAssessmentDimension.breed));
+        delta += 6;
+      }
+      break;
+    // --- Coat / skin: reward omega-3 ---
+    case 'birman':
+      if (_containsAny(text, _kOmega3)) {
+        pros.add(_p(l10n.assessmentBreedOmega3,
+            CatAssessmentDimension.breed));
+        delta += 6;
       }
       break;
   }

@@ -40,4 +40,21 @@ class CatEntity {
     this.gender,
     this.healthConditions,
   });
+
+  CatEntity copyWith({String? profileImageUrl}) => CatEntity(
+        id: id,
+        name: name,
+        age: age,
+        weight: weight,
+        neutered: neutered,
+        profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+        ageGroup: ageGroup,
+        neuteredStatus: neuteredStatus,
+        breed: breed,
+        weightCategory: weightCategory,
+        activityLevel: activityLevel,
+        coatType: coatType,
+        gender: gender,
+        healthConditions: healthConditions,
+      );
 }

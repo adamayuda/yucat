@@ -191,6 +191,28 @@ class AppLocalizationsEs extends AppLocalizations {
       'El omega-3 mantiene su pelaje brillante y la piel sana.';
 
   @override
+  String get coatFactHeadlineShort =>
+      'Los gatos de pelo corto se benefician de\nmás fibra';
+
+  @override
+  String get coatFactHighlightShort => 'más fibra';
+
+  @override
+  String get coatFactBodyShort =>
+      'La fibra ayuda a reducir las bolas de pelo del acicalado.';
+
+  @override
+  String get coatFactHeadlineHairless =>
+      'Los gatos sin pelo queman\nmás energía';
+
+  @override
+  String get coatFactHighlightHairless => 'más energía';
+
+  @override
+  String get coatFactBodyHairless =>
+      'Sin pelaje necesitan más calorías para mantenerse calientes.';
+
+  @override
   String get healthQuestion => '¿Alguna consideración de salud?';
 
   @override
@@ -663,7 +685,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paywallPeriodLifetime => 'De por vida';
 
   @override
-  String get paywallCtaUnlockPlus => 'Desbloquear Yucat Plus';
+  String get paywallCtaUnlockPlus => 'Empecemos';
 
   @override
   String get paywallSkipDebug => 'Omitir paywall (debug)';
@@ -972,6 +994,62 @@ class AppLocalizationsEs extends AppLocalizations {
       'Baja en proteína (<30%); puede ser insuficiente para los Bengala';
 
   @override
+  String get assessmentBreedHighProtein =>
+      'Alta en proteína (>35%); apoya a razas grandes y musculosas';
+
+  @override
+  String get assessmentBreedHighFat =>
+      'Mayor contenido de grasa (>18%); adecuado para razas de pelo fino y metabolismo rápido';
+
+  @override
+  String get assessmentBreedLowFat =>
+      'Baja en grasa (<12%); puede ser insuficiente para razas de pelo fino';
+
+  @override
+  String get assessmentBreedHairball =>
+      'Fórmula control de bolas de pelo (fibra 4–6% o indicaciones de bolas de pelo); adecuada para razas de pelo largo';
+
+  @override
+  String get assessmentBreedOmega3 =>
+      'Incluye ingredientes ricos en omega-3, buenos para el pelaje y la piel';
+
+  @override
+  String get assessmentBreedHighCarbs =>
+      'Alto en carbohidratos (>30%); no es ideal para esta raza';
+
+  @override
+  String get assessmentBreedDigestible =>
+      'Usa proteínas fácilmente digeribles, buenas para razas delgadas y activas';
+
+  @override
+  String get assessmentBreedFillers =>
+      'Contiene muchos rellenos (maíz, trigo, soja) que pueden no convenir a esta raza';
+
+  @override
+  String get assessmentBreedJointSupport =>
+      'Contiene ingredientes para el apoyo articular, útiles para esta raza';
+
+  @override
+  String get assessmentBreedLowPhosphorus =>
+      'Fórmula renal con bajo contenido de fósforo; adecuada para razas propensas a problemas renales';
+
+  @override
+  String get assessmentBreedHighMinerals =>
+      'Alto contenido de minerales; puede no convenir a razas propensas a problemas renales';
+
+  @override
+  String get assessmentBreedHighCalories =>
+      'La comida alta en calorías puede favorecer el aumento de peso en esta raza';
+
+  @override
+  String get assessmentBreedWeightManagement =>
+      'Fórmula de control de peso; adecuada para razas propensas a engordar';
+
+  @override
+  String get assessmentBreedHighCarbsDiabetes =>
+      'Alto en carbohidratos (>20%); puede no convenir a razas propensas a la diabetes';
+
+  @override
   String get assessmentUrinaryLowAsh =>
       'Formulada con bajo contenido de cenizas, favorable para problemas urinarios';
 
@@ -1068,6 +1146,23 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeAddCatButton => 'Añadir un gato';
+
+  @override
+  String homeProfileCompletionTitle(String name) {
+    return 'Completa el perfil de $name';
+  }
+
+  @override
+  String get homeProfileCompletionBody =>
+      'Añade unos detalles para mejores recomendaciones.';
+
+  @override
+  String homeProfileCompletionProgress(int filled, int total) {
+    return '$filled/$total';
+  }
+
+  @override
+  String get homeProfileCompletionButton => 'Completar perfil';
 
   @override
   String get homeMyCatsTitle => 'Mis gatos';
@@ -1629,6 +1724,38 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get dietWhyBritishCalories =>
       'Esta raza tranquila engorda con facilidad.';
+
+  @override
+  String get dietWhyBreedProtein =>
+      'Las razas grandes y musculosas prosperan con mucha proteína.';
+
+  @override
+  String get dietWhyBreedOmega3 =>
+      'El omega-3 mantiene sano el pelaje y las articulaciones de esta raza.';
+
+  @override
+  String get dietWhyBreedFat =>
+      'Las razas de pelo fino queman energía rápido y necesitan más grasa.';
+
+  @override
+  String get dietWhyBreedFiber =>
+      'La fibra ayuda a mover las bolas de pelo por el intestino.';
+
+  @override
+  String get dietWhyBreedCarbs =>
+      'A esta raza le va mejor con dietas bajas en carbohidratos.';
+
+  @override
+  String get dietWhyBreedDigestibility =>
+      'Las razas delgadas y activas rinden mejor con alimentos fáciles de digerir.';
+
+  @override
+  String get dietWhyBreedPhosphorus =>
+      'Menos fósforo alivia la carga en razas propensas a problemas renales.';
+
+  @override
+  String get dietWhyBreedCalories =>
+      'Esta raza engorda con facilidad y necesita menos calorías.';
 
   @override
   String get dietWhyLongCoatOmega3 =>

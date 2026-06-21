@@ -21,8 +21,6 @@ import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/service_locator.dart';
 
-const _manageSubscriptionUrl = 'https://apps.apple.com/account/subscriptions';
-
 @RoutePage()
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -96,21 +94,6 @@ class _ProfilePage extends State<ProfilePage> {
     context.router.push(const ScanHistoryRoute());
   }
 
-  void _restorePurchases() {
-    _bloc.add(RestorePurchasesTapEvent(context: context));
-  }
-
-  void _manageSubscription() {
-    sl<LogEventUsecase>().call(
-      eventName: 'Manage Subscription Tapped',
-      properties: {'timestamp': DateTime.now().toIso8601String()},
-    );
-    _launchUri(
-      Uri.parse(_manageSubscriptionUrl),
-      errorMessage: AppLocalizations.of(context).profileSubscriptionLinkError,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -123,8 +106,6 @@ class _ProfilePage extends State<ProfilePage> {
             cats: cats,
             savedProducts: savedProducts,
             scanHistory: scanHistory,
-            onRestore: _restorePurchases,
-            onManageSubscription: _manageSubscription,
             onCatTap: _openCatDetail,
             onAddCat: _openCreateCat,
             onManageCats: _openManageCats,
@@ -160,8 +141,6 @@ class _ProfileHub extends StatelessWidget {
   final List<CatEntity> cats;
   final List<ProductDisplayModel> savedProducts;
   final List<ProductDisplayModel> scanHistory;
-  final VoidCallback onRestore;
-  final VoidCallback onManageSubscription;
   final ValueChanged<CatEntity> onCatTap;
   final VoidCallback onAddCat;
   final VoidCallback onManageCats;
@@ -176,8 +155,6 @@ class _ProfileHub extends StatelessWidget {
     required this.cats,
     required this.savedProducts,
     required this.scanHistory,
-    required this.onRestore,
-    required this.onManageSubscription,
     required this.onCatTap,
     required this.onAddCat,
     required this.onManageCats,
@@ -206,11 +183,6 @@ class _ProfileHub extends StatelessWidget {
           children: [
             Text(l10n.profileTitle, style: DSTextStyles.displayLg),
             const SizedBox(height: DSDimens.sizeL),
-            _SubscriptionCard(
-              onRestore: onRestore,
-              onManageSubscription: onManageSubscription,
-            ),
-            const SizedBox(height: DSDimens.sizeM),
             _YourCatsCard(
               cats: cats,
               onCatTap: onCatTap,
@@ -281,77 +253,6 @@ class _ProfileHub extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SubscriptionCard extends StatelessWidget {
-  final VoidCallback onRestore;
-  final VoidCallback onManageSubscription;
-
-  const _SubscriptionCard({
-    required this.onRestore,
-    required this.onManageSubscription,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    // Hard paywall: every user who reaches Profile is an active subscriber,
-    // so the card always reflects the Pro state.
-    return DSCard(
-      padding: const EdgeInsets.all(DSDimens.sizeL),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: DSColors.accentSuccessSoft,
-                  borderRadius: BorderRadius.circular(DSRadii.md),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.workspace_premium_rounded,
-                  color: DSColors.accentSuccess,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: DSDimens.sizeS),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('YuCat Pro', style: DSTextStyles.titleMd),
-                    const SizedBox(height: 2),
-                    Text(
-                      l10n.profileSubscriptionActive,
-                      style: DSTextStyles.bodyMd.copyWith(
-                        color: DSColors.inkSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: DSDimens.sizeS),
-          _InlineAction(
-            icon: Icons.restore_rounded,
-            label: l10n.profileRestorePurchases,
-            onTap: onRestore,
-          ),
-          const _MenuDivider(),
-          _InlineAction(
-            icon: Icons.settings_outlined,
-            label: l10n.profileManageSubscription,
-            onTap: onManageSubscription,
-          ),
-        ],
       ),
     );
   }
@@ -480,43 +381,6 @@ class _AddCatTile extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InlineAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _InlineAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: DSDimens.sizeS),
-          child: Row(
-            children: [
-              Icon(icon, color: DSColors.inkPrimary, size: 20),
-              const SizedBox(width: DSDimens.sizeS),
-              Expanded(child: Text(label, style: DSTextStyles.titleMd)),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: DSColors.inkTertiary,
-                size: 24,
-              ),
-            ],
-          ),
         ),
       ),
     );

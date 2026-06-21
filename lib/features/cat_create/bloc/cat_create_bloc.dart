@@ -8,6 +8,7 @@ import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/create_cat_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/update_cat_usecase.dart';
+import 'package:yucat/features/cat/presentation/utils/cat_product_recommendations.dart';
 import 'package:yucat/features/cat_create/mappers/cat_model_to_entity_mapper.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_create_model.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
@@ -56,12 +57,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
        _currentUserUsecase = currentUserUsecase,
        _logScreenViewUsecase = logScreenViewUsecase,
        _logEventUsecase = logEventUsecase,
-       super(
-         const CatCreateLoadedState(
-           currentStep: 0,
-           cat: CatCreateModel(name: '', neutered: false),
-         ),
-       ) {
+       super(const CatCreateInitial()) {
     on<CatCreateInitialEvent>(_onCatCreateInitialEvent);
     on<CatCreateGoToNextStepEvent>(_onCatCreateGoToNextStepEvent);
     on<CatCreateStepChangedEvent>(_onCatCreateStepChangedEvent);
@@ -179,10 +175,17 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
   ) {
     final currentState = state;
     if (currentState is CatCreateLoadedState) {
+      // In edit mode the Firestore id must never be dropped. A step widget can
+      // fire `onChanged` during the first build — before `CatCreateInitialEvent`
+      // is processed — reading the bloc's empty initial state; that update is
+      // then queued after init and would otherwise overwrite the seeded id,
+      // breaking "Save changes" with "Cannot update cat without ID". Re-anchor
+      // the id from the original cat being edited (no-op for create mode).
+      final preservedId = event.cat.id ?? _originalCat?.id;
       emit(
         CatCreateLoadedState(
           currentStep: currentState.currentStep,
-          cat: event.cat,
+          cat: event.cat.copyWith(id: preservedId),
         ),
       );
     }
@@ -208,7 +211,14 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
       if (isEditMode) {
         // Update existing cat
         final catEntity = _catModelToEntityMapper(event.cat);
-        await _updateCatUsecase(cat: catEntity);
+        await _updateCatUsecase(
+          cat: catEntity,
+          profileImageFile: event.cat.profileImageFile,
+        );
+
+        // The profile changed — drop cached picks so the next fetch re-scores
+        // against the new attributes (otherwise stale picks survive the edit).
+        invalidateProductPicksCache(catEntity.id);
 
         // Track which fields changed
         final fieldsChanged = _getChangedFields(event.cat);
