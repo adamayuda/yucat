@@ -1,7 +1,7 @@
 # Mixpanel Setup — Step by Step (Revamp)
 
 Click-by-click guide to stand up a clean Mixpanel project for the YuCat revamp and build a
-proper dashboard. Event & property names are defined in **`design/analytics.md`** — keep that
+proper dashboard. Event & property names are defined in **`docs/analytics.md`** — keep that
 open alongside this. You do the clicks (I can't log into your account).
 
 > **Why a new project:** the legacy app is still live and writes to the old token

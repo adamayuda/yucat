@@ -7,6 +7,35 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:449124894302:android:ea3d83c93953999d2d56cf",
+        "android_client_info": {
+          "package_name": "com.adam.yucat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "449124894302-u4afm6g2dtj9dgo7apbd5kq8pc9taj0d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3aQ05I4n0GNwlRu9MKL2PaK7cRfGChpI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "449124894302-u4afm6g2dtj9dgo7apbd5kq8pc9taj0d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:449124894302:android:3c02760de7dd30e42d56cf",
         "android_client_info": {
           "package_name": "com.example.yucat"

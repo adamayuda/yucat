@@ -3,7 +3,7 @@
 /// New tracking introduced for the funnel/drop-off review references these
 /// constants instead of string literals to avoid name drift between the code
 /// and the Mixpanel dashboard. The ~40 pre-existing events still use inline
-/// literals (see `design/analytics.md` for the full catalog); migrating them
+/// literals (see `docs/analytics.md` for the full catalog); migrating them
 /// is a follow-up, not required for these constants to be useful.
 class AnalyticsEvents {
   AnalyticsEvents._();
@@ -13,8 +13,9 @@ class AnalyticsEvents {
 
   // Paywall funnel
   static const paywallShown = 'Paywall Shown';
+  // Unreachable while the paywall offers a single plan; kept for when a second
+  // plan comes back.
   static const planSelected = 'Plan Selected';
-  static const paywallPromoToggled = 'Paywall Promo Toggled';
   static const subscriptionCompleted = 'Subscription Completed';
   static const subscriptionRestored = 'Subscription Restored';
   static const subscriptionPurchaseFailed = 'Subscription Purchase Failed';

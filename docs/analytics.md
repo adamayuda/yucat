@@ -16,7 +16,7 @@ literals; the names below are authoritative regardless.
 > with the legacy app, which keeps the old token. Every revamp event is also stamped with the
 > super property **`tracking_version = v2`** (set in `_registerMixpanel`). Build/version
 > segmentation comes free from the SDK's auto `$app_version_string` / `$app_build_number`.
-> See **`design/mixpanel-setup.md`** for the step-by-step project + dashboard setup.
+> See **`docs/mixpanel-setup.md`** for the step-by-step project + dashboard setup.
 
 ---
 

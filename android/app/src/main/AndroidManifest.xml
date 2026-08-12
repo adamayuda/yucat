@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Product-scan camera (scanner_page.dart). image_picker on Android 13+ uses
+         the system photo picker, so no storage permission is required. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
     <application
         android:label="yucat"
         android:name="${applicationName}"

@@ -47,9 +47,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Design reference (large PNG screenshots — keep local)
+# Design reference (large PNG screenshots — keep local, never committed).
+# The written design/analytics docs used to live here; they now live in docs/.
 design/*
-!design/design.md
 
 # Firebase Functions (Node)
 functions/node_modules/

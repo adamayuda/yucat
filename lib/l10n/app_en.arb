@@ -282,13 +282,11 @@
   "paywallHeroHeadline": "Know exactly\nwhat's in the bowl",
   "paywallHeroHighlight": "exactly",
   "paywallPlusBadge": "Plus",
-  "paywallBadgeBestValue": "BEST VALUE",
-  "paywallLimitedTimeOffer": "Limited-time offer",
-  "paywallLimitedTimeOfferWithSavings": "Limited-time offer · {savings}",
-  "@paywallLimitedTimeOfferWithSavings": {
+  "paywallBadgeFreeTrial": "{days} DAYS FREE",
+  "@paywallBadgeFreeTrial": {
     "placeholders": {
-      "savings": {
-        "type": "String"
+      "days": {
+        "type": "int"
       }
     }
   },
@@ -318,7 +316,87 @@
   "paywallStatRatingLabel": "average\nrating",
   "paywallStatCatParentsLabel": "cat parents\nworldwide",
   "paywallCancelAnytime": "Cancel anytime.",
-  "paywallAutoRenewDisclosure": "Your subscription auto-renews unless cancelled at least 24 hours before the end of the current term. Cancel anytime in the App Store at no extra cost.",
+  "paywallPeriodSuffixWeekly": "week",
+  "paywallPeriodSuffixMonthly": "month",
+  "paywallPeriodSuffixAnnual": "year",
+  "paywallPerPeriodPrice": "{price}/{period}",
+  "@paywallPerPeriodPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallThenPrice": "then {price}/{period}",
+  "@paywallThenPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallTrialDisclosure": "{days} days free, then {price}/{period}. Cancel anytime.",
+  "@paywallTrialDisclosure": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "price": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPriceDisclosure": "{price}/{period}. Cancel anytime.",
+  "@paywallPriceDisclosure": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallAutoRenewDisclosure": "Yucat Plus costs {price}/{period} and renews automatically unless you cancel at least 24 hours before the end of the current period. Manage or cancel anytime in your {store} account settings.",
+  "@paywallAutoRenewDisclosure": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      },
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallAutoRenewDisclosureTrial": "Your {days}-day free trial converts to a paid Yucat Plus subscription at {price}/{period} unless you cancel at least 24 hours before it ends. It then renews automatically at the same price until you cancel. Manage or cancel anytime in your {store} account settings.",
+  "@paywallAutoRenewDisclosureTrial": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "price": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      },
+      "store": {
+        "type": "String"
+      }
+    }
+  },
   "paywallRestorePurchases": "Restore purchases",
   "commonTerms": "Terms",
   "commonPrivacy": "Privacy",
@@ -331,6 +409,16 @@
   "paywallPeriodWeekly": "Weekly",
   "paywallPeriodLifetime": "Lifetime",
   "paywallCtaUnlockPlus": "Let's get started",
+  "paywallCtaRedeemTrial": "Redeem {days} days for free",
+  "@paywallCtaRedeemTrial": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallNoPaymentDue": "No payment due now",
+  "paywallRetry": "Try again",
   "paywallSkipDebug": "Skip paywall (debug)",
   "paywallErroriOSOnly": "Subscriptions are only available on iOS.",
   "paywallErrorCouldNotLoadPlans": "Could not load plans.",

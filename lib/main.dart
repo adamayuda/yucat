@@ -38,8 +38,8 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Configure RevenueCat for iOS
-  if (Platform.isIOS) {
+  // Configure RevenueCat on iOS + Android (hard paywall enforced on both).
+  if (Platform.isIOS || Platform.isAndroid) {
     await _configureRevenueCat();
   }
 
@@ -62,10 +62,14 @@ Future<void> _configureRevenueCat() async {
   // Enable debug logs before calling `configure`.
   await Purchases.setLogLevel(LogLevel.debug);
 
-  // Configure RevenueCat for iOS
+  // Public SDK keys (safe to commit). iOS = App Store, Android = Google Play.
   const appleApiKey = 'appl_RLrrtMqNXWlaNlEXzZQxUcxkJxw';
+  // RevenueCat Android public SDK key (Google Play).
+  const googleApiKey = 'goog_RiTqfgyAOTSPvSLQjnBszSTXAKK';
 
-  final configuration = PurchasesConfiguration(appleApiKey)
+  final apiKey = Platform.isIOS ? appleApiKey : googleApiKey;
+
+  final configuration = PurchasesConfiguration(apiKey)
     ..appUserID = null
     ..purchasesAreCompletedBy = const PurchasesAreCompletedByRevenueCat();
 

@@ -1090,23 +1090,11 @@ abstract class AppLocalizations {
   /// **'Plus'**
   String get paywallPlusBadge;
 
-  /// No description provided for @paywallBadgeBestValue.
+  /// No description provided for @paywallBadgeFreeTrial.
   ///
   /// In en, this message translates to:
-  /// **'BEST VALUE'**
-  String get paywallBadgeBestValue;
-
-  /// No description provided for @paywallLimitedTimeOffer.
-  ///
-  /// In en, this message translates to:
-  /// **'Limited-time offer'**
-  String get paywallLimitedTimeOffer;
-
-  /// No description provided for @paywallLimitedTimeOfferWithSavings.
-  ///
-  /// In en, this message translates to:
-  /// **'Limited-time offer · {savings}'**
-  String paywallLimitedTimeOfferWithSavings(String savings);
+  /// **'{days} DAYS FREE'**
+  String paywallBadgeFreeTrial(int days);
 
   /// No description provided for @paywallEverythingYouGet.
   ///
@@ -1264,11 +1252,64 @@ abstract class AppLocalizations {
   /// **'Cancel anytime.'**
   String get paywallCancelAnytime;
 
+  /// No description provided for @paywallPeriodSuffixWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'week'**
+  String get paywallPeriodSuffixWeekly;
+
+  /// No description provided for @paywallPeriodSuffixMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'month'**
+  String get paywallPeriodSuffixMonthly;
+
+  /// No description provided for @paywallPeriodSuffixAnnual.
+  ///
+  /// In en, this message translates to:
+  /// **'year'**
+  String get paywallPeriodSuffixAnnual;
+
+  /// No description provided for @paywallPerPeriodPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'{price}/{period}'**
+  String paywallPerPeriodPrice(String price, String period);
+
+  /// No description provided for @paywallThenPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'then {price}/{period}'**
+  String paywallThenPrice(String price, String period);
+
+  /// No description provided for @paywallTrialDisclosure.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days free, then {price}/{period}. Cancel anytime.'**
+  String paywallTrialDisclosure(int days, String price, String period);
+
+  /// No description provided for @paywallPriceDisclosure.
+  ///
+  /// In en, this message translates to:
+  /// **'{price}/{period}. Cancel anytime.'**
+  String paywallPriceDisclosure(String price, String period);
+
   /// No description provided for @paywallAutoRenewDisclosure.
   ///
   /// In en, this message translates to:
-  /// **'Your subscription auto-renews unless cancelled at least 24 hours before the end of the current term. Cancel anytime in the App Store at no extra cost.'**
-  String get paywallAutoRenewDisclosure;
+  /// **'Yucat Plus costs {price}/{period} and renews automatically unless you cancel at least 24 hours before the end of the current period. Manage or cancel anytime in your {store} account settings.'**
+  String paywallAutoRenewDisclosure(String price, String period, String store);
+
+  /// No description provided for @paywallAutoRenewDisclosureTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Your {days}-day free trial converts to a paid Yucat Plus subscription at {price}/{period} unless you cancel at least 24 hours before it ends. It then renews automatically at the same price until you cancel. Manage or cancel anytime in your {store} account settings.'**
+  String paywallAutoRenewDisclosureTrial(
+    int days,
+    String price,
+    String period,
+    String store,
+  );
 
   /// No description provided for @paywallRestorePurchases.
   ///
@@ -1341,6 +1382,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Let\'s get started'**
   String get paywallCtaUnlockPlus;
+
+  /// No description provided for @paywallCtaRedeemTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem {days} days for free'**
+  String paywallCtaRedeemTrial(int days);
+
+  /// No description provided for @paywallNoPaymentDue.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment due now'**
+  String get paywallNoPaymentDue;
+
+  /// No description provided for @paywallRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get paywallRetry;
 
   /// No description provided for @paywallSkipDebug.
   ///

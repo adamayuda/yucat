@@ -39,12 +39,3 @@ class PaywallRestoreEvent extends PaywallEvent {
 class PaywallDismissEvent extends PaywallEvent {
   const PaywallDismissEvent();
 }
-
-class PaywallPromoToggledEvent extends PaywallEvent {
-  final bool promoOn;
-
-  const PaywallPromoToggledEvent({required this.promoOn});
-
-  @override
-  List<Object?> get props => [promoOn];
-}

@@ -537,14 +537,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallPlusBadge => 'Plus';
 
   @override
-  String get paywallBadgeBestValue => 'BEST VALUE';
-
-  @override
-  String get paywallLimitedTimeOffer => 'Limited-time offer';
-
-  @override
-  String paywallLimitedTimeOfferWithSavings(String savings) {
-    return 'Limited-time offer · $savings';
+  String paywallBadgeFreeTrial(int days) {
+    return '$days DAYS FREE';
   }
 
   @override
@@ -635,8 +629,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallCancelAnytime => 'Cancel anytime.';
 
   @override
-  String get paywallAutoRenewDisclosure =>
-      'Your subscription auto-renews unless cancelled at least 24 hours before the end of the current term. Cancel anytime in the App Store at no extra cost.';
+  String get paywallPeriodSuffixWeekly => 'week';
+
+  @override
+  String get paywallPeriodSuffixMonthly => 'month';
+
+  @override
+  String get paywallPeriodSuffixAnnual => 'year';
+
+  @override
+  String paywallPerPeriodPrice(String price, String period) {
+    return '$price/$period';
+  }
+
+  @override
+  String paywallThenPrice(String price, String period) {
+    return 'then $price/$period';
+  }
+
+  @override
+  String paywallTrialDisclosure(int days, String price, String period) {
+    return '$days days free, then $price/$period. Cancel anytime.';
+  }
+
+  @override
+  String paywallPriceDisclosure(String price, String period) {
+    return '$price/$period. Cancel anytime.';
+  }
+
+  @override
+  String paywallAutoRenewDisclosure(String price, String period, String store) {
+    return 'Yucat Plus costs $price/$period and renews automatically unless you cancel at least 24 hours before the end of the current period. Manage or cancel anytime in your $store account settings.';
+  }
+
+  @override
+  String paywallAutoRenewDisclosureTrial(
+    int days,
+    String price,
+    String period,
+    String store,
+  ) {
+    return 'Your $days-day free trial converts to a paid Yucat Plus subscription at $price/$period unless you cancel at least 24 hours before it ends. It then renews automatically at the same price until you cancel. Manage or cancel anytime in your $store account settings.';
+  }
 
   @override
   String get paywallRestorePurchases => 'Restore purchases';
@@ -673,6 +707,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paywallCtaUnlockPlus => 'Let\'s get started';
+
+  @override
+  String paywallCtaRedeemTrial(int days) {
+    return 'Redeem $days days for free';
+  }
+
+  @override
+  String get paywallNoPaymentDue => 'No payment due now';
+
+  @override
+  String get paywallRetry => 'Try again';
 
   @override
   String get paywallSkipDebug => 'Skip paywall (debug)';

@@ -115,7 +115,11 @@ class _PaywallPage extends State<PaywallPage> {
   Widget _onStateChangeBuilder(PaywallState state) {
     return switch (state) {
       PaywallLoadingState() => const PaywallSkeleton(),
-      PaywallErrorState(:final kind) => PaywallErrorWidget(kind: kind),
+      PaywallErrorState(:final kind) => PaywallErrorWidget(
+          kind: kind,
+          bloc: _bloc,
+          trigger: widget.trigger,
+        ),
       PaywallLoadedState() => PaywallLoadedWidget(
         state: state,
         bloc: _bloc,

@@ -14,7 +14,7 @@ YuCat is a Flutter mobile application (iOS-focused) that helps cat owners evalua
 - **Navigation**: AutoRoute ^9.2.2
 - **Backend Services**: Firebase (Auth, Firestore, Functions, Storage, Analytics)
 - **Search**: Algolia (`algolia ^1.1.2`, `algoliasearch ^1.41.0`); search input debounced with `easy_debounce`
-- **Subscriptions**: RevenueCat (`purchases_flutter`, iOS only) — custom paywall UI on top of the SDK; the `purchases_ui_flutter` drop-in is **not** used
+- **Subscriptions**: RevenueCat (`purchases_flutter`, iOS + Android) — custom paywall UI on top of the SDK; the `purchases_ui_flutter` drop-in is **not** used. See `lib/features/paywall/README.md`.
 - **Analytics**: Firebase Analytics + Mixpanel
 - **Device features**: `camera` + `image_picker` (product-image scan and cat photos)
 - **UI**: Bricolage Grotesque (bundled variable font — display/headings) + DM Sans (body, via `google_fonts`); `lottie` (animations), `smooth_page_indicator`, `url_launcher`
@@ -58,16 +58,16 @@ feature_name/
 Grouped by area (each lives under `lib/features/<name>/`):
 
 **App shell / onboarding**
-- **splash**: Bootstraps services and routes to onboarding or main
-- **onboarding**: First-launch flow; completion persisted in SharedPreferences
-- **bottom_navigation_bar**: Shared tab shell for the Main route
-- **profile**: User profile screen (currently lightweight; mostly analytics hooks)
+- **splash**: Bootstraps services and routes to onboarding, paywall or main
+- **onboarding**: First-launch flow — a 12-phase `PageView` (the `OnBoardingPhase` enum *is* the order, and its ordinal is the Mixpanel `step_index`), then a router push-chain out of the bloc: cat-create wizard → current-food scan → result → paywall. `onboarding_completed` is written **when the cat is created**, before the scan and paywall. `RemoteConfigService.onboardingScanEnabled` skips the scan+result beats. **Full details in `lib/features/onboarding/README.md`** — read it before touching the feature
+- **bottom_navigation_bar**: Shared tab shell for the Main route (Search / Home / Profile)
+- **profile**: Hub screen — Your Cats, Saved Products and Scan History rows with counts, legal links, and a debug-only Reset Onboarding row
 
 **Auth**
 - **auth**: Anonymous Firebase authentication
 
 **Cat lifecycle**
-- **cat**: Cat profile CRUD (Firestore + Storage)
+- **cat**: Cat profile CRUD (Firestore + Storage). Also hosts two rules engines in `presentation/utils/` — `cat_diet_recommendations.dart` (owner-facing tips) and `cat_product_recommendations.dart` (per-cat product picks). See *Product Assessment Logic* below
 - **cat_create**: Multi-step cat profile creation wizard (see *Core domain* below)
 - **cat_listing**: Lists the user's cats
 - **cat_detail**: Single-cat detail view
@@ -80,9 +80,12 @@ Grouped by area (each lives under `lib/features/<name>/`):
 - **product_listing**: Product list (e.g. by brand or search results)
 - **product_detail**: Product detail with cat-specific assessment; bookmark icon toggles save state via `SavedProductsRepository`
 - **saved_products**: User-saved product bookmarks. Toggle from `ProductDetailPage`; list page accessible from Profile. Storage: `SharedPreferences` key `saved_products_v1`. Identity is `${brand}__${name}` (lowercased, trimmed). Analytics: `Product Saved` / `Product Unsaved`.
+- **scan_history**: Every product successfully scanned, most recent first, reached from Profile. Storage: `SharedPreferences` key `scan_history_v1`, capped at **50** entries, same `${brand}__${name}` identity as saved_products. It's a list of **distinct foods, not a scan log** — rescanning the same can replaces the prior entry rather than appending, and there is no timestamp field. The write happens in `HomeBloc` after a successful scan, not in this feature; nothing in `scan_history` ever writes. No analytics of its own.
+
+> ⚠️ **`ProductDisplayModel` is the de-facto cross-feature product currency** — a *presentation* model in `product_detail` imported by search_products, product_listing, scan_history, saved_products, home and profile. Three consequences worth knowing before you touch it: the carbs derivation is **forked three ways** and only `product_detail`'s mapper has the `hasMacroData` guard (so a zero-macro product from search renders carbs 100 %); `saved_products` and `scan_history` each hand-roll their own SharedPreferences codec over the same 18 fields, so adding a field means editing two unrelated features; and **neither codec serializes `dataUnavailable`**, so a score-0 product rehydrates as a red "Poor" verdict computed from all-zero macros — exactly what the flag exists to prevent.
 
 **Monetization**
-- **paywall**: RevenueCat-driven subscription flow (custom slide-up route)
+- **paywall**: RevenueCat-driven subscription flow (custom slide-up route). Single annual plan behind a 3-day free trial — full details in `lib/features/paywall/README.md`
 
 **Cross-cutting**
 - **analytics**: Firebase Analytics + Mixpanel implementations behind a shared `AnalyticsDataSource`
@@ -120,20 +123,34 @@ These are the parts that are slowest to recover from code — keep them current.
 
 **Product entity** — nutrient fields used by the assessment: `protein`, `fat`, `carbs`, `fiber`, `moisture`, `ash` (`calories` lives on `ProductDisplayModel`, not the domain entity). Plus `name`, `brand`, `score`, `imageUrl`, `pros: List<String>`, `cons: List<String>`, and the V2-era display fields: `isAiIdentified: bool` (powers the "AI IDENTIFIED" hero pill — true for any image-scanned product), `format` (display string e.g. "Wet pâté", joined with `packageSize` into `ProductDisplayModel.formatLine` for the hero subtitle), `packageSize` (e.g. "85g pouch"), `description` (2-3 sentence nutrition-focused narrative shown under the verdict headline in `AnalysisCard`).
 
-**Cat-create wizard** (`lib/features/cat_create/`) — the canonical step order is the `_stepNames` list in `cat_create_bloc.dart` (11 steps: 9 input + 2 "did you know" interstitials): **CatName → Gender → ProfilePhoto → Age → Activity → WaterIntakeFact → NeuteredStatus → Coat → CoatFact → HealthConditions → Breed**. The `WaterIntakeFact` (index 5) and `CoatFact` (index 8) steps are non-input interstitials — excluded from the progress bar and shown with a "Got it" CTA. Step widgets live in `widgets/steps/`. Step completion and abandonment are emitted as analytics events. The wizard has two contexts: first-launch onboarding (Phase D, anchored CTA "Create profile"; the name is seeded so the flow starts at the Gender step) and standalone re-edit (CTA "Save changes" — branched in `create_cat_page.dart` on `widget.cat != null`). The bloc detects edit mode via `_originalCat != null` and routes to `UpdateCatUsecase` instead of `CreateCatUsecase`.
+**Cat-create wizard** (`lib/features/cat_create/`) — a **12-step** `PageView` (10 input + 2 "did you know" interstitials) in two contexts: first-run onboarding and standalone create/edit.
+
+> **`lib/features/cat_create/README.md` is the source of truth** — the canonical step table, the ~8 parallel magic numbers you must move together, the analytics contract, and the bloc's four bug-fix subtleties. Read it before touching the wizard, and **keep the step order documented there only** (it has been wrong in two places at once before).
+
+The order lives in `_stepNames` (`cat_create_bloc.dart:21`). ⚠️ `step_index` feeds the Mixpanel wizard funnel, so renumbering invalidates historical data. `CatCreateBloc` is the only bloc deliberately **absent** from `main.dart`'s `MultiBlocProvider` — each session owns a fresh instance.
 
 ### Product Assessment Logic
 
 The core business logic is in `lib/features/product_detail/presentation/utils/cat_product_assessment.dart`. It produces the per-cat pros/cons shown on `ProductDetail` by evaluating products across **6 dimensions**:
 
 - **Age group** (`kitten` / `adult` / `senior`) — e.g. kittens want protein > 35 %; seniors want kidney-friendly low phosphorus and joint support (glucosamine/chondroitin)
-- **Weight category** — underweight rewards higher kcal; overweight/obese penalises kcal > 320/100 g and rewards fiber > 4 %
+- **Weight category** — underweight rewards higher kcal; overweight is *rewarded* for 280–320 kcal and penalised above 360 (obese above 330), and rewarded for fiber > 4 %
 - **Activity level** — low-activity cats penalised for kcal > 360; high-activity rewarded for kcal > 380 and protein > 35 %
 - **Neutered status** — neutered cats penalised for high kcal/fat; pregnant/lactating need protein > 35 %, fat > 20 %
-- **Breed-specific rules** — Maine Coon, Persian, Siamese, Sphynx, British Shorthair, Bengal each have specialised nutrient/ingredient checks
-- **Health conditions** — urinary, kidney, sensitive stomach, food/skin allergies, diabetes, dental, hairball
+- **Breed-specific rules** — ~25 breeds: six named (Maine Coon, Persian, Siamese, Sphynx, British Shorthair, Bengal) plus ~19 more grouped into archetypes (large/muscular, hairless/fine-coat, brachycephalic/long-coat, lean/active, kidney-watch, obesity-prone, diabetes-prone, joint, coat)
+- **Health conditions** — 9: urinary, kidney, sensitive stomach, food allergy, skin allergy, diabetes, dental, hairball, heart condition
 
-Decisions combine numeric thresholds on the nutrient fields above with keyword scans of the product's `pros`/`cons` text (e.g. "cranberry", "DL-methionine" for urinary support). For exact thresholds, read the file directly.
+**The mental model you can't get from skimming the file:**
+
+- **Macros are normalised to dry-matter basis; calories are not.** `_Nm.from()` scales protein/fat/carbs/fiber by `100/(100 − moisture)`. Calories stay as-fed on purpose (energy density as eaten). Every threshold below reads against DMB — which is why a wet food isn't scored as "low protein".
+- **Score = `(70 + weightedDelta).clamp(0, 100)`** — 70 is a neutral baseline, not an average. Weighted delta is `(health×15 + weight×12 + age×10 + activity×8 + neutered×6 + breed×5) ~/ 10`; individual findings contribute ±6 to ±12.
+- **Weight overrides neutered.** When those two dimensions pull in opposite directions, the entire neutered dimension is discarded, pros/cons lines included — an underweight neutered cat needs calories.
+- **Ordering is the ranking.** Pros and cons are concatenated health → weight → age → activity → neutered → breed. `cat_verdict_card.dart` re-declares `_dimensionOrder` as a parallel constant that must stay in sync.
+- **`score == 0` is a sentinel** meaning "no analysis", not a grade — it drives `ProductDisplayModel.dataUnavailable` and the neutral no-data UI.
+
+Decisions combine numeric thresholds with keyword scans over **`pros + cons + name + brand`** (e.g. "cranberry", "DL-methionine" for urinary support). Two known false positives, documented so nobody re-derives them: `_kCommonAllergens` matches by plain substring with no word boundary and no "-free" exclusion (so `"contains no chicken"` triggers the allergy penalty, and `'fish'` matches inside `'fish oil'`), and `_kWeightManagement` includes `'light'`, which matches inside `'lightly'`/`'delight'`. For exact thresholds, read the file directly.
+
+There is a **second rules engine**: `lib/features/cat/presentation/utils/cat_diet_recommendations.dart` (owner-facing diet tips, shown on Home and Cat Detail) carries its own copy of the same dimension weights plus `coat` and `hydration`, and keeps one tip per nutrient by priority. Change one engine's weights and you must change the other. `cat_product_recommendations.dart` alongside it ranks Algolia-fed product picks per cat (`_minBaseScore = 70`, `_minFit = 68`) behind a **process-global cache keyed by cat id** — invalidated on cat edit, but not otherwise refreshed until restart.
 
 ## Development Commands
 
@@ -234,14 +251,21 @@ All dependencies are registered in `lib/service_locator.dart` using GetIt. The i
 2. SharedPreferences
 3. Dio (HTTP client)
 4. FirebaseFunctions (region `us-central1`)
-5. DataSources — `BrandDataSource`, `AnalyticsDataSource`, `AlgoliaSearchDataSource`, `RemoteSearchDataSource`, `AuthDataSource`, `CatDataSource`
+5. DataSources — `BrandDataSource`, `AnalyticsDataSource`, `AlgoliaSearchDataSource`, `RemoteSearchDataSource`, `AuthDataSource`, `CatDataSource`, `CatNarrativeDataSource`, `BrandVerdictDataSource`
 6. Mappers — Brand, Product (multiple variants), SearchProduct, Cat (entity ↔ document, entity ↔ model)
-7. Repositories — Brand, Analytics, Product, Search, Cat, Auth, Subscription, SavedProducts
-8. UseCases — search/brand, log-event, fetch-product-by-image, cat CRUD, auth, subscription, saved-products (get/isSaved/save/unsave)
-9. Services — `ScanTrackingService`, `CatTrackingService`, `ReviewPromptService`
-10. BLoCs (registered as factories) — Splash, OnBoarding, Search, Home, Profile, ProductListing, ProductDetail, CatListing, CatDetail, CatCreate, Paywall, SavedProducts
+7. Repositories — Brand, Analytics, Product, Search, Cat, Auth, Subscription, SavedProducts, ScanHistory, RecentSearches, CatNarrative, BrandVerdict
+8. UseCases — search/brand, log-event, fetch-product-by-image, cat CRUD, auth, subscription, saved-products (get/isSaved/save/unsave), scan-history
+9. Services (**6**) — `ScanTrackingService`, `CatTrackingService`, `ReviewPromptService`, `RemoteConfigService`, `NotificationService`, `UserAnalyticsService`
+10. BLoCs (**13**, registered as factories) — Splash, OnBoarding, Search, Home, Profile, ProductListing, ProductDetail, CatListing, CatDetail, CatCreate, Paywall, SavedProducts, ScanHistory
 
 **Important**: BLoCs are registered using a custom `registerBloc` extension that creates both the BLoC factory and a matching `BlocProvider` factory (which is why `provider` is a direct dependency).
+
+⚠️ **Registered but unreachable.** Several chains are fully wired in DI and consumed by nothing. Check before "fixing" them, and don't assume registration implies use:
+- `CatTrackingService` — the **whole class**; `canCreateCat` has no callers
+- `ScanTrackingService` — only `recordSuccessfulScan` is called (by `HomeBloc`, for streaks). The gating half (`canPerformScan`, `getRemainingScans`, …) *and* `getCurrentStreak` / `getLongestStreak` have no callers
+- `GenerateCatNarrativeUsecase` → `CatNarrativeRepository` → `CatNarrativeDataSource` — the whole chain. The `generateCatNarrative` Cloud Function is **never called by the app**
+- `AnalyzeBrandUsecase` → `BrandVerdictRepository` → `BrandVerdictDataSource` — likewise; `analyzeBrand` is never called
+- `AnalyticsFirebaseDataSource` — registered, but `AnalyticsRepositoryImpl` takes only Mixpanel
 
 ## Navigation
 
@@ -249,8 +273,8 @@ Uses AutoRoute with declarative routing in `lib/config/routes/router.dart`. Rout
 
 Structure:
 - **Boot flow**: `SplashRoute` → `OnBoardingRoute` → `MainRoute`
-- **`MainRoute`** is a tabbed shell with three children: `SearchRoute`, `HomeRoute` (dashboard), `CatListingRoute`. `MainPage` uses `extendBody: true` + transparent Scaffold bg so each tab's `tintLavender` extends behind the floating bottom nav.
-- **Stacked / modal routes**: `ScannerRoute` (full-screen camera, opened from Home), `ProductDetailRoute`, `ProductListingRoute`, `CatDetailRoute`, `CreateCatRoute` (fullscreen dialog), `ProfileRoute`, `SavedProductsRoute` (opened from Profile), `PaywallRoute` (custom slide-up + `opaque: false` transition)
+- **`MainRoute`** is a tabbed shell with three children: `SearchRoute`, `HomeRoute` (dashboard), `ProfileRoute`. (Cats is **not** a tab — it's reached from Home and Profile.) `MainPage` uses an **opaque** `tintLavender` Scaffold with the nav floating in a `Stack` — *not* `extendBody` + transparent, which caused a black blink during the `AutoTabsRouter` cross-fade. See `docs/design.md` §8c.
+- **Stacked / modal routes**: `ScannerRoute` (full-screen camera, opened from Home), `ProductDetailRoute`, `ProductListingRoute`, `CatDetailRoute`, `CreateCatRoute` (fullscreen dialog), `SavedProductsRoute` and `ScanHistoryRoute` (both opened from Profile), `CurrentFoodRoute` and `ResultRoute` (the tail of the onboarding cascade), `PaywallRoute` (custom slide-up + `opaque: false` transition)
 - **Screen-view analytics** auto-emitted via `AnalyticsRouteObserver` (`lib/config/routes/analytics_route_observer.dart`). `OnBoardingRoute` and `CreateCatRoute` are excluded — they handle their own multi-step PageView tracking inside the bloc.
 
 ## Themes & Design System
@@ -267,36 +291,30 @@ Shared components live under `lib/presentation/components/`: `DSCard`, `DSPillBu
 
 **Empty / error / loading state illustrations use cat mascots, never raster GIFs.** `MascotIllustration` (cat SVG on a tinted circular halo, framed by gently-twinkling stars, with a native bob/twinkle animation) is the single source — `AppLoadingWidget` and both `DSStateView.error()` / `DSStateView.empty()` render through it. Callers pass a full cat figure (`cat-thinking` / `cat-laught` / `cat-rating`) plus a section `tint` that matches the state's mood (e.g. `tintCoral` for errors). The legacy `assets/images/Illustrations/*.gif` were removed.
 
-**`design/design.md`** is the design-system source of truth — token rationale (§2-7), component catalog (§8), onboarding flow (§9), open decisions (§12). Update §8 when adding a shared component.
+**`docs/design.md`** is the design-system source of truth — token rationale (§2-7), component catalog (§8), onboarding flow (§9), open decisions (§12). Update §8 when adding a shared component.
 
 ## Firebase Configuration
 
 Firebase is configured via `firebase_options.dart` (generated by FlutterFire CLI). The project uses:
 - **Region**: us-central1 (for Functions)
 - **Auth**: Anonymous sign-in only
-- **Firestore**: Cat profiles stored per user; image-scan logs at `/scans/{requestId}`
+- **Firestore**: cats live in a **top-level `cats` collection** with a `user` DocumentReference field (not a per-user subcollection); image-scan logs at `/scans/{requestId}`
 - **Storage**: Cat profile images, plus `products/` (cached product images) and `scans/` (raw user scans)
 - **Analytics**: Screen view tracking via custom RouteObserver
+- **Remote Config**: one key — `onboarding_scan_enabled` (`RemoteConfigService`, default `true`, **fail-open**). A live kill switch: flipping it in the Firebase console drops the scan + result beats from onboarding with no build. 1 h minimum fetch interval
 
 ## Backend (Firebase Functions)
 
-The backend lives at `functions/` (TypeScript, Node 22) and exposes a single Callable Function — `fetchProductByImageV2` — built on **Claude Haiku 4.5** with the `web_search_20250305` server-side tool. The function is co-located with the Flutter app (single-repo, single deploy). The legacy `fetchProductByImage` (Gemini-based) still lives in the separate `yucat-api` repo and continues to serve App Store builds shipped before the V2 cutover; once all live clients are on a build that calls V2, `yucat-api` can be retired.
+> **`functions/CLAUDE.md` is the source of truth for the backend** — the callables and
+> their wire shapes, the scan pipeline and self-healing cache, prompts and tool schemas,
+> model parameters, config, secrets, the one-off scripts, and known gaps.
+> Read it before touching anything in `functions/`. What follows is the summary only.
 
-Pipeline (`functions/src/index.ts`):
-1. **Identify** (`anthropic.service.identifyProductFromImage`) — Haiku vision, tool-use forced output (`submit_identification` / `not_cat_food`). No web search; ~2-4s.
-2. **Cache lookup** (`algolia.service.searchProductByNameV2`) — fuzzy name match (Levenshtein-1 + bidirectional substring) against the `products2` Algolia index, threshold 0.6, brand match required. Falls back to `verifyMatchWithLLM` (a tiny Haiku call picking from up to 5 candidates) when string matching misses — toggled by `config.algolia.useLLMVerification`.
-3. **Full analysis** (`anthropic.service.analyzeProductImage`) — Haiku with `web_search_20250305` (`max_uses: 3`), `submit_product` tool schema enforces structured output; ephemeral prompt caching on the system prompt. ~10-15s on cache miss.
-4. Image upload to Firebase Storage (`utils/image-helpers.processProductImage`) + Algolia cache write + scan log to Firestore.
+The backend lives at `functions/` (TypeScript, Node 22), co-located with the Flutter app (single-repo, single deploy). It exposes **three Callable Functions** — `fetchProductByImageV2` (product image scan), `generateCatNarrative` and `analyzeBrand` (both onboarding-only, and both degrade to `null` rather than throwing). Everything model-facing runs on **Claude Haiku 4.5** with forced tool-use for structured output, plus the `web_search_20250305` server-side tool on the analysis path.
 
-Key files:
-- `functions/src/services/anthropic.service.ts` — Haiku client, retry helper, both pipeline calls + LLM verifier.
-- `functions/src/services/algolia.service.ts` — V2 fuzzy search + candidate fetch + cache R/W.
-- `functions/src/prompts/` — identify-product, analyze-product (structured-output prompts).
-- `functions/scripts/configure-algolia.ts` — one-shot script to apply index settings + synonyms (run via `npx ts-node` with `ALGOLIA_ADMIN_API_KEY`).
+Scan pipeline (`functions/src/index.ts`): **identify** (Haiku vision, no web search) → **Algolia cache lookup** against `products2`, with a small Haiku verifier for ambiguous matches → on a miss, **full analysis** (by default a 4-way parallel fan-out — three `web_search` sources plus a SerpAPI-fed manufacturer-page extractor — with the most complete result winning) → **image hosting to Storage + Algolia cache write + scan log to Firestore**. Cached entries self-heal at most once per 14 days.
 
-Secrets:
-- `ANTHROPIC_API_KEY` — set via `firebase functions:secrets:set ANTHROPIC_API_KEY`. Declared in the `onCall` runtime options so the runtime injects it into `process.env`.
-- Algolia search keys are committed to `functions/src/config/index.ts` (search-only key, safe in source). The admin key for index settings is **not** committed — pass via env when running `configure-algolia.ts`.
+Secrets (all via `firebase functions:secrets:set`, declared in the `onCall` runtime options): `ANTHROPIC_API_KEY`, `SERPAPI_API_KEY`, `ALGOLIA_API_KEY`. The Algolia *search-only* key is committed to `functions/src/config/index.ts` and is safe in source; the **admin** key never is — pass it via env when running the scripts in `functions/scripts/`.
 
 Local dev:
 ```bash
@@ -318,38 +336,52 @@ The barcode flow (`fetchProductByBarcode`) was orphaned and has been removed fro
 
 ## RevenueCat Integration & Hard Paywall
 
-RevenueCat is configured **only for iOS** in `main.dart`:
-- API Key: `appl_RLrrtMqNXWlaNlEXzZQxUcxkJxw`
+> **`lib/features/paywall/README.md` is the source of truth for the paywall** — UI, bloc, trial
+> detection, store configuration, store IDs, analytics, testing and known gaps.
+> Read it before touching anything in `lib/features/paywall/`. What follows is the
+> summary only.
+
+RevenueCat is configured for **iOS and Android** in `main.dart` (`appl_…` / `goog_…` keys selected by platform):
 - Subscription state is read via `HasActiveSubscriptionUseCase` → `SubscriptionRepository`
 - The paywall UI is **custom** (`lib/features/paywall/widgets/paywall_loaded_widget.dart`) on top of `Purchases.getOfferings()` / `Purchases.purchase(PurchaseParams.package(...))` / `Purchases.restorePurchases()`. The `purchases_ui_flutter` drop-in (`RevenueCatUI.presentPaywall()`) is intentionally not used.
-- Entitlement id is **`yucat pro`** (`subscription_repository_impl.dart`).
+- Entitlement id is **`yucat pro`** (`subscription_repository_impl.dart`) — the only store identifier hardcoded in the app.
 
-**Plans & intro-offer promo switch.** The paywall offers exactly two plans — **weekly** + **annual** (`$rc_weekly` / `$rc_annual` in the Current RevenueCat offering; `PaywallBloc._onInitial` also filters `availablePackages` to `PackageType.weekly`/`annual` as a safety net, defaulting the selection to annual). The annual product carries an **App Store introductory offer** (discounted first year, e.g. $39.99 then $49.99) — an automatic discount for eligible new subscribers, **not** an offer code. The paywall surfaces it via a promo `Switch` (`_PromoSwitch` in `paywall_loaded_widget.dart`) that **defaults ON**: it hides weekly and shows only the discounted annual (intro price bold, full price struck through, "Save X%" derived from the prices in `paywall_format.dart` — `hasIntroOffer` / `introPriceStringFor` / `renewalLabelFor` / `introSavingsLabelFor`). Toggling OFF reveals both plans. The switch only renders when `PaywallLoadedState.introEligible` is true — the bloc gates it with `Purchases.checkTrialOrIntroductoryPriceEligibility(...)` (fails closed) so an ineligible/returning user never sees a price they won't be charged; they get the plain two-plan paywall at full price. Intro offers, eligibility, and pricing can only be exercised in App Store **sandbox** with a fresh tester account.
+**One plan, entered through a free trial.** The paywall shows a single **annual** plan with a **3-day free trial**. `PaywallBloc._onInitial` filters `availablePackages` to `PackageType.annual`; weekly and monthly still exist in the store and still bill existing subscribers, but are not surfaced. The trial is detected per-store by `utils/trial_info.dart` — Play exposes `SubscriptionOption.freePhase`, StoreKit folds trials and discounts into `introductoryPrice` where **only a zero price means a trial**. Eligibility resolves to `PaywallLoadedState.eligibleTrial`, and every trial claim in the UI is gated on it being non-null (fail-closed). iOS asks `Purchases.checkTrialOrIntroductoryPriceEligibility`; **Android cannot** — that API always returns `unknown` there, so Play's own server-side offer filtering is the signal, which makes the Play offer's "new customers only" setting load-bearing. Trials can only be exercised in store **sandbox** with a fresh tester account, and eligibility is permanent per store account per subscription group.
 
-**The app is a hard paywall — there is no free tier.** Subscription is enforced at two non-limit gates: the final, non-dismissible beat of onboarding (`onboarding_bloc.dart`) and the splash screen for returning non-subscribers who finished onboarding (`splash_bloc.dart`). Every active user is therefore a subscriber.
+**The app is a hard paywall — there is no free tier.** Subscription is enforced at two non-limit gates: the final, non-dismissible beat of onboarding (`onboarding_bloc.dart`) and the splash screen for returning non-subscribers who finished onboarding (`splash_bloc.dart`). A trial counts as subscribed (`entitlement.isActive` is true throughout), so neither gate needed changing when the trial landed. Every active user is therefore a subscriber or a trialist.
 
 Because of this, the old free-tier scan/cat limits are **no longer wired into any flow**. The two tracking services remain in `lib/services/` (`scan_tracking_service.dart`, `_maxFreeScans = 3`; `cat_tracking_service.dart`, `_maxFreeCats = 1`) and stay registered in `service_locator.dart`, but their gating methods (`canPerformScan`, `canCreateCat`, `getRemainingScans`, and the `Free Limit Hit` event they emit) are **not called** — kept intact only so a free tier can be re-enabled later. `ScanTrackingService` is still used by `HomeBloc`, but **only for streak tracking** (`recordSuccessfulScan` / `getCurrentStreak`), not gating. Scanning and cat creation now proceed unconditionally.
 
 ## Analytics
 
-Two implementations behind `AnalyticsDataSource`: Firebase Analytics (primary) and Mixpanel (mirror). Screen views are auto-tracked by `AnalyticsRouteObserver`. Event categories tracked (see `lib/features/analytics/` for the full list — don't enumerate by hand):
+> **`docs/analytics.md` is the source of truth for analytics** — People properties, the full
+> event catalog with per-event property lists, and the six named Mixpanel funnels.
+> `docs/mixpanel-setup.md` covers project + dashboard setup. What follows is the summary only.
 
-- **Onboarding lifecycle** — Started / Completed / Skipped
-- **Cat lifecycle** — creation step started/completed/abandoned, Cat Created, profile viewed/updated/edit-started/deleted
-- **Product & search** — Product Searched / Selected / Detail Viewed / Image Captured / Image Scan Failed, Search Results Viewed
-- **Paywall & gating** — Paywall Shown / Dismissed, Subscription Completed / Restored, Free Limit Hit
+**Analytics is Mixpanel-primary.** `AnalyticsRepositoryImpl` takes **only** Mixpanel; the Firebase Analytics datasource is registered in DI and used nowhere. Events flow `LogEventUsecase → AnalyticsRepository → mixpanel.track(...)`, bound to the anonymous Firebase UID via `mixpanel.identify(uid)` (called at boot in `SplashBloc`, again in `HomeBloc`). The revamp writes to its own Mixpanel project and stamps every event with `tracking_version = v2`. Screen views are auto-tracked by `AnalyticsRouteObserver`. Event categories (see `docs/analytics.md` for the full list — don't enumerate by hand):
+
+- **Onboarding lifecycle** — Started / Get Started Tapped / Step Viewed / Step Back / Attribution Selected + Skipped / Completed, plus a separate `Onboarding Scan Captured / Succeeded / Failed / Skipped` namespace for the onboarding scan (Home's scan uses different names for the same user action)
+- **Cat lifecycle** — creation step started/completed/abandoned, Cat Wizard Step Viewed, Cat Created, profile viewed/updated/edit-started/deleted. `Cat Profile Updated` carries `fields_changed`, computed by a hand-written 11-field diff — a new `CatCreateModel` field must be added there or it silently never appears
+- **Product & search** — Product Searched / Selected / Detail Viewed / Image Captured / Image Scan Failed, Search Results Viewed, Product Saved / Unsaved, plus Home-surface events (Home Saved Product Tapped, Home See All Saved Tapped, Home Cat Snapshot Tapped, Home Complete Profile Tapped, Home Active Cat Changed, Home See All Cats Tapped)
+- **Paywall & gating** — Paywall Shown / Dismissed, Subscription Completed / Restored, Purchase & Restore Failed. `Subscription Completed` carries `is_trial` — a trial start moves no money, so revenue reporting must separate them. (`Free Limit Hit` and `Plan Selected` are defined but unreachable.)
+
+⚠️ **Two `step_index` funnel contracts** — the `OnBoardingPhase` enum ordinal and the cat-create `_stepNames` index. Both are emitted as analytics dimensions, so reordering either silently renumbers every historical funnel step.
 
 The base methods live on the analytics datasource: `logEvent`, `logScreenView`, `logLogin`, `logSignUp`, `logSearch`.
 
 ## Important Notes
 
-- **iOS-focused**: RevenueCat only initialized on iOS platform
-- **Tests**: No project-specific tests yet (the default `widget_test.dart` was removed)
+- **iOS-first, Android shipping**: RevenueCat is initialized on both platforms (see `main.dart`), but iOS remains the primary target
+- **Tests**: there is **no `test/` directory** — unit coverage is currently zero. `integration_test/onboarding_screenshots_test.dart` is the only test file in the repo. (Docs referencing `test/features/paywall/trial_info_test.dart` are describing a file that was removed.)
+- **Localization**: every user-facing string goes through `gen_l10n` — **6 locales** (`en` template, `de`, `es`, `fr`, `hu`, `pt`) at 564 keys each, currently in parity. `l10n.yaml` sets `nullable-getter: false`; `pubspec.yaml` has `generate: true`, and the generated `app_localizations*.dart` are committed under `lib/l10n/`. A new string must be added to **all six** ARB files. Localized *art* goes through `localizedAssetPath(...)`; every call site passes all six locales explicitly, but the helper's own `available` **default** is a stale `{en, es, fr, hu}` — a new call site relying on it would silently serve English art to `de` and `pt`. Details in `docs/design.md` §13
+- **Push notifications**: OneSignal (`NotificationService`), **iOS only**, and deliberately no permission prompt at init — the ask lives on the onboarding `reminders` screen. The `notifPrimer` screen before it is a mock that requests nothing
+- **App Store review prompts**: `ReviewPromptService` gates on 5+ scans and 90+ days because Apple caps the native modal at 3 per 365 days. ⚠️ The onboarding `rating` screen bypasses that gate and calls `InAppReview.requestReview()` directly, spending one modal on every new user
 - **Auto-route generation**: Always run `build_runner` after modifying routes
-- **Mapper pattern**: Strict separation between domain entities and presentation models — entities never carry display-only fields (e.g. `calories` lives on `ProductDisplayModel`, not the `Product` entity)
+- **Mapper pattern**: Strict separation between domain entities and presentation models — entities never carry display-only fields (e.g. `calories` lives on `ProductDisplayModel`, not the `Product` entity). Note `ProductDisplayModel` itself breaks the layering in practice — see the warning under *saved_products* / *scan_history*
 - **Analytics**: All screens auto-tracked via `AnalyticsRouteObserver`
-- **Anonymous auth**: Users auto-signed in anonymously on first launch
-- **Design tokens**: Use `DSColors` / `DSDimens` instead of inline hex values or magic numbers
+- **Anonymous auth**: Users auto-signed in anonymously on first launch — awaited in `SplashBloc` **before** routing, because the cat wizard used to fail when sign-in only happened at Home
+- **Test flags**: `lib/config/test_flags.dart` — `kTestBuildResetOnboarding` and `kTestBuildSkipPaywall`. Both must be `false` for release
+- **Design tokens**: Use `DSColors` / `DSDimens` instead of inline hex values or magic numbers — and prefer the BitePal-aligned tokens over the legacy palette still in `theme.dart:6-29` (`DSColors.black` is a mid-grey, not `inkPrimary`). Catalog: `docs/design.md` §2
 
 ## Git Workflow - CRITICAL
 

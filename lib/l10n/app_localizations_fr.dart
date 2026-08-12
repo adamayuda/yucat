@@ -546,14 +546,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paywallPlusBadge => 'Plus';
 
   @override
-  String get paywallBadgeBestValue => 'MEILLEURE OFFRE';
-
-  @override
-  String get paywallLimitedTimeOffer => 'Offre limitée';
-
-  @override
-  String paywallLimitedTimeOfferWithSavings(String savings) {
-    return 'Offre limitée · $savings';
+  String paywallBadgeFreeTrial(int days) {
+    return '$days JOURS OFFERTS';
   }
 
   @override
@@ -649,8 +643,48 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paywallCancelAnytime => 'Annule à tout moment.';
 
   @override
-  String get paywallAutoRenewDisclosure =>
-      'Ton abonnement se renouvelle automatiquement sauf annulation au moins 24 heures avant la fin de la période en cours. Annule à tout moment sur l\'App Store sans frais supplémentaires.';
+  String get paywallPeriodSuffixWeekly => 'semaine';
+
+  @override
+  String get paywallPeriodSuffixMonthly => 'mois';
+
+  @override
+  String get paywallPeriodSuffixAnnual => 'an';
+
+  @override
+  String paywallPerPeriodPrice(String price, String period) {
+    return '$price/$period';
+  }
+
+  @override
+  String paywallThenPrice(String price, String period) {
+    return 'puis $price/$period';
+  }
+
+  @override
+  String paywallTrialDisclosure(int days, String price, String period) {
+    return '$days jours offerts, puis $price/$period. Annule à tout moment.';
+  }
+
+  @override
+  String paywallPriceDisclosure(String price, String period) {
+    return '$price/$period. Annule à tout moment.';
+  }
+
+  @override
+  String paywallAutoRenewDisclosure(String price, String period, String store) {
+    return 'Yucat Plus coûte $price/$period et se renouvelle automatiquement sauf annulation au moins 24 heures avant la fin de la période en cours. Gère ou annule à tout moment dans les réglages de ton compte $store.';
+  }
+
+  @override
+  String paywallAutoRenewDisclosureTrial(
+    int days,
+    String price,
+    String period,
+    String store,
+  ) {
+    return 'Ton essai gratuit de $days jours se transforme automatiquement en abonnement payant Yucat Plus à $price/$period, sauf annulation au moins 24 heures avant son terme. Il se renouvelle ensuite automatiquement au même tarif jusqu\'à annulation. Gère ou annule à tout moment dans les réglages de ton compte $store.';
+  }
 
   @override
   String get paywallRestorePurchases => 'Restaurer les achats';
@@ -687,6 +721,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get paywallCtaUnlockPlus => 'C\'est parti';
+
+  @override
+  String paywallCtaRedeemTrial(int days) {
+    return 'Obtenir $days jours gratuitement';
+  }
+
+  @override
+  String get paywallNoPaymentDue => 'Aucun paiement maintenant';
+
+  @override
+  String get paywallRetry => 'Réessayer';
 
   @override
   String get paywallSkipDebug => 'Passer le paywall (debug)';

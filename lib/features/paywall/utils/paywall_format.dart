@@ -1,4 +1,5 @@
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:yucat/features/paywall/utils/trial_info.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 
 /// Human-readable plan title from a [Package].
@@ -15,65 +16,47 @@ String periodTitleFor(Package pkg, AppLocalizations l10n) {
   };
 }
 
-/// Per-month label for annual plans (e.g. "$2.50/mo"). Null otherwise.
-String? perPeriodLabel(Package pkg) {
+/// Localized billing-period noun ("week" / "month" / "year") for price lines.
+/// Null for package types with no natural suffix (e.g. lifetime), which callers
+/// treat as "fall back to generic copy".
+String? periodSuffixFor(Package pkg, AppLocalizations l10n) {
+  return switch (pkg.packageType) {
+    PackageType.annual => l10n.paywallPeriodSuffixAnnual,
+    PackageType.monthly => l10n.paywallPeriodSuffixMonthly,
+    PackageType.weekly => l10n.paywallPeriodSuffixWeekly,
+    _ => null,
+  };
+}
+
+/// Per-month breakdown for annual plans (e.g. "$4.17/month"). Null otherwise.
+/// With a single annual plan this is the main softener on the sticker price.
+String? perPeriodLabel(Package pkg, AppLocalizations l10n) {
   if (pkg.packageType != PackageType.annual) return null;
   final monthly = pkg.storeProduct.price / 12;
-  return '${_currencySymbolFor(pkg.storeProduct.priceString)}${monthly.toStringAsFixed(2)}/mo';
+  final price =
+      '${_currencySymbolFor(pkg.storeProduct.priceString)}${monthly.toStringAsFixed(2)}';
+  return l10n.paywallPerPeriodPrice(price, l10n.paywallPeriodSuffixMonthly);
 }
 
-/// "Save X%" relative to the monthly package, if available.
-String? savingsLabelFor(Package pkg, List<Package> all) {
-  if (pkg.packageType != PackageType.annual) return null;
-  final monthly = all.firstWhere(
-    (p) => p.packageType == PackageType.monthly,
-    orElse: () => pkg,
-  );
-  if (monthly.identifier == pkg.identifier) return null;
-  final annualEquivalent = monthly.storeProduct.price * 12;
-  if (annualEquivalent <= 0) return null;
-  final saved = (1 - pkg.storeProduct.price / annualEquivalent) * 100;
-  if (saved < 5) return null;
-  return 'Save ${saved.round()}%';
+/// What the user pays once the trial ends (e.g. "then $49.99/year").
+/// Null when the plan has no natural period suffix.
+String? thenPriceLabelFor(Package pkg, AppLocalizations l10n) {
+  final suffix = periodSuffixFor(pkg, l10n);
+  if (suffix == null) return null;
+  return l10n.paywallThenPrice(pkg.storeProduct.priceString, suffix);
 }
 
-/// Whether [pkg] carries an introductory offer (discounted first period).
-bool hasIntroOffer(Package pkg) => pkg.storeProduct.introductoryPrice != null;
-
-/// Formatted introductory price (e.g. "$39.99"), or null when there's no offer.
-String? introPriceStringFor(Package pkg) =>
-    pkg.storeProduct.introductoryPrice?.priceString;
-
-/// Post-intro renewal line for a plan with an introductory offer
-/// (e.g. "then $49.99/yr"). Null when there's no offer.
-String? renewalLabelFor(Package pkg) {
-  if (pkg.storeProduct.introductoryPrice == null) return null;
-  return 'then ${pkg.storeProduct.priceString}/${_periodSuffixFor(pkg)}';
-}
-
-/// "Save X%" comparing the introductory price to the full price. Null when
-/// there's no offer or the saving is negligible (< 5%).
-String? introSavingsLabelFor(Package pkg) {
-  final intro = pkg.storeProduct.introductoryPrice;
-  final full = pkg.storeProduct.price;
-  if (intro == null || full <= 0) return null;
-  final saved = (1 - intro.price / full) * 100;
-  if (saved < 5) return null;
-  return 'Save ${saved.round()}%';
-}
-
-/// CTA label. No free trial: paying is immediate, so the label is fixed.
-String ctaLabelFor(Package pkg, AppLocalizations l10n) {
-  return l10n.paywallCtaUnlockPlus;
-}
-
-String _periodSuffixFor(Package pkg) {
-  return switch (pkg.packageType) {
-    PackageType.annual => 'yr',
-    PackageType.monthly => 'mo',
-    PackageType.weekly => 'wk',
-    _ => 'period',
-  };
+/// CTA label. A trial-eligible selection leads with the trial ("Redeem 3 days
+/// for free"); everything else keeps the neutral "Let's get started". The word
+/// "free" rather than a formatted zero keeps this independent of whether the
+/// store hands back a usable price string, and reads naturally in every locale.
+String ctaLabelFor(
+  Package pkg,
+  AppLocalizations l10n, {
+  TrialInfo? trial,
+}) {
+  if (trial == null) return l10n.paywallCtaUnlockPlus;
+  return l10n.paywallCtaRedeemTrial(trial.days);
 }
 
 String _currencySymbolFor(String priceString) {

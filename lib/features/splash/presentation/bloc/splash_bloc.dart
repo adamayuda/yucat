@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -64,12 +62,6 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     // New users go through onboarding, which ends in the hard paywall.
     if (!isCompleted) {
       router.replace(const OnBoardingRoute());
-      return;
-    }
-
-    // Subscriptions (and the gate) are iOS-only.
-    if (!Platform.isIOS) {
-      router.replace(const HomeRoute());
       return;
     }
 

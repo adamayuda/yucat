@@ -544,14 +544,8 @@ class AppLocalizationsHu extends AppLocalizations {
   String get paywallPlusBadge => 'Plus';
 
   @override
-  String get paywallBadgeBestValue => 'LEGJOBB AJÁNLAT';
-
-  @override
-  String get paywallLimitedTimeOffer => 'Korlátozott idejű ajánlat';
-
-  @override
-  String paywallLimitedTimeOfferWithSavings(String savings) {
-    return 'Korlátozott idejű ajánlat · $savings';
+  String paywallBadgeFreeTrial(int days) {
+    return '$days NAP INGYEN';
   }
 
   @override
@@ -643,8 +637,48 @@ class AppLocalizationsHu extends AppLocalizations {
   String get paywallCancelAnytime => 'Bármikor lemondható.';
 
   @override
-  String get paywallAutoRenewDisclosure =>
-      'Az előfizetés automatikusan megújul, hacsak a jelenlegi időszak lejárta előtt legalább 24 órával nem mondod le. Bármikor lemondhatsz az App Store-ban, extra költség nélkül.';
+  String get paywallPeriodSuffixWeekly => 'hét';
+
+  @override
+  String get paywallPeriodSuffixMonthly => 'hónap';
+
+  @override
+  String get paywallPeriodSuffixAnnual => 'év';
+
+  @override
+  String paywallPerPeriodPrice(String price, String period) {
+    return '$price/$period';
+  }
+
+  @override
+  String paywallThenPrice(String price, String period) {
+    return 'utána $price/$period';
+  }
+
+  @override
+  String paywallTrialDisclosure(int days, String price, String period) {
+    return '$days nap ingyen, utána $price/$period. Bármikor lemondható.';
+  }
+
+  @override
+  String paywallPriceDisclosure(String price, String period) {
+    return '$price/$period. Bármikor lemondható.';
+  }
+
+  @override
+  String paywallAutoRenewDisclosure(String price, String period, String store) {
+    return 'A Yucat Plus ára $price/$period, és automatikusan megújul, hacsak a jelenlegi időszak lejárta előtt legalább 24 órával le nem mondod. Bármikor kezelheted vagy lemondhatod a $store fiókod beállításaiban.';
+  }
+
+  @override
+  String paywallAutoRenewDisclosureTrial(
+    int days,
+    String price,
+    String period,
+    String store,
+  ) {
+    return 'A $days napos ingyenes próbaidőszak automatikusan fizetős Yucat Plus előfizetéssé alakul $price/$period áron, hacsak legalább 24 órával a lejárta előtt le nem mondod. Ezután automatikusan megújul ugyanezen az áron, amíg le nem mondod. Bármikor kezelheted vagy lemondhatod a $store fiókod beállításaiban.';
+  }
 
   @override
   String get paywallRestorePurchases => 'Vásárlások visszaállítása';
@@ -681,6 +715,17 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get paywallCtaUnlockPlus => 'Kezdjük el';
+
+  @override
+  String paywallCtaRedeemTrial(int days) {
+    return 'Szerezz $days ingyenes napot';
+  }
+
+  @override
+  String get paywallNoPaymentDue => 'Most nem kell fizetned';
+
+  @override
+  String get paywallRetry => 'Újra';
 
   @override
   String get paywallSkipDebug => 'Fizetési kapu kihagyása (debug)';

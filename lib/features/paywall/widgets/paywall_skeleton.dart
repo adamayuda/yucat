@@ -3,7 +3,7 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/ds_shimmer.dart';
 
 /// Skeleton for the paywall load — mirrors `PaywallLoadedWidget` (full-bleed
-/// hero, two plan cards, value props, laurel stats, fixed CTA) on the same white
+/// hero, one plan card, value props, laurel stats, fixed CTA) on the same white
 /// surface so there's no color flash when offerings resolve. The white
 /// background paints immediately; only the bones are deferred.
 class PaywallSkeleton extends StatelessWidget {
@@ -17,7 +17,7 @@ class PaywallSkeleton extends StatelessWidget {
         child: Stack(
           children: [
             ListView(
-              padding: const EdgeInsets.only(bottom: 168),
+              padding: const EdgeInsets.only(bottom: 212),
               physics: const NeverScrollableScrollPhysics(),
               children: [
                 // Full-bleed hero bone (edge-to-edge, under the status bar).
@@ -42,9 +42,7 @@ class PaywallSkeleton extends StatelessWidget {
                           radius: DSRadii.sm,
                         ),
                         const SizedBox(height: DSDimens.size3xl),
-                        // Two plan cards.
-                        const ShimmerBone(height: 72, radius: DSRadii.xl),
-                        const SizedBox(height: DSDimens.sizeXs),
+                        // Single plan card.
                         const ShimmerBone(height: 72, radius: DSRadii.xl),
                         const SizedBox(height: DSDimens.size3xl),
                         // Value props.

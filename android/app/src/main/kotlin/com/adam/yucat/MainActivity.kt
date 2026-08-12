@@ -1,4 +1,4 @@
-package com.example.yucat
+package com.adam.yucat
 
 import io.flutter.embedding.android.FlutterActivity
 

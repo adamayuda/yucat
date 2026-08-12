@@ -548,14 +548,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get paywallPlusBadge => 'Plus';
 
   @override
-  String get paywallBadgeBestValue => 'BESTER WERT';
-
-  @override
-  String get paywallLimitedTimeOffer => 'Zeitlich begrenztes Angebot';
-
-  @override
-  String paywallLimitedTimeOfferWithSavings(String savings) {
-    return 'Zeitlich begrenztes Angebot · $savings';
+  String paywallBadgeFreeTrial(int days) {
+    return '$days TAGE GRATIS';
   }
 
   @override
@@ -649,8 +643,48 @@ class AppLocalizationsDe extends AppLocalizations {
   String get paywallCancelAnytime => 'Jederzeit kündbar.';
 
   @override
-  String get paywallAutoRenewDisclosure =>
-      'Dein Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ablauf des aktuellen Zeitraums gekündigt wird. Kündige jederzeit kostenlos im App Store.';
+  String get paywallPeriodSuffixWeekly => 'Woche';
+
+  @override
+  String get paywallPeriodSuffixMonthly => 'Monat';
+
+  @override
+  String get paywallPeriodSuffixAnnual => 'Jahr';
+
+  @override
+  String paywallPerPeriodPrice(String price, String period) {
+    return '$price/$period';
+  }
+
+  @override
+  String paywallThenPrice(String price, String period) {
+    return 'dann $price/$period';
+  }
+
+  @override
+  String paywallTrialDisclosure(int days, String price, String period) {
+    return '$days Tage gratis, dann $price/$period. Jederzeit kündbar.';
+  }
+
+  @override
+  String paywallPriceDisclosure(String price, String period) {
+    return '$price/$period. Jederzeit kündbar.';
+  }
+
+  @override
+  String paywallAutoRenewDisclosure(String price, String period, String store) {
+    return 'Yucat Plus kostet $price/$period und verlängert sich automatisch, sofern du nicht mindestens 24 Stunden vor Ablauf des aktuellen Zeitraums kündigst. Verwalte oder kündige jederzeit in deinen $store-Kontoeinstellungen.';
+  }
+
+  @override
+  String paywallAutoRenewDisclosureTrial(
+    int days,
+    String price,
+    String period,
+    String store,
+  ) {
+    return 'Deine $days-tägige Gratis-Testphase geht automatisch in ein kostenpflichtiges Yucat-Plus-Abo für $price/$period über, sofern du nicht mindestens 24 Stunden vor Ablauf kündigst. Danach verlängert es sich automatisch zum selben Preis, bis du kündigst. Verwalte oder kündige jederzeit in deinen $store-Kontoeinstellungen.';
+  }
 
   @override
   String get paywallRestorePurchases => 'Käufe wiederherstellen';
@@ -687,6 +721,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get paywallCtaUnlockPlus => 'Los geht\'s';
+
+  @override
+  String paywallCtaRedeemTrial(int days) {
+    return '$days Tage gratis sichern';
+  }
+
+  @override
+  String get paywallNoPaymentDue => 'Jetzt nichts zu zahlen';
+
+  @override
+  String get paywallRetry => 'Erneut versuchen';
 
   @override
   String get paywallSkipDebug => 'Paywall überspringen (Debug)';

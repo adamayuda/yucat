@@ -111,6 +111,21 @@ class CatDataSource {
 
   Future<void> deleteCat({required String catId}) async {
     try {
+      // Firestore does not cascade-delete subcollections, so best-effort clean
+      // up the cat's health_events first to avoid orphaned docs.
+      try {
+        final events = await _firestore
+            .collection('cats')
+            .doc(catId)
+            .collection('health_events')
+            .get();
+        for (final doc in events.docs) {
+          await doc.reference.delete();
+        }
+      } catch (e) {
+        debugPrint('Error deleting cat health events: $e');
+      }
+
       // Delete Firestore document
       await _firestore.collection('cats').doc(catId).delete();
 

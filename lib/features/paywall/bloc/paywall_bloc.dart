@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +9,7 @@ import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
+import 'package:yucat/features/paywall/utils/trial_info.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 
 class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
@@ -32,18 +33,12 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     on<PaywallPurchaseEvent>(_onPurchase);
     on<PaywallRestoreEvent>(_onRestore);
     on<PaywallDismissEvent>(_onDismiss);
-    on<PaywallPromoToggledEvent>(_onPromoToggled);
   }
 
   Future<void> _onInitial(
     PaywallInitialEvent event,
     Emitter<PaywallState> emit,
   ) async {
-    if (!Platform.isIOS) {
-      emit(const PaywallErrorState(kind: PaywallError.iosOnly));
-      return;
-    }
-
     _trigger = event.trigger;
     emit(const PaywallLoadingState());
 
@@ -66,23 +61,21 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       return;
     }
 
-    final allowed = current.availablePackages
-        .where((p) =>
-            p.packageType == PackageType.weekly ||
-            p.packageType == PackageType.annual)
+    // The paywall offers a single annual plan. Weekly is still published in the
+    // offering (and still billed for existing subscribers), it's just not shown
+    // — flip this filter to bring it back.
+    final annualOnly = current.availablePackages
+        .where((p) => p.packageType == PackageType.annual)
         .toList();
-    // Fall back to the raw list if the offering is misconfigured, so the
-    // paywall never renders empty.
-    final packages = allowed.isNotEmpty ? allowed : current.availablePackages;
-    final annual = packages.firstWhere(
-      (p) => p.packageType == PackageType.annual,
-      orElse: () => packages.first,
-    );
+    // Fall back to the first available package if the offering is
+    // misconfigured, so the paywall never renders empty.
+    final packages =
+        annualOnly.isNotEmpty ? annualOnly : [current.availablePackages.first];
+    final selected = packages.first;
 
-    // Whether this user can actually receive the annual plan's introductory
-    // offer. `storeProduct.introductoryPrice` reflects the product config, not
-    // per-user eligibility, so we check explicitly before advertising the promo.
-    final introEligible = await _isIntroEligible(annual);
+    // The trial this user will actually receive — null when the product has no
+    // trial configured or the store says they've already used one.
+    final eligibleTrial = await _eligibleTrialFor(selected);
 
     _paywallShownTime = DateTime.now();
     _logEventUsecase.call(
@@ -90,7 +83,8 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       properties: {
         'trigger': _trigger,
         'offering': current.identifier,
-        'intro_eligible': introEligible,
+        'trial_eligible': eligibleTrial != null,
+        'trial_days': eligibleTrial?.days,
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
@@ -98,25 +92,42 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     emit(PaywallLoadedState(
       currentOffering: current,
       packages: packages,
-      selectedPackage: annual,
-      introEligible: introEligible,
+      selectedPackage: selected,
+      eligibleTrial: eligibleTrial,
     ));
   }
 
-  /// Returns true only when [pkg] has a configured introductory offer AND this
-  /// user is eligible for it. On any error/unknown status we fail closed
-  /// (no promo) so we never show a discount the user won't be charged.
-  Future<bool> _isIntroEligible(Package pkg) async {
-    if (pkg.storeProduct.introductoryPrice == null) return false;
+  /// The free trial [pkg] will actually grant this user, or null.
+  ///
+  /// The two stores need different eligibility signals:
+  ///
+  /// * **iOS** — RevenueCat computes StoreKit eligibility for us. We fail closed
+  ///   on unknown/ineligible/error/timeout so an ineligible user is never shown
+  ///   a trial they can't get.
+  /// * **Android** — `checkTrialOrIntroductoryPriceEligibility` *always* returns
+  ///   unknown (see the SDK doc on that method), so it's useless here. Google
+  ///   Play instead filters offers server-side: an offer restricted to new
+  ///   customers simply isn't returned to an ineligible user. So the presence of
+  ///   a `freePhase` on the product IS the eligibility signal. This depends on
+  ///   the Play offer being configured "new customers only" — see the store
+  ///   setup notes in CLAUDE.md.
+  Future<TrialInfo?> _eligibleTrialFor(Package pkg) async {
+    final trial = trialInfoFor(pkg);
+    if (trial == null) return null;
+
+    if (Platform.isAndroid) return trial;
+
     try {
       final result = await Purchases.checkTrialOrIntroductoryPriceEligibility(
         [pkg.storeProduct.identifier],
-      );
+      ).timeout(const Duration(seconds: 5));
       final status = result[pkg.storeProduct.identifier]?.status;
-      return status == IntroEligibilityStatus.introEligibilityStatusEligible;
+      return status == IntroEligibilityStatus.introEligibilityStatusEligible
+          ? trial
+          : null;
     } catch (e) {
-      debugPrint('PaywallBloc.introEligibility error: $e');
-      return false;
+      debugPrint('PaywallBloc.trialEligibility error: $e');
+      return null;
     }
   }
 
@@ -168,6 +179,10 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
             'currency':
                 current.selectedPackage.storeProduct.currencyCode,
             'trigger': _trigger,
+            // Trial starts bill nothing today — downstream revenue reporting
+            // needs to tell them apart from immediate purchases.
+            'is_trial': current.eligibleTrial != null,
+            'trial_days': current.eligibleTrial?.days,
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
@@ -289,20 +304,6 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       properties: {
         'reason': reason,
         if (errorMessage != null) 'error_message': errorMessage,
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-  }
-
-  void _onPromoToggled(
-    PaywallPromoToggledEvent event,
-    Emitter<PaywallState> emit,
-  ) {
-    _logEventUsecase.call(
-      eventName: AnalyticsEvents.paywallPromoToggled,
-      properties: {
-        'promo_on': event.promoOn,
-        'trigger': _trigger,
         'timestamp': DateTime.now().toIso8601String(),
       },
     );

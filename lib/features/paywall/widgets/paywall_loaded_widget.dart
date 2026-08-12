@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -9,13 +11,14 @@ import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
 import 'package:yucat/features/paywall/utils/paywall_format.dart';
+import 'package:yucat/features/paywall/utils/trial_info.dart';
 import 'package:yucat/features/paywall/widgets/paywall_package_row.dart';
 import 'package:yucat/features/paywall/widgets/paywall_testimonials.dart';
 import 'package:yucat/features/paywall/widgets/paywall_value_props.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 
-class PaywallLoadedWidget extends StatefulWidget {
+class PaywallLoadedWidget extends StatelessWidget {
   final PaywallLoadedState state;
   final PaywallBloc bloc;
   final bool dismissible;
@@ -28,40 +31,10 @@ class PaywallLoadedWidget extends StatefulWidget {
   });
 
   @override
-  State<PaywallLoadedWidget> createState() => _PaywallLoadedWidgetState();
-}
-
-class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
-  // Promo switch defaults OFF; the "Limited-time offer" toggle shines to draw
-  // the eye. Only meaningful when the annual plan has an eligible intro offer.
-  bool _promoOn = false;
-
-  String? _badgeFor(Package pkg, AppLocalizations l10n) {
-    if (pkg.packageType == PackageType.annual) {
-      return l10n.paywallBadgeBestValue;
-    }
-    return null;
-  }
-
-  Package _annualOf(List<Package> packages) => packages.firstWhere(
-        (p) => p.packageType == PackageType.annual,
-        orElse: () => packages.first,
-      );
-
-  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final state = widget.state;
-    final bloc = widget.bloc;
-    final packages = state.packages;
-
-    final annual = _annualOf(packages);
-    // The promo is only offered when the annual plan carries an introductory
-    // offer AND the user is eligible for it (checked in the bloc).
-    final promoAvailable = state.introEligible && hasIntroOffer(annual);
-    final promoActive = promoAvailable && _promoOn;
-    // When the promo is active we collapse to just the discounted yearly plan.
-    final visible = promoActive ? <Package>[annual] : packages;
+    // Already eligibility-checked in the bloc, so it's safe to advertise.
+    final trial = state.eligibleTrial;
 
     return ColoredBox(
       color: DSColors.surfaceCard,
@@ -71,10 +44,12 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
           // bleeds edge-to-edge; the other sections are padded individually.
           // The close chip lives inside _Hero so it scrolls away with it.
           ListView(
-            padding: const EdgeInsets.only(bottom: 168),
+            // Reserves room for the sticky footer: no-payment line + CTA +
+            // terms line.
+            padding: const EdgeInsets.only(bottom: 212),
             children: [
               _Hero(
-                onClose: widget.dismissible
+                onClose: dismissible
                     ? () => bloc.add(const PaywallDismissEvent())
                     : null,
               ),
@@ -83,40 +58,18 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
                 padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
                 child: Column(
                   children: [
-                    if (promoAvailable) ...[
-                      _PromoSwitch(
-                        label: introSavingsLabelFor(annual) != null
-                            ? l10n.paywallLimitedTimeOfferWithSavings(introSavingsLabelFor(annual)!)
-                            : l10n.paywallLimitedTimeOffer,
-                        value: _promoOn,
-                        onChanged: (on) {
-                          setState(() => _promoOn = on);
-                          bloc.add(PaywallPromoToggledEvent(promoOn: on));
-                          // Turning the promo on collapses to the yearly plan,
-                          // so make sure it's the selected (purchased) package.
-                          if (on) {
-                            bloc.add(
-                              PaywallPackageSelectedEvent(package: annual),
-                            );
-                          }
-                        },
-                      ),
-                      const SizedBox(height: DSDimens.sizeS),
-                    ],
-                    for (var i = 0; i < visible.length; i++) ...[
-                      if (i > 0) const SizedBox(height: DSDimens.sizeXs),
-                      PaywallPackageRow(
-                        package: visible[i],
-                        allPackages: packages,
-                        selected: visible[i].identifier ==
-                            state.selectedPackage.identifier,
-                        badge: _badgeFor(visible[i], l10n),
-                        showIntro: promoActive,
-                        onTap: () => bloc.add(
-                          PaywallPackageSelectedEvent(package: visible[i]),
+                    // A single plan, so the row is always selected and tapping
+                    // it is a no-op — it's a price display, not a picker.
+                    PaywallPackageRow(
+                      package: state.selectedPackage,
+                      selected: true,
+                      trial: trial,
+                      onTap: () => bloc.add(
+                        PaywallPackageSelectedEvent(
+                          package: state.selectedPackage,
                         ),
                       ),
-                    ],
+                    ),
                     const SizedBox(height: DSDimens.size3xl),
                     const PaywallValueProps(),
                     const SizedBox(height: DSDimens.size3xl),
@@ -124,7 +77,10 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
                     const SizedBox(height: DSDimens.size3xl),
                     const _LaurelStats(),
                     const SizedBox(height: DSDimens.size3xl),
-                    const _AutoRenewDisclosure(),
+                    _AutoRenewDisclosure(
+                      package: state.selectedPackage,
+                      trial: trial,
+                    ),
                     const SizedBox(height: DSDimens.sizeS),
                     _LegalLinks(
                       onRestore: () => bloc.add(const PaywallRestoreEvent()),
@@ -135,12 +91,14 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
             ],
           ),
           // Fade behind the static CTA (same effect as the onboarding/success
-          // floating footer).
+          // floating footer). It has to be taller than the footer itself and
+          // reach full opacity well before the text starts, or scrolling
+          // content shows through behind the disclosure lines.
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            height: 160,
+            height: 240,
             child: IgnorePointer(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -150,7 +108,9 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
                     colors: [
                       DSColors.surfaceCard.withValues(alpha: 0),
                       DSColors.surfaceCard,
+                      DSColors.surfaceCard,
                     ],
+                    stops: const [0, 0.42, 1],
                   ),
                 ),
               ),
@@ -172,21 +132,34 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // The single biggest objection at this moment is "am I
+                    // about to be charged?" — answer it directly above the CTA.
+                    if (trial != null) ...[
+                      const _NoPaymentDue(),
+                      const SizedBox(height: DSDimens.sizeXs),
+                    ],
                     Center(
                       heightFactor: 1,
                       child: DSPillButton(
-                        label: ctaLabelFor(state.selectedPackage, l10n),
+                        label: ctaLabelFor(
+                          state.selectedPackage,
+                          l10n,
+                          trial: trial,
+                        ),
                         onPressed: () =>
                             bloc.add(const PaywallPurchaseEvent()),
                         loading: state.isPurchasing,
                       ),
                     ),
                     const SizedBox(height: DSDimens.sizeXs),
-                    const _Reassurance(),
+                    _Reassurance(
+                      package: state.selectedPackage,
+                      trial: trial,
+                    ),
                     // Debug-only escape hatch so the hard gate can be skipped
                     // while testing the rest of the app. Stripped from release
                     // builds (kDebugMode is a const false there).
-                    if (kDebugMode && !widget.dismissible)
+                    if (kDebugMode && !dismissible)
                       TextButton(
                         onPressed: () =>
                             bloc.add(const PaywallDismissEvent()),
@@ -204,126 +177,6 @@ class _PaywallLoadedWidgetState extends State<PaywallLoadedWidget> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _PromoSwitch extends StatelessWidget {
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  const _PromoSwitch({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-      padding: const EdgeInsets.fromLTRB(
-        DSDimens.sizeS,
-        DSDimens.sizeXxs,
-        DSDimens.sizeXs,
-        DSDimens.sizeXxs,
-      ),
-      decoration: BoxDecoration(
-        color: DSColors.paywallAccentSoft,
-        borderRadius: BorderRadius.circular(DSRadii.xl),
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.local_offer_rounded,
-            size: 18,
-            color: DSColors.paywallAccent,
-          ),
-          const SizedBox(width: DSDimens.sizeXs),
-          Expanded(
-            child: Text(
-              label,
-              style: DSTextStyles.label.copyWith(
-                color: DSColors.inkPrimary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          Switch.adaptive(
-            value: value,
-            onChanged: onChanged,
-            activeThumbColor: Colors.white,
-            activeTrackColor: DSColors.paywallAccent,
-          ),
-        ],
-      ),
-        ),
-        const _ShineOverlay(),
-      ],
-    );
-  }
-}
-
-/// A diagonal light streak that sweeps across the limited-time offer toggle to
-/// draw the eye. Loops with a pause; bright/strong rather than a faint shimmer.
-class _ShineOverlay extends StatefulWidget {
-  const _ShineOverlay();
-
-  @override
-  State<_ShineOverlay> createState() => _ShineOverlayState();
-}
-
-class _ShineOverlayState extends State<_ShineOverlay>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2400),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(DSRadii.xl),
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) {
-              // Sweep during the first ~45% of the loop, then rest off-screen.
-              final p = (_controller.value / 0.45).clamp(0.0, 1.0);
-              final dx = -1.6 + 3.2 * p;
-              return DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment(dx - 0.7, -1),
-                    end: Alignment(dx + 0.7, 1),
-                    colors: [
-                      Colors.white.withValues(alpha: 0),
-                      Colors.white.withValues(alpha: 0.7),
-                      Colors.white.withValues(alpha: 0),
-                    ],
-                    stops: const [0.3, 0.5, 0.7],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
       ),
     );
   }
@@ -568,8 +421,10 @@ class _LaurelStat extends StatelessWidget {
   }
 }
 
-class _Reassurance extends StatelessWidget {
-  const _Reassurance();
+/// "No payment due now" — shown only when a trial is actually being offered,
+/// because with no trial payment *is* due now.
+class _NoPaymentDue extends StatelessWidget {
+  const _NoPaymentDue();
 
   @override
   Widget build(BuildContext context) {
@@ -578,28 +433,78 @@ class _Reassurance extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Icon(
-          Icons.shield_outlined,
-          size: 14,
-          color: DSColors.inkTertiary,
+          Icons.check_circle_rounded,
+          size: 18,
+          color: DSColors.accentSuccess,
         ),
         const SizedBox(width: DSDimens.sizeXxs),
-        Text(
-          l10n.paywallCancelAnytime,
-          style: DSTextStyles.caption.copyWith(color: DSColors.inkSecondary),
+        Flexible(
+          child: Text(
+            l10n.paywallNoPaymentDue,
+            textAlign: TextAlign.center,
+            style: DSTextStyles.bodyMd.copyWith(
+              color: DSColors.inkPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
       ],
     );
   }
 }
 
-class _AutoRenewDisclosure extends StatelessWidget {
-  const _AutoRenewDisclosure();
+/// The compact disclosure directly under the CTA. Trial length, the price it
+/// converts to, and cancellation all have to be visible at the moment of
+/// purchase — App Store guideline 3.1.2 and Play's subscription policy both
+/// require it, and this is the line that satisfies them.
+class _Reassurance extends StatelessWidget {
+  final Package package;
+  final TrialInfo? trial;
+
+  const _Reassurance({required this.package, required this.trial});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final period = periodSuffixFor(package, l10n);
+    final price = package.storeProduct.priceString;
+    // A package type with no natural period (e.g. lifetime) can't state renewal
+    // terms, so it falls back to the bare reassurance.
+    final text = period == null
+        ? l10n.paywallCancelAnytime
+        : trial != null
+            ? l10n.paywallTrialDisclosure(trial!.days, price, period)
+            : l10n.paywallPriceDisclosure(price, period);
+    // No icon: _NoPaymentDue sits directly above with a check mark, and two
+    // stacked icons in a three-line footer reads cluttered.
     return Text(
-      l10n.paywallAutoRenewDisclosure,
+      text,
+      textAlign: TextAlign.center,
+      style: DSTextStyles.caption.copyWith(color: DSColors.inkSecondary),
+    );
+  }
+}
+
+/// The long-form renewal terms at the bottom of the scroll. Spells out the
+/// trial-to-paid conversion, since that's the part reviewers look for.
+class _AutoRenewDisclosure extends StatelessWidget {
+  final Package package;
+  final TrialInfo? trial;
+
+  const _AutoRenewDisclosure({required this.package, required this.trial});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    // Brand names, so not localized.
+    final store = Platform.isIOS ? 'App Store' : 'Google Play';
+    final period = periodSuffixFor(package, l10n) ?? '';
+    final price = package.storeProduct.priceString;
+    return Text(
+      trial != null
+          ? l10n.paywallAutoRenewDisclosureTrial(
+              trial!.days, price, period, store)
+          : l10n.paywallAutoRenewDisclosure(price, period, store),
       textAlign: TextAlign.center,
       style: DSTextStyles.caption.copyWith(color: DSColors.inkTertiary),
     );

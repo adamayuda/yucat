@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:yucat/features/paywall/utils/trial_info.dart';
 
 /// Fatal paywall load failures (full-screen error). The UI maps these to
 /// localized copy — no user-facing strings live in the bloc.
@@ -35,10 +36,14 @@ class PaywallLoadedState extends PaywallState {
   final Package selectedPackage;
   final bool isPurchasing;
 
-  /// Whether the current user is eligible for the annual plan's introductory
-  /// offer. Gates the promo switch so we never advertise an intro price the
-  /// user won't actually be charged.
-  final bool introEligible;
+  /// The free trial this user will actually receive on [selectedPackage], or
+  /// null when the product has no trial or this user isn't eligible for it.
+  ///
+  /// Null is the fail-closed default: every trial claim on the paywall — the
+  /// badge, the CTA, the disclosure — is gated on this being non-null, so a
+  /// failed eligibility check degrades to the plain full-price paywall rather
+  /// than promising a trial the store won't honour.
+  final TrialInfo? eligibleTrial;
 
   /// One-shot transient error for a SnackBar (cleared after listener fires).
   /// Increments [errorTick] every time we want to re-fire the SnackBar so
@@ -50,7 +55,7 @@ class PaywallLoadedState extends PaywallState {
     required this.currentOffering,
     required this.packages,
     required this.selectedPackage,
-    this.introEligible = false,
+    this.eligibleTrial,
     this.isPurchasing = false,
     this.transientError,
     this.errorTick = 0,
@@ -66,7 +71,7 @@ class PaywallLoadedState extends PaywallState {
       currentOffering: currentOffering,
       packages: packages,
       selectedPackage: selectedPackage ?? this.selectedPackage,
-      introEligible: introEligible,
+      eligibleTrial: eligibleTrial,
       isPurchasing: isPurchasing ?? this.isPurchasing,
       transientError: transientError,
       errorTick: errorTick ?? this.errorTick,
@@ -78,7 +83,9 @@ class PaywallLoadedState extends PaywallState {
         currentOffering.identifier,
         packages.map((p) => p.identifier).toList(),
         selectedPackage.identifier,
-        introEligible,
+        // [TrialInfo] isn't Equatable; the day count is the only part that
+        // affects rendering, so compare on that rather than on identity.
+        eligibleTrial?.days,
         isPurchasing,
         transientError,
         errorTick,
