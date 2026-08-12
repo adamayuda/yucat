@@ -12,7 +12,6 @@ import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
 import 'package:yucat/features/paywall/utils/paywall_format.dart';
 import 'package:yucat/features/paywall/utils/trial_info.dart';
-import 'package:yucat/features/paywall/widgets/paywall_package_row.dart';
 import 'package:yucat/features/paywall/widgets/paywall_testimonials.dart';
 import 'package:yucat/features/paywall/widgets/paywall_value_props.dart';
 import 'package:yucat/l10n/app_localizations.dart';
@@ -58,19 +57,12 @@ class PaywallLoadedWidget extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
                 child: Column(
                   children: [
-                    // A single plan, so the row is always selected and tapping
-                    // it is a no-op — it's a price display, not a picker.
-                    PaywallPackageRow(
-                      package: state.selectedPackage,
-                      selected: true,
-                      trial: trial,
-                      onTap: () => bloc.add(
-                        PaywallPackageSelectedEvent(
-                          package: state.selectedPackage,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: DSDimens.size3xl),
+                    // No plan card: with a single plan there is nothing to pick,
+                    // and the price/trial terms are already stated twice below —
+                    // `_Reassurance` under the CTA and `_AutoRenewDisclosure` at
+                    // the end of the scroll. `PaywallPackageRow` is kept in the
+                    // codebase as the restore path for a second plan (README §11).
+                    const SizedBox(height: DSDimens.sizeS),
                     const PaywallValueProps(),
                     const SizedBox(height: DSDimens.size3xl),
                     const PaywallTestimonials(),

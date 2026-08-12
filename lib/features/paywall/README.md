@@ -18,13 +18,11 @@ cannot use the app at all. Every active user is therefore a subscriber.
 
 The paywall offers **one plan**: annual, entered through a **3-day free trial**.
 
-```
-┌────────────────────────────────┐
-│ [3 DAYS FREE]                  │
-│ Annual                $24.99   │
-│ then $24.99/year     $2.08/mo  │
-└────────────────────────────────┘
+There is **no plan card** — with a single plan there is nothing to pick, so the
+screen goes straight from the hero into the value props, and the terms live in the
+sticky footer:
 
+```
       ✓ No payment due now
   [ Redeem 3 days for $0.00 ]
   3 days free, then $24.99/year.
@@ -36,9 +34,8 @@ abstract at the moment of commitment — and "No payment due now" answers the on
 objection that actually stops people here. Both appear **only** when a trial is
 being offered.
 
-A user who isn't trial-eligible (they've used one before) sees the same card with
-no badge, no "No payment due now" line, the CTA "Let's get started", and
-"$24.99/year. Cancel anytime."
+A user who isn't trial-eligible (they've used one before) sees no "No payment due
+now" line, the CTA "Let's get started", and "$24.99/year. Cancel anytime."
 
 ---
 
@@ -92,8 +89,8 @@ lib/features/paywall/
 │   ├── trial_info.dart            cross-platform trial detection  ← the subtle bit
 │   └── paywall_format.dart        price/period/CTA string helpers
 └── widgets/
-    ├── paywall_loaded_widget.dart hero, plan card, CTA, disclosures, legal links
-    ├── paywall_package_row.dart   the plan card
+    ├── paywall_loaded_widget.dart hero, value props, CTA, disclosures, legal links
+    ├── paywall_package_row.dart   the plan card — **not rendered** (see §11)
     ├── paywall_value_props.dart   6 feature rows
     ├── paywall_testimonials.dart  carousel (placeholder testimonials)
     ├── paywall_skeleton.dart      shimmer while offerings load
@@ -449,10 +446,18 @@ hardcoded. Allowed Apple durations: 3 days, 1 week, 2 weeks, 1 month, 2 months,
 .where((p) => p.packageType == PackageType.annual)
 ```
 
-Then restore the loop over `packages` in `paywall_loaded_widget.dart` (currently a
-single `PaywallPackageRow`), re-add a "BEST VALUE" badge string, and bump the
-skeleton back to two bones. `PaywallPackageSelectedEvent` and the `Plan Selected`
-event are already wired.
+Then render `PaywallPackageRow` again in `paywall_loaded_widget.dart` — the widget
+is still in the tree, just no longer called — looping over `packages`, re-add a
+"BEST VALUE" badge string, and bump the skeleton back to two bones.
+`PaywallPackageSelectedEvent` and the `Plan Selected` event are already wired.
+
+**Why the plan card is gone.** With one plan there is nothing to choose, so the
+card was a price display rather than a picker (its `onTap` re-selected the package
+it was already on). The price and trial terms are still stated **twice** below the
+fold — `_Reassurance` directly under the CTA and `_AutoRenewDisclosure` at the end
+of the scroll — so the App Store 3.1.2 / Play disclosure requirement is unaffected.
+Purchase is unaffected too: `selectedPackage` is set in `PaywallBloc._onInitial`,
+never by the card.
 
 **Re-enable a free tier** — the tracking services and their limits are intact; wire
 `canPerformScan` / `canCreateCat` back into `HomeBloc` and the cat wizard, and
