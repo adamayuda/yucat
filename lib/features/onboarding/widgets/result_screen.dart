@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:yucat/features/cat/presentation/utils/cat_labels.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat/presentation/utils/cat_product_recommendations.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
@@ -225,9 +226,31 @@ class _RecapCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final notSet = l10n.onboardingSuccessNotSet;
-    final healthValue = summary.healthLabels.isEmpty
+    final healthValue = summary.healthConditions.isEmpty
         ? l10n.onboardingSuccessNone
-        : summary.healthLabels.join(', ');
+        : summary.healthConditions
+            .map((c) => catFormatHealthCondition(c, l10n))
+            .join(', ');
+
+    // Raw profile keys → localized labels. The summary carries keys, not copy,
+    // so the recap follows the app language.
+    final ageMonths = summary.ageMonths;
+    final ageValue = ageMonths == null
+        ? null
+        : '${catFormatAge(ageMonths, l10n)} · '
+            '${catFormatLifeStageFromMonths(ageMonths, l10n)}';
+    final activityValue = summary.activityLevel == null
+        ? null
+        : catFormatActivityLevel(summary.activityLevel!, l10n);
+    final bodyValue = summary.weightCategory == null
+        ? null
+        : catFormatBodyCondition(summary.weightCategory!, l10n);
+    final coatValue = summary.coatType == null
+        ? null
+        : catFormatCoatType(summary.coatType!, l10n);
+    final neuterValue = summary.neuteredStatus == null
+        ? null
+        : catFormatNeuteredStatus(summary.neuteredStatus!, l10n);
 
     // Six single-value profile facts laid out two-per-row; health conditions
     // (variable length) spans the full width below them.
@@ -235,32 +258,32 @@ class _RecapCard extends StatelessWidget {
       _SummaryCell(
         iconAsset: 'Cake.svg',
         label: l10n.onboardingSuccessRowAge,
-        value: summary.ageLabel ?? notSet,
-        muted: summary.ageLabel == null,
+        value: ageValue ?? notSet,
+        muted: ageValue == null,
       ),
       _SummaryCell(
         iconAsset: 'Activity.svg',
         label: l10n.onboardingSuccessRowActivity,
-        value: summary.activityLabel ?? notSet,
-        muted: summary.activityLabel == null,
+        value: activityValue ?? notSet,
+        muted: activityValue == null,
       ),
       _SummaryCell(
         iconAsset: 'Body condition.svg',
         label: l10n.onboardingSuccessRowBodyCondition,
-        value: summary.bodyConditionLabel ?? notSet,
-        muted: summary.bodyConditionLabel == null,
+        value: bodyValue ?? notSet,
+        muted: bodyValue == null,
       ),
       _SummaryCell(
         iconAsset: 'Coat.svg',
         label: l10n.onboardingSuccessRowCoat,
-        value: summary.coatLabel ?? notSet,
-        muted: summary.coatLabel == null,
+        value: coatValue ?? notSet,
+        muted: coatValue == null,
       ),
       _SummaryCell(
         iconAsset: 'Neuter status.svg',
         label: l10n.onboardingSuccessRowNeuterStatus,
-        value: summary.neuterLabel ?? notSet,
-        muted: summary.neuterLabel == null,
+        value: neuterValue ?? notSet,
+        muted: neuterValue == null,
       ),
       _SummaryCell(
         iconAsset: 'catwalk.svg',
@@ -392,7 +415,7 @@ class _ProductVerdictCard extends StatelessWidget {
       ),
       ProductRatingColor.red => (DSColors.coralSurface, DSColors.accentDanger),
     };
-    final cons = product.cons.take(3).toList();
+    final cons = product.displayCons.take(3).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

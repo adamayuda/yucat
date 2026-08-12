@@ -1,5 +1,20 @@
 export type FoodType = "wet" | "dry" | "treat" | "topper" | "supplement";
 
+/**
+ * The five human-readable fields the app renders, in one language.
+ *
+ * `name`/`brand` are deliberately excluded — they are transcribed off the
+ * packaging (see prompts/identify-product) and must never be translated.
+ * `ingredients` is excluded because the app never renders it.
+ */
+export interface ProductText {
+  format: string;
+  packageSize: string;
+  description: string;
+  pros: string[];
+  cons: string[];
+}
+
 export interface Product {
   barcode: string;
   name: string;
@@ -29,6 +44,13 @@ export interface Product {
   // vice-versa). Absent on pre-existing rows → treated as "never attempted".
   lastAnalysisAttempt?: number;
   lastImageAttempt?: number;
+  // Cached translations of the five renderable text fields, keyed by language
+  // code. The flat fields above stay canonical English — the Flutter client's
+  // per-cat rules engine keyword-scans them, so they must not be localized in
+  // place. Filled lazily: the first request for a language pays one small Haiku
+  // call, everyone after reads it from here. No "en" entry (that's the flat
+  // fields). Absent on pre-existing rows.
+  translations?: Record<string, ProductText>;
 }
 
 export class ProductModel implements Product {
@@ -54,6 +76,7 @@ export class ProductModel implements Product {
   ingredients: string[];
   lastAnalysisAttempt?: number;
   lastImageAttempt?: number;
+  translations?: Record<string, ProductText>;
 
   constructor(
     barcode: string,
@@ -77,7 +100,8 @@ export class ProductModel implements Product {
     description = "",
     ingredients: string[] = [],
     lastAnalysisAttempt?: number,
-    lastImageAttempt?: number
+    lastImageAttempt?: number,
+    translations?: Record<string, ProductText>
   ) {
     this.barcode = barcode;
     this.name = name;
@@ -101,6 +125,7 @@ export class ProductModel implements Product {
     this.ingredients = ingredients;
     this.lastAnalysisAttempt = lastAnalysisAttempt;
     this.lastImageAttempt = lastImageAttempt;
+    this.translations = translations;
   }
 
   static fromObject(data: Partial<Product>): ProductModel {
@@ -126,7 +151,8 @@ export class ProductModel implements Product {
       data.description || "",
       data.ingredients || [],
       data.lastAnalysisAttempt,
-      data.lastImageAttempt
+      data.lastImageAttempt,
+      data.translations
     );
   }
 
@@ -154,6 +180,7 @@ export class ProductModel implements Product {
       ingredients: this.ingredients,
       lastAnalysisAttempt: this.lastAnalysisAttempt,
       lastImageAttempt: this.lastImageAttempt,
+      translations: this.translations,
     };
   }
 }

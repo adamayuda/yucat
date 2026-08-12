@@ -563,5 +563,9 @@
   "onboardingScanRetry": "Escanear de nuevo",
   "onboardingScanPersonalCon": "Para {name}: {con}",
   "onboardingResultWhyTitle": "Por qué no es lo ideal para {name}",
-  "onboardingResultProfileTitle": "Perfil de {name}"
+  "onboardingResultProfileTitle": "Perfil de {name}",
+  "ratingLabelExcellent": "Excelente",
+  "ratingLabelGood": "Bueno",
+  "ratingLabelAverage": "Aceptable",
+  "ratingLabelPoor": "Deficiente"
 }

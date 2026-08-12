@@ -64,9 +64,14 @@ class AnalysisCard extends StatelessWidget {
             const SizedBox(height: DSDimens.sizeS),
             Text(body, style: DSTextStyles.bodyMd),
           ],
-          if (!noData && (product.pros.isNotEmpty || product.cons.isNotEmpty)) ...[
+          if (!noData &&
+              (product.displayPros.isNotEmpty ||
+                  product.displayCons.isNotEmpty)) ...[
             const SizedBox(height: DSDimens.sizeS),
-            AnalysisChipRow(pros: product.pros, cons: product.cons),
+            AnalysisChipRow(
+              pros: product.displayPros,
+              cons: product.displayCons,
+            ),
           ],
         ],
       ),

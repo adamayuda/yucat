@@ -1,3 +1,4 @@
+import {CANONICAL_LANGUAGE, languageName, normalizeLanguage} from "./languages";
 /* eslint-disable max-len */
 /**
  * Prompts for the onboarding brand critique (`analyzeBrand` Callable).
@@ -19,15 +20,8 @@ export interface BrandVerdictInput {
   brand: string;
   catName?: string;
   catalogContext?: BrandCatalogContext;
-  locale?: string; // en / es / fr / hu
+  locale?: string; // any code in prompts/languages.ts
 }
-
-const LANGUAGE_NAMES: Record<string, string> = {
-  en: "English",
-  es: "Spanish",
-  fr: "French",
-  hu: "Hungarian",
-};
 
 export function generateBrandVerdictSystemPrompt(): string {
   return `
@@ -58,7 +52,7 @@ Rules:
 }
 
 export function generateBrandVerdictUserPrompt(input: BrandVerdictInput): string {
-  const language = LANGUAGE_NAMES[input.locale ?? "en"] ?? "English";
+  const language = languageName(normalizeLanguage(input.locale) ?? CANONICAL_LANGUAGE);
   const lines: string[] = [
     `Brand the owner currently feeds${input.catName ? ` ${input.catName}` : ""}: "${input.brand}"`,
   ];

@@ -99,3 +99,48 @@ export async function processProductImage(
     return "";
   }
 }
+
+/**
+ * Hosts a display-sized copy of the user's own scan photo, for use as a
+ * **per-user** fallback when no product image could be found on the web.
+ *
+ * `uploadUserPhoto` stores the raw client buffer unresized (a phone JPEG is
+ * routinely 3-6 MB), so this re-encodes it through the same 800x800 / q85
+ * pipeline product images use before it is rendered in a hero card or list.
+ *
+ * ⚠️ Written to `scans/{requestId}-display.jpeg`, **never** to `products/`.
+ * The products folder is keyed by product, so two users scanning the same
+ * imageless product would overwrite each other and end up rendering each
+ * other's photos. Keying per scan makes that impossible. This URL must also
+ * never be written to the shared Algolia record — see index.ts.
+ *
+ * Returns "" on any failure; the caller then keeps the placeholder.
+ */
+export async function processUserPhotoImage(
+  userPhotoUrl: string,
+  requestId: string
+): Promise<string> {
+  if (!userPhotoUrl || userPhotoUrl.trim() === "") return "";
+
+  try {
+    const uploadedUrl = await uploadImageToFirebaseStorage(
+      userPhotoUrl,
+      `${requestId}-display`,
+      "user scan",
+      "scans/"
+    );
+    logger.info("Hosted user photo as image fallback", {
+      requestId,
+      uploadedUrl,
+      structuredData: true,
+    });
+    return uploadedUrl;
+  } catch (error) {
+    logger.warn("Failed to host user photo fallback", {
+      requestId,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return "";
+  }
+}

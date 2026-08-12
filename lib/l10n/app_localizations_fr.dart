@@ -2049,4 +2049,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String onboardingResultProfileTitle(String name) {
     return 'Profil de $name';
   }
+
+  @override
+  String get ratingLabelExcellent => 'Excellent';
+
+  @override
+  String get ratingLabelGood => 'Bon';
+
+  @override
+  String get ratingLabelAverage => 'Moyen';
+
+  @override
+  String get ratingLabelPoor => 'Médiocre';
 }

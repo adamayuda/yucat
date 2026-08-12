@@ -3494,6 +3494,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name}\'s profile'**
   String onboardingResultProfileTitle(String name);
+
+  /// No description provided for @ratingLabelExcellent.
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent'**
+  String get ratingLabelExcellent;
+
+  /// No description provided for @ratingLabelGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get ratingLabelGood;
+
+  /// No description provided for @ratingLabelAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get ratingLabelAverage;
+
+  /// No description provided for @ratingLabelPoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Poor'**
+  String get ratingLabelPoor;
 }
 
 class _AppLocalizationsDelegate

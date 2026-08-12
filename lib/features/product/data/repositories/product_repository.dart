@@ -19,6 +19,7 @@ class ProductRepositoryImpl implements ProductRepository {
     required String imageBase64,
     required String mimeType,
     String? countryCode,
+    String? locale,
   }) async {
     debugPrint('[ProductRepository] Fetching product by image');
 
@@ -26,6 +27,7 @@ class ProductRepositoryImpl implements ProductRepository {
       imageBase64: imageBase64,
       mimeType: mimeType,
       countryCode: countryCode,
+      locale: locale,
     );
     if (remoteData == null) {
       debugPrint('[ProductRepository] Product not found for image');
@@ -40,6 +42,16 @@ class ProductRepositoryImpl implements ProductRepository {
       return null;
     }
     final productData = Map<String, dynamic>.from(productDataRaw);
-    return _productToDomainMapper(productData);
+    final localizedRaw = remoteData['localizedText'];
+    final fallbackRaw = remoteData['userPhotoFallbackUrl'];
+    return _productToDomainMapper(
+      productData,
+      localizedText: localizedRaw is Map
+          ? Map<String, dynamic>.from(localizedRaw)
+          : null,
+      userPhotoFallbackUrl: fallbackRaw is String && fallbackRaw.isNotEmpty
+          ? fallbackRaw
+          : null,
+    );
   }
 }

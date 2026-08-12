@@ -52,9 +52,12 @@ minInstances or concurrency is set anywhere** — everything runs on defaults (u
 ```ts
 // fetchProductByImageV2
 in:  {image: string /* base64, required */, mimeType?: string,
-      userId?: string, countryCode?: string /* ISO 3166-1 alpha-2 */}
+      userId?: string, countryCode?: string /* ISO 3166-1 alpha-2 */,
+      locale?: string /* app language, e.g. "fr" — see prompts/languages.ts */}
 out: {message: string, userId: string | null,
-      geminiResponse: string, product: Product | null}
+      geminiResponse: string, product: Product | null,
+      localizedText: ProductText | null,
+      userPhotoFallbackUrl: string | null}
 
 // generateCatNarrative — in: CatNarrativeInput (requires `name`)
 out: {narrative: string | null, outlook: string | null}
@@ -65,6 +68,19 @@ out: {verdict: BrandVerdictResult | null}
 
 `mimeType` is whitelisted against `VALID_MIME_TYPES`
 (`image/jpeg|png|webp|heic`) and coerced to `image/jpeg` otherwise.
+
+**`userPhotoFallbackUrl`** is a **per-user** image fallback: when neither the analyze step
+nor SerpAPI produced a usable product image, the backend hosts a display-sized copy of the
+user's own scan photo at `scans/{requestId}-display.jpeg` and returns that URL. The client
+renders it when `product.imageUrl` is empty.
+
+⚠️ It is deliberately **not** written into `product.imageUrl` or the Algolia record.
+`products/{key}.jpeg` is keyed by product and served to every user, so persisting it would
+(a) publish one user's photo to everyone — beyond the Terms' "operate the app **for you**"
+licence — and (b) let two users scanning the same imageless product overwrite each other's
+photos. Leaving the record's `imageUrl` empty also keeps the 14-day self-heal and
+`backfill-images.ts` hunting for a real product shot. `resolveUserPhotoFallback` runs
+**after** every `cacheProduct` call for exactly this reason.
 
 **`geminiResponse` is a vestigial field name**, kept for wire compatibility with the
 retired Gemini-era API. It now carries `JSON.stringify(submit_product.input)` on a full
@@ -305,8 +321,21 @@ Two subtleties:
 required: barcode name brand foodType protein fat moisture carbs fiber ash
           imageUrl score pros[] cons[] version
 V2 optional: isAiIdentified format packageSize description ingredients[]
-             lastAnalysisAttempt lastImageAttempt
+             lastAnalysisAttempt lastImageAttempt translations
 ```
+
+**`translations`** is `Record<lang, ProductText>` — cached translations of the five
+renderable fields (`format`, `packageSize`, `description`, `pros`, `cons`), keyed by language
+code, with no `en` entry (that's the flat fields). Filled **lazily**: the first request for a
+language pays one small Haiku call (`translateProductText`), everyone after reads it off the
+record. `name`/`brand` are never translated (they're transcribed off the packaging), and
+`ingredients` isn't either (the app never renders it).
+
+⚠️ **The flat fields stay canonical English on purpose.** The Flutter client's per-cat rules
+engine (`cat_product_assessment.dart`) keyword-scans `pros + cons + name + brand` against
+hardcoded English needles (`'chicken'`, `'renal'`, `'corn'`…) to build the per-cat verdict.
+Localizing them in place would silently break allergen, kidney and filler detection. The
+client renders `localizedText` and assesses on the canonical.
 
 The V2 fields are optional so pre-V2 cached rows still round-trip cleanly.
 

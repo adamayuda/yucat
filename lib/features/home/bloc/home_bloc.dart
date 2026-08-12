@@ -138,6 +138,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         imageBase64: event.imageBase64,
         mimeType: event.mimeType,
         countryCode: event.countryCode,
+        locale: event.locale,
       );
 
       if (product == null) {

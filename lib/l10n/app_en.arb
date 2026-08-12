@@ -982,5 +982,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "ratingLabelExcellent": "Excellent",
+  "ratingLabelGood": "Good",
+  "ratingLabelAverage": "Average",
+  "ratingLabelPoor": "Poor"
 }

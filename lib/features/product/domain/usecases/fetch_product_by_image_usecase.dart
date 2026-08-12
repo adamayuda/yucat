@@ -11,11 +11,13 @@ class FetchProductByImageUsecase {
     required String imageBase64,
     required String mimeType,
     String? countryCode,
+    String? locale,
   }) async {
     return _productRepository.fetchProductByImage(
       imageBase64: imageBase64,
       mimeType: mimeType,
       countryCode: countryCode,
+      locale: locale,
     );
   }
 }

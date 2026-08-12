@@ -202,7 +202,7 @@ class _LoadedBody extends StatelessWidget {
           padding: hPad,
           child: AnalysisCard(
             product: product,
-            description: product.description,
+            description: product.displayDescription,
           ),
         ),
         const SizedBox(height: DSDimens.sizeL),

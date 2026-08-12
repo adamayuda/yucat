@@ -1,3 +1,4 @@
+import {CANONICAL_LANGUAGE, languageName, normalizeLanguage} from "./languages";
 /* eslint-disable max-len */
 /**
  * Prompts for the onboarding "personalized narrative" step.
@@ -26,15 +27,8 @@ export interface CatNarrativeInput {
   coatType?: string; // short_hair / long_hair / hairless
   healthConditions?: string[];
   tips: DietTip[];
-  locale?: string; // en / es / fr / hu
+  locale?: string; // any code in prompts/languages.ts
 }
-
-const LANGUAGE_NAMES: Record<string, string> = {
-  en: "English",
-  es: "Spanish",
-  fr: "French",
-  hu: "Hungarian",
-};
 
 // Lay-level, vet-safe framing for each wizard condition, so the model can
 // acknowledge it accurately without diagnosing or prescribing.
@@ -127,7 +121,7 @@ Write everything in the requested language. Output ONLY by calling submit_narrat
 }
 
 export function generateCatNarrativeUserPrompt(input: CatNarrativeInput): string {
-  const language = LANGUAGE_NAMES[input.locale ?? "en"] ?? "English";
+  const language = languageName(normalizeLanguage(input.locale) ?? CANONICAL_LANGUAGE);
 
   const profileLines: string[] = [`name: "${input.name}"`];
   if (input.lifeStage) profileLines.push(`life stage: ${input.lifeStage}`);

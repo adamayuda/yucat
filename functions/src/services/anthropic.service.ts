@@ -2,8 +2,10 @@ import Anthropic from "@anthropic-ai/sdk";
 import * as logger from "firebase-functions/logger";
 import {config} from "../config";
 import {RETRY_CONFIG} from "../constants";
-import {FoodType, Product, ProductModel} from "../models/product";
+import {FoodType, Product, ProductModel, ProductText} from "../models/product";
 import {generateIdentificationPrompt} from "../prompts/identify-product";
+import {generateTranslationSystemPrompt, generateTranslationUserPrompt} from "../prompts/translate-product";
+import {languageName} from "../prompts/languages";
 import {
   generateAnalysisSystemPrompt,
   generateAnalysisUserPrompt,
@@ -1008,6 +1010,134 @@ export async function regradeProductQuality(
     return null;
   } catch (error) {
     logger.warn("regradeProductQuality failed", {
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return null;
+  }
+}
+
+const TRANSLATION_TOOLS: Anthropic.Tool[] = [
+  {
+    name: "submit_translation",
+    description: "Submit the translated product text.",
+    input_schema: {
+      type: "object",
+      required: ["format", "packageSize", "description", "pros", "cons"],
+      properties: {
+        format: {
+          type: "string",
+          description: "Translated short display format label, max 24 chars.",
+        },
+        packageSize: {
+          type: "string",
+          description:
+            "Translated pack size. Numbers and units unchanged; only the " +
+            "surrounding noun is translated.",
+        },
+        description: {
+          type: "string",
+          description: "Translated 2-3 sentence description.",
+        },
+        pros: {
+          type: "array",
+          items: {type: "string"},
+          description: "Translated pros — same count and order as the source.",
+        },
+        cons: {
+          type: "array",
+          items: {type: "string"},
+          description: "Translated cons — same count and order as the source.",
+        },
+      },
+    },
+  },
+];
+
+/**
+ * Translates the five renderable product-text fields into [language].
+ *
+ * One small Haiku call, no web search. Returns null on any failure or if the
+ * model changed the pros/cons item counts (a structural mismatch would desync
+ * the client's chip rows from the English canonical), so the caller can fall
+ * back to English. Never throws.
+ */
+export async function translateProductText(
+  text: ProductText,
+  languageCode: string
+): Promise<ProductText | null> {
+  const language = languageName(languageCode);
+  const started = Date.now();
+  try {
+    const response = await withRetry("translateProductText", () =>
+      getClient().messages.create({
+        model: config.anthropic.model,
+        max_tokens: 1024,
+        temperature: 0,
+        // The system prompt is constant, so it stays cacheable across every
+        // language; the target language rides in the user message.
+        system: [
+          {
+            type: "text",
+            text: generateTranslationSystemPrompt(),
+            cache_control: {type: "ephemeral"},
+          },
+        ],
+        messages: [
+          {role: "user", content: [
+            {
+              type: "text",
+              text: generateTranslationUserPrompt(text, language),
+            },
+          ]},
+        ],
+        tools: TRANSLATION_TOOLS,
+        tool_choice: {type: "tool", name: "submit_translation"},
+      })
+    );
+
+    const submit = findToolUse(response.content, "submit_translation");
+    const out = submit?.input;
+    if (!out) return null;
+
+    const pros = Array.isArray(out.pros) ? out.pros.map(String) : [];
+    const cons = Array.isArray(out.cons) ? out.cons.map(String) : [];
+    if (pros.length !== text.pros.length || cons.length !== text.cons.length) {
+      logger.warn("translateProductText item-count mismatch — discarding", {
+        languageCode,
+        expectedPros: text.pros.length,
+        gotPros: pros.length,
+        expectedCons: text.cons.length,
+        gotCons: cons.length,
+        structuredData: true,
+      });
+      return null;
+    }
+
+    logger.info("translateProductText complete", {
+      languageCode,
+      ms: Date.now() - started,
+      inputTokens: response.usage?.input_tokens,
+      outputTokens: response.usage?.output_tokens,
+      structuredData: true,
+    });
+
+    return {
+      format: typeof out.format === "string" ? out.format : text.format,
+      packageSize:
+        typeof out.packageSize === "string" ?
+          out.packageSize :
+          text.packageSize,
+      description:
+        typeof out.description === "string" ?
+          out.description :
+          text.description,
+      pros,
+      cons,
+    };
+  } catch (error) {
+    logger.warn("translateProductText failed", {
+      languageCode,
       error: error instanceof Error ? error.message : String(error),
       structuredData: true,
     });

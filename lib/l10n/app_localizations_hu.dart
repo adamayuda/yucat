@@ -2039,4 +2039,16 @@ class AppLocalizationsHu extends AppLocalizations {
   String onboardingResultProfileTitle(String name) {
     return '$name profilja';
   }
+
+  @override
+  String get ratingLabelExcellent => 'Kiváló';
+
+  @override
+  String get ratingLabelGood => 'Jó';
+
+  @override
+  String get ratingLabelAverage => 'Átlagos';
+
+  @override
+  String get ratingLabelPoor => 'Gyenge';
 }

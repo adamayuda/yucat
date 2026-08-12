@@ -54,6 +54,9 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
 
   Future<void> _runScan(String imageBase64, String mimeType) async {
     final l10n = AppLocalizations.of(context);
+    // Read before the first await — context lookups after an async gap are
+    // unsafe if the screen has been disposed.
+    final locale = Localizations.localeOf(context).languageCode;
     sl<LogEventUsecase>().call(
       eventName: AnalyticsEvents.onboardingScanCaptured,
       properties: {'timestamp': DateTime.now().toIso8601String()},
@@ -66,6 +69,9 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
         // market — same source as the main scan flow.
         countryCode:
             WidgetsBinding.instance.platformDispatcher.locale.countryCode,
+        // App language for translated product copy — the resolved app locale,
+        // not the device one. Same rationale as scanner_page.
+        locale: locale,
       );
       if (!mounted) return;
       if (entity == null) {

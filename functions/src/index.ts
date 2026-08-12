@@ -3,12 +3,14 @@ import {onCall} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import {config} from "./config";
+import {CANONICAL_LANGUAGE, normalizeLanguage} from "./prompts/languages";
 import {
   identifyProductFromImage,
   analyzeProductImage,
   analyzeProductImageParallel,
   findProductImageUrl,
   verifyMatchWithLLM,
+  translateProductText,
   generateCatNarrative as buildCatNarrative,
   analyzeBrand as runAnalyzeBrand,
 } from "./services/anthropic.service";
@@ -19,10 +21,14 @@ import {
   fetchCandidatesByName,
   searchProductByNameV2,
 } from "./services/algolia.service";
-import {processProductImage, uploadUserPhoto} from "./utils/image-helpers";
+import {
+  processProductImage,
+  processUserPhotoImage,
+  uploadUserPhoto,
+} from "./utils/image-helpers";
 import {logScanRequest} from "./utils/scan-log";
 import {createTimer} from "./utils/timing";
-import {Product} from "./models/product";
+import {Product, ProductText} from "./models/product";
 
 admin.initializeApp();
 
@@ -38,6 +44,92 @@ const hasImage = (p: Product): boolean => !!p.imageUrl;
 const isStale = (ts?: number): boolean =>
   !ts || Date.now() - ts > REANALYZE_AFTER_MS;
 
+/** The canonical (English) renderable text of a product record. */
+const canonicalText = (p: Product): ProductText => ({
+  format: p.format ?? "",
+  packageSize: p.packageSize ?? "",
+  description: p.description ?? "",
+  pros: p.pros ?? [],
+  cons: p.cons ?? [],
+});
+
+/**
+ * Returns the product's text in [language], translating and attaching it to
+ * `product.translations` on a miss.
+ *
+ * The stored record stays canonical English — the Flutter client keyword-scans
+ * `pros`/`cons` in English to drive its per-cat rules engine, so translating in
+ * place would silently break the per-cat verdict.
+ *
+ * Mutates `product` but does NOT persist; `added` tells the caller whether a
+ * write-back is needed. Best-effort throughout: any failure yields
+ * `{text: null}` and the client falls back to English.
+ */
+async function ensureTranslation(
+  product: Product,
+  language: string | undefined
+): Promise<{text: ProductText | null; added: boolean}> {
+  if (!language || language === CANONICAL_LANGUAGE) {
+    return {text: null, added: false};
+  }
+
+  const cached = product.translations?.[language];
+  if (cached) return {text: cached, added: false};
+
+  const source = canonicalText(product);
+  const hasSomethingToTranslate =
+    !!source.description ||
+    !!source.format ||
+    source.pros.length > 0 ||
+    source.cons.length > 0;
+  if (!hasSomethingToTranslate) return {text: null, added: false};
+
+  const translated = await translateProductText(source, language);
+  if (!translated) return {text: null, added: false};
+
+  product.translations = {
+    ...(product.translations ?? {}),
+    [language]: translated,
+  };
+  return {text: translated, added: true};
+}
+
+/**
+ * Per-user image fallback: when no product image could be found on the web,
+ * host a display-sized copy of the user's own scan photo and return it to
+ * *that* user only.
+ *
+ * ⚠️ The result must never be assigned to `product.imageUrl` — `product` is the
+ * same object handed to `cacheProduct`, so that would publish one user's photo
+ * as the shared catalog image for everyone. It is returned as its own response
+ * field instead, which makes the leak impossible by construction rather than by
+ * write ordering. Leaving the record's `imageUrl` empty also keeps the 14-day
+ * self-heal and `backfill-images.ts` hunting for a real product shot.
+ *
+ * Returns null when the product already has an image, when the scan upload
+ * failed, or when hosting failed — the client then keeps its placeholder.
+ */
+async function resolveUserPhotoFallback(
+  product: Product | null,
+  userPhotoUrl: string,
+  requestId: string,
+  path: string
+): Promise<string | null> {
+  if (!product || hasImage(product) || !userPhotoUrl) return null;
+
+  const hosted = await processUserPhotoImage(userPhotoUrl, requestId);
+  if (!hosted) return null;
+
+  logger.info("user photo fallback used", {
+    requestId,
+    path,
+    brand: product.brand,
+    name: product.name,
+    structuredData: true,
+  });
+  return hosted;
+}
+
 export const fetchProductByImageV2 = onCall(
   {
     cors: config.functions.corsEnabled,
@@ -45,7 +137,7 @@ export const fetchProductByImageV2 = onCall(
     secrets: ["ANTHROPIC_API_KEY", "ALGOLIA_API_KEY", "SERPAPI_API_KEY"],
   },
   async (request) => {
-    const {image, mimeType, userId, countryCode} = request.data;
+    const {image, mimeType, userId, countryCode, locale} = request.data;
 
     if (!image || typeof image !== "string") {
       throw new Error("Missing required field: image (base64-encoded string)");
@@ -58,12 +150,18 @@ export const fetchProductByImageV2 = onCall(
         countryCode.trim() :
         undefined;
 
+    // Optional app language (e.g. "fr"). Drives the translated copy returned in
+    // `localizedText`; unsupported or absent → English only (older clients, no
+    // regression). Distinct from countryCode, which is a region, not a language.
+    const resolvedLanguage = normalizeLanguage(locale);
+
     const resolvedMimeType = VALID_MIME_TYPES.includes(mimeType) ? mimeType : "image/jpeg";
 
     logger.info("Image endpoint called", {
       userId,
       mimeType: resolvedMimeType,
       imageSize: image.length,
+      language: resolvedLanguage ?? CANONICAL_LANGUAGE,
       structuredData: true,
     });
 
@@ -107,6 +205,8 @@ export const fetchProductByImageV2 = onCall(
           userId: userId || null,
           geminiResponse: "",
           product: null,
+          localizedText: null,
+          userPhotoFallbackUrl: null,
         };
       }
 
@@ -182,6 +282,27 @@ export const fetchProductByImageV2 = onCall(
             structuredData: true,
           });
 
+          // Lazy translation fill: the first requester of a language pays one
+          // small Haiku call, everyone after reads it off the record.
+          const localized = await ensureTranslation(
+            cachedProduct,
+            resolvedLanguage
+          );
+          if (localized.added) {
+            await cacheProduct(cachedProduct.barcode, cachedProduct);
+          }
+          timer.mark("translate");
+
+          // Every cache write for this product is done above, so nothing can
+          // carry the fallback into the shared record.
+          const cachedFallback = await resolveUserPhotoFallback(
+            cachedProduct,
+            userPhotoUrl,
+            requestId,
+            "cache-hit"
+          );
+          timer.mark("userPhotoFallback");
+
           await logScanRequest({
             requestId,
             userId: userId || null,
@@ -205,6 +326,8 @@ export const fetchProductByImageV2 = onCall(
             userId: userId || null,
             geminiResponse: "",
             product: cachedProduct,
+            localizedText: localized.text,
+            userPhotoFallbackUrl: cachedFallback,
           };
         }
       }
@@ -259,6 +382,9 @@ export const fetchProductByImageV2 = onCall(
         );
       timer.mark("analyze");
 
+      let localizedText: ProductText | null = null;
+      let userPhotoFallbackUrl: string | null = null;
+
       if (product && product.name) {
         // Image-flow products are always AI-identified.
         product.isAiIdentified = true;
@@ -291,6 +417,11 @@ export const fetchProductByImageV2 = onCall(
         product.lastAnalysisAttempt = Date.now();
         product.lastImageAttempt = Date.now();
 
+        // Translate before the cache write below so the translation lands in the
+        // same Algolia round-trip rather than costing a second write.
+        localizedText = (await ensureTranslation(product, resolvedLanguage)).text;
+        timer.mark("translate");
+
         logger.info("Image product processing complete", {
           productName: product.name,
           brand: product.brand,
@@ -314,6 +445,15 @@ export const fetchProductByImageV2 = onCall(
           }),
         ]);
         timer.mark("finalize");
+
+        // After the cache write, so the fallback cannot reach the shared record.
+        userPhotoFallbackUrl = await resolveUserPhotoFallback(
+          product,
+          userPhotoUrl,
+          requestId,
+          "full-analysis"
+        );
+        timer.mark("userPhotoFallback");
       } else {
         await logScanRequest({
           requestId,
@@ -339,6 +479,8 @@ export const fetchProductByImageV2 = onCall(
         userId: userId || null,
         geminiResponse: rawResponse,
         product,
+        localizedText,
+        userPhotoFallbackUrl,
       };
     } catch (error) {
       logger.error("Error processing product image", {

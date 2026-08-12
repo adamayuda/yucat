@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:yucat/l10n/app_localizations.dart';
+import 'package:yucat/features/product_detail/presentation/utils/verdict_headline.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/hatched_placeholder.dart';
@@ -41,7 +43,10 @@ class ProductRowCard extends StatelessWidget {
                 const SizedBox(height: DSDimens.sizeXxs),
                 _ScorePill(
                   score: product.scoreDisplay,
-                  rating: product.ratingText,
+                  rating: ratingLabelFor(
+                    product.ratingText,
+                    AppLocalizations.of(context),
+                  ),
                   color: product.ratingColor,
                 ),
               ],

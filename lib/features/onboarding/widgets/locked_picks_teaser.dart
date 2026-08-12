@@ -79,7 +79,9 @@ class _PickRow extends StatelessWidget {
     final (bg, fg) = _scoreColors(pick.product.ratingColor);
     final benefit =
         pick.why ??
-        (pick.product.pros.isNotEmpty ? pick.product.pros.first : null);
+        (pick.product.displayPros.isNotEmpty
+            ? pick.product.displayPros.first
+            : null);
 
     return ClipRect(
       child: ImageFiltered(

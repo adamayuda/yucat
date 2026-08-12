@@ -2022,4 +2022,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String onboardingResultProfileTitle(String name) {
     return '$name\'s profile';
   }
+
+  @override
+  String get ratingLabelExcellent => 'Excellent';
+
+  @override
+  String get ratingLabelGood => 'Good';
+
+  @override
+  String get ratingLabelAverage => 'Average';
+
+  @override
+  String get ratingLabelPoor => 'Poor';
 }

@@ -16,9 +16,20 @@ class ProductDisplayModel {
   final double fiber;
   final double carbs;
   final bool isAiIdentified;
+
+  /// Canonical **English** text. `cat_product_assessment.dart` keyword-scans
+  /// [pros]/[cons]/[name]/[brand] against English needles to build the per-cat
+  /// verdict, so these must stay English. Render the `display*` getters instead.
   final String format;
   final String packageSize;
   final String description;
+
+  /// Backend-translated copy for the current app language, when available.
+  final String? localizedFormat;
+  final String? localizedPackageSize;
+  final String? localizedDescription;
+  final List<String>? localizedPros;
+  final List<String>? localizedCons;
 
   /// True when no guaranteed analysis could be found for this product (score 0,
   /// all macros missing). Drives a neutral "no info yet" state instead of a
@@ -44,8 +55,23 @@ class ProductDisplayModel {
     this.format = '',
     this.packageSize = '',
     this.description = '',
+    this.localizedFormat,
+    this.localizedPackageSize,
+    this.localizedDescription,
+    this.localizedPros,
+    this.localizedCons,
     this.dataUnavailable = false,
   });
+
+  // --- Display accessors -------------------------------------------------
+  // Always render these, never the canonical fields: they fall back to English
+  // whenever a translation is absent.
+
+  String get displayFormat => localizedFormat ?? format;
+  String get displayPackageSize => localizedPackageSize ?? packageSize;
+  String get displayDescription => localizedDescription ?? description;
+  List<String> get displayPros => localizedPros ?? pros;
+  List<String> get displayCons => localizedCons ?? cons;
 
   String get scoreDisplay => '$score/$maxScore';
 
@@ -56,7 +82,10 @@ class ProductDisplayModel {
   /// Subtitle segment for the hero card: "Wet pâté · 85g pouch", or just one
   /// of them, or empty when neither is set.
   String? get formatLine {
-    final parts = [format, packageSize].where((s) => s.isNotEmpty).toList();
+    final parts = [
+      displayFormat,
+      displayPackageSize,
+    ].where((s) => s.isNotEmpty).toList();
     return parts.isEmpty ? null : parts.join(' · ');
   }
 }

@@ -10,19 +10,23 @@ class CatSummary {
   /// Raw age in months (as collected by the wizard). Null if unknown.
   final int? ageMonths;
 
-  /// Kitten / Adult / Senior, derived from age (months). Null if age unknown.
-  final String? lifeStage;
+  /// Raw profile values, exactly as the wizard stores them (`short_hair`,
+  /// `kidney_disease`, …). These are deliberately **not** display strings: the
+  /// summary is built in `CatCreateBloc`, which has no `BuildContext` and so no
+  /// `AppLocalizations`. Render them through `cat_labels.dart` at the widget
+  /// layer instead — they used to be pre-baked English here, which is why the
+  /// onboarding recap showed English in every locale.
   final String? gender;
-  final String? activityLabel;
-  final String? coatLabel;
-  final String? neuterLabel;
-  final String? bodyConditionLabel;
+  final String? activityLevel;
+  final String? coatType;
+  final String? neuteredStatus;
+  final String? weightCategory;
 
   /// Breed name, or null when unset / "Other" (mixed / unknown).
   final String? breed;
 
-  /// Friendly health-condition labels (excludes "None"). Empty when healthy.
-  final List<String> healthLabels;
+  /// Raw health-condition keys (excludes "none"). Empty when healthy.
+  final List<String> healthConditions;
 
   /// The canonical cat profile, used to drive the personalized narrative and
   /// dietary tips on the success screen (carries the raw values the rule engine
@@ -33,43 +37,17 @@ class CatSummary {
     required this.name,
     required this.entity,
     this.ageMonths,
-    this.lifeStage,
     this.gender,
-    this.activityLabel,
-    this.coatLabel,
-    this.neuterLabel,
-    this.bodyConditionLabel,
+    this.activityLevel,
+    this.coatType,
+    this.neuteredStatus,
+    this.weightCategory,
     this.breed,
-    this.healthLabels = const [],
+    this.healthConditions = const [],
   });
 
-  /// Age formatted as "2 yr 6 mo", with the life stage appended
-  /// ("2 yr 6 mo · Adult"). Null when the age is unknown.
-  String? get ageLabel {
-    final m = ageMonths;
-    if (m == null) return null;
-    final years = m ~/ 12;
-    final months = m % 12;
-    final String age;
-    if (years == 0) {
-      age = '$months mo';
-    } else if (months == 0) {
-      age = '$years ${years == 1 ? 'yr' : 'yrs'}';
-    } else {
-      age = '$years ${years == 1 ? 'yr' : 'yrs'} $months mo';
-    }
-    return lifeStage != null ? '$age · $lifeStage' : age;
-  }
-
   factory CatSummary.fromModel(CatCreateModel cat) {
-    String cap(String v) =>
-        v.isEmpty ? v : '${v[0].toUpperCase()}${v.substring(1)}';
-
-    String? lifeStage;
     final age = cat.age;
-    if (age != null) {
-      lifeStage = age < 12 ? 'Kitten' : (age < 120 ? 'Adult' : 'Senior');
-    }
 
     return CatSummary(
       name: cat.name,
@@ -90,52 +68,16 @@ class CatSummary {
         healthConditions: cat.healthConditions,
       ),
       ageMonths: age,
-      lifeStage: lifeStage,
-      gender: cat.gender != null ? cap(cat.gender!) : null,
-      activityLabel: cat.activityLevel != null
-          ? '${cap(cat.activityLevel!)} activity'
-          : null,
-      coatLabel: _coatLabels[cat.coatType],
-      neuterLabel: _neuterLabels[cat.neuteredStatus],
-      bodyConditionLabel: _bodyConditionLabels[cat.weightCategory],
+      gender: cat.gender,
+      activityLevel: cat.activityLevel,
+      coatType: cat.coatType,
+      neuteredStatus: cat.neuteredStatus,
+      weightCategory: cat.weightCategory,
       breed: (cat.breed != null && cat.breed != 'Other') ? cat.breed : null,
-      healthLabels: [
+      healthConditions: [
         for (final c in cat.healthConditions)
-          if (c != 'none' && _healthLabels[c] != null) _healthLabels[c]!,
+          if (c != 'none') c,
       ],
     );
   }
-
-  static const _coatLabels = {
-    'short_hair': 'Short hair',
-    'long_hair': 'Long hair',
-    'hairless': 'Hairless',
-  };
-
-  static const _neuterLabels = {
-    'neutered': 'Neutered',
-    'intact': 'Not neutered',
-    'pregnant': 'Pregnant',
-    'lactating': 'Lactating',
-  };
-
-  static const _bodyConditionLabels = {
-    'underweight': 'Underweight',
-    'normal': 'Ideal weight',
-    'overweight': 'Overweight',
-    'obese': 'Obese',
-  };
-
-  static const _healthLabels = {
-    'urinary_issues': 'Urinary issues',
-    'kidney_disease': 'Kidney disease',
-    'sensitive_stomach': 'Sensitive stomach',
-    'skin_allergies': 'Skin allergies',
-    'food_allergies': 'Food allergies',
-    'diabetes': 'Diabetes',
-    'dental_problems': 'Dental problems',
-    'hairball_issues': 'Hairball issues',
-    'heart_condition': 'Heart condition',
-    'joint_issues': 'Joint or mobility issues',
-  };
 }

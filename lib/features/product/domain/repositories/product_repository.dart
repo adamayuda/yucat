@@ -5,5 +5,6 @@ abstract class ProductRepository {
     required String imageBase64,
     required String mimeType,
     String? countryCode,
+    String? locale,
   });
 }

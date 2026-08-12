@@ -30,6 +30,11 @@ class ImageCapturedEvent extends HomeEvent {
   /// market. Null when the device exposes no region.
   final String? countryCode;
 
+  /// Resolved **app** language (ISO 639-1, e.g. "fr") — what the UI is actually
+  /// rendering in, which is not necessarily the device language. Forwarded so
+  /// the backend can return translated product copy. Null → English.
+  final String? locale;
+
   /// The router *controller* captured before the ScannerPage pops itself.
   /// We must not navigate via the page's BuildContext after the scan resolves
   /// — by then the ScannerPage is unmounted and any `context.router` lookup
@@ -42,10 +47,12 @@ class ImageCapturedEvent extends HomeEvent {
     required this.mimeType,
     required this.router,
     this.countryCode,
+    this.locale,
   });
 
   @override
-  List<Object?> get props => [imageBase64, mimeType, router, countryCode];
+  List<Object?> get props =>
+      [imageBase64, mimeType, router, countryCode, locale];
 }
 
 class PaywallDismissedEvent extends HomeEvent {

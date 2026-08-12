@@ -176,11 +176,16 @@ async function uploadToStorage(
 /**
  * Downloads, optimizes, and uploads an image from a URL to Firebase Storage.
  * Returns the public Firebase Storage URL.
+ *
+ * [folder] defaults to the shared `products/` catalog folder. Pass a different
+ * folder for images that must NOT be shared across users — notably the
+ * per-scan user-photo fallback, which lives under `scans/`.
  */
 export async function uploadImageToFirebaseStorage(
   imageUrl: string,
   barcode: string,
-  productName: string
+  productName: string,
+  folder: string = config.storage.productsFolder
 ): Promise<string> {
   logger.info("Downloading image from URL", {
     barcode,
@@ -196,7 +201,7 @@ export async function uploadImageToFirebaseStorage(
   );
 
   const contentType = `image/${format}`;
-  const fileName = `${config.storage.productsFolder}${barcode}.${format}`;
+  const fileName = `${folder}${barcode}.${format}`;
 
   const publicUrl = await uploadToStorage(
     optimizedImage,

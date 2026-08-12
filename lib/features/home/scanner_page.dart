@@ -122,6 +122,11 @@ class _ScannerPageState extends State<ScannerPage>
     // Localizations (the app locale, which is language-only here).
     final countryCode =
         WidgetsBinding.instance.platformDispatcher.locale.countryCode;
+    // App language (e.g. "fr") for translated product copy. Deliberately
+    // Localizations, not platformDispatcher: this is the locale the app
+    // actually resolved to, so an unsupported device language correctly asks
+    // for English rather than a language we don't ship.
+    final locale = Localizations.localeOf(context).languageCode;
     // Capture the router controller while still mounted — the scan resolves
     // after this page pops, so navigating via this page's context later would
     // throw. The controller persists past the pop.
@@ -130,6 +135,7 @@ class _ScannerPageState extends State<ScannerPage>
       mimeType: mimeType,
       router: router,
       countryCode: countryCode,
+      locale: locale,
     ));
     router.maybePop();
   }

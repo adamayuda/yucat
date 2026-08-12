@@ -15,6 +15,7 @@ class RemoteSearchDataSource {
     required String imageBase64,
     required String mimeType,
     String? countryCode,
+    String? locale,
   }) async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -33,6 +34,9 @@ class RemoteSearchDataSource {
         // to the user's market. Omitted when unknown.
         if (countryCode != null && countryCode.isNotEmpty)
           'countryCode': countryCode,
+        // App language (ISO 639-1). Drives the translated `localizedText` in
+        // the response. Omitted when unknown → English.
+        if (locale != null && locale.isNotEmpty) 'locale': locale,
       });
 
       final data = result.data;

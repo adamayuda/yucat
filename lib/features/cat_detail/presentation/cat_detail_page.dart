@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yucat/features/cat/presentation/utils/cat_labels.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
@@ -235,12 +236,12 @@ class _DetailsCard extends StatelessWidget {
       ),
       _TileSpec(
         l10n.catDetailAgeLabel,
-        cat.age != null ? _formatAge(cat.age!, l10n) : notSet,
+        cat.age != null ? catFormatAge(cat.age!, l10n) : notSet,
         iconAsset: 'Cake.svg',
       ),
       _TileSpec(
         l10n.catDetailGenderLabel,
-        cat.gender != null ? _formatGender(cat.gender!, l10n) : notSet,
+        cat.gender != null ? catFormatGender(cat.gender!, l10n) : notSet,
         icon: cat.gender?.toLowerCase() == 'male'
             ? Icons.male_rounded
             : cat.gender?.toLowerCase() == 'female'
@@ -249,27 +250,27 @@ class _DetailsCard extends StatelessWidget {
       ),
       _TileSpec(
         l10n.catDetailCoatLabel,
-        cat.coatType != null ? _formatCoatType(cat.coatType!, l10n) : notSet,
+        cat.coatType != null ? catFormatCoatType(cat.coatType!, l10n) : notSet,
         iconAsset: 'Coat.svg',
       ),
       _TileSpec(
         l10n.catDetailActivityLabel,
         cat.activityLevel != null
-            ? _formatActivityLevel(cat.activityLevel!, l10n)
+            ? catFormatActivityLevel(cat.activityLevel!, l10n)
             : notSet,
         iconAsset: 'Activity.svg',
       ),
       _TileSpec(
         l10n.catDetailBodyLabel,
         cat.weightCategory != null
-            ? _formatBodyCondition(cat.weightCategory!, l10n)
+            ? catFormatBodyCondition(cat.weightCategory!, l10n)
             : notSet,
         iconAsset: 'Body condition.svg',
       ),
       _TileSpec(
         l10n.catDetailStatusLabel,
         cat.neuteredStatus != null
-            ? _formatNeuteredStatus(cat.neuteredStatus!, l10n)
+            ? catFormatNeuteredStatus(cat.neuteredStatus!, l10n)
             : (cat.neutered ? l10n.catDetailStatusNeutered : l10n.neuteredIntact),
         iconAsset: 'Neuter status.svg',
       ),
@@ -308,77 +309,7 @@ class _DetailsCard extends StatelessWidget {
     );
   }
 
-  String _formatAge(int ageInMonths, AppLocalizations l10n) {
-    final years = ageInMonths ~/ 12;
-    final months = ageInMonths % 12;
-    if (years == 0) return '$months ${l10n.ageUnitMonth}';
-    final yearStr = '$years ${years == 1 ? l10n.ageUnitYear : l10n.catDetailAgeYears}';
-    if (months == 0) return yearStr;
-    return '$yearStr $months ${l10n.ageUnitMonth}';
-  }
-
-  String _formatGender(String gender, AppLocalizations l10n) {
-    return switch (gender.toLowerCase()) {
-      'male' => l10n.genderMale,
-      'female' => l10n.genderFemale,
-      _ => _formatSnakeCase(gender),
-    };
-  }
-
-  String _formatActivityLevel(String level, AppLocalizations l10n) {
-    return switch (level.toLowerCase()) {
-      'low' => l10n.activityLowLabel,
-      'moderate' => l10n.catDetailActivityModerate,
-      'medium' => l10n.activityMediumLabel,
-      'high' => l10n.activityHighLabel,
-      _ => _formatSnakeCase(level),
-    };
-  }
-
-  String _formatBodyCondition(String category, AppLocalizations l10n) {
-    return switch (category.toLowerCase()) {
-      'underweight' => l10n.bodyUnderweightLabel,
-      'normal' => l10n.catDetailBodyNormal,
-      'overweight' => l10n.bodyOverweightLabel,
-      'obese' => l10n.bodyObeseLabel,
-      _ => _formatSnakeCase(category),
-    };
-  }
-
-  String _formatNeuteredStatus(String status, AppLocalizations l10n) {
-    return switch (status.toLowerCase()) {
-      'neutered' => l10n.catDetailStatusNeutered,
-      'spayed' => l10n.catDetailStatusSpayed,
-      'intact' => l10n.neuteredIntact,
-      'pregnant' => l10n.neuteredPregnant,
-      'lactating' => l10n.neuteredLactating,
-      _ => _formatSnakeCase(status),
-    };
-  }
-
-  String _formatCoatType(String coatType, AppLocalizations l10n) {
-    return switch (coatType.toLowerCase()) {
-      'short' => l10n.coatShortHair,
-      'short_hair' => l10n.coatShortHair,
-      'medium' => l10n.catDetailCoatMedium,
-      'long' => l10n.coatLongHair,
-      'long_hair' => l10n.coatLongHair,
-      'hairless' => l10n.coatHairless,
-      _ => _formatSnakeCase(coatType),
-    };
-  }
-
-  String _formatSnakeCase(String text) {
-    return text
-        .split('_')
-        .map(
-          (word) => word.isEmpty
-              ? ''
-              : word[0].toUpperCase() + word.substring(1).toLowerCase(),
-        )
-        .join(' ');
-  }
-}
+            }
 
 class _ConditionsCard extends StatelessWidget {
   final List<String> conditions;
@@ -426,7 +357,7 @@ class _ConditionChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(DSRadii.pill),
       ),
       child: Text(
-        _localizeCondition(condition, l10n),
+        catFormatHealthCondition(condition, l10n),
         style: DSTextStyles.label.copyWith(
           color: DSColors.accentDanger,
           fontWeight: FontWeight.w600,
@@ -435,33 +366,7 @@ class _ConditionChip extends StatelessWidget {
     );
   }
 
-  String _localizeCondition(String condition, AppLocalizations l10n) {
-    return switch (condition.toLowerCase()) {
-      'urinary_issues' => l10n.healthUrinaryIssues,
-      'kidney_disease' => l10n.healthKidneyDisease,
-      'sensitive_stomach' => l10n.healthSensitiveStomach,
-      'skin_allergies' => l10n.healthSkinAllergies,
-      'food_allergies' => l10n.healthFoodAllergies,
-      'diabetes' => l10n.healthDiabetes,
-      'dental_problems' => l10n.healthDentalProblems,
-      'hairball_issues' => l10n.healthHairballIssues,
-      'heart_condition' => l10n.healthHeartCondition,
-      'joint_issues' => l10n.healthJointIssues,
-      _ => _formatSnakeCase(condition),
-    };
   }
-
-  String _formatSnakeCase(String text) {
-    return text
-        .split('_')
-        .map(
-          (word) => word.isEmpty
-              ? ''
-              : word[0].toUpperCase() + word.substring(1).toLowerCase(),
-        )
-        .join(' ');
-  }
-}
 
 class _DeleteLink extends StatelessWidget {
   final VoidCallback onTap;

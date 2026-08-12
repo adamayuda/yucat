@@ -2050,4 +2050,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String onboardingResultProfileTitle(String name) {
     return 'Perfil do $name';
   }
+
+  @override
+  String get ratingLabelExcellent => 'Excelente';
+
+  @override
+  String get ratingLabelGood => 'Bom';
+
+  @override
+  String get ratingLabelAverage => 'Razoável';
+
+  @override
+  String get ratingLabelPoor => 'Fraco';
 }

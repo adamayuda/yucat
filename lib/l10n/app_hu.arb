@@ -563,5 +563,9 @@
   "onboardingScanRetry": "Újra beolvasás",
   "onboardingScanPersonalCon": "{name} számára: {con}",
   "onboardingResultWhyTitle": "Miért nem ideális {name} számára",
-  "onboardingResultProfileTitle": "{name} profilja"
+  "onboardingResultProfileTitle": "{name} profilja",
+  "ratingLabelExcellent": "Kiváló",
+  "ratingLabelGood": "Jó",
+  "ratingLabelAverage": "Átlagos",
+  "ratingLabelPoor": "Gyenge"
 }

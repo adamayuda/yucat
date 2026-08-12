@@ -71,6 +71,16 @@ class ScanHistoryRepositoryImpl implements ScanHistoryRepository {
         'format': p.format,
         'packageSize': p.packageSize,
         'description': p.description,
+        // Translated copy, so a saved entry keeps rendering in the language it
+        // was fetched in rather than silently reverting to English.
+        'localizedFormat': p.localizedFormat,
+        'localizedPackageSize': p.localizedPackageSize,
+        'localizedDescription': p.localizedDescription,
+        'localizedPros': p.localizedPros,
+        'localizedCons': p.localizedCons,
+        // Pre-existing bug: this was never persisted, so a score-0 "no analysis"
+        // product rehydrated as a red "Poor" verdict computed from zero macros.
+        'dataUnavailable': p.dataUnavailable,
       };
 
   ProductDisplayModel _fromJson(Map<String, dynamic> j) => ProductDisplayModel(
@@ -92,6 +102,12 @@ class ScanHistoryRepositoryImpl implements ScanHistoryRepository {
         format: j['format'] as String? ?? '',
         packageSize: j['packageSize'] as String? ?? '',
         description: j['description'] as String? ?? '',
+        localizedFormat: j['localizedFormat'] as String?,
+        localizedPackageSize: j['localizedPackageSize'] as String?,
+        localizedDescription: j['localizedDescription'] as String?,
+        localizedPros: (j['localizedPros'] as List?)?.cast<String>(),
+        localizedCons: (j['localizedCons'] as List?)?.cast<String>(),
+        dataUnavailable: j['dataUnavailable'] == true,
       );
 
   ProductRatingColor _decodeRatingColor(dynamic value) {
