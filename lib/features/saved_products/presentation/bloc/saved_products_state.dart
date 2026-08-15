@@ -13,9 +13,15 @@ class SavedProductsLoadingState extends SavedProductsState {
 
 class SavedProductsLoadedState extends SavedProductsState {
   final List<ProductDisplayModel> products;
+  final List<LitterDisplayModel> litters;
 
-  const SavedProductsLoadedState({required this.products});
+  const SavedProductsLoadedState({
+    required this.products,
+    this.litters = const [],
+  });
+
+  bool get isEmpty => products.isEmpty && litters.isEmpty;
 
   @override
-  List<Object?> get props => [products];
+  List<Object?> get props => [products, litters];
 }

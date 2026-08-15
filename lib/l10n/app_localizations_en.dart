@@ -1303,7 +1303,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanHistoryEmptyTitle => 'No scans yet';
 
   @override
-  String get scanHistoryEmptyBody => 'Foods you scan will show up here.';
+  String get scanHistoryEmptyBody => 'Everything you scan shows up here.';
 
   @override
   String get commonTryAgain => 'Try again';
@@ -2034,4 +2034,193 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ratingLabelPoor => 'Poor';
+
+  @override
+  String get litterDetailScoreLabel => 'LITTER SCORE';
+
+  @override
+  String get litterDetailNoDataBody =>
+      'We couldn\'t find enough about this litter yet. Try scanning the back of the pack, or check back later — we keep looking.';
+
+  @override
+  String get litterDetailAttributesTitle => 'What\'s in the box';
+
+  @override
+  String get litterDetailAdditives => 'Additives';
+
+  @override
+  String get litterDetailNoCatPrompt =>
+      'Create a cat profile to see what this litter means for your cat.';
+
+  @override
+  String litterDetailNoFlags(String name) {
+    return 'Nothing here needs special attention for $name.';
+  }
+
+  @override
+  String get litterAttrClumping => 'Clumping';
+
+  @override
+  String get litterAttrNonClumping => 'Non-clumping';
+
+  @override
+  String get litterAttrDustLow => 'Low dust';
+
+  @override
+  String get litterAttrDustModerate => 'Some dust';
+
+  @override
+  String get litterAttrDustHigh => 'High dust';
+
+  @override
+  String get litterAttrUnscented => 'Unscented';
+
+  @override
+  String get litterAttrScented => 'Scented';
+
+  @override
+  String get litterAttrTrackingLow => 'Low tracking';
+
+  @override
+  String get litterAttrTrackingModerate => 'Some tracking';
+
+  @override
+  String get litterAttrTrackingHigh => 'High tracking';
+
+  @override
+  String get litterAttrOdorLow => 'Weak odour control';
+
+  @override
+  String get litterAttrOdorModerate => 'Moderate odour control';
+
+  @override
+  String get litterAttrOdorHigh => 'Strong odour control';
+
+  @override
+  String get litterAttrFlushable => 'Flushable';
+
+  @override
+  String get litterAttrBiodegradable => 'Biodegradable';
+
+  @override
+  String get litterMaterialClayBentonite => 'Bentonite clay';
+
+  @override
+  String get litterMaterialClayNonClumping => 'Non-clumping clay';
+
+  @override
+  String get litterMaterialSilicaCrystal => 'Silica crystals';
+
+  @override
+  String get litterMaterialCorn => 'Corn';
+
+  @override
+  String get litterMaterialWheat => 'Wheat';
+
+  @override
+  String get litterMaterialTofu => 'Tofu';
+
+  @override
+  String get litterMaterialPaper => 'Recycled paper';
+
+  @override
+  String get litterMaterialWood => 'Wood';
+
+  @override
+  String get litterMaterialWalnut => 'Walnut shell';
+
+  @override
+  String get litterMaterialGrass => 'Grass';
+
+  @override
+  String get litterMaterialMixed => 'Mixed substrate';
+
+  @override
+  String get litterMaterialOther => 'Other substrate';
+
+  @override
+  String litterFlagKittenClumpingClay(String name) {
+    return 'Clumping clay can form a blockage if $name swallows it while grooming. Vets usually suggest a non-clumping or plant-based litter until about 4 months.';
+  }
+
+  @override
+  String litterFlagKittenSilica(String name) {
+    return 'Kittens often taste their litter, and silica crystals are sharp and not meant to be swallowed. Something softer is safer for $name for now.';
+  }
+
+  @override
+  String litterFlagMonitoringClumping(String name) {
+    return 'Clumps make it easy to see how much $name is urinating — worth watching with their condition.';
+  }
+
+  @override
+  String litterFlagMonitoringNonClumping(String name) {
+    return 'Without clumps it\'s hard to notice changes in how much $name urinates, which matters with their condition.';
+  }
+
+  @override
+  String litterFlagSensitiveScented(String name) {
+    return 'Added fragrance can irritate sensitive skin and paws like $name\'s.';
+  }
+
+  @override
+  String litterFlagSensitiveDust(String name) {
+    return 'High dust settles on skin and paws and can irritate $name\'s airways.';
+  }
+
+  @override
+  String litterFlagPawComfortCoarse(String name) {
+    return 'Coarse crystals and pellets are hard underfoot for stiff joints. $name may prefer a fine, sand-like grain.';
+  }
+
+  @override
+  String litterFlagPawComfortFine(String name) {
+    return 'A fine, sand-like grain is gentle on $name\'s joints and easy to dig in.';
+  }
+
+  @override
+  String litterFlagLongCoatTracking(String name) {
+    return 'Litter that tracks easily gets caught in a long coat like $name\'s and travels through the house.';
+  }
+
+  @override
+  String get litterSectionTitle => 'Litters';
+
+  @override
+  String litterSectionCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count litters',
+      one: '1 litter',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get litterAdditiveBakingSoda => 'Baking soda';
+
+  @override
+  String get litterAdditiveActivatedCharcoal => 'Activated charcoal';
+
+  @override
+  String get litterAdditiveFragrance => 'Fragrance';
+
+  @override
+  String get litterAdditivePlantStarch => 'Plant starch';
+
+  @override
+  String get litterAdditiveZeolite => 'Zeolite';
+
+  @override
+  String get litterAdditiveSilica => 'Silica';
+
+  @override
+  String get litterAdditiveEssentialOils => 'Essential oils';
+
+  @override
+  String get litterAdditiveDeodorizer => 'Odour neutralizer';
+
+  @override
+  String get foodSectionTitle => 'Cat food';
 }

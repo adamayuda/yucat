@@ -32,6 +32,7 @@ import 'package:yucat/services/remote_config_service.dart';
 
 import 'config/routes/analytics_route_observer.dart';
 import 'config/routes/router.dart';
+import 'package:yucat/features/litter_detail/presentation/bloc/litter_detail_bloc.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -128,6 +129,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         BlocProvider(create: (context) => sl<HomeBloc>()),
         BlocProvider(create: (context) => sl<ProfileBloc>()),
         BlocProvider(create: (context) => sl<ProductDetailBloc>()),
+        BlocProvider(create: (context) => sl<LitterDetailBloc>()),
         BlocProvider(create: (context) => sl<SavedProductsBloc>()),
         BlocProvider(create: (context) => sl<ScanHistoryBloc>()),
         BlocProvider(create: (context) => sl<CatListingBloc>()),

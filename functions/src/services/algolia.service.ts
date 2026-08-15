@@ -1,6 +1,7 @@
 import * as logger from "firebase-functions/logger";
 import {config} from "../config";
 import {Product} from "../models/product";
+import {Litter} from "../models/litter";
 import {algoliasearch} from "algoliasearch";
 
 const algoliaClient = algoliasearch(
@@ -381,6 +382,165 @@ export async function fetchCandidatesByName(
     return hits as Product[];
   } catch (error) {
     logger.warn("Algolia candidate fetch failed", {
+      brand,
+      name,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return [];
+  }
+}
+
+// --- Cat litter ------------------------------------------------------------
+// Litter uses its own index (config.algolia.litterIndexName) but the exact same
+// matching helpers and thresholds as the food path, so behaviour stays in sync.
+
+/**
+ * Saves a litter to the Algolia cache. Failures are swallowed (warning logged).
+ */
+export async function cacheLitter(id: string, litter: Litter): Promise<void> {
+  if (!config.algolia.enabled) {
+    logger.info("Algolia cache disabled, skipping litter save", {
+      id,
+      litterName: litter.name,
+      structuredData: true,
+    });
+    return;
+  }
+
+  try {
+    await algoliaClient.saveObject({
+      indexName: config.algolia.litterIndexName,
+      body: {objectID: id, ...litter},
+    });
+
+    logger.info("Litter successfully saved to Algolia", {
+      objectID: id,
+      indexName: config.algolia.litterIndexName,
+      litterName: litter.name,
+      litterBrand: litter.brand,
+      structuredData: true,
+    });
+  } catch (error) {
+    logger.warn("Failed to save litter to Algolia", {
+      objectID: id,
+      indexName: config.algolia.litterIndexName,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+  }
+}
+
+/**
+ * Litter counterpart to {@link searchProductByNameV2} — same scoring, same
+ * threshold, same ambiguity guard (a near-tie returns null so the caller's LLM
+ * verifier disambiguates instead of us picking the first hit).
+ */
+export async function searchLitterByNameV2(
+  brand: string,
+  name: string
+): Promise<Litter | null> {
+  if (!config.algolia.enabled) {
+    return null;
+  }
+
+  try {
+    const queryTokens = tokenize(normalize(name));
+    const expectedBrand = normalize(brand);
+
+    const result = await algoliaClient.search({
+      requests: [{
+        indexName: config.algolia.litterIndexName,
+        query: name,
+        hitsPerPage: HITS_PER_PAGE_V2,
+        optionalFilters: brand ? [`brand:${brand}`] : undefined,
+      }],
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const hits = ((result.results[0] as any)?.hits || []) as any[];
+    if (hits.length === 0) {
+      logger.info("Algolia litter: no hits", {
+        brand, name, structuredData: true,
+      });
+      return null;
+    }
+
+    const scored = hits.map((hit) => {
+      const hitBrand = normalize(hit.brand || "");
+      const hitNameTokens = tokenize(normalize(hit.name || ""));
+      const brandMatch = hitBrand === expectedBrand ? 1 : 0;
+      const overlap = wordOverlap(queryTokens, hitNameTokens);
+      return {hit, score: 0.5 * brandMatch + 0.5 * overlap, brandMatch, overlap};
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+
+    logger.info("Algolia litter: ranked candidates", {
+      query: `${brand} ${name}`,
+      candidates: scored.map((s) => ({
+        name: s.hit.name,
+        brand: s.hit.brand,
+        score: s.score.toFixed(2),
+        brandMatch: s.brandMatch,
+      })),
+      structuredData: true,
+    });
+
+    const best = scored[0];
+    if (!best || best.score < NAME_MATCH_THRESHOLD || best.brandMatch === 0) {
+      return null;
+    }
+
+    const second = scored[1];
+    if (second && best.score - second.score < AMBIGUITY_MARGIN) {
+      logger.info("Algolia litter: ambiguous top match, deferring to verifier", {
+        topScore: best.score.toFixed(2),
+        runnerUpScore: second.score.toFixed(2),
+        structuredData: true,
+      });
+      return null;
+    }
+
+    return best.hit as Litter;
+  } catch (error) {
+    logger.warn("Algolia litter name search failed", {
+      brand,
+      name,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return null;
+  }
+}
+
+/**
+ * Litter counterpart to {@link fetchCandidatesByName} — the unfiltered
+ * candidate pool the LLM verifier picks from.
+ */
+export async function fetchLitterCandidatesByName(
+  brand: string,
+  name: string
+): Promise<Litter[]> {
+  if (!config.algolia.enabled) {
+    return [];
+  }
+
+  try {
+    const result = await algoliaClient.search({
+      requests: [{
+        indexName: config.algolia.litterIndexName,
+        query: name,
+        hitsPerPage: HITS_PER_PAGE_V2,
+        optionalFilters: brand ? [`brand:${brand}`] : undefined,
+      }],
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const hits = ((result.results[0] as any)?.hits || []) as any[];
+    return hits as Litter[];
+  } catch (error) {
+    logger.warn("Algolia litter candidate fetch failed", {
       brand,
       name,
       error: error instanceof Error ? error.message : String(error),

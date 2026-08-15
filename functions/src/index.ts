@@ -5,10 +5,13 @@ import * as admin from "firebase-admin";
 import {config} from "./config";
 import {CANONICAL_LANGUAGE, normalizeLanguage} from "./prompts/languages";
 import {
-  identifyProductFromImage,
+  LitterIdentification,
+  identifyScanSubject,
+  analyzeLitterImage,
   analyzeProductImage,
   analyzeProductImageParallel,
   findProductImageUrl,
+  verifyLitterMatchWithLLM,
   verifyMatchWithLLM,
   translateProductText,
   generateCatNarrative as buildCatNarrative,
@@ -17,8 +20,11 @@ import {
 import {CatNarrativeInput} from "./prompts/cat-narrative";
 import {BrandVerdictInput} from "./prompts/brand-verdict";
 import {
+  cacheLitter,
   cacheProduct,
   fetchCandidatesByName,
+  fetchLitterCandidatesByName,
+  searchLitterByNameV2,
   searchProductByNameV2,
 } from "./services/algolia.service";
 import {
@@ -27,8 +33,9 @@ import {
   uploadUserPhoto,
 } from "./utils/image-helpers";
 import {logScanRequest} from "./utils/scan-log";
-import {createTimer} from "./utils/timing";
+import {createTimer, Timer} from "./utils/timing";
 import {Product, ProductText} from "./models/product";
+import {Litter, LitterText} from "./models/litter";
 
 admin.initializeApp();
 
@@ -37,20 +44,40 @@ const VALID_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"]
 // Self-healing cache: a cached entry can be re-attempted at most once per window.
 const REANALYZE_AFTER_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
 
-// A genuinely analyzed product always scores > 0; the force-submit fallback
-// (no guaranteed analysis found) is the only path that yields score 0.
-const hasNutritionData = (p: Product): boolean => p.score > 0;
-const hasImage = (p: Product): boolean => !!p.imageUrl;
+/**
+ * The parts of a cached record the pipeline machinery (self-heal, translation,
+ * user-photo fallback) touches. Both `Product` and `Litter` satisfy it, which is
+ * what lets food and litter share one set of helpers instead of drifting apart.
+ */
+interface ScannedRecord {
+  brand: string;
+  name: string;
+  imageUrl: string;
+  score: number;
+  pros: string[];
+  cons: string[];
+  format?: string;
+  packageSize?: string;
+  description?: string;
+  lastAnalysisAttempt?: number;
+  lastImageAttempt?: number;
+  translations?: Record<string, ProductText>;
+}
+
+// A genuinely analyzed record always scores > 0; the force-submit fallback
+// (no data found) is the only path that yields score 0.
+const hasAnalysisData = (r: ScannedRecord): boolean => r.score > 0;
+const hasImage = (r: ScannedRecord): boolean => !!r.imageUrl;
 const isStale = (ts?: number): boolean =>
   !ts || Date.now() - ts > REANALYZE_AFTER_MS;
 
-/** The canonical (English) renderable text of a product record. */
-const canonicalText = (p: Product): ProductText => ({
-  format: p.format ?? "",
-  packageSize: p.packageSize ?? "",
-  description: p.description ?? "",
-  pros: p.pros ?? [],
-  cons: p.cons ?? [],
+/** The canonical (English) renderable text of a cached record. */
+const canonicalText = (r: ScannedRecord): ProductText => ({
+  format: r.format ?? "",
+  packageSize: r.packageSize ?? "",
+  description: r.description ?? "",
+  pros: r.pros ?? [],
+  cons: r.cons ?? [],
 });
 
 /**
@@ -66,7 +93,7 @@ const canonicalText = (p: Product): ProductText => ({
  * `{text: null}` and the client falls back to English.
  */
 async function ensureTranslation(
-  product: Product,
+  product: ScannedRecord,
   language: string | undefined
 ): Promise<{text: ProductText | null; added: boolean}> {
   if (!language || language === CANONICAL_LANGUAGE) {
@@ -110,7 +137,7 @@ async function ensureTranslation(
  * failed, or when hosting failed — the client then keeps its placeholder.
  */
 async function resolveUserPhotoFallback(
-  product: Product | null,
+  product: ScannedRecord | null,
   userPhotoUrl: string,
   requestId: string,
   path: string
@@ -128,6 +155,292 @@ async function resolveUserPhotoFallback(
     structuredData: true,
   });
   return hosted;
+}
+
+/** The response shape shared by every exit of the scan pipeline. */
+interface ScanResponse {
+  message: string;
+  userId: string | null;
+  geminiResponse: string;
+  /**
+   * What the scan turned out to be. Null when nothing was identified. Clients
+   * shipped before litter support ignore this and read `product` as before.
+   */
+  category: "food" | "litter" | null;
+  product: Product | null;
+  localizedText: ProductText | null;
+  litter: Litter | null;
+  litterLocalizedText: LitterText | null;
+  userPhotoFallbackUrl: string | null;
+}
+
+/**
+ * The litter half of the scan pipeline — the mirror of the food path below,
+ * with one meaningful simplification: analysis is a single web_search call
+ * rather than a source fan-out (see {@link analyzeLitterImage}).
+ *
+ * Everything else is deliberately identical: same cache-then-analyze order,
+ * same 14-day self-heal predicates, same lazy translation, same user-photo
+ * fallback ordering (always AFTER the cache write, so one user's photo can
+ * never become the shared catalog image).
+ */
+async function handleLitterScan(opts: {
+  image: string;
+  mimeType: string;
+  identification: LitterIdentification;
+  requestId: string;
+  userId: string | null;
+  userPhotoUrl: string;
+  countryCode?: string;
+  language?: string;
+  timer: Timer;
+}): Promise<ScanResponse> {
+  const {
+    image, mimeType, identification, requestId, userId, userPhotoUrl,
+    countryCode, language, timer,
+  } = opts;
+
+  const emptyFood = {product: null, localizedText: null};
+
+  // Step 2 — cache lookup, with the LLM verifier as the tie-breaker.
+  let cached = await searchLitterByNameV2(
+    identification.brand,
+    identification.name
+  );
+  timer.mark("cacheLookup");
+
+  if (!cached && config.algolia.useLLMVerification) {
+    const candidates = await fetchLitterCandidatesByName(
+      identification.brand,
+      identification.name
+    );
+    if (candidates.length > 0) {
+      cached = await verifyLitterMatchWithLLM(identification, candidates);
+    }
+    timer.mark("llmVerify");
+  }
+
+  // Set when a stale no-data entry is re-analyzed, so the row is overwritten in
+  // place rather than duplicated under a near-identical key.
+  let overwriteKey: string | undefined;
+
+  if (cached) {
+    const staleJunk =
+      !hasAnalysisData(cached) && isStale(cached.lastAnalysisAttempt);
+
+    if (staleJunk) {
+      overwriteKey = cached.id;
+      logger.info("Litter cache hit is a stale no-data entry — re-analyzing", {
+        brand: cached.brand,
+        name: cached.name,
+        structuredData: true,
+      });
+    } else {
+      if (
+        hasAnalysisData(cached) &&
+        !hasImage(cached) &&
+        isStale(cached.lastImageAttempt)
+      ) {
+        logger.info("Litter cache hit missing image — attempting backfill", {
+          brand: cached.brand,
+          name: cached.name,
+          structuredData: true,
+        });
+        const foundUrl = await findProductImageUrl(cached.brand, cached.name);
+        cached.imageUrl = await processProductImage(
+          foundUrl,
+          cached.id,
+          cached.name,
+          cached.brand
+        );
+        cached.lastImageAttempt = Date.now();
+        await cacheLitter(cached.id, cached);
+        timer.mark("imageBackfill");
+      }
+
+      const localized = await ensureTranslation(cached, language);
+      if (localized.added) {
+        await cacheLitter(cached.id, cached);
+      }
+      timer.mark("translate");
+
+      const cachedFallback = await resolveUserPhotoFallback(
+        cached,
+        userPhotoUrl,
+        requestId,
+        "litter-cache-hit"
+      );
+      timer.mark("userPhotoFallback");
+
+      await logScanRequest({
+        requestId,
+        userId,
+        userPhotoUrl,
+        identification: {...identification, category: "litter"},
+        cachedMatch: true,
+        product: cached,
+        timestamp: new Date(),
+      });
+      timer.mark("scanLog");
+
+      logger.info("scan timings", {
+        requestId,
+        path: "litter-cache-hit",
+        ...timer.summary(),
+        structuredData: true,
+      });
+
+      return {
+        message: "Litter found in cache",
+        userId,
+        geminiResponse: "",
+        category: "litter",
+        ...emptyFood,
+        litter: cached,
+        litterLocalizedText: localized.text,
+        userPhotoFallbackUrl: cachedFallback,
+      };
+    }
+  }
+
+  // Step 3 — full analysis. As on the food path, the SerpAPI image lookup runs
+  // concurrently so it stays off the critical path.
+  logger.info("No litter cache match, running full analysis", {
+    brand: identification.brand,
+    name: identification.name,
+    structuredData: true,
+  });
+
+  const provisionalKey =
+    overwriteKey ?? litterCacheKey(identification.brand, identification.name);
+  const serpApiHostedPromise = (async () => {
+    const url = await findProductImageUrl(
+      identification.brand,
+      identification.name
+    );
+    if (!url) return "";
+    return processProductImage(
+      url,
+      provisionalKey,
+      identification.name,
+      identification.brand
+    );
+  })().catch(() => "");
+
+  const {litter, rawResponse} = await analyzeLitterImage(
+    image,
+    mimeType,
+    identification,
+    countryCode
+  );
+  timer.mark("analyze");
+
+  if (!litter || !litter.name) {
+    await logScanRequest({
+      requestId,
+      userId,
+      userPhotoUrl,
+      identification: {...identification, category: "litter"},
+      cachedMatch: false,
+      product: null,
+      timestamp: new Date(),
+    });
+    timer.mark("finalize");
+
+    logger.info("scan timings", {
+      requestId,
+      path: "litter-analysis-failed",
+      ...timer.summary(),
+      structuredData: true,
+    });
+
+    return {
+      message: "Could not analyze the cat litter in the image",
+      userId,
+      geminiResponse: rawResponse,
+      category: "litter",
+      ...emptyFood,
+      litter: null,
+      litterLocalizedText: null,
+      userPhotoFallbackUrl: null,
+    };
+  }
+
+  litter.isAiIdentified = true;
+  const cacheKey =
+    overwriteKey ?? litterCacheKey(litter.brand, litter.name);
+  litter.id = cacheKey;
+
+  let hostedImage = await processProductImage(
+    litter.imageUrl,
+    cacheKey,
+    litter.name,
+    litter.brand
+  );
+  if (!hostedImage) {
+    hostedImage = await serpApiHostedPromise;
+  }
+  litter.imageUrl = hostedImage;
+  timer.mark("imageHost");
+
+  litter.lastAnalysisAttempt = Date.now();
+  litter.lastImageAttempt = Date.now();
+
+  // Translate before the cache write so the translation lands in the same
+  // Algolia round-trip rather than costing a second one.
+  const localizedText = (await ensureTranslation(litter, language)).text;
+  timer.mark("translate");
+
+  await Promise.all([
+    cacheLitter(cacheKey, litter),
+    logScanRequest({
+      requestId,
+      userId,
+      userPhotoUrl,
+      identification: {...identification, category: "litter"},
+      cachedMatch: false,
+      product: litter,
+      timestamp: new Date(),
+    }),
+  ]);
+  timer.mark("finalize");
+
+  // After the cache write, so the fallback cannot reach the shared record.
+  const userPhotoFallbackUrl = await resolveUserPhotoFallback(
+    litter,
+    userPhotoUrl,
+    requestId,
+    "litter-full-analysis"
+  );
+  timer.mark("userPhotoFallback");
+
+  logger.info("scan timings", {
+    requestId,
+    path: "litter-full-analysis",
+    ...timer.summary(),
+    structuredData: true,
+  });
+
+  return {
+    message: "Litter analyzed",
+    userId,
+    geminiResponse: rawResponse,
+    category: "litter",
+    ...emptyFood,
+    litter,
+    litterLocalizedText: localizedText,
+    userPhotoFallbackUrl,
+  };
+}
+
+/**
+ * Litter cache identity. Text-derived like the food key and with the same
+ * caveat: any drift in how Haiku transcribes the name creates a duplicate row,
+ * which is why the identify prompt insists on transcribing printed text only.
+ * The `lit-` prefix keeps the two key spaces visibly distinct in logs.
+ */
+function litterCacheKey(brand: string, name: string): string {
+  return `lit-${brand}-${name}`.toLowerCase().replace(/\s+/g, "-");
 }
 
 export const fetchProductByImageV2 = onCall(
@@ -174,14 +487,15 @@ export const fetchProductByImageV2 = onCall(
       // Background: upload the user's scan photo to Storage.
       const userPhotoPromise = uploadUserPhoto(image, resolvedMimeType, requestId);
 
-      // Step 1 — fast identification (Haiku vision, no web_search).
-      const identification = await identifyProductFromImage(image, resolvedMimeType);
+      // Step 1 — fast identification (Haiku vision, no web_search). Decides
+      // food vs litter vs neither; everything downstream branches on that.
+      const scanSubject = await identifyScanSubject(image, resolvedMimeType);
       timer.mark("identify");
 
       const userPhotoUrl = await userPhotoPromise;
       timer.mark("userPhotoUpload");
 
-      if (!identification) {
+      if (!scanSubject) {
         await logScanRequest({
           requestId,
           userId: userId || null,
@@ -201,14 +515,33 @@ export const fetchProductByImageV2 = onCall(
         });
 
         return {
-          message: "Could not identify a cat food product in the image",
+          message: "Could not identify a cat food or litter product in the image",
           userId: userId || null,
           geminiResponse: "",
+          category: null,
           product: null,
           localizedText: null,
+          litter: null,
+          litterLocalizedText: null,
           userPhotoFallbackUrl: null,
         };
       }
+
+      if (scanSubject.category === "litter") {
+        return await handleLitterScan({
+          image,
+          mimeType: resolvedMimeType,
+          identification: scanSubject.litter,
+          requestId,
+          userId: userId || null,
+          userPhotoUrl,
+          countryCode: resolvedCountry,
+          language: resolvedLanguage,
+          timer,
+        });
+      }
+
+      const identification = scanSubject.food;
 
       // Step 2 — Algolia cache lookup with V2 string matching.
       let cachedProduct = await searchProductByNameV2(
@@ -237,7 +570,7 @@ export const fetchProductByImageV2 = onCall(
 
       if (cachedProduct) {
         const staleJunk =
-          !hasNutritionData(cachedProduct) &&
+          !hasAnalysisData(cachedProduct) &&
           isStale(cachedProduct.lastAnalysisAttempt);
 
         if (staleJunk) {
@@ -252,7 +585,7 @@ export const fetchProductByImageV2 = onCall(
           // Image-only backfill: the entry has nutrition data but no image and
           // hasn't been attempted recently. Cheaper than a full re-analysis.
           if (
-            hasNutritionData(cachedProduct) &&
+            hasAnalysisData(cachedProduct) &&
             !hasImage(cachedProduct) &&
             isStale(cachedProduct.lastImageAttempt)
           ) {
@@ -325,8 +658,11 @@ export const fetchProductByImageV2 = onCall(
             message: "Product found in cache",
             userId: userId || null,
             geminiResponse: "",
+            category: "food" as const,
             product: cachedProduct,
             localizedText: localized.text,
+            litter: null,
+            litterLocalizedText: null,
             userPhotoFallbackUrl: cachedFallback,
           };
         }
@@ -478,8 +814,11 @@ export const fetchProductByImageV2 = onCall(
         message: "Image processed successfully",
         userId: userId || null,
         geminiResponse: rawResponse,
+        category: "food" as const,
         product,
         localizedText,
+        litter: null,
+        litterLocalizedText: null,
         userPhotoFallbackUrl,
       };
     } catch (error) {

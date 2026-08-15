@@ -13,9 +13,15 @@ class ScanHistoryLoadingState extends ScanHistoryState {
 
 class ScanHistoryLoadedState extends ScanHistoryState {
   final List<ProductDisplayModel> products;
+  final List<LitterDisplayModel> litters;
 
-  const ScanHistoryLoadedState({required this.products});
+  const ScanHistoryLoadedState({
+    required this.products,
+    this.litters = const [],
+  });
+
+  bool get isEmpty => products.isEmpty && litters.isEmpty;
 
   @override
-  List<Object?> get props => [products];
+  List<Object?> get props => [products, litters];
 }

@@ -20,6 +20,7 @@ import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/service_locator.dart';
+import 'package:yucat/features/litter_detail/presentation/models/litter_display_model.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
@@ -101,11 +102,19 @@ class _ProfilePage extends State<ProfilePage> {
       bloc: _bloc,
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) => switch (state) {
-        ProfileLoadedState(:final cats, :final savedProducts, :final scanHistory) =>
+        ProfileLoadedState(
+          :final cats,
+          :final savedProducts,
+          :final savedLitters,
+          :final scanHistory,
+          :final litterHistory,
+        ) =>
           _ProfileHub(
             cats: cats,
             savedProducts: savedProducts,
+            savedLitters: savedLitters,
             scanHistory: scanHistory,
+            litterHistory: litterHistory,
             onCatTap: _openCatDetail,
             onAddCat: _openCreateCat,
             onManageCats: _openManageCats,
@@ -140,7 +149,9 @@ class _ProfilePage extends State<ProfilePage> {
 class _ProfileHub extends StatelessWidget {
   final List<CatEntity> cats;
   final List<ProductDisplayModel> savedProducts;
+  final List<LitterDisplayModel> savedLitters;
   final List<ProductDisplayModel> scanHistory;
+  final List<LitterDisplayModel> litterHistory;
   final ValueChanged<CatEntity> onCatTap;
   final VoidCallback onAddCat;
   final VoidCallback onManageCats;
@@ -154,7 +165,9 @@ class _ProfileHub extends StatelessWidget {
   const _ProfileHub({
     required this.cats,
     required this.savedProducts,
+    required this.savedLitters,
     required this.scanHistory,
+    required this.litterHistory,
     required this.onCatTap,
     required this.onAddCat,
     required this.onManageCats,
@@ -197,20 +210,26 @@ class _ProfileHub extends StatelessWidget {
                   _LibraryRow(
                     icon: Icons.bookmark_outline_rounded,
                     label: l10n.profileSavedProductsLabel,
-                    count: savedProducts.length,
+                    count: savedProducts.length + savedLitters.length,
                     emptyLabel: l10n.profileSavedProductsEmpty,
                     countLabel: (n) => l10n.profileSavedProductsCount(n),
-                    previews: savedProducts,
+                    previews: [
+                      ...savedProducts.map((p) => p.imageUrl),
+                      ...savedLitters.map((l) => l.imageUrl),
+                    ],
                     onTap: onSavedProductsTap,
                   ),
                   const _MenuDivider(),
                   _LibraryRow(
                     icon: Icons.history_rounded,
                     label: l10n.profileScanHistoryLabel,
-                    count: scanHistory.length,
+                    count: scanHistory.length + litterHistory.length,
                     emptyLabel: l10n.profileScanHistoryEmpty,
                     countLabel: (n) => l10n.profileScanHistoryCount(n),
-                    previews: scanHistory,
+                    previews: [
+                      ...scanHistory.map((p) => p.imageUrl),
+                      ...litterHistory.map((l) => l.imageUrl),
+                    ],
                     onTap: onScanHistoryTap,
                   ),
                 ],
@@ -395,7 +414,9 @@ class _LibraryRow extends StatelessWidget {
   final int count;
   final String emptyLabel;
   final String Function(int) countLabel;
-  final List<ProductDisplayModel> previews;
+  /// Image URLs for the cover stack — plain strings so a row can mix
+  /// categories (saved products and saved litters share one row).
+  final List<String?> previews;
   final VoidCallback onTap;
 
   const _LibraryRow({
@@ -467,9 +488,9 @@ class _LibraryRow extends StatelessWidget {
   }
 }
 
-/// Up to three overlapping product covers, newest on the left.
+/// Up to three overlapping covers, newest on the left.
 class _CoverStack extends StatelessWidget {
-  final List<ProductDisplayModel> covers;
+  final List<String?> covers;
 
   const _CoverStack({required this.covers});
 
@@ -487,7 +508,7 @@ class _CoverStack extends StatelessWidget {
           for (var i = 0; i < n; i++)
             Positioned(
               left: i * _overlap,
-              child: _CoverThumb(product: covers[i], size: _size),
+              child: _CoverThumb(imageUrl: covers[i], size: _size),
             ),
         ],
       ),
@@ -496,14 +517,14 @@ class _CoverStack extends StatelessWidget {
 }
 
 class _CoverThumb extends StatelessWidget {
-  final ProductDisplayModel product;
+  final String? imageUrl;
   final double size;
 
-  const _CoverThumb({required this.product, required this.size});
+  const _CoverThumb({required this.imageUrl, required this.size});
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = product.imageUrl != null && product.imageUrl!.isNotEmpty;
+    final hasImage = imageUrl != null && imageUrl!.isNotEmpty;
     return Container(
       width: size,
       height: size,
@@ -517,7 +538,7 @@ class _CoverThumb extends StatelessWidget {
         borderRadius: BorderRadius.circular(DSRadii.sm - 2),
         child: hasImage
             ? Image.network(
-                product.imageUrl!,
+                imageUrl!,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => const HatchedPlaceholder(),
               )

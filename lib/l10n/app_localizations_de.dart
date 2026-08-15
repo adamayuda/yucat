@@ -1323,7 +1323,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get scanHistoryEmptyTitle => 'Noch keine Scans';
 
   @override
-  String get scanHistoryEmptyBody => 'Gescannte Futter erscheinen hier.';
+  String get scanHistoryEmptyBody => 'Alles, was du scannst, erscheint hier.';
 
   @override
   String get commonTryAgain => 'Erneut versuchen';
@@ -2062,4 +2062,193 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get ratingLabelPoor => 'Schwach';
+
+  @override
+  String get litterDetailScoreLabel => 'STREU-BEWERTUNG';
+
+  @override
+  String get litterDetailNoDataBody =>
+      'Wir haben noch nicht genug über diese Katzenstreu gefunden. Scanne die Rückseite der Packung oder schau später wieder vorbei – wir suchen weiter.';
+
+  @override
+  String get litterDetailAttributesTitle => 'Was drin ist';
+
+  @override
+  String get litterDetailAdditives => 'Zusätze';
+
+  @override
+  String get litterDetailNoCatPrompt =>
+      'Erstelle ein Katzenprofil, um zu sehen, was diese Streu für deine Katze bedeutet.';
+
+  @override
+  String litterDetailNoFlags(String name) {
+    return 'Für $name gibt es hier nichts Besonderes zu beachten.';
+  }
+
+  @override
+  String get litterAttrClumping => 'Klumpend';
+
+  @override
+  String get litterAttrNonClumping => 'Nicht klumpend';
+
+  @override
+  String get litterAttrDustLow => 'Staubarm';
+
+  @override
+  String get litterAttrDustModerate => 'Etwas Staub';
+
+  @override
+  String get litterAttrDustHigh => 'Sehr staubig';
+
+  @override
+  String get litterAttrUnscented => 'Unparfümiert';
+
+  @override
+  String get litterAttrScented => 'Parfümiert';
+
+  @override
+  String get litterAttrTrackingLow => 'Verstreut kaum';
+
+  @override
+  String get litterAttrTrackingModerate => 'Verstreut etwas';
+
+  @override
+  String get litterAttrTrackingHigh => 'Verstreut stark';
+
+  @override
+  String get litterAttrOdorLow => 'Schwache Geruchsbindung';
+
+  @override
+  String get litterAttrOdorModerate => 'Mittlere Geruchsbindung';
+
+  @override
+  String get litterAttrOdorHigh => 'Starke Geruchsbindung';
+
+  @override
+  String get litterAttrFlushable => 'Spülbar';
+
+  @override
+  String get litterAttrBiodegradable => 'Biologisch abbaubar';
+
+  @override
+  String get litterMaterialClayBentonite => 'Bentonit-Ton';
+
+  @override
+  String get litterMaterialClayNonClumping => 'Nicht klumpender Ton';
+
+  @override
+  String get litterMaterialSilicaCrystal => 'Silikatkristalle';
+
+  @override
+  String get litterMaterialCorn => 'Mais';
+
+  @override
+  String get litterMaterialWheat => 'Weizen';
+
+  @override
+  String get litterMaterialTofu => 'Tofu';
+
+  @override
+  String get litterMaterialPaper => 'Recyclingpapier';
+
+  @override
+  String get litterMaterialWood => 'Holz';
+
+  @override
+  String get litterMaterialWalnut => 'Walnussschalen';
+
+  @override
+  String get litterMaterialGrass => 'Gras';
+
+  @override
+  String get litterMaterialMixed => 'Mischsubstrat';
+
+  @override
+  String get litterMaterialOther => 'Anderes Substrat';
+
+  @override
+  String litterFlagKittenClumpingClay(String name) {
+    return 'Klumpende Tonstreu kann im Bauch verkleben, wenn $name sie bei der Fellpflege verschluckt. Tierärzte empfehlen bis etwa zum 4. Monat eine nicht klumpende oder pflanzliche Streu.';
+  }
+
+  @override
+  String litterFlagKittenSilica(String name) {
+    return 'Kitten probieren ihre Streu oft, und Silikatkristalle sind scharfkantig und nicht zum Verschlucken gedacht. Etwas Weicheres ist für $name vorerst sicherer.';
+  }
+
+  @override
+  String litterFlagMonitoringClumping(String name) {
+    return 'An den Klumpen lässt sich gut erkennen, wie viel $name uriniert – bei dieser Erkrankung ein wichtiger Hinweis.';
+  }
+
+  @override
+  String litterFlagMonitoringNonClumping(String name) {
+    return 'Ohne Klumpen fallen Veränderungen kaum auf, wie viel $name uriniert – bei dieser Erkrankung ist das wichtig.';
+  }
+
+  @override
+  String litterFlagSensitiveScented(String name) {
+    return 'Zugesetzte Duftstoffe können empfindliche Haut und Pfoten wie die von $name reizen.';
+  }
+
+  @override
+  String litterFlagSensitiveDust(String name) {
+    return 'Viel Staub legt sich auf Haut und Pfoten und kann die Atemwege von $name reizen.';
+  }
+
+  @override
+  String litterFlagPawComfortCoarse(String name) {
+    return 'Grobe Kristalle und Pellets sind für steife Gelenke unangenehm. $name bevorzugt vermutlich ein feines, sandartiges Granulat.';
+  }
+
+  @override
+  String litterFlagPawComfortFine(String name) {
+    return 'Ein feines, sandartiges Granulat ist schonend für die Gelenke von $name und lässt sich leicht scharren.';
+  }
+
+  @override
+  String litterFlagLongCoatTracking(String name) {
+    return 'Streu, die stark verstreut wird, verfängt sich in langem Fell wie dem von $name und wandert durch die ganze Wohnung.';
+  }
+
+  @override
+  String get litterSectionTitle => 'Katzenstreu';
+
+  @override
+  String litterSectionCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Streusorten',
+      one: '1 Streusorte',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get litterAdditiveBakingSoda => 'Natron';
+
+  @override
+  String get litterAdditiveActivatedCharcoal => 'Aktivkohle';
+
+  @override
+  String get litterAdditiveFragrance => 'Duftstoffe';
+
+  @override
+  String get litterAdditivePlantStarch => 'Pflanzenstärke';
+
+  @override
+  String get litterAdditiveZeolite => 'Zeolith';
+
+  @override
+  String get litterAdditiveSilica => 'Silikat';
+
+  @override
+  String get litterAdditiveEssentialOils => 'Ätherische Öle';
+
+  @override
+  String get litterAdditiveDeodorizer => 'Geruchsbinder';
+
+  @override
+  String get foodSectionTitle => 'Katzenfutter';
 }

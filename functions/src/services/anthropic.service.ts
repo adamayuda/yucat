@@ -3,7 +3,18 @@ import * as logger from "firebase-functions/logger";
 import {config} from "../config";
 import {RETRY_CONFIG} from "../constants";
 import {FoodType, Product, ProductModel, ProductText} from "../models/product";
+import {
+  LITTER_LEVELS,
+  LITTER_MATERIALS,
+  Litter,
+  LitterModel,
+  TRISTATES,
+} from "../models/litter";
 import {generateIdentificationPrompt} from "../prompts/identify-product";
+import {
+  generateLitterAnalysisSystemPrompt,
+  generateLitterAnalysisUserPrompt,
+} from "../prompts/analyze-litter";
 import {generateTranslationSystemPrompt, generateTranslationUserPrompt} from "../prompts/translate-product";
 import {languageName} from "../prompts/languages";
 import {
@@ -105,6 +116,20 @@ export interface ProductIdentification {
   foodType: FoodType;
 }
 
+export interface LitterIdentification {
+  brand: string;
+  name: string;
+}
+
+/**
+ * What the identify step decided the photo shows. The scan pipeline branches on
+ * `category`, so adding a third scannable category means adding a variant here
+ * and one more tool below — nothing else in the pipeline is category-aware.
+ */
+export type ScanIdentification =
+  | {category: "food"; food: ProductIdentification}
+  | {category: "litter"; litter: LitterIdentification};
+
 const FOOD_TYPE_ENUM: FoodType[] = [
   "wet", "dry", "treat", "topper", "supplement",
 ];
@@ -129,11 +154,119 @@ const IDENTIFICATION_TOOLS: Anthropic.Tool[] = [
     },
   },
   {
-    name: "not_cat_food",
+    name: "submit_litter_identification",
     description:
-      "Call this if the image is not a cat food product (dog food, " +
-      "human food, non-food items, or unrecognizable).",
+      "Submit the identified cat litter product. Call this when the image " +
+      "clearly shows cat litter (the substrate that goes in a litter box).",
+    input_schema: {
+      type: "object",
+      required: ["brand", "name"],
+      properties: {
+        brand: {type: "string", description: "Brand name from packaging"},
+        name: {
+          type: "string",
+          description: "Full product name including line and variant",
+        },
+      },
+    },
+  },
+  {
+    name: "not_cat_product",
+    description:
+      "Call this if the image is neither cat food nor cat litter (dog food, " +
+      "human food, other non-cat items, or unrecognizable).",
     input_schema: {type: "object", properties: {}},
+  },
+];
+
+const LITTER_ANALYSIS_TOOLS: Anthropic.Tool[] = [
+  {
+    name: "submit_litter",
+    description: "Submit the final cat litter analysis.",
+    input_schema: {
+      type: "object",
+      required: [
+        "name", "brand", "material", "clumping", "dustLevel", "scented",
+        "trackingLevel", "odorControl", "flushable", "biodegradable",
+        "additives", "format", "packageSize", "description", "imageUrl",
+        "score", "pros", "cons",
+      ],
+      properties: {
+        name: {type: "string"},
+        brand: {type: "string"},
+        material: {
+          type: "string",
+          enum: LITTER_MATERIALS,
+          description:
+            "Substrate. \"clay-bentonite\" for clumping sodium bentonite " +
+            "clay, \"clay-non-clumping\" for traditional absorbent clay, " +
+            "\"mixed\" for a genuine blend, \"other\" only when it is none " +
+            "of the listed substrates.",
+        },
+        clumping: {
+          type: "string",
+          enum: TRISTATES,
+          description: "Does it form scoopable clumps?",
+        },
+        dustLevel: {
+          type: "string",
+          enum: LITTER_LEVELS,
+          description:
+            "Airborne dust. \"low\" only when the product claims dust-free / " +
+            "low dust or the substrate is inherently low dust.",
+        },
+        scented: {
+          type: "string",
+          enum: TRISTATES,
+          description: "Does it contain added fragrance or perfume?",
+        },
+        trackingLevel: {type: "string", enum: LITTER_LEVELS},
+        odorControl: {
+          type: "string",
+          enum: LITTER_LEVELS,
+          description:
+            "How effectively it controls odour: low = weak, high = strong.",
+        },
+        flushable: {type: "string", enum: TRISTATES},
+        biodegradable: {type: "string", enum: TRISTATES},
+        additives: {
+          type: "array",
+          items: {type: "string"},
+          description:
+            "Functional additives named on the label, e.g. \"Baking soda\", " +
+            "\"Activated charcoal\", \"Fragrance\". Empty array if none.",
+        },
+        format: {
+          type: "string",
+          description:
+            "Short display-friendly format, e.g. \"Clumping bentonite clay\", " +
+            "\"Silica crystals\", \"Tofu pellets\". Title case, max 28 chars.",
+        },
+        packageSize: {
+          type: "string",
+          description:
+            "Pack size as printed, e.g. \"10 L bag\", \"12.7 kg box\". " +
+            "Empty string if not visible.",
+        },
+        description: {
+          type: "string",
+          description:
+            "2-3 sentence factual summary of what the litter is made of and " +
+            "how it behaves in the box. No marketing language.",
+        },
+        imageUrl: {type: "string"},
+        score: {
+          type: "number",
+          minimum: 0,
+          maximum: 100,
+          description:
+            "0 is the \"no data found\" sentinel, NOT a bad grade. Any litter " +
+            "you could characterize scores at least 1.",
+        },
+        pros: {type: "array", items: {type: "string"}, maxItems: 3},
+        cons: {type: "array", items: {type: "string"}, maxItems: 3},
+      },
+    },
   },
 ];
 
@@ -206,14 +339,19 @@ function findToolUse(content: any[], name: string): any | undefined {
  * Step 1 — Quick identification from the photo. No web search.
  * Returns null if the image is not a cat food product.
  */
-export async function identifyProductFromImage(
+/**
+ * Step 1 — fast classification + transcription. Decides whether the photo shows
+ * cat food, cat litter, or neither, and reads the brand/name off the packaging.
+ * No web search: this step must stay cheap because every scan pays for it.
+ */
+export async function identifyScanSubject(
   imageBase64: string,
   mimeType: string
-): Promise<ProductIdentification | null> {
+): Promise<ScanIdentification | null> {
   const mediaType = normalizeMediaType(mimeType);
   const prompt = generateIdentificationPrompt();
 
-  const response = await withRetry("identifyProductFromImage", () =>
+  const response = await withRetry("identifyScanSubject", () =>
     getClient().messages.create({
       model: config.anthropic.model,
       max_tokens: 256,
@@ -239,17 +377,33 @@ export async function identifyProductFromImage(
   if (submit) {
     const input = submit.input as ProductIdentification;
     logger.info("Product identified", {
+      category: "food",
       brand: input.brand,
       name: input.name,
       foodType: input.foodType,
       structuredData: true,
     });
-    return input;
+    return {category: "food", food: input};
   }
 
-  const notCatFood = findToolUse(response.content, "not_cat_food");
-  if (notCatFood) {
-    logger.info("Image classified as non-cat-food", {structuredData: true});
+  const submitLitter = findToolUse(
+    response.content,
+    "submit_litter_identification"
+  );
+  if (submitLitter) {
+    const input = submitLitter.input as LitterIdentification;
+    logger.info("Product identified", {
+      category: "litter",
+      brand: input.brand,
+      name: input.name,
+      structuredData: true,
+    });
+    return {category: "litter", litter: input};
+  }
+
+  const notCatProduct = findToolUse(response.content, "not_cat_product");
+  if (notCatProduct) {
+    logger.info("Image classified as non-cat-product", {structuredData: true});
     return null;
   }
 
@@ -878,6 +1032,196 @@ const NARRATIVE_TOOLS: Anthropic.Tool[] = [
   },
 ];
 
+/**
+ * Full litter analysis — one Haiku call with web_search, mirroring the shape of
+ * {@link analyzeOneSource} (pause_turn resume loop, country biasing, forced
+ * submit fallback) but deliberately NOT fanned out across sources.
+ *
+ * Litter attributes are a handful of qualitative facts printed on the pack and
+ * repeated identically by every retailer, unlike a guaranteed analysis that one
+ * source has and another doesn't. Parallel sources would triple the cost to
+ * re-read the same claims, so a single free-search call at `maxWebSearches` is
+ * the right trade here. Revisit if attribute coverage turns out to be thin.
+ *
+ * Returns `{litter: null}` only when the model produced no structured answer at
+ * all; a litter it could not characterize comes back with score 0 and every
+ * attribute "unknown".
+ */
+export async function analyzeLitterImage(
+  imageBase64: string,
+  mimeType: string,
+  identification?: LitterIdentification,
+  countryCode?: string
+): Promise<{litter: Litter | null; rawResponse: string}> {
+  // Mutable: web_search accepts only an allowlist of country codes, so an
+  // unsupported region degrades to no biasing rather than failing the scan.
+  let country = countryCode?.trim().toUpperCase() || undefined;
+  const mediaType = normalizeMediaType(mimeType);
+
+  const systemBlocks = [
+    {
+      type: "text" as const,
+      text: generateLitterAnalysisSystemPrompt(),
+      cache_control: {type: "ephemeral" as const},
+    },
+  ];
+
+  const userContent: Anthropic.MessageParam["content"] = [
+    {
+      type: "image",
+      source: {type: "base64", media_type: mediaType, data: imageBase64},
+    },
+    {type: "text", text: generateLitterAnalysisUserPrompt(identification)},
+  ];
+
+  const messages: Anthropic.MessageParam[] = [
+    {role: "user", content: userContent},
+  ];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let accumulated: any[] = [];
+  let lastStopReason: string | null | undefined;
+  const roundTripMs: number[] = [];
+  let inputTokens = 0;
+  let outputTokens = 0;
+
+  const createParams = () => ({
+    model: config.anthropic.model,
+    max_tokens: 8192,
+    temperature: config.anthropic.temperature,
+    system: systemBlocks,
+    messages,
+    tools: [
+      {
+        type: "web_search_20250305",
+        name: "web_search",
+        max_uses: config.anthropic.maxWebSearches,
+        ...(country ?
+          {user_location: {type: "approximate", country}} :
+          {}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
+      ...LITTER_ANALYSIS_TOOLS,
+    ],
+    tool_choice: {type: "auto" as const},
+  });
+
+  const isUnsupportedCountryError = (err: unknown): boolean =>
+    /country code/i.test(err instanceof Error ? err.message : String(err));
+
+  for (let i = 0; i <= MAX_CONTINUATIONS; i++) {
+    const roundStart = Date.now();
+    let response;
+    try {
+      response = await withRetry("analyzeLitterImage", () =>
+        getClient().messages.create(createParams())
+      );
+    } catch (err) {
+      if (country && isUnsupportedCountryError(err)) {
+        logger.warn("web_search rejected country; retrying without biasing", {
+          label: "litter",
+          country,
+          structuredData: true,
+        });
+        country = undefined;
+        response = await withRetry("analyzeLitterImage", () =>
+          getClient().messages.create(createParams())
+        );
+      } else {
+        throw err;
+      }
+    }
+    roundTripMs.push(Date.now() - roundStart);
+    inputTokens += response.usage?.input_tokens ?? 0;
+    outputTokens += response.usage?.output_tokens ?? 0;
+    accumulated = accumulated.concat(response.content);
+    lastStopReason = response.stop_reason;
+
+    // "pause_turn" predates the pinned SDK's StopReason union — compare as string.
+    if ((response.stop_reason as string) === "pause_turn") {
+      messages.push({role: "assistant", content: response.content});
+      continue;
+    }
+    break;
+  }
+
+  logger.info("analyzeLitterImage web_search timing", {
+    country: country ?? "none",
+    roundTrips: roundTripMs.length,
+    roundTripMs,
+    webSearchMs: roundTripMs.reduce((a, b) => a + b, 0),
+    webSearchCount: accumulated.filter(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (b: any) => b?.type === "server_tool_use" && b?.name === "web_search"
+    ).length,
+    inputTokens,
+    outputTokens,
+    structuredData: true,
+  });
+
+  let submit = findToolUse(accumulated, "submit_litter");
+
+  // Same fallback rationale as the food path: the search turn sometimes ends
+  // with the answer written as free text and no tool call. Feed that research
+  // back in and force the tool rather than throwing the searches away.
+  if (!submit) {
+    logger.warn("analyzeLitterImage: no submit_litter, forcing submit", {
+      stopReason: lastStopReason,
+      structuredData: true,
+    });
+
+    const priorText = accumulated
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .filter((b: any) => b?.type === "text" && typeof b.text === "string")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((b: any) => b.text as string)
+      .join("\n")
+      .trim();
+
+    const fallbackMessages: Anthropic.MessageParam[] = priorText ?
+      [
+        {role: "user", content: userContent},
+        {
+          role: "user",
+          content:
+            "Here is the research you already gathered for this litter:\n\n" +
+            priorText +
+            "\n\nNow call the submit_litter tool with the final structured " +
+            "answer using this data. Leave attributes \"unknown\" and score 0 " +
+            "if nothing was established — do not invent values.",
+        },
+      ] :
+      [{role: "user", content: userContent}];
+
+    const fallback = await withRetry("analyzeLitterImage:forceSubmit", () =>
+      getClient().messages.create({
+        model: config.anthropic.model,
+        max_tokens: 4096,
+        temperature: config.anthropic.temperature,
+        system: systemBlocks,
+        messages: fallbackMessages,
+        tools: LITTER_ANALYSIS_TOOLS,
+        tool_choice: {type: "tool", name: "submit_litter"},
+      })
+    );
+
+    submit = findToolUse(fallback.content, "submit_litter");
+    if (!submit) {
+      logger.warn("analyzeLitterImage fallback returned no submit_litter", {
+        stopReason: fallback.stop_reason,
+        structuredData: true,
+      });
+      return {litter: null, rawResponse: JSON.stringify(fallback.content)};
+    }
+  }
+
+  const litter = LitterModel.fromObject({
+    ...submit.input,
+    id: "",
+  } as Partial<Litter>).toObject();
+
+  return {litter, rawResponse: JSON.stringify(submit.input)};
+}
+
 export interface CatNarrativeResult {
   narrative: string;
   outlook: string | null;
@@ -1372,6 +1716,97 @@ export async function verifyMatchWithLLM(
     return winner;
   } catch (error) {
     logger.warn("LLM verifier failed - skipping verification", {
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return null;
+  }
+}
+
+/**
+ * Litter counterpart to {@link verifyMatchWithLLM}. Kept separate rather than
+ * generalized because the sameness criteria differ: for litter, scented vs
+ * unscented and clumping vs non-clumping are DIFFERENT products even within one
+ * line, while pack size is still irrelevant.
+ *
+ * Returns the matched candidate, or null if Haiku says "none of these".
+ */
+export async function verifyLitterMatchWithLLM(
+  expected: LitterIdentification,
+  candidates: Litter[]
+): Promise<Litter | null> {
+  if (candidates.length === 0) return null;
+
+  const candidateLines = candidates
+    .map((c, i) => `${i}. brand="${c.brand}" name="${c.name}"`)
+    .join("\n");
+
+  const prompt =
+    "A user scanned a cat litter identified as:\n" +
+    `  brand="${expected.brand}" name="${expected.name}"\n\n` +
+    "Here are the closest cached candidates:\n" +
+    `${candidateLines}\n\n` +
+    "Pick the index of the candidate that is the SAME product (same brand, " +
+    "same line and variant). If none is the same product, pass -1. " +
+    "Differences in pack size or weight are fine. Differences in scent " +
+    "(scented vs unscented vs a named fragrance), in clumping behaviour, or " +
+    "in substrate are NOT the same product — only pick a variant if the " +
+    "scanned name names that same variant.";
+
+  const tools: Anthropic.Tool[] = [
+    {
+      name: "submit_match",
+      description:
+        "Report which candidate (if any) is the same litter as the scan",
+      input_schema: {
+        type: "object",
+        required: ["matchIndex"],
+        properties: {
+          matchIndex: {
+            type: "integer",
+            minimum: -1,
+            maximum: candidates.length - 1,
+            description: "0-based index of the matching candidate, or -1 for none",
+          },
+        },
+      },
+    },
+  ];
+
+  try {
+    const response = await withRetry("verifyLitterMatchWithLLM", () =>
+      getClient().messages.create({
+        model: config.anthropic.model,
+        max_tokens: 128,
+        temperature: 0,
+        messages: [{role: "user", content: [{type: "text", text: prompt}]}],
+        tools,
+        tool_choice: {type: "any"},
+      })
+    );
+
+    const submit = findToolUse(response.content, "submit_match");
+    const idx = submit?.input?.matchIndex;
+    if (typeof idx !== "number" || idx < 0 || idx >= candidates.length) {
+      logger.info("LLM verifier rejected all litter candidates", {
+        expectedBrand: expected.brand,
+        expectedName: expected.name,
+        candidateCount: candidates.length,
+        structuredData: true,
+      });
+      return null;
+    }
+
+    const winner = candidates[idx];
+    logger.info("LLM verifier selected litter candidate", {
+      expectedBrand: expected.brand,
+      expectedName: expected.name,
+      matchedName: winner.name,
+      structuredData: true,
+    });
+    return winner;
+  } catch (error) {
+    logger.warn("LLM litter match verification failed", {
       error: error instanceof Error ? error.message : String(error),
       structuredData: true,
     });

@@ -372,7 +372,7 @@
   "scanHistoryTitle": "Scan-Verlauf",
   "scanHistoryScanCount": "{count, plural, =1{1 Scan} other{{count} Scans}}",
   "scanHistoryEmptyTitle": "Noch keine Scans",
-  "scanHistoryEmptyBody": "Gescannte Futter erscheinen hier.",
+  "scanHistoryEmptyBody": "Alles, was du scannst, erscheint hier.",
   "commonTryAgain": "Erneut versuchen",
   "searchTabTitle": "Suchen",
   "searchHint": "Suche nach einem Katzenfutter",
@@ -567,5 +567,135 @@
   "ratingLabelExcellent": "Ausgezeichnet",
   "ratingLabelGood": "Gut",
   "ratingLabelAverage": "Mittelmäßig",
-  "ratingLabelPoor": "Schwach"
+  "ratingLabelPoor": "Schwach",
+  "litterDetailScoreLabel": "STREU-BEWERTUNG",
+  "litterDetailNoDataBody": "Wir haben noch nicht genug über diese Katzenstreu gefunden. Scanne die Rückseite der Packung oder schau später wieder vorbei – wir suchen weiter.",
+  "litterDetailAttributesTitle": "Was drin ist",
+  "litterDetailAdditives": "Zusätze",
+  "litterDetailNoCatPrompt": "Erstelle ein Katzenprofil, um zu sehen, was diese Streu für deine Katze bedeutet.",
+  "litterDetailNoFlags": "Für {name} gibt es hier nichts Besonderes zu beachten.",
+  "@litterDetailNoFlags": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterAttrClumping": "Klumpend",
+  "litterAttrNonClumping": "Nicht klumpend",
+  "litterAttrDustLow": "Staubarm",
+  "litterAttrDustModerate": "Etwas Staub",
+  "litterAttrDustHigh": "Sehr staubig",
+  "litterAttrUnscented": "Unparfümiert",
+  "litterAttrScented": "Parfümiert",
+  "litterAttrTrackingLow": "Verstreut kaum",
+  "litterAttrTrackingModerate": "Verstreut etwas",
+  "litterAttrTrackingHigh": "Verstreut stark",
+  "litterAttrOdorLow": "Schwache Geruchsbindung",
+  "litterAttrOdorModerate": "Mittlere Geruchsbindung",
+  "litterAttrOdorHigh": "Starke Geruchsbindung",
+  "litterAttrFlushable": "Spülbar",
+  "litterAttrBiodegradable": "Biologisch abbaubar",
+  "litterMaterialClayBentonite": "Bentonit-Ton",
+  "litterMaterialClayNonClumping": "Nicht klumpender Ton",
+  "litterMaterialSilicaCrystal": "Silikatkristalle",
+  "litterMaterialCorn": "Mais",
+  "litterMaterialWheat": "Weizen",
+  "litterMaterialTofu": "Tofu",
+  "litterMaterialPaper": "Recyclingpapier",
+  "litterMaterialWood": "Holz",
+  "litterMaterialWalnut": "Walnussschalen",
+  "litterMaterialGrass": "Gras",
+  "litterMaterialMixed": "Mischsubstrat",
+  "litterMaterialOther": "Anderes Substrat",
+  "litterFlagKittenClumpingClay": "Klumpende Tonstreu kann im Bauch verkleben, wenn {name} sie bei der Fellpflege verschluckt. Tierärzte empfehlen bis etwa zum 4. Monat eine nicht klumpende oder pflanzliche Streu.",
+  "@litterFlagKittenClumpingClay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagKittenSilica": "Kitten probieren ihre Streu oft, und Silikatkristalle sind scharfkantig und nicht zum Verschlucken gedacht. Etwas Weicheres ist für {name} vorerst sicherer.",
+  "@litterFlagKittenSilica": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagMonitoringClumping": "An den Klumpen lässt sich gut erkennen, wie viel {name} uriniert – bei dieser Erkrankung ein wichtiger Hinweis.",
+  "@litterFlagMonitoringClumping": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagMonitoringNonClumping": "Ohne Klumpen fallen Veränderungen kaum auf, wie viel {name} uriniert – bei dieser Erkrankung ist das wichtig.",
+  "@litterFlagMonitoringNonClumping": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagSensitiveScented": "Zugesetzte Duftstoffe können empfindliche Haut und Pfoten wie die von {name} reizen.",
+  "@litterFlagSensitiveScented": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagSensitiveDust": "Viel Staub legt sich auf Haut und Pfoten und kann die Atemwege von {name} reizen.",
+  "@litterFlagSensitiveDust": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagPawComfortCoarse": "Grobe Kristalle und Pellets sind für steife Gelenke unangenehm. {name} bevorzugt vermutlich ein feines, sandartiges Granulat.",
+  "@litterFlagPawComfortCoarse": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagPawComfortFine": "Ein feines, sandartiges Granulat ist schonend für die Gelenke von {name} und lässt sich leicht scharren.",
+  "@litterFlagPawComfortFine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagLongCoatTracking": "Streu, die stark verstreut wird, verfängt sich in langem Fell wie dem von {name} und wandert durch die ganze Wohnung.",
+  "@litterFlagLongCoatTracking": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterSectionTitle": "Katzenstreu",
+  "litterSectionCount": "{count, plural, =1{1 Streusorte} other{{count} Streusorten}}",
+  "@litterSectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "litterAdditiveBakingSoda": "Natron",
+  "litterAdditiveActivatedCharcoal": "Aktivkohle",
+  "litterAdditiveFragrance": "Duftstoffe",
+  "litterAdditivePlantStarch": "Pflanzenstärke",
+  "litterAdditiveZeolite": "Zeolith",
+  "litterAdditiveSilica": "Silikat",
+  "litterAdditiveEssentialOils": "Ätherische Öle",
+  "litterAdditiveDeodorizer": "Geruchsbinder",
+  "foodSectionTitle": "Katzenfutter"
 }

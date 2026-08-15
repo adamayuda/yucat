@@ -1,7 +1,10 @@
-import 'package:yucat/features/product/domain/entities/product_entity.dart';
+import 'package:yucat/features/product/domain/entities/scan_result_entity.dart';
 
 abstract class ProductRepository {
-  Future<ProductEntity?> fetchProductByImage({
+  /// Scans a package photo. Returns a [ScanFoodResult] or a [ScanLitterResult]
+  /// depending on what the backend recognized, or null when it recognized
+  /// neither.
+  Future<ScanResultEntity?> fetchProductByImage({
     required String imageBase64,
     required String mimeType,
     String? countryCode,

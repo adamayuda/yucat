@@ -11,7 +11,8 @@ This is the source of truth for `functions/`. The root `CLAUDE.md` carries a sum
 
 A TypeScript / Node 22 Firebase Functions codebase, co-located with the Flutter app
 (single repo, single deploy). It backs three things: **product image scanning** (the core
-feature) and two **onboarding LLM calls** (a personalized cat note and a brand critique).
+feature — cat food *and* cat litter, through one callable) and two **onboarding LLM calls**
+(a personalized cat note and a brand critique).
 
 Everything model-facing runs on **Claude Haiku 4.5** (`claude-haiku-4-5-20251001`) with
 forced tool-use for structured output, plus the `web_search_20250305` server-side tool on
@@ -32,9 +33,9 @@ minInstances or concurrency is set anywhere** — everything runs on defaults (u
 
 | Function | Timeout | Secrets | Purpose |
 |---|---|---|---|
-| `fetchProductByImageV2` (`index.ts:41`) | 300s | `ANTHROPIC_API_KEY`, `ALGOLIA_API_KEY`, `SERPAPI_API_KEY` | The scan pipeline (§3) |
-| `generateCatNarrative` (`index.ts:364`) | 60s | `ANTHROPIC_API_KEY` | Onboarding personalized note |
-| `analyzeBrand` (`index.ts:406`) | 60s | `ANTHROPIC_API_KEY` | Onboarding brand critique |
+| `fetchProductByImageV2` | 300s | `ANTHROPIC_API_KEY`, `ALGOLIA_API_KEY`, `SERPAPI_API_KEY` | The scan pipeline — food (§3) and cat litter (§3b) |
+| `generateCatNarrative` (`index.ts:845`) | 60s | `ANTHROPIC_API_KEY` | Onboarding personalized note |
+| `analyzeBrand` (`index.ts:887`) | 60s | `ANTHROPIC_API_KEY` | Onboarding brand critique |
 
 **None of them inspects `request.auth`** — the Flutter client checks
 `FirebaseAuth.currentUser` itself before calling. See §13.
@@ -55,8 +56,12 @@ in:  {image: string /* base64, required */, mimeType?: string,
       userId?: string, countryCode?: string /* ISO 3166-1 alpha-2 */,
       locale?: string /* app language, e.g. "fr" — see prompts/languages.ts */}
 out: {message: string, userId: string | null,
-      geminiResponse: string, product: Product | null,
+      geminiResponse: string,
+      category: "food" | "litter" | null,   // what the photo turned out to be
+      product: Product | null,              // food scans only
       localizedText: ProductText | null,
+      litter: Litter | null,                // litter scans only (§3b)
+      litterLocalizedText: LitterText | null,
       userPhotoFallbackUrl: string | null}
 
 // generateCatNarrative — in: CatNarrativeInput (requires `name`)
@@ -100,11 +105,13 @@ line, so use them when reading logs.
 
 1. `uploadUserPhoto(...)` — **started but not awaited**, uploads the scan to
    `scans/{requestId}.{ext}`.
-2. `identifyProductFromImage(image, mime)` → `{brand, name, foodType} | null` — Haiku
-   vision, no web search. *(`identify`)*
+2. `identifyScanSubject(image, mime)` → `ScanIdentification | null` — Haiku vision, no
+   web search. Classifies **food / litter / neither** and transcribes brand + name; the
+   discriminated `category` is what the whole pipeline branches on. *(`identify`)*
 3. `await userPhotoPromise` *(`userPhotoUpload`)*
 4. **Not identified** → `logScanRequest` *(`scanLog`)*, log `path: "not-identified"`,
    return `product: null`. ⟵ exit 1
+4b. **Litter** → hand off to `handleLitterScan` (§3b). ⟵ exits 4-6
 5. `searchProductByNameV2(brand, name, foodType)` — Algolia cache lookup *(`cacheLookup`)*
 6. On a miss, if `config.algolia.useLLMVerification`: `fetchCandidatesByName(...)` →
    `verifyMatchWithLLM(...)` *(`llmVerify`)*
@@ -126,12 +133,14 @@ line, so use them when reading logs.
 ### Self-healing cache — the least obvious logic in the file
 
 A cached entry can be re-attempted **at most once per `REANALYZE_AFTER_MS` (14 days)**.
-Three predicates drive it (`index.ts:36-39`):
+Three predicates drive it (`index.ts:67-72`):
 
 ```ts
-hasNutritionData = (p) => p.score > 0      // score 0 is a sentinel, not a grade
-hasImage         = (p) => !!p.imageUrl
-isStale          = (ts) => !ts || Date.now() - ts > REANALYZE_AFTER_MS
+// All three take a `ScannedRecord` — the structural interface both Product and
+// Litter satisfy — so food and litter self-heal by exactly the same rules.
+hasAnalysisData = (r) => r.score > 0      // score 0 is a sentinel, not a grade
+hasImage        = (r) => !!r.imageUrl
+isStale         = (ts) => !ts || Date.now() - ts > REANALYZE_AFTER_MS
 ```
 
 | Cached entry | Action |
@@ -143,6 +152,40 @@ isStale          = (ts) => !ts || Date.now() - ts > REANALYZE_AFTER_MS
 `lastAnalysisAttempt` and `lastImageAttempt` are **separate stamps** precisely so an entry
 with nutrition but no image can retry the image without paying for a full re-analysis.
 Both are absent on pre-V2 rows, which reads as "never attempted".
+
+---
+
+## 3b. The litter path (`handleLitterScan`)
+
+Structurally the same pipeline against a different index and a different model:
+`searchLitterByNameV2` → `verifyLitterMatchWithLLM` on a near-tie → self-heal (identical
+`hasAnalysisData` / `hasImage` / `isStale` predicates, identical 14-day window) →
+`analyzeLitterImage` → image hosting → `cacheLitter` + `logScanRequest`. Log paths are
+`litter-cache-hit`, `litter-full-analysis`, `litter-analysis-failed`.
+
+Three deliberate differences from the food path:
+
+| | Food | Litter |
+|---|---|---|
+| Analysis | 4-way parallel fan-out (`analyzeProductImageParallel`) | **one** `web_search` call at `maxWebSearches` |
+| Index | `products2` | `litters` (`config.algolia.litterIndexName`) |
+| Cache key | `img-{brand}-{name}` → `product.barcode` | `lit-{brand}-{name}` → `litter.id` |
+
+The single analyze call is a cost decision, not an oversight: a guaranteed analysis is
+data one retailer has and another doesn't, so breadth pays; litter attributes are pack
+claims every source repeats verbatim, so three sources would buy the same answer at 3×.
+
+**`score === 0` is the same "no data" sentinel** as for food, and the litter prompt says so
+explicitly — a litter that could be characterized must score ≥ 1. The `ScannedRecord`
+interface in `index.ts` is what lets both categories share `ensureTranslation`,
+`resolveUserPhotoFallback` and the self-heal predicates; `Product` and `Litter` both
+satisfy it structurally, so the two paths cannot drift apart silently.
+
+`translateProductText` is reused verbatim — `LitterText` is structurally identical to
+`ProductText` (the same five renderable fields), so litter gets the same lazy per-language
+translation cache for free. Unlike food, though, the canonical-English fields carry **no
+hidden contract**: the client's per-cat litter rules read the structured attribute enums,
+not a keyword scan of the prose.
 
 ---
 
@@ -183,8 +226,10 @@ functions/
 │   ├── config/index.ts           all tunables and keys (§8)
 │   ├── constants/index.ts        retry, image validation/optimization, score bounds
 │   ├── models/product.ts         Product interface + ProductModel (§9)
+│   ├── models/litter.ts          Litter interface + LitterModel + attribute enums
 │   ├── prompts/                  (§6)
 │   │   ├── identify-product.ts   analyze-product.ts    quality-rubric.ts
+│   │   ├── analyze-litter.ts     litter-rubric.ts
 │   │   └── cat-narrative.ts      brand-verdict.ts      rescore-product.ts
 │   ├── services/
 │   │   ├── anthropic.service.ts  ~1250 lines — every model call + all tool schemas
@@ -210,7 +255,9 @@ functions/
 
 | Prompt file | Exports | Consumer |
 |---|---|---|
-| `identify-product.ts` | `generateIdentificationPrompt()` | `identifyProductFromImage` |
+| `identify-product.ts` | `generateIdentificationPrompt()` | `identifyScanSubject` |
+| `analyze-litter.ts` | `generateLitterAnalysisSystemPrompt/UserPrompt()` | `analyzeLitterImage` |
+| `litter-rubric.ts` | `LITTER_RUBRIC` | Embedded in the litter analysis system prompt |
 | `analyze-product.ts` | `generateAnalysisSystemPrompt()`, `generateAnalysisUserPrompt(identification?, sourceHint?)` | `analyzeOneSource`, `analyzeFromProductPages` |
 | `quality-rubric.ts` | `QUALITY_RUBRIC` | Embedded verbatim in **both** the analyze and regrade system prompts |
 | `cat-narrative.ts` | `generateCatNarrativeSystemPrompt/UserPrompt`, `CatNarrativeInput`, `DietTip`; internal `CARE_NOTES` (10 conditions), `deriveCombos()`, `LANGUAGE_NAMES` (en/es/fr/hu) | `generateCatNarrative` |
@@ -225,7 +272,8 @@ index carries two incompatible score generations.
 
 | Const | Tool(s) | Notes |
 |---|---|---|
-| `IDENTIFICATION_TOOLS` | `submit_identification`, `not_cat_food` | requires `brand`, `name`, `foodType` ∈ wet/dry/treat/topper/supplement |
+| `IDENTIFICATION_TOOLS` | `submit_identification`, `submit_litter_identification`, `not_cat_product` | food requires `brand`, `name`, `foodType` ∈ wet/dry/treat/topper/supplement; litter requires `brand`, `name` |
+| `LITTER_ANALYSIS_TOOLS` | `submit_litter` | **18 required fields**; every graded attribute has an explicit `unknown` member |
 | `ANALYSIS_TOOLS` | `submit_product` | **17 required fields**; numbers bounded 0–100; `pros`/`cons` `maxItems: 3` |
 | `NARRATIVE_TOOLS` | `submit_narrative` | `narrative` (~50 words) + `outlook` (~25 words) |
 | `SCORE_TOOLS` | `submit_score` | `score` 0–100 |
@@ -241,7 +289,9 @@ model string is hardcoded anywhere in `functions/`.
 
 | Call site | max_tokens | temp | tool_choice | prompt cache |
 |---|---|---|---|---|
-| `identifyProductFromImage` | 256 | 0.1 | `{type: "any"}` | — |
+| `identifyScanSubject` | 256 | 0.1 | `{type: "any"}` | — |
+| `analyzeLitterImage` | 8192 | 0.1 | `{type: "auto"}` | ephemeral (system) |
+| ↳ force-submit fallback | 4096 | 0.1 | `{type: "tool", name: "submit_litter"}` | ephemeral |
 | `analyzeOneSource` | 8192 | 0.1 | `{type: "auto"}` | ephemeral (system) |
 | ↳ force-submit fallback | 4096 | 0.1 | `{type: "tool", name: "submit_product"}` | ephemeral |
 | `analyzeFromProductPages` | 4096 | 0.1 | `{type: "tool", name: "submit_product"}` | ephemeral |
@@ -285,6 +335,7 @@ fallbacks when the env var is absent:
 | `algolia.applicationId` | `GI8VPYUYCP` |
 | `algolia.apiKey` | `5b6e53…` — **search-only key, intentionally in source** |
 | `algolia.indexName` | `products2` |
+| `algolia.litterIndexName` | `litters` |
 | `algolia.useLLMVerification` | `true` |
 | `storage.bucketName` | `yucat-d8fb5.firebasestorage.app` |
 | `storage.productsFolder` | `products/` |
@@ -339,7 +390,15 @@ client renders `localizedText` and assesses on the canonical.
 
 The V2 fields are optional so pre-V2 cached rows still round-trip cleanly.
 
-**Algolia** — one index, `products2`, record = `{objectID: cacheKey, ...Product}`.
+`src/models/litter.ts` — `Litter` / `LitterModel` / `LitterText`, plus the attribute enums
+(`LitterMaterial`, `LitterLevel`, `Tristate`) that the tool schema's `enum` lists are built
+from, so schema and type cannot drift. Attributes are graded, not measured, and `unknown`
+is a first-class value the prompt is told to prefer over a guess.
+
+**Algolia** — two indexes: `products2` (`{objectID: cacheKey, ...Product}`) and `litters`
+(`{objectID: id, ...Litter}`). Separate rather than one index with a `category` facet
+because the Flutter search tab queries `products2` unfiltered and maps every hit through
+the food display model — a litter row in there would render as a food with no macros.
 
 ⚠️ **Cache identity is text-derived, not a real barcode.** The key is
 `img-{brand}-{name}` lowercased with whitespace → `-`, written to **both** `objectID` and
@@ -411,6 +470,7 @@ itself is not a declared dependency (`npx` fetches it).
 | `configure-algolia.ts` | Applies `products2` index settings (searchable attributes, faceting, `customRanking: desc(score)`, typo tolerance) + replaces 7 synonym sets. Run after any relevant settings change. |
 | `rescore-products.ts` | Batch re-grades `score` against `QUALITY_RUBRIC`, keeping the old value in `scoreLegacy` for rollback. Skips `score === 0`. Flags: `--dry-run`, `--limit=N`, `--concurrency=N` (10), `--query=`. |
 | `backfill-images.ts` | Finds + hosts images for products with `score > 0` and empty `imageUrl`, reusing the live self-heal path. Stamps `lastImageAttempt` even on failure, matching live throttling. Flags: `--dry-run`, `--limit=N`, `--concurrency=N` (5). |
+| `configure-litter-index.ts` | Applies `litters` index settings + litter synonyms. ⚠️ **Must be run once before the litter cache can work** — `searchLitterByNameV2` soft-filters on `brand`, and Algolia rejects a filter on an undeclared facet, so until then every lookup errors silently and every litter scan pays for a full analysis. |
 | `purge-cache-entry.ts` | `purge-cache-entry.ts "<brandSubstr>" [nameSubstr]` — deletes matching `img-*` entries so the next scan re-analyzes from scratch. **Deletes without confirmation** — review the printed matches, and tighten the filter if it catches too much. |
 
 All three write-scripts need `ALGOLIA_ADMIN_API_KEY` (search-only keys cannot mutate).
@@ -465,7 +525,7 @@ Accepted behavior, documented so it isn't rediscovered as a surprise:
 - **`image/heic` is accepted at the boundary but not supported downstream** —
   `normalizeMediaType` silently relabels it `image/jpeg`, which will fail or mis-decode for
   a genuine HEIC payload.
-- **Score 0 is a sentinel, not a grade.** `score > 0` is what `hasNutritionData`,
+- **Score 0 is a sentinel, not a grade.** `score > 0` is what `hasAnalysisData`,
   `pickBestProduct`, `rescore-products.ts` and `backfill-images.ts` all test. A rubric
   change that lets a real product legitimately score 0 breaks the self-heal logic.
 - **Provisional vs final image key can diverge.** The parallel SerpAPI upload names the
@@ -481,5 +541,15 @@ Accepted behavior, documented so it isn't rediscovered as a surprise:
   `"Sharp not available"` warning.
 - **Dead code**: `getCachedProduct` and the V1 `searchProductByName` are unexercised;
   `mime` is a declared but never-imported dependency.
+- **The `litters` index has no maintenance scripts.** `rescore-products.ts` and
+  `backfill-images.ts` both target `products2` only, so a change to `LITTER_RUBRIC`
+  cannot be back-applied to cached litter rows, and an imageless litter row only heals
+  when someone rescans it. `configure-litter-index.ts` is the only litter script.
+- **Litter images are hosted under `products/`**, keyed `lit-{brand}-{name}`. They do not
+  collide with food keys, but `products/` is not a category-scoped folder — do not treat
+  the prefix as a namespace guarantee.
+- **The litter path has no analyze fan-out**, by design (§3b). If attribute coverage
+  turns out to be thin on obscure brands, that is the first knob to turn — and the reason
+  it is a knob rather than an oversight is written down there.
 - **No tests exist**, despite `firebase-functions-test` being installed. There is no CI
   config under `functions/`.

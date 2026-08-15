@@ -2346,7 +2346,7 @@ abstract class AppLocalizations {
   /// No description provided for @scanHistoryEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'Foods you scan will show up here.'**
+  /// **'Everything you scan shows up here.'**
   String get scanHistoryEmptyBody;
 
   /// No description provided for @commonTryAgain.
@@ -3518,6 +3518,324 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Poor'**
   String get ratingLabelPoor;
+
+  /// No description provided for @litterDetailScoreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'LITTER SCORE'**
+  String get litterDetailScoreLabel;
+
+  /// No description provided for @litterDetailNoDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find enough about this litter yet. Try scanning the back of the pack, or check back later — we keep looking.'**
+  String get litterDetailNoDataBody;
+
+  /// No description provided for @litterDetailAttributesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s in the box'**
+  String get litterDetailAttributesTitle;
+
+  /// No description provided for @litterDetailAdditives.
+  ///
+  /// In en, this message translates to:
+  /// **'Additives'**
+  String get litterDetailAdditives;
+
+  /// No description provided for @litterDetailNoCatPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a cat profile to see what this litter means for your cat.'**
+  String get litterDetailNoCatPrompt;
+
+  /// No description provided for @litterDetailNoFlags.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here needs special attention for {name}.'**
+  String litterDetailNoFlags(String name);
+
+  /// No description provided for @litterAttrClumping.
+  ///
+  /// In en, this message translates to:
+  /// **'Clumping'**
+  String get litterAttrClumping;
+
+  /// No description provided for @litterAttrNonClumping.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-clumping'**
+  String get litterAttrNonClumping;
+
+  /// No description provided for @litterAttrDustLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low dust'**
+  String get litterAttrDustLow;
+
+  /// No description provided for @litterAttrDustModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Some dust'**
+  String get litterAttrDustModerate;
+
+  /// No description provided for @litterAttrDustHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High dust'**
+  String get litterAttrDustHigh;
+
+  /// No description provided for @litterAttrUnscented.
+  ///
+  /// In en, this message translates to:
+  /// **'Unscented'**
+  String get litterAttrUnscented;
+
+  /// No description provided for @litterAttrScented.
+  ///
+  /// In en, this message translates to:
+  /// **'Scented'**
+  String get litterAttrScented;
+
+  /// No description provided for @litterAttrTrackingLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low tracking'**
+  String get litterAttrTrackingLow;
+
+  /// No description provided for @litterAttrTrackingModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Some tracking'**
+  String get litterAttrTrackingModerate;
+
+  /// No description provided for @litterAttrTrackingHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High tracking'**
+  String get litterAttrTrackingHigh;
+
+  /// No description provided for @litterAttrOdorLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Weak odour control'**
+  String get litterAttrOdorLow;
+
+  /// No description provided for @litterAttrOdorModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate odour control'**
+  String get litterAttrOdorModerate;
+
+  /// No description provided for @litterAttrOdorHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong odour control'**
+  String get litterAttrOdorHigh;
+
+  /// No description provided for @litterAttrFlushable.
+  ///
+  /// In en, this message translates to:
+  /// **'Flushable'**
+  String get litterAttrFlushable;
+
+  /// No description provided for @litterAttrBiodegradable.
+  ///
+  /// In en, this message translates to:
+  /// **'Biodegradable'**
+  String get litterAttrBiodegradable;
+
+  /// No description provided for @litterMaterialClayBentonite.
+  ///
+  /// In en, this message translates to:
+  /// **'Bentonite clay'**
+  String get litterMaterialClayBentonite;
+
+  /// No description provided for @litterMaterialClayNonClumping.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-clumping clay'**
+  String get litterMaterialClayNonClumping;
+
+  /// No description provided for @litterMaterialSilicaCrystal.
+  ///
+  /// In en, this message translates to:
+  /// **'Silica crystals'**
+  String get litterMaterialSilicaCrystal;
+
+  /// No description provided for @litterMaterialCorn.
+  ///
+  /// In en, this message translates to:
+  /// **'Corn'**
+  String get litterMaterialCorn;
+
+  /// No description provided for @litterMaterialWheat.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheat'**
+  String get litterMaterialWheat;
+
+  /// No description provided for @litterMaterialTofu.
+  ///
+  /// In en, this message translates to:
+  /// **'Tofu'**
+  String get litterMaterialTofu;
+
+  /// No description provided for @litterMaterialPaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Recycled paper'**
+  String get litterMaterialPaper;
+
+  /// No description provided for @litterMaterialWood.
+  ///
+  /// In en, this message translates to:
+  /// **'Wood'**
+  String get litterMaterialWood;
+
+  /// No description provided for @litterMaterialWalnut.
+  ///
+  /// In en, this message translates to:
+  /// **'Walnut shell'**
+  String get litterMaterialWalnut;
+
+  /// No description provided for @litterMaterialGrass.
+  ///
+  /// In en, this message translates to:
+  /// **'Grass'**
+  String get litterMaterialGrass;
+
+  /// No description provided for @litterMaterialMixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed substrate'**
+  String get litterMaterialMixed;
+
+  /// No description provided for @litterMaterialOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other substrate'**
+  String get litterMaterialOther;
+
+  /// No description provided for @litterFlagKittenClumpingClay.
+  ///
+  /// In en, this message translates to:
+  /// **'Clumping clay can form a blockage if {name} swallows it while grooming. Vets usually suggest a non-clumping or plant-based litter until about 4 months.'**
+  String litterFlagKittenClumpingClay(String name);
+
+  /// No description provided for @litterFlagKittenSilica.
+  ///
+  /// In en, this message translates to:
+  /// **'Kittens often taste their litter, and silica crystals are sharp and not meant to be swallowed. Something softer is safer for {name} for now.'**
+  String litterFlagKittenSilica(String name);
+
+  /// No description provided for @litterFlagMonitoringClumping.
+  ///
+  /// In en, this message translates to:
+  /// **'Clumps make it easy to see how much {name} is urinating — worth watching with their condition.'**
+  String litterFlagMonitoringClumping(String name);
+
+  /// No description provided for @litterFlagMonitoringNonClumping.
+  ///
+  /// In en, this message translates to:
+  /// **'Without clumps it\'s hard to notice changes in how much {name} urinates, which matters with their condition.'**
+  String litterFlagMonitoringNonClumping(String name);
+
+  /// No description provided for @litterFlagSensitiveScented.
+  ///
+  /// In en, this message translates to:
+  /// **'Added fragrance can irritate sensitive skin and paws like {name}\'s.'**
+  String litterFlagSensitiveScented(String name);
+
+  /// No description provided for @litterFlagSensitiveDust.
+  ///
+  /// In en, this message translates to:
+  /// **'High dust settles on skin and paws and can irritate {name}\'s airways.'**
+  String litterFlagSensitiveDust(String name);
+
+  /// No description provided for @litterFlagPawComfortCoarse.
+  ///
+  /// In en, this message translates to:
+  /// **'Coarse crystals and pellets are hard underfoot for stiff joints. {name} may prefer a fine, sand-like grain.'**
+  String litterFlagPawComfortCoarse(String name);
+
+  /// No description provided for @litterFlagPawComfortFine.
+  ///
+  /// In en, this message translates to:
+  /// **'A fine, sand-like grain is gentle on {name}\'s joints and easy to dig in.'**
+  String litterFlagPawComfortFine(String name);
+
+  /// No description provided for @litterFlagLongCoatTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Litter that tracks easily gets caught in a long coat like {name}\'s and travels through the house.'**
+  String litterFlagLongCoatTracking(String name);
+
+  /// No description provided for @litterSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Litters'**
+  String get litterSectionTitle;
+
+  /// No description provided for @litterSectionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 litter} other{{count} litters}}'**
+  String litterSectionCount(num count);
+
+  /// No description provided for @litterAdditiveBakingSoda.
+  ///
+  /// In en, this message translates to:
+  /// **'Baking soda'**
+  String get litterAdditiveBakingSoda;
+
+  /// No description provided for @litterAdditiveActivatedCharcoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Activated charcoal'**
+  String get litterAdditiveActivatedCharcoal;
+
+  /// No description provided for @litterAdditiveFragrance.
+  ///
+  /// In en, this message translates to:
+  /// **'Fragrance'**
+  String get litterAdditiveFragrance;
+
+  /// No description provided for @litterAdditivePlantStarch.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant starch'**
+  String get litterAdditivePlantStarch;
+
+  /// No description provided for @litterAdditiveZeolite.
+  ///
+  /// In en, this message translates to:
+  /// **'Zeolite'**
+  String get litterAdditiveZeolite;
+
+  /// No description provided for @litterAdditiveSilica.
+  ///
+  /// In en, this message translates to:
+  /// **'Silica'**
+  String get litterAdditiveSilica;
+
+  /// No description provided for @litterAdditiveEssentialOils.
+  ///
+  /// In en, this message translates to:
+  /// **'Essential oils'**
+  String get litterAdditiveEssentialOils;
+
+  /// No description provided for @litterAdditiveDeodorizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Odour neutralizer'**
+  String get litterAdditiveDeodorizer;
+
+  /// No description provided for @foodSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cat food'**
+  String get foodSectionTitle;
 }
 
 class _AppLocalizationsDelegate

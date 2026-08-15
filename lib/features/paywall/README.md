@@ -427,7 +427,7 @@ prints to the console on `getOfferings()`.
 | No `CustomerInfo` listener | `Purchases.addCustomerInfoUpdateListener` is never registered, and `didChangeAppLifecycleState` doesn't re-check entitlements. A trial expiring mid-session isn't observed until cold launch. |
 | RevenueCat identity is unlinked | `appUserID = null` and `Purchases.logIn` is never called, so the RC anonymous ID is never tied to the Firebase UID. Entitlements follow the store account; a reinstalling user must tap **Restore purchases**. Trial abuse via reinstall is *not* possible — Apple/Play enforce eligibility per store account. |
 | `SubscriptionRepositoryImpl` fails closed | `getCustomerInfo()` has a 5s timeout and returns `false` on any error, so a paying user offline at boot is held at the paywall. |
-| Dead free-tier code | `ScanTrackingService.canPerformScan` and `CatTrackingService.canCreateCat` are never called. `ScanTrackingService` is used only for streaks (`home_bloc.dart`). Kept so a free tier can be re-enabled. |
+| Dead free-tier code | `ScanTrackingService.canPerformScan` and `CatTrackingService.canCreateCat` are never called. Both classes now have **zero live callers** — `ScanTrackingService`'s last one was the scan streak, since removed. Kept so a free tier can be re-enabled. |
 | `PaywallError.iosOnly` never emitted | Vestigial; `paywall_error_widget.dart` still maps it. |
 | Placeholder social proof | Testimonials and the `4.7` / `1M+` laurel stats are hardcoded, not real data. |
 

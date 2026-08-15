@@ -33,6 +33,13 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<!-- The app uses only the standard HTTPS/TLS provided by iOS (Firebase,
+	     RevenueCat, Algolia, OneSignal) and ships no custom or proprietary
+	     cryptography, so it qualifies for the export-compliance exemption.
+	     Declaring it here means TestFlight builds skip the "Missing
+	     Compliance" hold and reach testers as soon as processing finishes. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>

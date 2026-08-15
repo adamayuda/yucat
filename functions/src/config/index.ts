@@ -41,6 +41,11 @@ export const config = {
     apiKey: process.env.ALGOLIA_API_KEY ||
       "5b6e53aabd413a6325207b6cecb26a2d",
     indexName: "products2",
+    // Cat litter lives in its OWN index, not behind a facet on products2: the
+    // app's search tab queries products2 unfiltered and maps every hit through
+    // the food display model, so a litter row in there would render as a food
+    // with no macros. Separate index = no coupling to fix.
+    litterIndexName: "litters",
     enabled: true,
     useLLMVerification: true,
   },

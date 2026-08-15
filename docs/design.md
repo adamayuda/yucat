@@ -264,6 +264,7 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | `ProductRowCard` | `lib/features/search_products/presentation/widgets/product_row_card.dart` | 64×64 thumb (or `tintLavender` placeholder) + name + brand + soft score pill + chevron. Used by Search results AND Product Listing. |
 | `SearchTextField` | `lib/features/search_products/presentation/widgets/search_text_field.dart` | White pill input, `e1` shadow, search icon prefix. Search page. |
 | `RingScore` | `lib/features/product_detail/presentation/widgets/ring_score.dart` | Circular ring score: `CircularProgressIndicator(value)` + centered number. Color buckets (green / amber / coral) follow `ProductRatingColor`. Used on product analysis card and per-cat verdict cards. |
+| `LitterListRow` | `lib/features/litter_detail/presentation/widgets/litter_list_row.dart` | 56×56 thumb (or `HatchedPlaceholder`) + name + brand + soft score pill. Used by BOTH the Saved-products and Scan-history lists, which is why it is one widget rather than the two near-copies the food rows are. The score pill is hidden when `dataUnavailable` — "0/100" reads as a damning grade, not as "no data". |
 | `HatchedPlaceholder` | `lib/features/product_detail/presentation/widgets/hatched_placeholder.dart` | 45° hatch `CustomPainter` + "PRODUCT" tag corner. Hero fallback when `imageUrl` is null. |
 | `AnalysisChipRow` | `lib/features/product_detail/presentation/widgets/analysis_chip_row.dart` | Wrapping pill chips: success (`+ ...` green) / caution (`! ...` amber). Truncates to 3 pros + 1 con. |
 | Per-screen skeletons | `ProductDetailSkeleton`, `CatDetailSkeleton`, `ProfileSkeleton`, `SearchDiscoverSkeleton`, `HomeSkeleton`, `PaywallSkeleton` (each in its feature's `widgets/`) | Layout-matched loading skeletons built from `DSShimmer` + bones, mirroring each screen's loaded body. Replace the old full-screen `AppLoadingWidget`. `HomeSkeleton` covers the dashboard load only — the 4-step scan animation (`HomeLoadingWidget`) now fires solely for a real scan (`HomeScanningState`). `PaywallSkeleton` paints on white (`surfaceCard`) to match the loaded paywall (no mint flash). `AppLoadingWidget` (now a `MascotIllustration`, no GIF) is retained only for the product-detail cat-assessment `FutureBuilder`. |
@@ -458,7 +459,7 @@ _None._
 ## 13. Localization
 
 Every user-facing string goes through `gen_l10n`. There are **6 locales** — `en` (template),
-`de`, `es`, `fr`, `hu`, `pt` — at **604 keys each**, currently in full parity.
+`de`, `es`, `fr`, `hu`, `pt` — at **621 keys each**, currently in full parity.
 
 - `l10n.yaml` → `arb-dir: lib/l10n`, template `app_en.arb`, output class `AppLocalizations`,
   **`nullable-getter: false`** (so `AppLocalizations.of(context)` is non-null — delegates are

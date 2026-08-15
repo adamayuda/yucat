@@ -97,6 +97,19 @@ import 'package:yucat/services/review_prompt_service.dart';
 import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/services/cat_tracking_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
+import 'package:yucat/features/litter/data/mappers/litter_to_domain_mapper.dart';
+import 'package:yucat/features/litter_detail/presentation/bloc/litter_detail_bloc.dart';
+import 'package:yucat/features/litter_detail/presentation/mappers/litter_entity_to_model_mapper.dart';
+import 'package:yucat/features/saved_products/data/repositories/saved_litters_repository_impl.dart';
+import 'package:yucat/features/saved_products/domain/repositories/saved_litters_repository.dart';
+import 'package:yucat/features/saved_products/domain/usecases/get_saved_litters_usecase.dart';
+import 'package:yucat/features/saved_products/domain/usecases/is_litter_saved_usecase.dart';
+import 'package:yucat/features/saved_products/domain/usecases/save_litter_usecase.dart';
+import 'package:yucat/features/saved_products/domain/usecases/unsave_litter_usecase.dart';
+import 'package:yucat/features/scan_history/data/repositories/litter_history_repository_impl.dart';
+import 'package:yucat/features/scan_history/domain/repositories/litter_history_repository.dart';
+import 'package:yucat/features/scan_history/domain/usecases/add_litter_to_history_usecase.dart';
+import 'package:yucat/features/scan_history/domain/usecases/get_litter_history_usecase.dart';
 
 final sl = GetIt.instance;
 
@@ -179,7 +192,11 @@ Future<void> _registerDataSources() async {
 Future<void> _registerMappers() async {
   sl.registerSingleton<BrandDocumentMapper>(BrandDocumentMapperImpl());
   sl.registerSingleton<ProductToDomainMapper>(ProductToDomainMapperImpl());
+  sl.registerSingleton<LitterToDomainMapper>(LitterToDomainMapperImpl());
   sl.registerSingleton<ProductToModelMapper>(ProductToModelMapperImpl());
+  sl.registerSingleton<LitterEntityToModelMapper>(
+    LitterEntityToModelMapperImpl(),
+  );
   sl.registerSingleton<ProductEntityToModelMapper>(
     ProductEntityToModelMapperImpl(),
   );
@@ -210,6 +227,7 @@ Future<void> _registerRepositories() async {
     ProductRepositoryImpl(
       remoteDataSource: sl<RemoteSearchDataSource>(),
       productToDomainMapper: sl<ProductToDomainMapper>(),
+      litterToDomainMapper: sl<LitterToDomainMapper>(),
     ),
   );
   sl.registerSingleton<SearchRepository>(
@@ -237,8 +255,14 @@ Future<void> _registerRepositories() async {
   sl.registerSingleton<SavedProductsRepository>(
     SavedProductsRepositoryImpl(prefs: sl<SharedPreferences>()),
   );
+  sl.registerSingleton<SavedLittersRepository>(
+    SavedLittersRepositoryImpl(prefs: sl<SharedPreferences>()),
+  );
   sl.registerSingleton<ScanHistoryRepository>(
     ScanHistoryRepositoryImpl(prefs: sl<SharedPreferences>()),
+  );
+  sl.registerSingleton<LitterHistoryRepository>(
+    LitterHistoryRepositoryImpl(prefs: sl<SharedPreferences>()),
   );
 }
 
@@ -333,6 +357,24 @@ Future<void> _registerUseCases() async {
   sl.registerSingleton<AddScanToHistoryUsecase>(
     AddScanToHistoryUsecase(repository: sl<ScanHistoryRepository>()),
   );
+  sl.registerSingleton<GetSavedLittersUsecase>(
+    GetSavedLittersUsecase(repository: sl<SavedLittersRepository>()),
+  );
+  sl.registerSingleton<IsLitterSavedUsecase>(
+    IsLitterSavedUsecase(repository: sl<SavedLittersRepository>()),
+  );
+  sl.registerSingleton<SaveLitterUsecase>(
+    SaveLitterUsecase(repository: sl<SavedLittersRepository>()),
+  );
+  sl.registerSingleton<UnsaveLitterUsecase>(
+    UnsaveLitterUsecase(repository: sl<SavedLittersRepository>()),
+  );
+  sl.registerSingleton<GetLitterHistoryUsecase>(
+    GetLitterHistoryUsecase(repository: sl<LitterHistoryRepository>()),
+  );
+  sl.registerSingleton<AddLitterToHistoryUsecase>(
+    AddLitterToHistoryUsecase(repository: sl<LitterHistoryRepository>()),
+  );
 }
 
 Future<void> _registerServices() async {
@@ -421,13 +463,14 @@ Future<void> _registerBlocs() async {
     () => HomeBloc(
       fetchProductByImageUsecase: sl<FetchProductByImageUsecase>(),
       productEntityToModelMapper: sl<ProductEntityToModelMapper>(),
+      litterEntityToModelMapper: sl<LitterEntityToModelMapper>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
       signinAnonymouslyUsecase: sl<SigninAnonymouslyUsecase>(),
-      scanTrackingService: sl<ScanTrackingService>(),
       reviewPromptService: sl<ReviewPromptService>(),
       getCatsUsecase: sl<GetCatsUsecase>(),
       getSavedProductsUsecase: sl<GetSavedProductsUsecase>(),
       addScanToHistoryUsecase: sl<AddScanToHistoryUsecase>(),
+      addLitterToHistoryUsecase: sl<AddLitterToHistoryUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
       notificationService: sl<NotificationService>(),
       userAnalyticsService: sl<UserAnalyticsService>(),
@@ -439,7 +482,9 @@ Future<void> _registerBlocs() async {
       prefs: sl<SharedPreferences>(),
       getCatsUsecase: sl<GetCatsUsecase>(),
       getSavedProductsUsecase: sl<GetSavedProductsUsecase>(),
+      getSavedLittersUsecase: sl<GetSavedLittersUsecase>(),
       getScanHistoryUsecase: sl<GetScanHistoryUsecase>(),
+      getLitterHistoryUsecase: sl<GetLitterHistoryUsecase>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
     ),
   );
@@ -451,14 +496,24 @@ Future<void> _registerBlocs() async {
       unsaveProductUsecase: sl<UnsaveProductUsecase>(),
     ),
   );
+  sl.registerBloc<LitterDetailBloc>(
+    () => LitterDetailBloc(
+      logEventUsecase: sl<LogEventUsecase>(),
+      isLitterSavedUsecase: sl<IsLitterSavedUsecase>(),
+      saveLitterUsecase: sl<SaveLitterUsecase>(),
+      unsaveLitterUsecase: sl<UnsaveLitterUsecase>(),
+    ),
+  );
   sl.registerBloc<SavedProductsBloc>(
     () => SavedProductsBloc(
       getSavedProductsUsecase: sl<GetSavedProductsUsecase>(),
+      getSavedLittersUsecase: sl<GetSavedLittersUsecase>(),
     ),
   );
   sl.registerBloc<ScanHistoryBloc>(
     () => ScanHistoryBloc(
       getScanHistoryUsecase: sl<GetScanHistoryUsecase>(),
+      getLitterHistoryUsecase: sl<GetLitterHistoryUsecase>(),
     ),
   );
   sl.registerBloc<CatListingBloc>(

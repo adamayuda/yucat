@@ -13,7 +13,7 @@ import {ProductText} from "../models/product";
  */
 export function generateTranslationSystemPrompt(): string {
   return `
-You translate short cat-food product copy for a mobile app. You will be given a JSON object of English source text and a target language.
+You translate short cat-product copy (cat food or cat litter) for a mobile app. You will be given a JSON object of English source text and a target language.
 
 RULES
 - Translate meaning, not words. The result must read like native marketing-free product copy, not a literal gloss.

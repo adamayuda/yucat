@@ -198,6 +198,45 @@ class HomeRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [LitterDetailPage]
+class LitterDetailRoute extends PageRouteInfo<LitterDetailRouteArgs> {
+  LitterDetailRoute({
+    Key? key,
+    LitterDisplayModel? litter,
+    List<PageRouteInfo>? children,
+  }) : super(
+         LitterDetailRoute.name,
+         args: LitterDetailRouteArgs(key: key, litter: litter),
+         initialChildren: children,
+       );
+
+  static const String name = 'LitterDetailRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<LitterDetailRouteArgs>(
+        orElse: () => const LitterDetailRouteArgs(),
+      );
+      return LitterDetailPage(key: args.key, litter: args.litter);
+    },
+  );
+}
+
+class LitterDetailRouteArgs {
+  const LitterDetailRouteArgs({this.key, this.litter});
+
+  final Key? key;
+
+  final LitterDisplayModel? litter;
+
+  @override
+  String toString() {
+    return 'LitterDetailRouteArgs{key: $key, litter: $litter}';
+  }
+}
+
+/// generated route for
 /// [MainPage]
 class MainRoute extends PageRouteInfo<void> {
   const MainRoute({List<PageRouteInfo>? children})

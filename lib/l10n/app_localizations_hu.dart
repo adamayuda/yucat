@@ -1312,8 +1312,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get scanHistoryEmptyTitle => 'Még nincs szkennelés';
 
   @override
-  String get scanHistoryEmptyBody =>
-      'Az általad szkennelt ételek itt jelennek meg.';
+  String get scanHistoryEmptyBody => 'Minden, amit beolvasol, itt jelenik meg.';
 
   @override
   String get commonTryAgain => 'Próbáld újra';
@@ -2051,4 +2050,193 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get ratingLabelPoor => 'Gyenge';
+
+  @override
+  String get litterDetailScoreLabel => 'ALOM PONTSZÁM';
+
+  @override
+  String get litterDetailNoDataBody =>
+      'Még nem találtunk elég információt erről az alomról. Próbáld beolvasni a csomag hátulját, vagy nézz vissza később – tovább keresünk.';
+
+  @override
+  String get litterDetailAttributesTitle => 'Mi van benne';
+
+  @override
+  String get litterDetailAdditives => 'Adalékok';
+
+  @override
+  String get litterDetailNoCatPrompt =>
+      'Hozz létre macskaprofilt, hogy lásd, mit jelent ez az alom a macskádnak.';
+
+  @override
+  String litterDetailNoFlags(String name) {
+    return '$name esetében itt semmi nem igényel külön figyelmet.';
+  }
+
+  @override
+  String get litterAttrClumping => 'Csomósodó';
+
+  @override
+  String get litterAttrNonClumping => 'Nem csomósodó';
+
+  @override
+  String get litterAttrDustLow => 'Kevés por';
+
+  @override
+  String get litterAttrDustModerate => 'Némi por';
+
+  @override
+  String get litterAttrDustHigh => 'Sok por';
+
+  @override
+  String get litterAttrUnscented => 'Illatmentes';
+
+  @override
+  String get litterAttrScented => 'Illatosított';
+
+  @override
+  String get litterAttrTrackingLow => 'Alig szóródik';
+
+  @override
+  String get litterAttrTrackingModerate => 'Kissé szóródik';
+
+  @override
+  String get litterAttrTrackingHigh => 'Erősen szóródik';
+
+  @override
+  String get litterAttrOdorLow => 'Gyenge szagsemlegesítés';
+
+  @override
+  String get litterAttrOdorModerate => 'Közepes szagsemlegesítés';
+
+  @override
+  String get litterAttrOdorHigh => 'Erős szagsemlegesítés';
+
+  @override
+  String get litterAttrFlushable => 'WC-be dobható';
+
+  @override
+  String get litterAttrBiodegradable => 'Lebomló';
+
+  @override
+  String get litterMaterialClayBentonite => 'Bentonit agyag';
+
+  @override
+  String get litterMaterialClayNonClumping => 'Nem csomósodó agyag';
+
+  @override
+  String get litterMaterialSilicaCrystal => 'Szilikátkristály';
+
+  @override
+  String get litterMaterialCorn => 'Kukorica';
+
+  @override
+  String get litterMaterialWheat => 'Búza';
+
+  @override
+  String get litterMaterialTofu => 'Tofu';
+
+  @override
+  String get litterMaterialPaper => 'Újrahasznosított papír';
+
+  @override
+  String get litterMaterialWood => 'Fa';
+
+  @override
+  String get litterMaterialWalnut => 'Dióhéj';
+
+  @override
+  String get litterMaterialGrass => 'Fű';
+
+  @override
+  String get litterMaterialMixed => 'Vegyes alapanyag';
+
+  @override
+  String get litterMaterialOther => 'Egyéb alapanyag';
+
+  @override
+  String litterFlagKittenClumpingClay(String name) {
+    return 'A csomósodó agyag elzáródást okozhat, ha $name tisztálkodás közben lenyeli. Az állatorvosok körülbelül 4 hónapos korig nem csomósodó vagy növényi alapú almot javasolnak.';
+  }
+
+  @override
+  String litterFlagKittenSilica(String name) {
+    return 'A kiscicák gyakran megkóstolják az almot, a szilikátkristály viszont éles és nem lenyelésre való. $name számára egyelőre biztonságosabb valami lágyabb.';
+  }
+
+  @override
+  String litterFlagMonitoringClumping(String name) {
+    return 'A csomókból jól látszik, mennyit vizel $name – az állapota miatt érdemes figyelni.';
+  }
+
+  @override
+  String litterFlagMonitoringNonClumping(String name) {
+    return 'Csomók nélkül nehéz észrevenni, ha változik, mennyit vizel $name – ami az állapota miatt fontos.';
+  }
+
+  @override
+  String litterFlagSensitiveScented(String name) {
+    return 'A hozzáadott illatanyag irritálhatja az olyan érzékeny bőrt és mancsokat, mint $name esetében.';
+  }
+
+  @override
+  String litterFlagSensitiveDust(String name) {
+    return 'A sok por lerakódik a bőrön és a mancsokon, és irritálhatja $name légútjait.';
+  }
+
+  @override
+  String litterFlagPawComfortCoarse(String name) {
+    return 'A durva kristályok és pelletek kellemetlenek a merev ízületeknek. $name valószínűleg a finom, homokszerű szemcsét kedveli.';
+  }
+
+  @override
+  String litterFlagPawComfortFine(String name) {
+    return 'A finom, homokszerű szemcse kíméli $name ízületeit, és könnyű benne kaparni.';
+  }
+
+  @override
+  String litterFlagLongCoatTracking(String name) {
+    return 'A könnyen szóródó alom beleakad a hosszú szőrbe, mint $name esetében, és szétterjed a lakásban.';
+  }
+
+  @override
+  String get litterSectionTitle => 'Alom';
+
+  @override
+  String litterSectionCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count alom',
+      one: '1 alom',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get litterAdditiveBakingSoda => 'Szódabikarbóna';
+
+  @override
+  String get litterAdditiveActivatedCharcoal => 'Aktív szén';
+
+  @override
+  String get litterAdditiveFragrance => 'Illatanyag';
+
+  @override
+  String get litterAdditivePlantStarch => 'Növényi keményítő';
+
+  @override
+  String get litterAdditiveZeolite => 'Zeolit';
+
+  @override
+  String get litterAdditiveSilica => 'Szilikát';
+
+  @override
+  String get litterAdditiveEssentialOils => 'Illóolajok';
+
+  @override
+  String get litterAdditiveDeodorizer => 'Szagsemlegesítő';
+
+  @override
+  String get foodSectionTitle => 'Macskaeledel';
 }

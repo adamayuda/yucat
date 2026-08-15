@@ -372,7 +372,7 @@
   "scanHistoryTitle": "Historique des scans",
   "scanHistoryScanCount": "{count, plural, =1{1 scan} other{{count} scans}}",
   "scanHistoryEmptyTitle": "Aucun scan pour l'instant",
-  "scanHistoryEmptyBody": "Les aliments que tu scanneras apparaîtront ici.",
+  "scanHistoryEmptyBody": "Tout ce que tu scannes apparaît ici.",
   "commonTryAgain": "Réessayer",
   "searchTabTitle": "Recherche",
   "searchHint": "Rechercher un aliment pour chat",
@@ -567,5 +567,135 @@
   "ratingLabelExcellent": "Excellent",
   "ratingLabelGood": "Bon",
   "ratingLabelAverage": "Moyen",
-  "ratingLabelPoor": "Médiocre"
+  "ratingLabelPoor": "Médiocre",
+  "litterDetailScoreLabel": "NOTE DE LA LITIÈRE",
+  "litterDetailNoDataBody": "Nous n'avons pas encore trouvé assez d'informations sur cette litière. Essayez de scanner l'arrière du paquet ou revenez plus tard — nous continuons à chercher.",
+  "litterDetailAttributesTitle": "Ce qu'il y a dedans",
+  "litterDetailAdditives": "Additifs",
+  "litterDetailNoCatPrompt": "Créez un profil de chat pour voir ce que cette litière signifie pour votre chat.",
+  "litterDetailNoFlags": "Rien ici ne demande une attention particulière pour {name}.",
+  "@litterDetailNoFlags": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterAttrClumping": "Agglomérante",
+  "litterAttrNonClumping": "Non agglomérante",
+  "litterAttrDustLow": "Peu de poussière",
+  "litterAttrDustModerate": "Un peu de poussière",
+  "litterAttrDustHigh": "Très poussiéreuse",
+  "litterAttrUnscented": "Sans parfum",
+  "litterAttrScented": "Parfumée",
+  "litterAttrTrackingLow": "Peu de dispersion",
+  "litterAttrTrackingModerate": "Dispersion modérée",
+  "litterAttrTrackingHigh": "Dispersion importante",
+  "litterAttrOdorLow": "Faible contrôle des odeurs",
+  "litterAttrOdorModerate": "Contrôle des odeurs moyen",
+  "litterAttrOdorHigh": "Bon contrôle des odeurs",
+  "litterAttrFlushable": "Jetable aux toilettes",
+  "litterAttrBiodegradable": "Biodégradable",
+  "litterMaterialClayBentonite": "Argile bentonite",
+  "litterMaterialClayNonClumping": "Argile non agglomérante",
+  "litterMaterialSilicaCrystal": "Cristaux de silice",
+  "litterMaterialCorn": "Maïs",
+  "litterMaterialWheat": "Blé",
+  "litterMaterialTofu": "Tofu",
+  "litterMaterialPaper": "Papier recyclé",
+  "litterMaterialWood": "Bois",
+  "litterMaterialWalnut": "Coque de noix",
+  "litterMaterialGrass": "Herbe",
+  "litterMaterialMixed": "Substrat mixte",
+  "litterMaterialOther": "Autre substrat",
+  "litterFlagKittenClumpingClay": "L'argile agglomérante peut former un bouchon si {name} l'avale en faisant sa toilette. Les vétérinaires conseillent une litière non agglomérante ou végétale jusqu'à environ 4 mois.",
+  "@litterFlagKittenClumpingClay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagKittenSilica": "Les chatons goûtent souvent leur litière, et les cristaux de silice sont coupants et ne doivent pas être avalés. Quelque chose de plus doux est plus sûr pour {name} pour l'instant.",
+  "@litterFlagKittenSilica": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagMonitoringClumping": "Les agglomérats permettent de voir facilement combien {name} urine — un point à surveiller avec son problème de santé.",
+  "@litterFlagMonitoringClumping": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagMonitoringNonClumping": "Sans agglomérats, il est difficile de repérer un changement dans la quantité d'urine de {name}, ce qui compte avec son problème de santé.",
+  "@litterFlagMonitoringNonClumping": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagSensitiveScented": "Les parfums ajoutés peuvent irriter une peau et des coussinets sensibles comme ceux de {name}.",
+  "@litterFlagSensitiveScented": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagSensitiveDust": "Beaucoup de poussière se dépose sur la peau et les coussinets et peut irriter les voies respiratoires de {name}.",
+  "@litterFlagSensitiveDust": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagPawComfortCoarse": "Les cristaux et granulés grossiers sont durs sous des articulations raides. {name} préférera sans doute un grain fin, proche du sable.",
+  "@litterFlagPawComfortCoarse": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagPawComfortFine": "Un grain fin, proche du sable, ménage les articulations de {name} et se gratte facilement.",
+  "@litterFlagPawComfortFine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagLongCoatTracking": "Une litière qui se disperse facilement s'accroche à un pelage long comme celui de {name} et se retrouve dans toute la maison.",
+  "@litterFlagLongCoatTracking": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterSectionTitle": "Litières",
+  "litterSectionCount": "{count, plural, =1{1 litière} other{{count} litières}}",
+  "@litterSectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "litterAdditiveBakingSoda": "Bicarbonate de soude",
+  "litterAdditiveActivatedCharcoal": "Charbon actif",
+  "litterAdditiveFragrance": "Parfum",
+  "litterAdditivePlantStarch": "Amidon végétal",
+  "litterAdditiveZeolite": "Zéolite",
+  "litterAdditiveSilica": "Silice",
+  "litterAdditiveEssentialOils": "Huiles essentielles",
+  "litterAdditiveDeodorizer": "Neutralisant d'odeurs",
+  "foodSectionTitle": "Alimentation"
 }

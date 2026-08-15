@@ -1,4 +1,4 @@
-import 'package:yucat/features/product/domain/entities/product_entity.dart';
+import 'package:yucat/features/product/domain/entities/scan_result_entity.dart';
 import 'package:yucat/features/product/domain/repositories/product_repository.dart';
 
 class FetchProductByImageUsecase {
@@ -7,7 +7,9 @@ class FetchProductByImageUsecase {
   FetchProductByImageUsecase({required ProductRepository productRepository})
     : _productRepository = productRepository;
 
-  Future<ProductEntity?> call({
+  /// Returns a [ScanFoodResult] or a [ScanLitterResult] — the camera is one
+  /// entry point for both categories — or null when nothing was recognized.
+  Future<ScanResultEntity?> call({
     required String imageBase64,
     required String mimeType,
     String? countryCode,

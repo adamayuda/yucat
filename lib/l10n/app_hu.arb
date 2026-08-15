@@ -372,7 +372,7 @@
   "scanHistoryTitle": "Szkennelési előzmények",
   "scanHistoryScanCount": "{count, plural, =1{1 szkennelés} other{{count} szkennelés}}",
   "scanHistoryEmptyTitle": "Még nincs szkennelés",
-  "scanHistoryEmptyBody": "Az általad szkennelt ételek itt jelennek meg.",
+  "scanHistoryEmptyBody": "Minden, amit beolvasol, itt jelenik meg.",
   "commonTryAgain": "Próbáld újra",
   "searchTabTitle": "Keresés",
   "searchHint": "Keress macskaeledelre",
@@ -567,5 +567,135 @@
   "ratingLabelExcellent": "Kiváló",
   "ratingLabelGood": "Jó",
   "ratingLabelAverage": "Átlagos",
-  "ratingLabelPoor": "Gyenge"
+  "ratingLabelPoor": "Gyenge",
+  "litterDetailScoreLabel": "ALOM PONTSZÁM",
+  "litterDetailNoDataBody": "Még nem találtunk elég információt erről az alomról. Próbáld beolvasni a csomag hátulját, vagy nézz vissza később – tovább keresünk.",
+  "litterDetailAttributesTitle": "Mi van benne",
+  "litterDetailAdditives": "Adalékok",
+  "litterDetailNoCatPrompt": "Hozz létre macskaprofilt, hogy lásd, mit jelent ez az alom a macskádnak.",
+  "litterDetailNoFlags": "{name} esetében itt semmi nem igényel külön figyelmet.",
+  "@litterDetailNoFlags": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterAttrClumping": "Csomósodó",
+  "litterAttrNonClumping": "Nem csomósodó",
+  "litterAttrDustLow": "Kevés por",
+  "litterAttrDustModerate": "Némi por",
+  "litterAttrDustHigh": "Sok por",
+  "litterAttrUnscented": "Illatmentes",
+  "litterAttrScented": "Illatosított",
+  "litterAttrTrackingLow": "Alig szóródik",
+  "litterAttrTrackingModerate": "Kissé szóródik",
+  "litterAttrTrackingHigh": "Erősen szóródik",
+  "litterAttrOdorLow": "Gyenge szagsemlegesítés",
+  "litterAttrOdorModerate": "Közepes szagsemlegesítés",
+  "litterAttrOdorHigh": "Erős szagsemlegesítés",
+  "litterAttrFlushable": "WC-be dobható",
+  "litterAttrBiodegradable": "Lebomló",
+  "litterMaterialClayBentonite": "Bentonit agyag",
+  "litterMaterialClayNonClumping": "Nem csomósodó agyag",
+  "litterMaterialSilicaCrystal": "Szilikátkristály",
+  "litterMaterialCorn": "Kukorica",
+  "litterMaterialWheat": "Búza",
+  "litterMaterialTofu": "Tofu",
+  "litterMaterialPaper": "Újrahasznosított papír",
+  "litterMaterialWood": "Fa",
+  "litterMaterialWalnut": "Dióhéj",
+  "litterMaterialGrass": "Fű",
+  "litterMaterialMixed": "Vegyes alapanyag",
+  "litterMaterialOther": "Egyéb alapanyag",
+  "litterFlagKittenClumpingClay": "A csomósodó agyag elzáródást okozhat, ha {name} tisztálkodás közben lenyeli. Az állatorvosok körülbelül 4 hónapos korig nem csomósodó vagy növényi alapú almot javasolnak.",
+  "@litterFlagKittenClumpingClay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagKittenSilica": "A kiscicák gyakran megkóstolják az almot, a szilikátkristály viszont éles és nem lenyelésre való. {name} számára egyelőre biztonságosabb valami lágyabb.",
+  "@litterFlagKittenSilica": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagMonitoringClumping": "A csomókból jól látszik, mennyit vizel {name} – az állapota miatt érdemes figyelni.",
+  "@litterFlagMonitoringClumping": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagMonitoringNonClumping": "Csomók nélkül nehéz észrevenni, ha változik, mennyit vizel {name} – ami az állapota miatt fontos.",
+  "@litterFlagMonitoringNonClumping": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagSensitiveScented": "A hozzáadott illatanyag irritálhatja az olyan érzékeny bőrt és mancsokat, mint {name} esetében.",
+  "@litterFlagSensitiveScented": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagSensitiveDust": "A sok por lerakódik a bőrön és a mancsokon, és irritálhatja {name} légútjait.",
+  "@litterFlagSensitiveDust": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagPawComfortCoarse": "A durva kristályok és pelletek kellemetlenek a merev ízületeknek. {name} valószínűleg a finom, homokszerű szemcsét kedveli.",
+  "@litterFlagPawComfortCoarse": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagPawComfortFine": "A finom, homokszerű szemcse kíméli {name} ízületeit, és könnyű benne kaparni.",
+  "@litterFlagPawComfortFine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagLongCoatTracking": "A könnyen szóródó alom beleakad a hosszú szőrbe, mint {name} esetében, és szétterjed a lakásban.",
+  "@litterFlagLongCoatTracking": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterSectionTitle": "Alom",
+  "litterSectionCount": "{count, plural, =1{1 alom} other{{count} alom}}",
+  "@litterSectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "litterAdditiveBakingSoda": "Szódabikarbóna",
+  "litterAdditiveActivatedCharcoal": "Aktív szén",
+  "litterAdditiveFragrance": "Illatanyag",
+  "litterAdditivePlantStarch": "Növényi keményítő",
+  "litterAdditiveZeolite": "Zeolit",
+  "litterAdditiveSilica": "Szilikát",
+  "litterAdditiveEssentialOils": "Illóolajok",
+  "litterAdditiveDeodorizer": "Szagsemlegesítő",
+  "foodSectionTitle": "Macskaeledel"
 }

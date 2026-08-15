@@ -34,6 +34,14 @@ class AnalyticsEvents {
 
   // Cat-create wizard
   static const catWizardStepViewed = 'Cat Wizard Step Viewed';
+
+  // Cat litter. The capture and failure events are shared with food
+  // (`Product Image Captured` / `Product Image Scan Failed`) because the camera
+  // is one entry point — only the outcome events split by category.
+  static const litterSelected = 'Litter Selected';
+  static const litterDetailViewed = 'Litter Detail Viewed';
+  static const litterSaved = 'Litter Saved';
+  static const litterUnsaved = 'Litter Unsaved';
 }
 
 /// Values for the `trigger` property on paywall events — lets Mixpanel funnels
@@ -58,7 +66,6 @@ class UserProps {
   static const hasCat = 'has_cat';
   static const primaryCatAgeGroup = 'primary_cat_age_group';
   static const totalScans = 'total_scans';
-  static const currentStreak = 'current_streak';
   static const lastScanAt = 'last_scan_at';
   static const attributionSource = 'attribution_source';
   static const onboardingCompleted = 'onboarding_completed';

@@ -372,7 +372,7 @@
   "scanHistoryTitle": "Historial de escaneos",
   "scanHistoryScanCount": "{count, plural, =1{1 escaneo} other{{count} escaneos}}",
   "scanHistoryEmptyTitle": "Aún no hay escaneos",
-  "scanHistoryEmptyBody": "Los alimentos que escanees aparecerán aquí.",
+  "scanHistoryEmptyBody": "Todo lo que escanees aparecerá aquí.",
   "commonTryAgain": "Intentar de nuevo",
   "searchTabTitle": "Buscar",
   "searchHint": "Busca un alimento para gatos",
@@ -567,5 +567,135 @@
   "ratingLabelExcellent": "Excelente",
   "ratingLabelGood": "Bueno",
   "ratingLabelAverage": "Aceptable",
-  "ratingLabelPoor": "Deficiente"
+  "ratingLabelPoor": "Deficiente",
+  "litterDetailScoreLabel": "PUNTUACIÓN DE LA ARENA",
+  "litterDetailNoDataBody": "Todavía no hemos encontrado suficiente información sobre esta arena. Prueba a escanear la parte trasera del paquete o vuelve más tarde: seguimos buscando.",
+  "litterDetailAttributesTitle": "Qué contiene",
+  "litterDetailAdditives": "Aditivos",
+  "litterDetailNoCatPrompt": "Crea un perfil de gato para ver qué significa esta arena para tu gato.",
+  "litterDetailNoFlags": "No hay nada que requiera atención especial para {name}.",
+  "@litterDetailNoFlags": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterAttrClumping": "Aglomerante",
+  "litterAttrNonClumping": "No aglomerante",
+  "litterAttrDustLow": "Poco polvo",
+  "litterAttrDustModerate": "Algo de polvo",
+  "litterAttrDustHigh": "Mucho polvo",
+  "litterAttrUnscented": "Sin perfume",
+  "litterAttrScented": "Perfumada",
+  "litterAttrTrackingLow": "Poco rastro",
+  "litterAttrTrackingModerate": "Algo de rastro",
+  "litterAttrTrackingHigh": "Mucho rastro",
+  "litterAttrOdorLow": "Poco control de olores",
+  "litterAttrOdorModerate": "Control de olores moderado",
+  "litterAttrOdorHigh": "Gran control de olores",
+  "litterAttrFlushable": "Se puede tirar al inodoro",
+  "litterAttrBiodegradable": "Biodegradable",
+  "litterMaterialClayBentonite": "Arcilla de bentonita",
+  "litterMaterialClayNonClumping": "Arcilla no aglomerante",
+  "litterMaterialSilicaCrystal": "Cristales de sílice",
+  "litterMaterialCorn": "Maíz",
+  "litterMaterialWheat": "Trigo",
+  "litterMaterialTofu": "Tofu",
+  "litterMaterialPaper": "Papel reciclado",
+  "litterMaterialWood": "Madera",
+  "litterMaterialWalnut": "Cáscara de nuez",
+  "litterMaterialGrass": "Hierba",
+  "litterMaterialMixed": "Sustrato mixto",
+  "litterMaterialOther": "Otro sustrato",
+  "litterFlagKittenClumpingClay": "La arcilla aglomerante puede formar una obstrucción si {name} la traga al asearse. Los veterinarios suelen recomendar una arena no aglomerante o vegetal hasta los 4 meses.",
+  "@litterFlagKittenClumpingClay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagKittenSilica": "Los gatitos suelen probar su arena, y los cristales de sílice son afilados y no están hechos para tragarse. Por ahora, algo más suave es más seguro para {name}.",
+  "@litterFlagKittenSilica": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagMonitoringClumping": "Los grumos permiten ver fácilmente cuánto orina {name}, algo que conviene vigilar con su condición.",
+  "@litterFlagMonitoringClumping": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagMonitoringNonClumping": "Sin grumos es difícil notar cambios en cuánto orina {name}, algo importante con su condición.",
+  "@litterFlagMonitoringNonClumping": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagSensitiveScented": "El perfume añadido puede irritar la piel y las almohadillas sensibles como las de {name}.",
+  "@litterFlagSensitiveScented": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagSensitiveDust": "Mucho polvo se deposita en la piel y las patas y puede irritar las vías respiratorias de {name}.",
+  "@litterFlagSensitiveDust": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagPawComfortCoarse": "Los cristales y pellets gruesos son duros para unas articulaciones rígidas. {name} probablemente prefiera un grano fino tipo arena.",
+  "@litterFlagPawComfortCoarse": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagPawComfortFine": "Un grano fino tipo arena es suave para las articulaciones de {name} y fácil de escarbar.",
+  "@litterFlagPawComfortFine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagLongCoatTracking": "La arena que se esparce con facilidad se queda en un pelaje largo como el de {name} y acaba por toda la casa.",
+  "@litterFlagLongCoatTracking": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterSectionTitle": "Arenas",
+  "litterSectionCount": "{count, plural, =1{1 arena} other{{count} arenas}}",
+  "@litterSectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "litterAdditiveBakingSoda": "Bicarbonato de sodio",
+  "litterAdditiveActivatedCharcoal": "Carbón activado",
+  "litterAdditiveFragrance": "Perfume",
+  "litterAdditivePlantStarch": "Almidón vegetal",
+  "litterAdditiveZeolite": "Zeolita",
+  "litterAdditiveSilica": "Sílice",
+  "litterAdditiveEssentialOils": "Aceites esenciales",
+  "litterAdditiveDeodorizer": "Neutralizador de olores",
+  "foodSectionTitle": "Comida"
 }

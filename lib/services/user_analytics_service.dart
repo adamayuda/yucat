@@ -74,12 +74,11 @@ class UserAnalyticsService {
   }
 
   /// Records a successful scan: bumps the lifetime counter and stamps the
-  /// streak + last-scan time.
-  Future<void> recordScan({required int currentStreak}) async {
+  /// last-scan time. Counts both categories — a litter scan is a scan.
+  Future<void> recordScan() async {
     try {
       await _setUserPropertiesUsecase.increment(UserProps.totalScans, 1);
       await _setUserPropertiesUsecase({
-        UserProps.currentStreak: currentStreak,
         UserProps.lastScanAt: DateTime.now().toIso8601String(),
       });
     } catch (e) {

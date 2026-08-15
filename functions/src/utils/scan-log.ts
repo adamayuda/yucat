@@ -10,8 +10,15 @@ export async function logScanRequest(data: {
   requestId: string;
   userId: string | null;
   userPhotoUrl: string;
-  identification: {brand: string; name: string} | null;
+  /**
+   * What the identify step read off the packaging. `category` distinguishes a
+   * food scan from a litter scan; absent on rows written before litter support.
+   */
+  identification:
+    | {brand: string; name: string; foodType?: string; category?: string}
+    | null;
   cachedMatch: boolean;
+  /** The analyzed record — a `Product` on a food scan, a `Litter` on a litter scan. */
   product: object | null;
   timestamp: Date;
 }): Promise<void> {

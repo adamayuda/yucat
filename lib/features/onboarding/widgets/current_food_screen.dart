@@ -10,6 +10,7 @@ import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/cat/presentation/utils/cat_product_recommendations.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
 import 'package:yucat/features/home/widgets/home_loading_page.dart';
+import 'package:yucat/features/product/domain/entities/scan_result_entity.dart';
 import 'package:yucat/features/product/domain/usecases/fetch_product_by_image_usecase.dart';
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
@@ -62,7 +63,7 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
       properties: {'timestamp': DateTime.now().toIso8601String()},
     );
     try {
-      final entity = await sl<FetchProductByImageUsecase>().call(
+      final scan = await sl<FetchProductByImageUsecase>().call(
         imageBase64: imageBase64,
         mimeType: mimeType,
         // Device region (e.g. "ES") to bias backend web_search to the user's
@@ -74,11 +75,14 @@ class _CurrentFoodScreenState extends State<CurrentFoodScreen> {
         locale: locale,
       );
       if (!mounted) return;
-      if (entity == null) {
+      // This beat asks "what do you feed your cat?", so only a food scan can
+      // answer it. A litter scan here is treated as an unrecognized photo
+      // rather than derailing onboarding into the litter screen.
+      if (scan is! ScanFoodResult) {
         _fail('not_found');
         return;
       }
-      final model = sl<ProductEntityToModelMapper>()(entity);
+      final model = sl<ProductEntityToModelMapper>()(scan.product);
       // Warm the per-cat picks cache so the success teaser is instant.
       unawaited(recommendProductsForCat(widget.summary.entity, l10n, limit: 3));
       sl<LogEventUsecase>().call(

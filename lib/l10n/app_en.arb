@@ -631,7 +631,7 @@
     }
   },
   "scanHistoryEmptyTitle": "No scans yet",
-  "scanHistoryEmptyBody": "Foods you scan will show up here.",
+  "scanHistoryEmptyBody": "Everything you scan shows up here.",
   "commonTryAgain": "Try again",
   "searchTabTitle": "Search",
   "searchHint": "Search for a cat food",
@@ -986,5 +986,135 @@
   "ratingLabelExcellent": "Excellent",
   "ratingLabelGood": "Good",
   "ratingLabelAverage": "Average",
-  "ratingLabelPoor": "Poor"
+  "ratingLabelPoor": "Poor",
+  "litterDetailScoreLabel": "LITTER SCORE",
+  "litterDetailNoDataBody": "We couldn't find enough about this litter yet. Try scanning the back of the pack, or check back later — we keep looking.",
+  "litterDetailAttributesTitle": "What's in the box",
+  "litterDetailAdditives": "Additives",
+  "litterDetailNoCatPrompt": "Create a cat profile to see what this litter means for your cat.",
+  "litterDetailNoFlags": "Nothing here needs special attention for {name}.",
+  "@litterDetailNoFlags": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterAttrClumping": "Clumping",
+  "litterAttrNonClumping": "Non-clumping",
+  "litterAttrDustLow": "Low dust",
+  "litterAttrDustModerate": "Some dust",
+  "litterAttrDustHigh": "High dust",
+  "litterAttrUnscented": "Unscented",
+  "litterAttrScented": "Scented",
+  "litterAttrTrackingLow": "Low tracking",
+  "litterAttrTrackingModerate": "Some tracking",
+  "litterAttrTrackingHigh": "High tracking",
+  "litterAttrOdorLow": "Weak odour control",
+  "litterAttrOdorModerate": "Moderate odour control",
+  "litterAttrOdorHigh": "Strong odour control",
+  "litterAttrFlushable": "Flushable",
+  "litterAttrBiodegradable": "Biodegradable",
+  "litterMaterialClayBentonite": "Bentonite clay",
+  "litterMaterialClayNonClumping": "Non-clumping clay",
+  "litterMaterialSilicaCrystal": "Silica crystals",
+  "litterMaterialCorn": "Corn",
+  "litterMaterialWheat": "Wheat",
+  "litterMaterialTofu": "Tofu",
+  "litterMaterialPaper": "Recycled paper",
+  "litterMaterialWood": "Wood",
+  "litterMaterialWalnut": "Walnut shell",
+  "litterMaterialGrass": "Grass",
+  "litterMaterialMixed": "Mixed substrate",
+  "litterMaterialOther": "Other substrate",
+  "litterFlagKittenClumpingClay": "Clumping clay can form a blockage if {name} swallows it while grooming. Vets usually suggest a non-clumping or plant-based litter until about 4 months.",
+  "@litterFlagKittenClumpingClay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagKittenSilica": "Kittens often taste their litter, and silica crystals are sharp and not meant to be swallowed. Something softer is safer for {name} for now.",
+  "@litterFlagKittenSilica": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagMonitoringClumping": "Clumps make it easy to see how much {name} is urinating — worth watching with their condition.",
+  "@litterFlagMonitoringClumping": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagMonitoringNonClumping": "Without clumps it's hard to notice changes in how much {name} urinates, which matters with their condition.",
+  "@litterFlagMonitoringNonClumping": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagSensitiveScented": "Added fragrance can irritate sensitive skin and paws like {name}'s.",
+  "@litterFlagSensitiveScented": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagSensitiveDust": "High dust settles on skin and paws and can irritate {name}'s airways.",
+  "@litterFlagSensitiveDust": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagPawComfortCoarse": "Coarse crystals and pellets are hard underfoot for stiff joints. {name} may prefer a fine, sand-like grain.",
+  "@litterFlagPawComfortCoarse": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagPawComfortFine": "A fine, sand-like grain is gentle on {name}'s joints and easy to dig in.",
+  "@litterFlagPawComfortFine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagLongCoatTracking": "Litter that tracks easily gets caught in a long coat like {name}'s and travels through the house.",
+  "@litterFlagLongCoatTracking": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterSectionTitle": "Litters",
+  "litterSectionCount": "{count, plural, =1{1 litter} other{{count} litters}}",
+  "@litterSectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "litterAdditiveBakingSoda": "Baking soda",
+  "litterAdditiveActivatedCharcoal": "Activated charcoal",
+  "litterAdditiveFragrance": "Fragrance",
+  "litterAdditivePlantStarch": "Plant starch",
+  "litterAdditiveZeolite": "Zeolite",
+  "litterAdditiveSilica": "Silica",
+  "litterAdditiveEssentialOils": "Essential oils",
+  "litterAdditiveDeodorizer": "Odour neutralizer",
+  "foodSectionTitle": "Cat food"
 }

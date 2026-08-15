@@ -1321,8 +1321,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scanHistoryEmptyTitle => 'Aucun scan pour l\'instant';
 
   @override
-  String get scanHistoryEmptyBody =>
-      'Les aliments que tu scanneras apparaîtront ici.';
+  String get scanHistoryEmptyBody => 'Tout ce que tu scannes apparaît ici.';
 
   @override
   String get commonTryAgain => 'Réessayer';
@@ -2061,4 +2060,193 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ratingLabelPoor => 'Médiocre';
+
+  @override
+  String get litterDetailScoreLabel => 'NOTE DE LA LITIÈRE';
+
+  @override
+  String get litterDetailNoDataBody =>
+      'Nous n\'avons pas encore trouvé assez d\'informations sur cette litière. Essayez de scanner l\'arrière du paquet ou revenez plus tard — nous continuons à chercher.';
+
+  @override
+  String get litterDetailAttributesTitle => 'Ce qu\'il y a dedans';
+
+  @override
+  String get litterDetailAdditives => 'Additifs';
+
+  @override
+  String get litterDetailNoCatPrompt =>
+      'Créez un profil de chat pour voir ce que cette litière signifie pour votre chat.';
+
+  @override
+  String litterDetailNoFlags(String name) {
+    return 'Rien ici ne demande une attention particulière pour $name.';
+  }
+
+  @override
+  String get litterAttrClumping => 'Agglomérante';
+
+  @override
+  String get litterAttrNonClumping => 'Non agglomérante';
+
+  @override
+  String get litterAttrDustLow => 'Peu de poussière';
+
+  @override
+  String get litterAttrDustModerate => 'Un peu de poussière';
+
+  @override
+  String get litterAttrDustHigh => 'Très poussiéreuse';
+
+  @override
+  String get litterAttrUnscented => 'Sans parfum';
+
+  @override
+  String get litterAttrScented => 'Parfumée';
+
+  @override
+  String get litterAttrTrackingLow => 'Peu de dispersion';
+
+  @override
+  String get litterAttrTrackingModerate => 'Dispersion modérée';
+
+  @override
+  String get litterAttrTrackingHigh => 'Dispersion importante';
+
+  @override
+  String get litterAttrOdorLow => 'Faible contrôle des odeurs';
+
+  @override
+  String get litterAttrOdorModerate => 'Contrôle des odeurs moyen';
+
+  @override
+  String get litterAttrOdorHigh => 'Bon contrôle des odeurs';
+
+  @override
+  String get litterAttrFlushable => 'Jetable aux toilettes';
+
+  @override
+  String get litterAttrBiodegradable => 'Biodégradable';
+
+  @override
+  String get litterMaterialClayBentonite => 'Argile bentonite';
+
+  @override
+  String get litterMaterialClayNonClumping => 'Argile non agglomérante';
+
+  @override
+  String get litterMaterialSilicaCrystal => 'Cristaux de silice';
+
+  @override
+  String get litterMaterialCorn => 'Maïs';
+
+  @override
+  String get litterMaterialWheat => 'Blé';
+
+  @override
+  String get litterMaterialTofu => 'Tofu';
+
+  @override
+  String get litterMaterialPaper => 'Papier recyclé';
+
+  @override
+  String get litterMaterialWood => 'Bois';
+
+  @override
+  String get litterMaterialWalnut => 'Coque de noix';
+
+  @override
+  String get litterMaterialGrass => 'Herbe';
+
+  @override
+  String get litterMaterialMixed => 'Substrat mixte';
+
+  @override
+  String get litterMaterialOther => 'Autre substrat';
+
+  @override
+  String litterFlagKittenClumpingClay(String name) {
+    return 'L\'argile agglomérante peut former un bouchon si $name l\'avale en faisant sa toilette. Les vétérinaires conseillent une litière non agglomérante ou végétale jusqu\'à environ 4 mois.';
+  }
+
+  @override
+  String litterFlagKittenSilica(String name) {
+    return 'Les chatons goûtent souvent leur litière, et les cristaux de silice sont coupants et ne doivent pas être avalés. Quelque chose de plus doux est plus sûr pour $name pour l\'instant.';
+  }
+
+  @override
+  String litterFlagMonitoringClumping(String name) {
+    return 'Les agglomérats permettent de voir facilement combien $name urine — un point à surveiller avec son problème de santé.';
+  }
+
+  @override
+  String litterFlagMonitoringNonClumping(String name) {
+    return 'Sans agglomérats, il est difficile de repérer un changement dans la quantité d\'urine de $name, ce qui compte avec son problème de santé.';
+  }
+
+  @override
+  String litterFlagSensitiveScented(String name) {
+    return 'Les parfums ajoutés peuvent irriter une peau et des coussinets sensibles comme ceux de $name.';
+  }
+
+  @override
+  String litterFlagSensitiveDust(String name) {
+    return 'Beaucoup de poussière se dépose sur la peau et les coussinets et peut irriter les voies respiratoires de $name.';
+  }
+
+  @override
+  String litterFlagPawComfortCoarse(String name) {
+    return 'Les cristaux et granulés grossiers sont durs sous des articulations raides. $name préférera sans doute un grain fin, proche du sable.';
+  }
+
+  @override
+  String litterFlagPawComfortFine(String name) {
+    return 'Un grain fin, proche du sable, ménage les articulations de $name et se gratte facilement.';
+  }
+
+  @override
+  String litterFlagLongCoatTracking(String name) {
+    return 'Une litière qui se disperse facilement s\'accroche à un pelage long comme celui de $name et se retrouve dans toute la maison.';
+  }
+
+  @override
+  String get litterSectionTitle => 'Litières';
+
+  @override
+  String litterSectionCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count litières',
+      one: '1 litière',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get litterAdditiveBakingSoda => 'Bicarbonate de soude';
+
+  @override
+  String get litterAdditiveActivatedCharcoal => 'Charbon actif';
+
+  @override
+  String get litterAdditiveFragrance => 'Parfum';
+
+  @override
+  String get litterAdditivePlantStarch => 'Amidon végétal';
+
+  @override
+  String get litterAdditiveZeolite => 'Zéolite';
+
+  @override
+  String get litterAdditiveSilica => 'Silice';
+
+  @override
+  String get litterAdditiveEssentialOils => 'Huiles essentielles';
+
+  @override
+  String get litterAdditiveDeodorizer => 'Neutralisant d\'odeurs';
+
+  @override
+  String get foodSectionTitle => 'Alimentation';
 }

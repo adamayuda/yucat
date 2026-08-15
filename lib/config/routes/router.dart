@@ -7,6 +7,8 @@ import 'package:yucat/features/cat_detail/presentation/cat_detail_page.dart';
 import 'package:yucat/features/onboarding/current_food_page.dart';
 import 'package:yucat/features/onboarding/onboarding_page.dart';
 import 'package:yucat/features/onboarding/result_page.dart';
+import 'package:yucat/features/litter_detail/presentation/litter_detail_page.dart';
+import 'package:yucat/features/litter_detail/presentation/models/litter_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/profile/profile_page.dart';
 import 'package:yucat/features/saved_products/presentation/saved_products_page.dart';
@@ -102,6 +104,7 @@ class AppRouter extends RootStackRouter {
       fullscreenDialog: true,
     ),
     AutoRoute(page: ProductDetailRoute.page, path: '/product-detail'),
+    AutoRoute(page: LitterDetailRoute.page, path: '/litter-detail'),
     AutoRoute(page: ProductListingRoute.page, path: '/product-listing'),
     AutoRoute(page: CatListingRoute.page, path: '/cats'),
     AutoRoute(page: SavedProductsRoute.page, path: '/saved-products'),

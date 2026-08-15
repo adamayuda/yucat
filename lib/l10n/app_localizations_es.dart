@@ -1320,8 +1320,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get scanHistoryEmptyTitle => 'Aún no hay escaneos';
 
   @override
-  String get scanHistoryEmptyBody =>
-      'Los alimentos que escanees aparecerán aquí.';
+  String get scanHistoryEmptyBody => 'Todo lo que escanees aparecerá aquí.';
 
   @override
   String get commonTryAgain => 'Intentar de nuevo';
@@ -2062,4 +2061,193 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get ratingLabelPoor => 'Deficiente';
+
+  @override
+  String get litterDetailScoreLabel => 'PUNTUACIÓN DE LA ARENA';
+
+  @override
+  String get litterDetailNoDataBody =>
+      'Todavía no hemos encontrado suficiente información sobre esta arena. Prueba a escanear la parte trasera del paquete o vuelve más tarde: seguimos buscando.';
+
+  @override
+  String get litterDetailAttributesTitle => 'Qué contiene';
+
+  @override
+  String get litterDetailAdditives => 'Aditivos';
+
+  @override
+  String get litterDetailNoCatPrompt =>
+      'Crea un perfil de gato para ver qué significa esta arena para tu gato.';
+
+  @override
+  String litterDetailNoFlags(String name) {
+    return 'No hay nada que requiera atención especial para $name.';
+  }
+
+  @override
+  String get litterAttrClumping => 'Aglomerante';
+
+  @override
+  String get litterAttrNonClumping => 'No aglomerante';
+
+  @override
+  String get litterAttrDustLow => 'Poco polvo';
+
+  @override
+  String get litterAttrDustModerate => 'Algo de polvo';
+
+  @override
+  String get litterAttrDustHigh => 'Mucho polvo';
+
+  @override
+  String get litterAttrUnscented => 'Sin perfume';
+
+  @override
+  String get litterAttrScented => 'Perfumada';
+
+  @override
+  String get litterAttrTrackingLow => 'Poco rastro';
+
+  @override
+  String get litterAttrTrackingModerate => 'Algo de rastro';
+
+  @override
+  String get litterAttrTrackingHigh => 'Mucho rastro';
+
+  @override
+  String get litterAttrOdorLow => 'Poco control de olores';
+
+  @override
+  String get litterAttrOdorModerate => 'Control de olores moderado';
+
+  @override
+  String get litterAttrOdorHigh => 'Gran control de olores';
+
+  @override
+  String get litterAttrFlushable => 'Se puede tirar al inodoro';
+
+  @override
+  String get litterAttrBiodegradable => 'Biodegradable';
+
+  @override
+  String get litterMaterialClayBentonite => 'Arcilla de bentonita';
+
+  @override
+  String get litterMaterialClayNonClumping => 'Arcilla no aglomerante';
+
+  @override
+  String get litterMaterialSilicaCrystal => 'Cristales de sílice';
+
+  @override
+  String get litterMaterialCorn => 'Maíz';
+
+  @override
+  String get litterMaterialWheat => 'Trigo';
+
+  @override
+  String get litterMaterialTofu => 'Tofu';
+
+  @override
+  String get litterMaterialPaper => 'Papel reciclado';
+
+  @override
+  String get litterMaterialWood => 'Madera';
+
+  @override
+  String get litterMaterialWalnut => 'Cáscara de nuez';
+
+  @override
+  String get litterMaterialGrass => 'Hierba';
+
+  @override
+  String get litterMaterialMixed => 'Sustrato mixto';
+
+  @override
+  String get litterMaterialOther => 'Otro sustrato';
+
+  @override
+  String litterFlagKittenClumpingClay(String name) {
+    return 'La arcilla aglomerante puede formar una obstrucción si $name la traga al asearse. Los veterinarios suelen recomendar una arena no aglomerante o vegetal hasta los 4 meses.';
+  }
+
+  @override
+  String litterFlagKittenSilica(String name) {
+    return 'Los gatitos suelen probar su arena, y los cristales de sílice son afilados y no están hechos para tragarse. Por ahora, algo más suave es más seguro para $name.';
+  }
+
+  @override
+  String litterFlagMonitoringClumping(String name) {
+    return 'Los grumos permiten ver fácilmente cuánto orina $name, algo que conviene vigilar con su condición.';
+  }
+
+  @override
+  String litterFlagMonitoringNonClumping(String name) {
+    return 'Sin grumos es difícil notar cambios en cuánto orina $name, algo importante con su condición.';
+  }
+
+  @override
+  String litterFlagSensitiveScented(String name) {
+    return 'El perfume añadido puede irritar la piel y las almohadillas sensibles como las de $name.';
+  }
+
+  @override
+  String litterFlagSensitiveDust(String name) {
+    return 'Mucho polvo se deposita en la piel y las patas y puede irritar las vías respiratorias de $name.';
+  }
+
+  @override
+  String litterFlagPawComfortCoarse(String name) {
+    return 'Los cristales y pellets gruesos son duros para unas articulaciones rígidas. $name probablemente prefiera un grano fino tipo arena.';
+  }
+
+  @override
+  String litterFlagPawComfortFine(String name) {
+    return 'Un grano fino tipo arena es suave para las articulaciones de $name y fácil de escarbar.';
+  }
+
+  @override
+  String litterFlagLongCoatTracking(String name) {
+    return 'La arena que se esparce con facilidad se queda en un pelaje largo como el de $name y acaba por toda la casa.';
+  }
+
+  @override
+  String get litterSectionTitle => 'Arenas';
+
+  @override
+  String litterSectionCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count arenas',
+      one: '1 arena',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get litterAdditiveBakingSoda => 'Bicarbonato de sodio';
+
+  @override
+  String get litterAdditiveActivatedCharcoal => 'Carbón activado';
+
+  @override
+  String get litterAdditiveFragrance => 'Perfume';
+
+  @override
+  String get litterAdditivePlantStarch => 'Almidón vegetal';
+
+  @override
+  String get litterAdditiveZeolite => 'Zeolita';
+
+  @override
+  String get litterAdditiveSilica => 'Sílice';
+
+  @override
+  String get litterAdditiveEssentialOils => 'Aceites esenciales';
+
+  @override
+  String get litterAdditiveDeodorizer => 'Neutralizador de olores';
+
+  @override
+  String get foodSectionTitle => 'Comida';
 }

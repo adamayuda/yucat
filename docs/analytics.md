@@ -33,8 +33,7 @@ Set on the user's People profile (keyed by Firebase UID). Use these to **segment
 | `cats_count` | int | HomeBloc after cats load (authoritative) |
 | `has_cat` | bool | derived from `cats_count > 0` |
 | `primary_cat_age_group` | string | HomeBloc |
-| `total_scans` | int (incremented +1 per scan) | HomeBloc scan success |
-| `current_streak` | int | HomeBloc scan success |
+| `total_scans` | int (incremented +1 per scan) | HomeBloc scan success — **food and litter both count** |
 | `last_scan_at` | ISO8601 string | HomeBloc scan success |
 | `attribution_source` | string | onboarding attribution step |
 | `onboarding_completed` | bool | onboarding finalized |
@@ -88,7 +87,23 @@ Stalled (`onboarding_completed = true` AND `is_subscriber = false`).
 | `Search Results Viewed` | `query`, `results_count`, `has_results` |
 | `Product Detail Viewed` | `product_name`, `product_brand` |
 | `Product Saved` / `Product Unsaved` | `product_name`, `product_brand` |
-| `Streak Milestone` | `streak_days` |
+
+### Cat litter
+| Event | Key properties |
+|---|---|
+| `Litter Selected` | `litter_name`, `litter_brand`, `litter_material`, `source` (`image`) |
+| `Litter Detail Viewed` | `litter_name`, `litter_brand`, `litter_material` |
+| `Litter Saved` / `Litter Unsaved` | `litter_name`, `litter_brand` |
+
+⚠️ **The capture and failure events are shared with food.** The camera is a single entry
+point — the backend decides whether the photo was food or litter — so
+`Product Image Captured` and `Product Image Scan Failed` fire for **both** categories and
+only the outcome events split. A scan funnel built on the capture event therefore counts
+litter scans too; segment on the outcome event to separate them.
+
+> **Removed:** `Streak Milestone` and the `current_streak` People property. The daily scan
+> streak was never rendered anywhere in the app, so the two signals measured a feature
+> users could not see. `total_scans` and `last_scan_at` remain.
 
 ### Paywall & subscription
 | Event | Properties | Notes |

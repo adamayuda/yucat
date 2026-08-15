@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/signin_anonymously_usecase.dart';
@@ -12,26 +13,29 @@ import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
+import 'package:yucat/features/litter_detail/presentation/mappers/litter_entity_to_model_mapper.dart';
+import 'package:yucat/features/product/domain/entities/scan_result_entity.dart';
 import 'package:yucat/features/product/domain/usecases/fetch_product_by_image_usecase.dart';
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/saved_products/domain/usecases/get_saved_products_usecase.dart';
+import 'package:yucat/features/scan_history/domain/usecases/add_litter_to_history_usecase.dart';
 import 'package:yucat/features/scan_history/domain/usecases/add_scan_to_history_usecase.dart';
 import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/review_prompt_service.dart';
-import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final FetchProductByImageUsecase _fetchProductByImageUsecase;
   final ProductEntityToModelMapper _productEntityToModelMapper;
+  final LitterEntityToModelMapper _litterEntityToModelMapper;
   final CurrentUserUsecase _currentUserUsecase;
   final SigninAnonymouslyUsecase _signinAnonymouslyUsecase;
-  final ScanTrackingService _scanTrackingService;
   final ReviewPromptService _reviewPromptService;
   final GetCatsUsecase _getCatsUsecase;
   final GetSavedProductsUsecase _getSavedProductsUsecase;
   final AddScanToHistoryUsecase _addScanToHistoryUsecase;
+  final AddLitterToHistoryUsecase _addLitterToHistoryUsecase;
   final LogEventUsecase _logEventUsecase;
   final NotificationService _notificationService;
   final UserAnalyticsService _userAnalyticsService;
@@ -41,26 +45,28 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc({
     required FetchProductByImageUsecase fetchProductByImageUsecase,
     required ProductEntityToModelMapper productEntityToModelMapper,
+    required LitterEntityToModelMapper litterEntityToModelMapper,
     required CurrentUserUsecase currentUserUsecase,
     required SigninAnonymouslyUsecase signinAnonymouslyUsecase,
-    required ScanTrackingService scanTrackingService,
     required ReviewPromptService reviewPromptService,
     required GetCatsUsecase getCatsUsecase,
     required GetSavedProductsUsecase getSavedProductsUsecase,
     required AddScanToHistoryUsecase addScanToHistoryUsecase,
+    required AddLitterToHistoryUsecase addLitterToHistoryUsecase,
     required LogEventUsecase logEventUsecase,
     required NotificationService notificationService,
     required UserAnalyticsService userAnalyticsService,
     required SharedPreferences prefs,
   }) : _fetchProductByImageUsecase = fetchProductByImageUsecase,
        _productEntityToModelMapper = productEntityToModelMapper,
+       _litterEntityToModelMapper = litterEntityToModelMapper,
        _currentUserUsecase = currentUserUsecase,
        _signinAnonymouslyUsecase = signinAnonymouslyUsecase,
-       _scanTrackingService = scanTrackingService,
        _reviewPromptService = reviewPromptService,
        _getCatsUsecase = getCatsUsecase,
        _getSavedProductsUsecase = getSavedProductsUsecase,
        _addScanToHistoryUsecase = addScanToHistoryUsecase,
+       _addLitterToHistoryUsecase = addLitterToHistoryUsecase,
        _logEventUsecase = logEventUsecase,
        _notificationService = notificationService,
        _userAnalyticsService = userAnalyticsService,
@@ -134,14 +140,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(HomeScanningState(imageBase64: event.imageBase64));
 
     try {
-      final product = await _fetchProductByImageUsecase.call(
+      final scan = await _fetchProductByImageUsecase.call(
         imageBase64: event.imageBase64,
         mimeType: event.mimeType,
         countryCode: event.countryCode,
         locale: event.locale,
       );
 
-      if (product == null) {
+      if (scan == null) {
         _logEventUsecase.call(
           eventName: 'Product Image Scan Failed',
           properties: {
@@ -153,6 +159,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         return;
       }
 
+      // The camera is one entry point for both categories — the backend decides
+      // which it was, and the two results have their own screens and stores.
+      if (scan is ScanLitterResult) {
+        await _onLitterScanned(scan, event);
+        return;
+      }
+
+      final product = (scan as ScanFoodResult).product;
       final productDetailModel = _productEntityToModelMapper(product);
 
       // Record every successful scan to local history (best-effort; a
@@ -171,8 +185,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         },
       );
 
-      final streak = await _scanTrackingService.recordSuccessfulScan();
-      unawaited(_userAnalyticsService.recordScan(currentStreak: streak));
+      unawaited(_userAnalyticsService.recordScan());
       await _reviewPromptService.recordScan();
       // Fire-and-forget; the service applies its own gating.
       unawaited(
@@ -194,6 +207,39 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       );
       emit(HomeErrorState(errorType: _toErrorType(e)));
     }
+  }
+
+  /// A scanned litter: record it in the litter history and open the litter
+  /// screen. Deliberately symmetrical with the food path — a litter scan counts
+  /// toward `total_scans` and the review-prompt gate exactly like a food one.
+  Future<void> _onLitterScanned(
+    ScanLitterResult scan,
+    ImageCapturedEvent event,
+  ) async {
+    final litterModel = _litterEntityToModelMapper(scan.litter);
+
+    // Best-effort: a persistence failure must never block the result screen.
+    try {
+      await _addLitterToHistoryUsecase(litterModel);
+    } catch (_) {}
+
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.litterSelected,
+      properties: {
+        'litter_name': litterModel.name,
+        'litter_brand': litterModel.brand,
+        'litter_material': litterModel.material.wire,
+        'source': 'image',
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+
+    unawaited(_userAnalyticsService.recordScan());
+    await _reviewPromptService.recordScan();
+    unawaited(_reviewPromptService.maybePrompt(trigger: 'post_scan'));
+
+    event.router.push(LitterDetailRoute(litter: litterModel));
+    add(HomeInitialEvent());
   }
 
   HomeErrorType _toErrorType(Object e) {

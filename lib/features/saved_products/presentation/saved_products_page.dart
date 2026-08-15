@@ -11,6 +11,8 @@ import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
 import 'package:yucat/presentation/components/skeletons/product_list_skeleton.dart';
+import 'package:yucat/features/litter_detail/presentation/models/litter_display_model.dart';
+import 'package:yucat/features/litter_detail/presentation/widgets/litter_list_row.dart';
 
 @RoutePage()
 class SavedProductsPage extends StatefulWidget {
@@ -32,6 +34,11 @@ class _SavedProductsPageState extends State<SavedProductsPage> {
 
   Future<void> _openProduct(ProductDisplayModel product) async {
     await context.router.push(ProductDetailRoute(product: product));
+    _bloc.add(const SavedProductsRefreshEvent());
+  }
+
+  Future<void> _openLitter(LitterDisplayModel litter) async {
+    await context.router.push(LitterDetailRoute(litter: litter));
     _bloc.add(const SavedProductsRefreshEvent());
   }
 
@@ -57,12 +64,14 @@ class _SavedProductsPageState extends State<SavedProductsPage> {
                         DSDimens.size4xl,
                       ),
                     ),
-                  SavedProductsLoadedState(:final products) =>
-                    products.isEmpty
+                  SavedProductsLoadedState(:final products, :final litters) =>
+                    state.isEmpty
                         ? _EmptyView()
                         : _LoadedList(
                             products: products,
+                            litters: litters,
                             onTapProduct: _openProduct,
+                            onTapLitter: _openLitter,
                           ),
                 },
               ),
@@ -76,51 +85,121 @@ class _SavedProductsPageState extends State<SavedProductsPage> {
 
 class _LoadedList extends StatelessWidget {
   final List<ProductDisplayModel> products;
+  final List<LitterDisplayModel> litters;
   final ValueChanged<ProductDisplayModel> onTapProduct;
+  final ValueChanged<LitterDisplayModel> onTapLitter;
 
   const _LoadedList({
     required this.products,
+    required this.litters,
     required this.onTapProduct,
+    required this.onTapLitter,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
+    final l10n = AppLocalizations.of(context);
+    // A plain ListView rather than a builder: both stores are capped well
+    // under a hundred entries, and two sections with their own headers are far
+    // clearer laid out directly than behind index arithmetic.
+    return ListView(
       padding: const EdgeInsets.fromLTRB(
         DSDimens.sizeL,
         DSDimens.sizeS,
         DSDimens.sizeL,
         DSDimens.size4xl,
       ),
-      itemCount: products.length + 1,
-      separatorBuilder: (_, __) => const SizedBox(height: DSDimens.sizeS),
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          final n = products.length;
-          final l10n = AppLocalizations.of(context);
-          return Padding(
-            padding: const EdgeInsets.only(bottom: DSDimens.sizeS),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.savedProductsTitle, style: DSTextStyles.displayLg),
-                const SizedBox(height: DSDimens.sizeXxxs),
-                Text(
-                  l10n.savedProductsCount(n),
-                  style: DSTextStyles.bodyMd.copyWith(
-                    color: DSColors.inkSecondary,
-                  ),
-                ),
-              ],
+      children: [
+        // The page title always renders, so a library containing only litters
+        // is still headed "Saved products". Per-category subheads appear only
+        // when there is more than one category to tell apart.
+        _SectionHeader(
+          title: l10n.savedProductsTitle,
+          subtitle: l10n.savedProductsCount(products.length + litters.length),
+        ),
+        if (products.isNotEmpty) ...[
+          if (litters.isNotEmpty)
+            _SectionSubhead(
+              title: l10n.foodSectionTitle,
+              count: l10n.savedProductsCount(products.length),
             ),
-          );
-        }
-        final product = products[index - 1];
-        return _SavedProductRow(
-          product: product,
-          onTap: () => onTapProduct(product),
-        );
-      },
+          for (final product in products) ...[
+            _SavedProductRow(
+              product: product,
+              onTap: () => onTapProduct(product),
+            ),
+            const SizedBox(height: DSDimens.sizeS),
+          ],
+        ],
+        if (litters.isNotEmpty) ...[
+          if (products.isNotEmpty)
+            _SectionSubhead(
+              title: l10n.litterSectionTitle,
+              count: l10n.litterSectionCount(litters.length),
+            ),
+          for (final litter in litters) ...[
+            LitterListRow(
+              litter: litter,
+              onTap: () => onTapLitter(litter),
+            ),
+            const SizedBox(height: DSDimens.sizeS),
+          ],
+        ],
+      ],
+    );
+  }
+}
+
+/// A per-category divider inside a two-category list. Rendered only when both
+/// categories are present — with one category the page title already says what
+/// the list is.
+class _SectionSubhead extends StatelessWidget {
+  final String title;
+  final String count;
+
+  const _SectionSubhead({required this.title, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: DSDimens.sizeXs),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          Text(title, style: DSTextStyles.titleMd),
+          const SizedBox(width: DSDimens.sizeXxs),
+          Text(
+            count,
+            style: DSTextStyles.caption.copyWith(color: DSColors.inkSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const _SectionHeader({required this.title, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: DSDimens.sizeS),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: DSTextStyles.displayLg),
+          const SizedBox(height: DSDimens.sizeXxxs),
+          Text(
+            subtitle,
+            style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkSecondary),
+          ),
+        ],
+      ),
     );
   }
 }

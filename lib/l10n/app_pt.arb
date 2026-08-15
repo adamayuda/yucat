@@ -372,7 +372,7 @@
   "scanHistoryTitle": "Histórico de digitalizações",
   "scanHistoryScanCount": "{count, plural, =1{1 digitalização} other{{count} digitalizações}}",
   "scanHistoryEmptyTitle": "Ainda não há digitalizações",
-  "scanHistoryEmptyBody": "Os alimentos que digitalizar aparecerão aqui.",
+  "scanHistoryEmptyBody": "Tudo o que digitalizares aparece aqui.",
   "commonTryAgain": "Tentar novamente",
   "searchTabTitle": "Pesquisar",
   "searchHint": "Pesquise um alimento para gatos",
@@ -567,5 +567,135 @@
   "ratingLabelExcellent": "Excelente",
   "ratingLabelGood": "Bom",
   "ratingLabelAverage": "Razoável",
-  "ratingLabelPoor": "Fraco"
+  "ratingLabelPoor": "Fraco",
+  "litterDetailScoreLabel": "PONTUAÇÃO DA AREIA",
+  "litterDetailNoDataBody": "Ainda não encontrámos informação suficiente sobre esta areia. Tenta digitalizar a parte de trás da embalagem ou volta mais tarde — continuamos à procura.",
+  "litterDetailAttributesTitle": "O que tem dentro",
+  "litterDetailAdditives": "Aditivos",
+  "litterDetailNoCatPrompt": "Cria um perfil de gato para veres o que esta areia significa para o teu gato.",
+  "litterDetailNoFlags": "Não há nada que exija atenção especial para {name}.",
+  "@litterDetailNoFlags": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterAttrClumping": "Aglomerante",
+  "litterAttrNonClumping": "Não aglomerante",
+  "litterAttrDustLow": "Pouco pó",
+  "litterAttrDustModerate": "Algum pó",
+  "litterAttrDustHigh": "Muito pó",
+  "litterAttrUnscented": "Sem perfume",
+  "litterAttrScented": "Perfumada",
+  "litterAttrTrackingLow": "Espalha-se pouco",
+  "litterAttrTrackingModerate": "Espalha-se um pouco",
+  "litterAttrTrackingHigh": "Espalha-se muito",
+  "litterAttrOdorLow": "Fraco controlo de odores",
+  "litterAttrOdorModerate": "Controlo de odores moderado",
+  "litterAttrOdorHigh": "Bom controlo de odores",
+  "litterAttrFlushable": "Pode ir à sanita",
+  "litterAttrBiodegradable": "Biodegradável",
+  "litterMaterialClayBentonite": "Argila de bentonite",
+  "litterMaterialClayNonClumping": "Argila não aglomerante",
+  "litterMaterialSilicaCrystal": "Cristais de sílica",
+  "litterMaterialCorn": "Milho",
+  "litterMaterialWheat": "Trigo",
+  "litterMaterialTofu": "Tofu",
+  "litterMaterialPaper": "Papel reciclado",
+  "litterMaterialWood": "Madeira",
+  "litterMaterialWalnut": "Casca de noz",
+  "litterMaterialGrass": "Erva",
+  "litterMaterialMixed": "Substrato misto",
+  "litterMaterialOther": "Outro substrato",
+  "litterFlagKittenClumpingClay": "A argila aglomerante pode formar uma obstrução se {name} a engolir enquanto se lambe. Os veterinários costumam recomendar uma areia não aglomerante ou vegetal até aos 4 meses.",
+  "@litterFlagKittenClumpingClay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagKittenSilica": "Os gatinhos costumam provar a areia, e os cristais de sílica são afiados e não devem ser engolidos. Por agora, algo mais macio é mais seguro para {name}.",
+  "@litterFlagKittenSilica": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagMonitoringClumping": "Os grumos permitem ver facilmente quanto {name} urina — algo a vigiar com a sua condição.",
+  "@litterFlagMonitoringClumping": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagMonitoringNonClumping": "Sem grumos é difícil notar mudanças na quantidade de urina de {name}, o que importa com a sua condição.",
+  "@litterFlagMonitoringNonClumping": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagSensitiveScented": "O perfume adicionado pode irritar a pele e as patas sensíveis como as de {name}.",
+  "@litterFlagSensitiveScented": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagSensitiveDust": "Muito pó deposita-se na pele e nas patas e pode irritar as vias respiratórias de {name}.",
+  "@litterFlagSensitiveDust": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagPawComfortCoarse": "Cristais e grânulos grossos são duros para articulações rígidas. {name} deve preferir um grão fino, tipo areia.",
+  "@litterFlagPawComfortCoarse": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagPawComfortFine": "Um grão fino, tipo areia, é suave para as articulações de {name} e fácil de escavar.",
+  "@litterFlagPawComfortFine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterFlagLongCoatTracking": "A areia que se espalha facilmente fica presa num pelo comprido como o de {name} e acaba por toda a casa.",
+  "@litterFlagLongCoatTracking": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "litterSectionTitle": "Areias",
+  "litterSectionCount": "{count, plural, =1{1 areia} other{{count} areias}}",
+  "@litterSectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "litterAdditiveBakingSoda": "Bicarbonato de sódio",
+  "litterAdditiveActivatedCharcoal": "Carvão ativado",
+  "litterAdditiveFragrance": "Perfume",
+  "litterAdditivePlantStarch": "Amido vegetal",
+  "litterAdditiveZeolite": "Zeólito",
+  "litterAdditiveSilica": "Sílica",
+  "litterAdditiveEssentialOils": "Óleos essenciais",
+  "litterAdditiveDeodorizer": "Neutralizador de odores",
+  "foodSectionTitle": "Comida"
 }
