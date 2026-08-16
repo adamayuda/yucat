@@ -404,10 +404,14 @@ Future<void> _registerServices() async {
       logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
+  // Depends on the UserAnalyticsService registered above — the direction is
+  // load-bearing, which is why OneSignal tag writes live here and never inside
+  // UserAnalyticsService (that edge would be a cycle).
   sl.registerSingleton<NotificationService>(
     NotificationService(
       logEventUsecase: sl<LogEventUsecase>(),
       userAnalyticsService: sl<UserAnalyticsService>(),
+      prefs: sl<SharedPreferences>(),
     ),
   );
   sl.registerSingleton<RemoteConfigService>(RemoteConfigService());
@@ -430,6 +434,7 @@ Future<void> _registerBlocs() async {
       userAnalyticsService: sl<UserAnalyticsService>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
       signinAnonymouslyUsecase: sl<SigninAnonymouslyUsecase>(),
+      notificationService: sl<NotificationService>(),
     ),
   );
   sl.registerBloc<ProductListingBloc>(
@@ -445,6 +450,7 @@ Future<void> _registerBlocs() async {
       logEventUsecase: sl<LogEventUsecase>(),
       userAnalyticsService: sl<UserAnalyticsService>(),
       remoteConfigService: sl<RemoteConfigService>(),
+      notificationService: sl<NotificationService>(),
     ),
   );
   sl.registerBloc<SearchBloc>(
@@ -537,6 +543,7 @@ Future<void> _registerBlocs() async {
       currentUserUsecase: sl<CurrentUserUsecase>(),
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
+      notificationService: sl<NotificationService>(),
     ),
   );
   sl.registerBloc<PaywallBloc>(
@@ -544,6 +551,7 @@ Future<void> _registerBlocs() async {
       hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
       logEventUsecase: sl<LogEventUsecase>(),
       userAnalyticsService: sl<UserAnalyticsService>(),
+      notificationService: sl<NotificationService>(),
     ),
   );
 }

@@ -49,7 +49,7 @@ hide noise (e.g. Mixpanel's auto `$ae_*` events).
 
 - **Events tab → "＋"**: add the events you care about from `analytics.md §2` (at minimum:
   `App Opened`, the Onboarding set, `Cat Created`, `Product Image Captured`,
-  `Product Detail Viewed`, `Paywall Shown`, `Plan Selected`, `Subscription Completed`,
+  `Product Detail Viewed`, `Paywall Shown`, `Paywall CTA Tapped`, `Subscription Completed`,
   `Subscription Purchase Failed`). Give each a one-line description.
 - **Profile Properties tab**: register the People properties from `analytics.md §1`
   (`is_subscriber`, `cats_count`, `total_scans`, `attribution_source`, …) with types.
@@ -91,12 +91,21 @@ For step 3, click the step's event → **"＋"** to add `Subscription Restored` 
 ### C. Purchase micro-funnel  *(window: 1 hour)*
 ```
 1. Paywall Shown
-2. Plan Selected        (optional middle step)
+2. Paywall CTA Tapped
 3. Subscription Completed
 ```
-Add a **breakdown by `trigger`** to compare onboarding vs returning conversion. To quantify
-Apple-sheet abandonment, build a sibling Insights report on `Subscription Purchase Failed`
-broken down by `reason` (see §5). Save as **"C · Purchase"**.
+The two legs measure different things: **1→2** is whether the offer persuades, **2→3** is
+store-sheet abandonment. Add a **breakdown by `trigger`** to compare onboarding vs
+returning conversion, or by `is_trial` to compare trial-eligible users against those who
+see the plain price.
+
+To attribute the 2→3 drop, build a sibling Insights report on `Subscription Purchase
+Failed` broken down by `reason` (see §5) — `cancelled` is users who backed out of the
+sheet, everything else is a real error, and whatever the breakdown doesn't account for is
+sheets that never resolved at all. Save as **"C · Purchase"**.
+
+> Don't use `Plan Selected` as a step — it never fires while the paywall offers a single
+> plan.
 
 ### D. Activation — subscriber → first value  *(window: 7 days)*
 ```
@@ -235,9 +244,14 @@ Use **Stalled** as a remarketing audience and as a funnel filter to study why th
 - **Scan failure rate** — formula metric: `Product Image Scan Failed` ÷ `Product Image Captured`
   (use the **"＋ Add formula"** / metric-ratio option), as a %.
 - **Avg scans per user** — Event `Product Image Captured`, measured as **Average per user**.
-- **Promo-toggle lift** — Funnel C conversion, **Breakdown: did `Paywall Promo Toggled` fire** —
-  or compare two saved copies of Funnel C, one filtered to users who fired
-  `Paywall Promo Toggled` with `promo_on = true`.
+- **Store-sheet abandonment %** — formula metric: `Subscription Completed` ÷ `Paywall CTA
+  Tapped`, as a %. This is the second step of Funnel C isolated: how many people who
+  committed at the CTA actually got through the Apple/Play sheet. Pair it with the
+  purchase-failure-reasons tile above — any shortfall the `reason` breakdown doesn't
+  explain is sheets that never resolved at all.
+- **Trial-eligible lift** — Funnel C conversion, **Breakdown: `is_trial`** (present on both
+  `Paywall CTA Tapped` and `Subscription Completed`). Compares users offered the 3-day
+  trial against those who've already used one and see the plain price.
 
 ---
 

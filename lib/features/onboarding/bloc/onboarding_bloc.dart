@@ -9,6 +9,7 @@ import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
+import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/remote_config_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 
@@ -22,6 +23,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
   final LogEventUsecase _logEventUsecase;
   final UserAnalyticsService _userAnalyticsService;
   final RemoteConfigService _remoteConfigService;
+  final NotificationService _notificationService;
 
   DateTime? _onboardingStartTime;
   int _stepsViewed = 0;
@@ -32,11 +34,13 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     required LogEventUsecase logEventUsecase,
     required UserAnalyticsService userAnalyticsService,
     required RemoteConfigService remoteConfigService,
+    required NotificationService notificationService,
   }) : _prefs = prefs,
        _logScreenViewUsecase = logScreenViewUsecase,
        _logEventUsecase = logEventUsecase,
        _userAnalyticsService = userAnalyticsService,
        _remoteConfigService = remoteConfigService,
+       _notificationService = notificationService,
        super(OnBoardingLoadingState()) {
     on<OnBoardingInitialEvent>(_onOnBoardingInitialEvent);
     on<OnBoardingGetStartedEvent>(_onOnBoardingGetStartedEvent);
@@ -92,6 +96,13 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
+    // Coarse stage only — the exact phase is Mixpanel's job. Monotonic inside
+    // the service, so this is safe to call on every phase view.
+    //
+    // Note most of these users are unreachable by push: permission isn't asked
+    // until the `reminders` phase (index 10 of 12). The tag is still written so
+    // the segment is correct for the ones who do opt in.
+    _notificationService.setFunnelStage(FunnelStage.onboarding);
   }
 
   void _onOnBoardingGetStartedEvent(
@@ -287,6 +298,13 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       },
     );
     _userAnalyticsService.markOnboardingComplete();
+    // Tagged here, not where the `onboarding_completed` pref is written (that
+    // happens on cat creation, before the scan and paywall). This means the tag
+    // does NOT imply the user got past the paywall — `is_subscriber` is what
+    // says that.
+    _notificationService.setTags({
+      NotificationTags.onboardingCompleted: NotificationTags.boolValue(true),
+    });
 
     // Hard gate: the paywall is the final beat of onboarding and cannot be
     // dismissed. push() only returns once the user has subscribed (or restored

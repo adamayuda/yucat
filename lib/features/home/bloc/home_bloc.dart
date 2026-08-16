@@ -89,12 +89,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     final user = _currentUserUsecase();
 
-    // Attach the anonymous Firebase UID as the OneSignal external id so push
-    // notifications can target this user. Fire-and-forget; iOS-only internally.
-    // Also bind the same UID as the Mixpanel distinct id so People properties
-    // attach to a stable profile (idempotent per session).
+    // Bind the anonymous Firebase UID as the Mixpanel distinct id so People
+    // properties attach to a stable profile (idempotent per session).
+    //
+    // OneSignal.login used to happen here too; it moved to SplashBloc, which
+    // runs before onboarding — Home is only reached by users who already
+    // converted, so identifying here left every drop-off anonymous.
     if (user != null) {
-      unawaited(_notificationService.login(user.uid));
       unawaited(_userAnalyticsService.identify(user.uid));
     }
 
@@ -108,6 +109,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           count: cats.length,
           primaryAgeGroup: cats.isNotEmpty ? cats.first.ageGroup : null,
         ));
+        // Same correction for the OneSignal tag — cat_create only ever sets
+        // has_cat = true, so this is where a delete gets reflected.
+        unawaited(_notificationService.setTags({
+          NotificationTags.hasCat: NotificationTags.boolValue(cats.isNotEmpty),
+        }));
       } catch (_) {
         // Header falls back to generic copy on read failure.
       }

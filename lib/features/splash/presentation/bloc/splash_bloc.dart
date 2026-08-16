@@ -9,6 +9,7 @@ import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_
 import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/signin_anonymously_usecase.dart';
+import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 
 part 'splash_event.dart';
@@ -22,6 +23,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   final UserAnalyticsService _userAnalyticsService;
   final CurrentUserUsecase _currentUserUsecase;
   final SigninAnonymouslyUsecase _signinAnonymouslyUsecase;
+  final NotificationService _notificationService;
 
   SplashBloc({
     required SharedPreferences prefs,
@@ -29,11 +31,13 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     required UserAnalyticsService userAnalyticsService,
     required CurrentUserUsecase currentUserUsecase,
     required SigninAnonymouslyUsecase signinAnonymouslyUsecase,
+    required NotificationService notificationService,
   })  : _prefs = prefs,
         _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
         _userAnalyticsService = userAnalyticsService,
         _currentUserUsecase = currentUserUsecase,
         _signinAnonymouslyUsecase = signinAnonymouslyUsecase,
+        _notificationService = notificationService,
         super(SplashLoadingState()) {
     on<SplashInitialEvent>(_onSplashInitialEvent);
   }
@@ -73,8 +77,12 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
         await _hasActiveSubscriptionUseCase(forceRefresh: true);
 
     // Keep the People profile's subscription state fresh on every cold launch
-    // of a returning user (handles lapses/renewals between sessions).
+    // of a returning user (handles lapses/renewals between sessions). The
+    // OneSignal tag has to be refreshed here too, not just on purchase — a
+    // churned subscriber would otherwise keep is_subscriber = true for ever and
+    // never enter a win-back segment.
     _userAnalyticsService.syncSubscription(isSubscriber: hasSubscription);
+    _notificationService.setSubscriber(hasSubscription);
 
     if (hasSubscription || kTestBuildSkipPaywall) {
       router.replace(const HomeRoute());
@@ -89,9 +97,15 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     }
   }
 
-  /// Ensures an anonymous Firebase session exists and binds the Mixpanel
-  /// profile to its uid. Awaited at boot so the uid is ready for every route.
-  /// Safe to call repeatedly; never throws to the caller.
+  /// Ensures an anonymous Firebase session exists and binds the Mixpanel profile
+  /// and the OneSignal user to its uid. Awaited at boot so the uid is ready for
+  /// every route. Safe to call repeatedly; never throws to the caller.
+  ///
+  /// OneSignal is identified *here* rather than at Home because Home is only
+  /// reached after onboarding, cat creation and the paywall all succeed — i.e.
+  /// only by users who converted. Identifying at boot means funnel tags written
+  /// by users who drop out land on an identified user instead of an anonymous
+  /// device record.
   Future<void> _ensureSignedIn() async {
     try {
       if (_currentUserUsecase() == null) {
@@ -100,6 +114,11 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       final user = _currentUserUsecase();
       if (user != null) {
         await _userAnalyticsService.identify(user.uid);
+        await _notificationService.login(user.uid);
+        // Every launch passes through here, including new users who return
+        // early below — so this is the one place recency is guaranteed to be
+        // stamped for everyone.
+        await _notificationService.setLastActive();
       }
     } catch (e) {
       debugPrint('SplashBloc._ensureSignedIn error: $e');

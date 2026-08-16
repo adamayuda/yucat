@@ -13,6 +13,14 @@ class AnalyticsEvents {
 
   // Paywall funnel
   static const paywallShown = 'Paywall Shown';
+  // Intent, logged before the store sheet opens. Without these the Apple/Play
+  // sheet is a black box: a tap that never resolves (sheet fails to present,
+  // hangs, app backgrounded) leaves no trace at all.
+  static const paywallCtaTapped = 'Paywall CTA Tapped';
+  static const paywallRestoreTapped = 'Paywall Restore Tapped';
+  // Means "closed without converting" — it is deliberately NOT fired on
+  // purchase/restore success. See the note in PaywallBloc._logPaywallDismissed.
+  static const paywallDismissed = 'Paywall Dismissed';
   // Unreachable while the paywall offers a single plan; kept for when a second
   // plan comes back.
   static const planSelected = 'Plan Selected';

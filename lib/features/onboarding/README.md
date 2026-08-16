@@ -158,6 +158,10 @@ never depend on the prompt.
 - ⚠️ **The reminder-type selections are never persisted.** They're a local
   `Set<int> _selected` used only to style the rows. Nothing reads them, and no reminder is
   ever scheduled — the app has no local-notification scheduling at all.
+- ⚠️ **This screen's position bounds all push reach.** Permission is asked at phase 10 of
+  12, so anyone abandoning in phases 0–9 has no push subscription and cannot be messaged —
+  including by the OneSignal drop-off segments. `_trackPhaseView` still writes a
+  `funnel_stage` tag for them. See `docs/onesignal.md` §3.
 
 ### `profileName` (7) seeds the wizard
 

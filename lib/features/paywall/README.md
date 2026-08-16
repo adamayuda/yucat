@@ -373,17 +373,62 @@ Events in `lib/features/analytics/analytics_events.dart`:
 | Event | Key properties |
 |---|---|
 | `Paywall Shown` | `trigger`, `offering`, `trial_eligible`, `trial_days` |
-| `Paywall Dismissed` | `cta_tapped`, `time_viewed_seconds` (inline literal, not a constant) |
+| `Paywall CTA Tapped` | `package_id`, `package_type`, `price`, `currency`, `trigger`, `is_trial`, `trial_days` |
+| `Paywall Restore Tapped` | `trigger` |
+| `Paywall Dismissed` | `cta_tapped`, `time_viewed_seconds` |
 | `Subscription Completed` | `package_id`, `package_type`, `price`, `currency`, `trigger`, **`is_trial`**, **`trial_days`** |
-| `Subscription Restored` | — |
-| `Subscription Purchase Failed` | `reason`, `package_type` |
-| `Subscription Restore Failed` | `reason`, `error_message` |
+| `Subscription Restored` | `trigger` |
+| `Subscription Purchase Failed` | `reason`, `error_message?`, `package_type`, `trigger` |
+| `Subscription Restore Failed` | `reason`, `error_message?` — note: **no `trigger`** |
 | `Plan Selected` | unreachable with a single plan; kept for a future second plan |
 
 `PaywallTrigger` values: `onboarding_complete`, `returning_user`.
 
 `is_trial: true` means **no money moved today**. Downstream revenue reporting has
 to separate those from immediate purchases, or day-one revenue looks fabricated.
+
+### The two tap events exist to make the store sheet measurable
+
+`Paywall CTA Tapped` fires in `_onPurchase` *after* the `isPurchasing` guard (so a
+double-tap counts once) and *before* `Purchases.purchase(...)`. Without it, a tap
+whose sheet never resolves — fails to present, hangs, or the app is killed
+mid-purchase — leaves no trace whatsoever, and `Shown → Completed` is the only
+funnel available with everything in between a black box. It deliberately mirrors
+`Subscription Completed`'s property set so both ends segment identically.
+
+`Paywall Restore Tapped` is the same idea on the restore path.
+
+### `Paywall Dismissed` means "closed without converting"
+
+It **used to** also fire on purchase and restore success with `cta_tapped: true`,
+which made it unusable as an abandonment metric — you had to filter on
+`cta_tapped` to avoid counting conversions as exits. Those two calls were removed
+(2026-08-16); conversion is already fully described by `Subscription Completed` /
+`Subscription Restored`, and intent by `Paywall CTA Tapped`.
+
+`cta_tapped` is consequently always `false` now. It's kept rather than dropped so
+existing reports filtering `cta_tapped == false` are unaffected; ones filtering
+`== true` correctly fall to zero. **Historical data spans both meanings** — segment
+by date when comparing across the change.
+
+### Untracked paths
+
+Worth knowing before building a dashboard, since these users leave no paywall event:
+
+- **Load failures.** `PaywallErrorState` (`couldNotLoadPlans`, `noPlansAvailable`)
+  emits nothing, and `Paywall Shown` never fires either — a store/RevenueCat outage
+  reads as onboarding drop-off. The Retry tap is untracked too.
+- **`PaywallAlreadySubscribedState`** — silent auto-pop, no event.
+- **System back / iOS edge swipe** — `PopScope` pops without dispatching
+  `PaywallDismissEvent`. Moot today because both gates pass `dismissible: false`,
+  but a live hole the moment a dismissible paywall ships.
+- **Trial-eligibility errors** — `_eligibleTrialFor` swallows the exception and
+  degrades to "no trial", indistinguishable from a genuinely ineligible user.
+
+`PaywallRoute` is *not* in `AnalyticsRouteObserver._excludedRoutes`, so a
+`Screen View` fires on push and another for the underlying route on pop. That
+pop-side event is the only universal close signal covering the paths above — but
+it's coarse and carries no paywall context.
 
 ---
 

@@ -10,12 +10,14 @@ import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
 import 'package:yucat/features/paywall/utils/trial_info.dart';
+import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 
 class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
   final LogEventUsecase _logEventUsecase;
   final UserAnalyticsService _userAnalyticsService;
+  final NotificationService _notificationService;
 
   DateTime? _paywallShownTime;
   String _trigger = 'manual';
@@ -24,9 +26,11 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
     required LogEventUsecase logEventUsecase,
     required UserAnalyticsService userAnalyticsService,
+    required NotificationService notificationService,
   })  : _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
         _logEventUsecase = logEventUsecase,
         _userAnalyticsService = userAnalyticsService,
+        _notificationService = notificationService,
         super(const PaywallInitialState()) {
     on<PaywallInitialEvent>(_onInitial);
     on<PaywallPackageSelectedEvent>(_onPackageSelected);
@@ -88,6 +92,13 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
+    // `paywall_seen` is the anchor for the "dropped at paywall" segment: it is
+    // set once and never cleared, so pairing it with is_subscriber != true finds
+    // everyone who saw the offer and didn't take it.
+    _notificationService.setFunnelStage(FunnelStage.paywall);
+    _notificationService.setTags({
+      NotificationTags.paywallSeen: NotificationTags.boolValue(true),
+    });
 
     emit(PaywallLoadedState(
       currentOffering: current,
@@ -158,6 +169,25 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     final current = state;
     if (current is! PaywallLoadedState || current.isPurchasing) return;
 
+    // Logged after the isPurchasing guard (so a double-tap while the sheet is
+    // open counts once) and before the store call (so a sheet that never
+    // presents or never resolves is still visible as intent). Carries the same
+    // properties as Subscription Completed so both ends of the funnel segment
+    // identically.
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.paywallCtaTapped,
+      properties: {
+        'package_id': current.selectedPackage.identifier,
+        'package_type': current.selectedPackage.packageType.name,
+        'price': current.selectedPackage.storeProduct.price,
+        'currency': current.selectedPackage.storeProduct.currencyCode,
+        'trigger': _trigger,
+        'is_trial': current.eligibleTrial != null,
+        'trial_days': current.eligibleTrial?.days,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+
     emit(current.copyWith(isPurchasing: true));
 
     try {
@@ -192,7 +222,8 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
           price: current.selectedPackage.storeProduct.price,
           currency: current.selectedPackage.storeProduct.currencyCode,
         );
-        _logPaywallDismissed(ctaTapped: true);
+        _notificationService.setFunnelStage(FunnelStage.subscribed);
+        _notificationService.setSubscriber(true);
         emit(const PaywallSuccessState(purchasedSubscription: true));
       } else {
         _logPurchaseFailed(reason: 'not_active', packageType: current.selectedPackage.packageType.name);
@@ -261,6 +292,14 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     final current = state;
     if (current is! PaywallLoadedState || current.isPurchasing) return;
 
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.paywallRestoreTapped,
+      properties: {
+        'trigger': _trigger,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+
     emit(current.copyWith(isPurchasing: true));
 
     try {
@@ -277,7 +316,8 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
           },
         );
         _userAnalyticsService.syncSubscription(isSubscriber: true);
-        _logPaywallDismissed(ctaTapped: true);
+        _notificationService.setFunnelStage(FunnelStage.subscribed);
+        _notificationService.setSubscriber(true);
         emit(const PaywallSuccessState(purchasedSubscription: true));
       } else {
         _logRestoreFailed(reason: 'no_active_subscription');
@@ -317,12 +357,24 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     emit(const PaywallSuccessState(purchasedSubscription: false));
   }
 
+  /// Fires only when the user leaves **without** converting.
+  ///
+  /// It used to also fire on purchase/restore success with `cta_tapped: true`,
+  /// which made it useless as an abandonment metric — a funnel counting
+  /// dismissals had to filter on `cta_tapped` to avoid counting conversions.
+  /// Conversions are fully described by `Subscription Completed` /
+  /// `Subscription Restored`, and intent by `Paywall CTA Tapped`, so those
+  /// calls were removed.
+  ///
+  /// `cta_tapped` is therefore always `false` now. It is kept rather than
+  /// dropped so existing Mixpanel reports filtering `cta_tapped == false` keep
+  /// working unchanged; ones filtering `== true` correctly fall to zero.
   void _logPaywallDismissed({required bool ctaTapped}) {
     final timeViewedSeconds = _paywallShownTime != null
         ? DateTime.now().difference(_paywallShownTime!).inSeconds
         : null;
     _logEventUsecase.call(
-      eventName: 'Paywall Dismissed',
+      eventName: AnalyticsEvents.paywallDismissed,
       properties: {
         'time_viewed_seconds': timeViewedSeconds,
         'cta_tapped': ctaTapped,

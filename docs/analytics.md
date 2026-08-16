@@ -44,6 +44,14 @@ Set on the user's People profile (keyed by Firebase UID). Use these to **segment
 `total_scans ≥ 1`), Power users (`total_scans ≥ 10`), By channel (`attribution_source`),
 Stalled (`onboarding_completed = true` AND `is_subscriber = false`).
 
+> **These are mirrored, in part, to OneSignal.** A coarse subset — `funnel_stage`,
+> `onboarding_completed`, `has_cat`, `paywall_seen`, `is_subscriber`, `last_active_at` — is
+> written as OneSignal **tags** at the same checkpoints, so drop-off audiences can be
+> pushed to. The two systems are written side by side in the same functions and must be
+> kept in step. Note the OneSignal copies are **strings**, not typed, and `funnel_stage` is
+> monotonic where Mixpanel's equivalents are not. Schema and Segments:
+> **`docs/onesignal.md`**.
+
 ---
 
 ## 2. Event catalog
@@ -108,14 +116,15 @@ litter scans too; segment on the outcome event to separate them.
 ### Paywall & subscription
 | Event | Properties | Notes |
 |---|---|---|
-| `Paywall Shown` | `trigger`, `offering`, `intro_eligible`, `timestamp` | `trigger` now `onboarding_complete` / `returning_user` / `manual` (was always `manual`); `intro_eligible` **NEW** |
-| `Plan Selected` | `package_id`, `package_type`, `trigger`, `timestamp` | **NEW** — fires when the user switches the highlighted plan |
-| `Paywall Promo Toggled` | `promo_on`, `trigger`, `timestamp` | **NEW** — limited-time intro-offer switch |
-| `Subscription Completed` | `package_id`, `package_type`, `price`, `currency`, `trigger`, `timestamp` | |
-| `Subscription Restored` | `trigger`, `timestamp` | |
-| `Subscription Purchase Failed` | `reason` (`cancelled`/`platform_error`/`not_active`/`unknown`), `error_message?`, `package_type`, `trigger` | **NEW** — `cancelled` = user backed out of the Apple sheet |
-| `Subscription Restore Failed` | `reason` (`no_active_subscription`/`error`), `error_message?` | **NEW** |
-| `Paywall Dismissed` | `time_viewed_seconds`, `cta_tapped`, `timestamp` | |
+| `Paywall Shown` | `trigger`, `offering`, `trial_eligible`, `trial_days`, `timestamp` | `trigger` is `onboarding_complete` / `returning_user` / `manual` (no live call site passes `manual` — seeing it means a new entry point forgot to pass a trigger) |
+| `Paywall CTA Tapped` | `package_id`, `package_type`, `price`, `currency`, `trigger`, `is_trial`, `trial_days`, `timestamp` | **NEW** — fires *before* the store sheet opens, so a sheet that never presents or never resolves is still counted. Same property set as `Subscription Completed` so the funnel segments identically |
+| `Paywall Restore Tapped` | `trigger`, `timestamp` | **NEW** — fires before `Purchases.restorePurchases()` |
+| `Plan Selected` | `package_id`, `package_type`, `trigger`, `timestamp` | Fires when the user switches the highlighted plan — *currently unreachable*: the paywall shows a single annual plan and no plan-picker widget is rendered |
+| `Subscription Completed` | `package_id`, `package_type`, `price`, `currency`, `trigger`, `is_trial`, `trial_days`, `timestamp` | `is_trial: true` means **no money moved today** — revenue reporting must exclude these |
+| `Subscription Restored` | `trigger`, `timestamp` | Carries no package/price/currency, unlike `Subscription Completed` |
+| `Subscription Purchase Failed` | `reason` (`cancelled`/`platform_error`/`not_active`/`unknown`), `error_message?`, `package_type`, `trigger`, `timestamp` | `cancelled` = user backed out of the store sheet. **Always filter it out of error-rate charts** — it is a normal outcome, not a failure |
+| `Subscription Restore Failed` | `reason` (`no_active_subscription`/`error`), `error_message?`, `timestamp` | No `trigger` — restore failures can't be split by gate |
+| `Paywall Dismissed` | `time_viewed_seconds`, `cta_tapped`, `timestamp` | Means **closed without converting**. It no longer fires on purchase/restore success, so `cta_tapped` is now always `false` (kept for schema stability) |
 
 ### Other
 | Event | Properties |
@@ -153,11 +162,25 @@ App Opened (launch_type = warm OR cold)
 **C. Purchase micro-funnel (paywall interaction → conversion)**
 ```
 Paywall Shown
-  → Plan Selected (optional)
+  → Paywall CTA Tapped
   → Subscription Completed
 ```
-Use `Subscription Purchase Failed` (`reason = cancelled`) as a conversion-loss segment to
-quantify Apple-sheet abandonment. Compare conversion with vs. without `Paywall Promo Toggled`.
+The two steps answer different questions. `Shown → CTA Tapped` is whether the offer
+persuades; `CTA Tapped → Completed` is store-sheet abandonment.
+
+Break the second step down by outcome — the three are mutually exclusive and should
+account for every tap:
+
+- `Subscription Completed` — converted.
+- `Subscription Purchase Failed` (`reason = cancelled`) — backed out of the sheet.
+- `Subscription Purchase Failed` (`reason != cancelled`) — genuine errors.
+
+Any residual gap is taps whose sheet never resolved at all (failed to present, hung, or
+the app was killed mid-purchase). That population was invisible before `Paywall CTA
+Tapped` existed.
+
+Segment by `is_trial` to compare trial-eligible against ineligible users — they see a
+materially different CTA and price line.
 
 **D. Activation (subscriber → first value)**
 ```

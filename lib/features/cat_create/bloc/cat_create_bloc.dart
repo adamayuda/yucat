@@ -12,6 +12,7 @@ import 'package:yucat/features/cat/presentation/utils/cat_product_recommendation
 import 'package:yucat/features/cat_create/mappers/cat_model_to_entity_mapper.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_create_model.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
+import 'package:yucat/services/notification_service.dart';
 
 part 'cat_create_event.dart';
 part 'cat_create_state.dart';
@@ -39,6 +40,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
   final CurrentUserUsecase _currentUserUsecase;
   final LogScreenViewUsecase _logScreenViewUsecase;
   final LogEventUsecase _logEventUsecase;
+  final NotificationService _notificationService;
 
   DateTime? _creationStartTime;
   CatCreateModel? _originalCat;
@@ -51,12 +53,14 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
     required CurrentUserUsecase currentUserUsecase,
     required LogScreenViewUsecase logScreenViewUsecase,
     required LogEventUsecase logEventUsecase,
+    required NotificationService notificationService,
   }) : _createCatUsecase = createCatUsecase,
        _updateCatUsecase = updateCatUsecase,
        _catModelToEntityMapper = catModelToEntityMapper,
        _currentUserUsecase = currentUserUsecase,
        _logScreenViewUsecase = logScreenViewUsecase,
        _logEventUsecase = logEventUsecase,
+       _notificationService = notificationService,
        super(const CatCreateInitial()) {
     on<CatCreateInitialEvent>(_onCatCreateInitialEvent);
     on<CatCreateGoToNextStepEvent>(_onCatCreateGoToNextStepEvent);
@@ -85,6 +89,12 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
+    // First-time creation only. Editing an existing cat is not the acquisition
+    // funnel, and tagging it would put established users into the
+    // "stalled mid-wizard" segment every time they tweaked a profile.
+    if (_originalCat == null) {
+      _notificationService.setFunnelStage(FunnelStage.catCreate);
+    }
   }
 
   void _onCatCreateGoToNextStepEvent(
@@ -271,6 +281,9 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
+        _notificationService.setTags({
+          NotificationTags.hasCat: NotificationTags.boolValue(true),
+        });
       }
 
       // Return a structured profile summary so callers (e.g. onboarding) can
