@@ -98,6 +98,12 @@ import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/services/cat_tracking_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 import 'package:yucat/features/litter/data/mappers/litter_to_domain_mapper.dart';
+import 'package:yucat/features/recipes/data/datasources/recipe_seed_datasource.dart';
+import 'package:yucat/features/recipes/data/repositories/recipes_repository_impl.dart';
+import 'package:yucat/features/recipes/domain/repositories/recipes_repository.dart';
+import 'package:yucat/features/recipes/domain/usecases/get_recipes_usecase.dart';
+import 'package:yucat/features/recipes/presentation/bloc/recipes_bloc.dart';
+import 'package:yucat/features/recipes/presentation/mappers/recipe_entity_to_model_mapper.dart';
 import 'package:yucat/features/litter_detail/presentation/bloc/litter_detail_bloc.dart';
 import 'package:yucat/features/litter_detail/presentation/mappers/litter_entity_to_model_mapper.dart';
 import 'package:yucat/features/saved_products/data/repositories/saved_litters_repository_impl.dart';
@@ -187,6 +193,9 @@ Future<void> _registerDataSources() async {
   sl.registerSingleton<BrandVerdictDataSource>(
     BrandVerdictDataSource(functions: sl<FirebaseFunctions>()),
   );
+  // Hard-coded catalogue for now — swap this for a remote datasource when
+  // recipes move to the backend.
+  sl.registerSingleton<RecipeSeedDataSource>(const RecipeSeedDataSource());
 }
 
 Future<void> _registerMappers() async {
@@ -208,6 +217,9 @@ Future<void> _registerMappers() async {
   sl.registerSingleton<CatModelToEntityMapper>(CatModelToEntityMapper());
   sl.registerSingleton<CatModelToCreateMapper>(CatModelToCreateMapperImpl());
   sl.registerSingleton<BrandToModelMapper>(BrandToModelMapperImpl());
+  sl.registerSingleton<RecipeEntityToModelMapper>(
+    const RecipeEntityToModelMapper(),
+  );
 }
 
 Future<void> _registerRepositories() async {
@@ -263,6 +275,9 @@ Future<void> _registerRepositories() async {
   );
   sl.registerSingleton<LitterHistoryRepository>(
     LitterHistoryRepositoryImpl(prefs: sl<SharedPreferences>()),
+  );
+  sl.registerSingleton<RecipesRepository>(
+    RecipesRepositoryImpl(dataSource: sl<RecipeSeedDataSource>()),
   );
 }
 
@@ -374,6 +389,9 @@ Future<void> _registerUseCases() async {
   );
   sl.registerSingleton<AddLitterToHistoryUsecase>(
     AddLitterToHistoryUsecase(repository: sl<LitterHistoryRepository>()),
+  );
+  sl.registerSingleton<GetRecipesUsecase>(
+    GetRecipesUsecase(repository: sl<RecipesRepository>()),
   );
 }
 
@@ -552,6 +570,12 @@ Future<void> _registerBlocs() async {
       logEventUsecase: sl<LogEventUsecase>(),
       userAnalyticsService: sl<UserAnalyticsService>(),
       notificationService: sl<NotificationService>(),
+    ),
+  );
+  sl.registerBloc<RecipesBloc>(
+    () => RecipesBloc(
+      getRecipesUsecase: sl<GetRecipesUsecase>(),
+      mapper: sl<RecipeEntityToModelMapper>(),
     ),
   );
 }

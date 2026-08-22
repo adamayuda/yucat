@@ -15,6 +15,7 @@ import 'package:yucat/features/product_detail/presentation/widgets/nutrition_gri
 import 'package:yucat/features/product_detail/presentation/widgets/product_detail_skeleton.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/product_hero_card.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
+import 'package:yucat/presentation/components/ds_circle_icon_button.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
 import 'package:yucat/presentation/widgets/app_loading_widget.dart';
 import 'package:yucat/service_locator.dart';
@@ -76,7 +77,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 return DSAppBar.modal(
                   onBack: () => Navigator.of(context).pop(),
                   actions: [
-                    _CircleIconButton(
+                    DSCircleIconButton(
                       icon: isSaved
                           ? Icons.bookmark_rounded
                           : Icons.bookmark_border_rounded,
@@ -87,7 +88,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         const ProductDetailToggleSavedEvent(),
                       ),
                     ),
-                    _CircleIconButton(
+                    DSCircleIconButton(
                       icon: Icons.more_horiz_rounded,
                       // TODO: wire overflow menu (report, share)
                       onPressed: () {},
@@ -125,47 +126,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 }
 
-class _CircleIconButton extends StatelessWidget {
-  final IconData icon;
-  final Color? iconColor;
-  final VoidCallback onPressed;
-
-  const _CircleIconButton({
-    required this.icon,
-    required this.onPressed,
-    this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: DSColors.surfaceCard,
-      shape: const CircleBorder(),
-      elevation: 0,
-      shadowColor: Colors.transparent,
-      child: Ink(
-        decoration: BoxDecoration(
-          color: DSColors.surfaceCard,
-          shape: BoxShape.circle,
-          boxShadow: DSShadows.e1,
-        ),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onPressed,
-          child: SizedBox(
-            width: 36,
-            height: 36,
-            child: Icon(
-              icon,
-              color: iconColor ?? DSColors.inkPrimary,
-              size: 18,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class _LoadedBody extends StatelessWidget {
   final ProductDisplayModel product;

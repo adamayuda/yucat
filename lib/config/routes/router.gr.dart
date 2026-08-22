@@ -415,6 +415,43 @@ class ProfileRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [RecipeDetailPage]
+class RecipeDetailRoute extends PageRouteInfo<RecipeDetailRouteArgs> {
+  RecipeDetailRoute({
+    Key? key,
+    required RecipeDisplayModel recipe,
+    List<PageRouteInfo>? children,
+  }) : super(
+         RecipeDetailRoute.name,
+         args: RecipeDetailRouteArgs(key: key, recipe: recipe),
+         initialChildren: children,
+       );
+
+  static const String name = 'RecipeDetailRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<RecipeDetailRouteArgs>();
+      return RecipeDetailPage(key: args.key, recipe: args.recipe);
+    },
+  );
+}
+
+class RecipeDetailRouteArgs {
+  const RecipeDetailRouteArgs({this.key, required this.recipe});
+
+  final Key? key;
+
+  final RecipeDisplayModel recipe;
+
+  @override
+  String toString() {
+    return 'RecipeDetailRouteArgs{key: $key, recipe: $recipe}';
+  }
+}
+
+/// generated route for
 /// [RecipesPage]
 class RecipesRoute extends PageRouteInfo<void> {
   const RecipesRoute({List<PageRouteInfo>? children})

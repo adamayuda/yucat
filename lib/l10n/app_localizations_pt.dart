@@ -1370,11 +1370,69 @@ class AppLocalizationsPt extends AppLocalizations {
   String get recipesTabTitle => 'Receitas';
 
   @override
-  String get recipesEmptyHeadline => 'As receitas estão a caminho';
+  String get recipesEmptyHeadline => 'Nenhuma receita corresponde';
 
   @override
   String get recipesEmptyBody =>
-      'Em breve vai encontrar aqui receitas adequadas para gatos.';
+      'Experimenta outra pesquisa ou escolhe outra categoria.';
+
+  @override
+  String get recipesSearchHint => 'Procurar uma receita';
+
+  @override
+  String get recipesCategoryAll => 'Todas';
+
+  @override
+  String get recipesCategoryBiscuits => 'Bolachas';
+
+  @override
+  String get recipesCategoryCakes => 'Bolos';
+
+  @override
+  String get recipesCategoryFrozenTreats => 'Guloseimas geladas';
+
+  @override
+  String get recipesCategoryOther => 'Outras';
+
+  @override
+  String get recipesErrorBody => 'Algo correu mal ao carregar as receitas.';
+
+  @override
+  String get recipesDifficultyEasy => 'Fácil';
+
+  @override
+  String get recipesDifficultyMedium => 'Média';
+
+  @override
+  String get recipesDifficultyHard => 'Difícil';
+
+  @override
+  String recipesPrepMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String recipesPrepMinutesPlusFreezing(int minutes) {
+    return '$minutes min + congelação';
+  }
+
+  @override
+  String get recipesCompatible => 'Compatível com o perfil';
+
+  @override
+  String get recipesCaution => 'Confirma com o veterinário';
+
+  @override
+  String get recipesIncompatible => 'Não indicada para o perfil';
+
+  @override
+  String get recipeDetailIngredients => 'Ingredientes';
+
+  @override
+  String get recipeDetailPreparation => 'Preparação';
+
+  @override
+  String get recipeDetailTip => 'Dica';
 
   @override
   String get productListingEmpty =>

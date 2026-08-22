@@ -2430,14 +2430,122 @@ abstract class AppLocalizations {
   /// No description provided for @recipesEmptyHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Recipes are coming'**
+  /// **'No recipes match'**
   String get recipesEmptyHeadline;
 
   /// No description provided for @recipesEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'Cat-friendly recipes will show up here soon.'**
+  /// **'Try another search or pick a different category.'**
   String get recipesEmptyBody;
+
+  /// No description provided for @recipesSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a recipe'**
+  String get recipesSearchHint;
+
+  /// No description provided for @recipesCategoryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get recipesCategoryAll;
+
+  /// No description provided for @recipesCategoryBiscuits.
+  ///
+  /// In en, this message translates to:
+  /// **'Biscuits'**
+  String get recipesCategoryBiscuits;
+
+  /// No description provided for @recipesCategoryCakes.
+  ///
+  /// In en, this message translates to:
+  /// **'Cakes'**
+  String get recipesCategoryCakes;
+
+  /// No description provided for @recipesCategoryFrozenTreats.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen treats'**
+  String get recipesCategoryFrozenTreats;
+
+  /// No description provided for @recipesCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get recipesCategoryOther;
+
+  /// No description provided for @recipesErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while loading recipes.'**
+  String get recipesErrorBody;
+
+  /// No description provided for @recipesDifficultyEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get recipesDifficultyEasy;
+
+  /// No description provided for @recipesDifficultyMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get recipesDifficultyMedium;
+
+  /// No description provided for @recipesDifficultyHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get recipesDifficultyHard;
+
+  /// No description provided for @recipesPrepMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String recipesPrepMinutes(int minutes);
+
+  /// No description provided for @recipesPrepMinutesPlusFreezing.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min + freezing'**
+  String recipesPrepMinutesPlusFreezing(int minutes);
+
+  /// No description provided for @recipesCompatible.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches their profile'**
+  String get recipesCompatible;
+
+  /// No description provided for @recipesCaution.
+  ///
+  /// In en, this message translates to:
+  /// **'Check with your vet'**
+  String get recipesCaution;
+
+  /// No description provided for @recipesIncompatible.
+  ///
+  /// In en, this message translates to:
+  /// **'Not for their profile'**
+  String get recipesIncompatible;
+
+  /// No description provided for @recipeDetailIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get recipeDetailIngredients;
+
+  /// No description provided for @recipeDetailPreparation.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparation'**
+  String get recipeDetailPreparation;
+
+  /// No description provided for @recipeDetailTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip'**
+  String get recipeDetailTip;
 
   /// No description provided for @productListingEmpty.
   ///

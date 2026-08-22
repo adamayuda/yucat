@@ -1371,11 +1371,70 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recipesTabTitle => 'Recettes';
 
   @override
-  String get recipesEmptyHeadline => 'Les recettes arrivent';
+  String get recipesEmptyHeadline => 'Aucune recette ne correspond';
 
   @override
   String get recipesEmptyBody =>
-      'Des recettes adaptées à votre chat apparaîtront bientôt ici.';
+      'Essaie une autre recherche ou choisis une autre catégorie.';
+
+  @override
+  String get recipesSearchHint => 'Rechercher une recette';
+
+  @override
+  String get recipesCategoryAll => 'Toutes';
+
+  @override
+  String get recipesCategoryBiscuits => 'Biscuits';
+
+  @override
+  String get recipesCategoryCakes => 'Gâteaux';
+
+  @override
+  String get recipesCategoryFrozenTreats => 'Friandises glacées';
+
+  @override
+  String get recipesCategoryOther => 'Autres';
+
+  @override
+  String get recipesErrorBody =>
+      'Une erreur est survenue lors du chargement des recettes.';
+
+  @override
+  String get recipesDifficultyEasy => 'Facile';
+
+  @override
+  String get recipesDifficultyMedium => 'Moyen';
+
+  @override
+  String get recipesDifficultyHard => 'Difficile';
+
+  @override
+  String recipesPrepMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String recipesPrepMinutesPlusFreezing(int minutes) {
+    return '$minutes min + congélation';
+  }
+
+  @override
+  String get recipesCompatible => 'Compatible avec son profil';
+
+  @override
+  String get recipesCaution => 'À valider avec ton vétérinaire';
+
+  @override
+  String get recipesIncompatible => 'Déconseillé pour son profil';
+
+  @override
+  String get recipeDetailIngredients => 'Ingrédients';
+
+  @override
+  String get recipeDetailPreparation => 'Préparation';
+
+  @override
+  String get recipeDetailTip => 'Astuce';
 
   @override
   String get productListingEmpty => 'Aucun produit trouvé pour cette marque.';

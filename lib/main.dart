@@ -23,6 +23,7 @@ import 'package:yucat/features/onboarding/bloc/onboarding_bloc.dart';
 import 'package:yucat/features/product_detail/presentation/bloc/product_detail_bloc.dart';
 import 'package:yucat/features/product_listing/presentation/bloc/product_listing_bloc.dart';
 import 'package:yucat/features/profile/bloc/profile_bloc.dart';
+import 'package:yucat/features/recipes/presentation/bloc/recipes_bloc.dart';
 import 'package:yucat/features/saved_products/presentation/bloc/saved_products_bloc.dart';
 import 'package:yucat/features/scan_history/presentation/bloc/scan_history_bloc.dart';
 import 'package:yucat/service_locator.dart';
@@ -126,6 +127,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         BlocProvider(create: (context) => sl<OnBoardingBloc>()),
         BlocProvider(create: (context) => sl<HomeBloc>()),
         BlocProvider(create: (context) => sl<ProfileBloc>()),
+        BlocProvider(create: (context) => sl<RecipesBloc>()),
         BlocProvider(create: (context) => sl<ProductDetailBloc>()),
         BlocProvider(create: (context) => sl<LitterDetailBloc>()),
         BlocProvider(create: (context) => sl<SavedProductsBloc>()),

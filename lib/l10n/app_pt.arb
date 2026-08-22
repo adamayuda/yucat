@@ -386,8 +386,40 @@
   "bottomNavRecipes": "Receitas",
   "bottomNavProfile": "Perfil",
   "recipesTabTitle": "Receitas",
-  "recipesEmptyHeadline": "As receitas estão a caminho",
-  "recipesEmptyBody": "Em breve vai encontrar aqui receitas adequadas para gatos.",
+  "recipesEmptyHeadline": "Nenhuma receita corresponde",
+  "recipesEmptyBody": "Experimenta outra pesquisa ou escolhe outra categoria.",
+  "recipesSearchHint": "Procurar uma receita",
+  "recipesCategoryAll": "Todas",
+  "recipesCategoryBiscuits": "Bolachas",
+  "recipesCategoryCakes": "Bolos",
+  "recipesCategoryFrozenTreats": "Guloseimas geladas",
+  "recipesCategoryOther": "Outras",
+  "recipesErrorBody": "Algo correu mal ao carregar as receitas.",
+  "recipesDifficultyEasy": "Fácil",
+  "recipesDifficultyMedium": "Média",
+  "recipesDifficultyHard": "Difícil",
+  "recipesPrepMinutes": "{minutes} min",
+  "@recipesPrepMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesPrepMinutesPlusFreezing": "{minutes} min + congelação",
+  "@recipesPrepMinutesPlusFreezing": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesCompatible": "Compatível com o perfil",
+  "recipesCaution": "Confirma com o veterinário",
+  "recipesIncompatible": "Não indicada para o perfil",
+  "recipeDetailIngredients": "Ingredientes",
+  "recipeDetailPreparation": "Preparação",
+  "recipeDetailTip": "Dica",
   "productListingEmpty": "Não foram encontrados produtos para esta marca.",
   "commonAgeGroupKitten": "Gatinho",
   "commonAgeGroupAdult": "Adulto",

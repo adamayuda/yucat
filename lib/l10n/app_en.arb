@@ -652,8 +652,40 @@
   "bottomNavRecipes": "Recipes",
   "bottomNavProfile": "Profile",
   "recipesTabTitle": "Recipes",
-  "recipesEmptyHeadline": "Recipes are coming",
-  "recipesEmptyBody": "Cat-friendly recipes will show up here soon.",
+  "recipesEmptyHeadline": "No recipes match",
+  "recipesEmptyBody": "Try another search or pick a different category.",
+  "recipesSearchHint": "Search for a recipe",
+  "recipesCategoryAll": "All",
+  "recipesCategoryBiscuits": "Biscuits",
+  "recipesCategoryCakes": "Cakes",
+  "recipesCategoryFrozenTreats": "Frozen treats",
+  "recipesCategoryOther": "Other",
+  "recipesErrorBody": "Something went wrong while loading recipes.",
+  "recipesDifficultyEasy": "Easy",
+  "recipesDifficultyMedium": "Medium",
+  "recipesDifficultyHard": "Hard",
+  "recipesPrepMinutes": "{minutes} min",
+  "@recipesPrepMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesPrepMinutesPlusFreezing": "{minutes} min + freezing",
+  "@recipesPrepMinutesPlusFreezing": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesCompatible": "Matches their profile",
+  "recipesCaution": "Check with your vet",
+  "recipesIncompatible": "Not for their profile",
+  "recipeDetailIngredients": "Ingredients",
+  "recipeDetailPreparation": "Preparation",
+  "recipeDetailTip": "Tip",
   "productListingEmpty": "No products found for this brand.",
   "commonAgeGroupKitten": "Kitten",
   "commonAgeGroupAdult": "Adult",

@@ -1362,11 +1362,69 @@ class AppLocalizationsHu extends AppLocalizations {
   String get recipesTabTitle => 'Receptek';
 
   @override
-  String get recipesEmptyHeadline => 'Hamarosan jönnek a receptek';
+  String get recipesEmptyHeadline => 'Nincs találat';
 
   @override
   String get recipesEmptyBody =>
-      'A macskabarát receptek hamarosan itt jelennek meg.';
+      'Próbálj más keresést, vagy válassz másik kategóriát.';
+
+  @override
+  String get recipesSearchHint => 'Recept keresése';
+
+  @override
+  String get recipesCategoryAll => 'Összes';
+
+  @override
+  String get recipesCategoryBiscuits => 'Kekszek';
+
+  @override
+  String get recipesCategoryCakes => 'Sütemények';
+
+  @override
+  String get recipesCategoryFrozenTreats => 'Fagyasztott finomságok';
+
+  @override
+  String get recipesCategoryOther => 'Egyéb';
+
+  @override
+  String get recipesErrorBody => 'Hiba történt a receptek betöltése közben.';
+
+  @override
+  String get recipesDifficultyEasy => 'Könnyű';
+
+  @override
+  String get recipesDifficultyMedium => 'Közepes';
+
+  @override
+  String get recipesDifficultyHard => 'Nehéz';
+
+  @override
+  String recipesPrepMinutes(int minutes) {
+    return '$minutes perc';
+  }
+
+  @override
+  String recipesPrepMinutesPlusFreezing(int minutes) {
+    return '$minutes perc + fagyasztás';
+  }
+
+  @override
+  String get recipesCompatible => 'Illik a profiljához';
+
+  @override
+  String get recipesCaution => 'Egyeztess az állatorvossal';
+
+  @override
+  String get recipesIncompatible => 'Nem való a profiljához';
+
+  @override
+  String get recipeDetailIngredients => 'Hozzávalók';
+
+  @override
+  String get recipeDetailPreparation => 'Elkészítés';
+
+  @override
+  String get recipeDetailTip => 'Tipp';
 
   @override
   String get productListingEmpty => 'Nem találhatók termékek ennél a márkánál.';

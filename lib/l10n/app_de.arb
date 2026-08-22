@@ -386,8 +386,40 @@
   "bottomNavRecipes": "Rezepte",
   "bottomNavProfile": "Profil",
   "recipesTabTitle": "Rezepte",
-  "recipesEmptyHeadline": "Rezepte sind bald da",
-  "recipesEmptyBody": "Katzenfreundliche Rezepte erscheinen hier in Kürze.",
+  "recipesEmptyHeadline": "Keine passenden Rezepte",
+  "recipesEmptyBody": "Versuche eine andere Suche oder wähle eine andere Kategorie.",
+  "recipesSearchHint": "Rezept suchen",
+  "recipesCategoryAll": "Alle",
+  "recipesCategoryBiscuits": "Kekse",
+  "recipesCategoryCakes": "Kuchen",
+  "recipesCategoryFrozenTreats": "Gefrorene Snacks",
+  "recipesCategoryOther": "Sonstige",
+  "recipesErrorBody": "Beim Laden der Rezepte ist etwas schiefgelaufen.",
+  "recipesDifficultyEasy": "Einfach",
+  "recipesDifficultyMedium": "Mittel",
+  "recipesDifficultyHard": "Schwer",
+  "recipesPrepMinutes": "{minutes} Min.",
+  "@recipesPrepMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesPrepMinutesPlusFreezing": "{minutes} Min. + Gefrierzeit",
+  "@recipesPrepMinutesPlusFreezing": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesCompatible": "Passt zum Profil",
+  "recipesCaution": "Mit dem Tierarzt klären",
+  "recipesIncompatible": "Nicht für dieses Profil",
+  "recipeDetailIngredients": "Zutaten",
+  "recipeDetailPreparation": "Zubereitung",
+  "recipeDetailTip": "Tipp",
   "productListingEmpty": "Für diese Marke wurden keine Produkte gefunden.",
   "commonAgeGroupKitten": "Kätzchen",
   "commonAgeGroupAdult": "Erwachsen",

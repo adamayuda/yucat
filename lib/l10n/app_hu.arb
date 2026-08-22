@@ -386,8 +386,40 @@
   "bottomNavRecipes": "Receptek",
   "bottomNavProfile": "Profil",
   "recipesTabTitle": "Receptek",
-  "recipesEmptyHeadline": "Hamarosan jönnek a receptek",
-  "recipesEmptyBody": "A macskabarát receptek hamarosan itt jelennek meg.",
+  "recipesEmptyHeadline": "Nincs találat",
+  "recipesEmptyBody": "Próbálj más keresést, vagy válassz másik kategóriát.",
+  "recipesSearchHint": "Recept keresése",
+  "recipesCategoryAll": "Összes",
+  "recipesCategoryBiscuits": "Kekszek",
+  "recipesCategoryCakes": "Sütemények",
+  "recipesCategoryFrozenTreats": "Fagyasztott finomságok",
+  "recipesCategoryOther": "Egyéb",
+  "recipesErrorBody": "Hiba történt a receptek betöltése közben.",
+  "recipesDifficultyEasy": "Könnyű",
+  "recipesDifficultyMedium": "Közepes",
+  "recipesDifficultyHard": "Nehéz",
+  "recipesPrepMinutes": "{minutes} perc",
+  "@recipesPrepMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesPrepMinutesPlusFreezing": "{minutes} perc + fagyasztás",
+  "@recipesPrepMinutesPlusFreezing": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesCompatible": "Illik a profiljához",
+  "recipesCaution": "Egyeztess az állatorvossal",
+  "recipesIncompatible": "Nem való a profiljához",
+  "recipeDetailIngredients": "Hozzávalók",
+  "recipeDetailPreparation": "Elkészítés",
+  "recipeDetailTip": "Tipp",
   "productListingEmpty": "Nem találhatók termékek ennél a márkánál.",
   "commonAgeGroupKitten": "Kölyök",
   "commonAgeGroupAdult": "Felnőtt",

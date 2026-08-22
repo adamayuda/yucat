@@ -386,8 +386,40 @@
   "bottomNavRecipes": "Recettes",
   "bottomNavProfile": "Profil",
   "recipesTabTitle": "Recettes",
-  "recipesEmptyHeadline": "Les recettes arrivent",
-  "recipesEmptyBody": "Des recettes adaptées à votre chat apparaîtront bientôt ici.",
+  "recipesEmptyHeadline": "Aucune recette ne correspond",
+  "recipesEmptyBody": "Essaie une autre recherche ou choisis une autre catégorie.",
+  "recipesSearchHint": "Rechercher une recette",
+  "recipesCategoryAll": "Toutes",
+  "recipesCategoryBiscuits": "Biscuits",
+  "recipesCategoryCakes": "Gâteaux",
+  "recipesCategoryFrozenTreats": "Friandises glacées",
+  "recipesCategoryOther": "Autres",
+  "recipesErrorBody": "Une erreur est survenue lors du chargement des recettes.",
+  "recipesDifficultyEasy": "Facile",
+  "recipesDifficultyMedium": "Moyen",
+  "recipesDifficultyHard": "Difficile",
+  "recipesPrepMinutes": "{minutes} min",
+  "@recipesPrepMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesPrepMinutesPlusFreezing": "{minutes} min + congélation",
+  "@recipesPrepMinutesPlusFreezing": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "recipesCompatible": "Compatible avec son profil",
+  "recipesCaution": "À valider avec ton vétérinaire",
+  "recipesIncompatible": "Déconseillé pour son profil",
+  "recipeDetailIngredients": "Ingrédients",
+  "recipeDetailPreparation": "Préparation",
+  "recipeDetailTip": "Astuce",
   "productListingEmpty": "Aucun produit trouvé pour cette marque.",
   "commonAgeGroupKitten": "Chaton",
   "commonAgeGroupAdult": "Adulte",

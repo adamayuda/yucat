@@ -258,6 +258,7 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | `MascotSpeechBubble` | `mascot_speech_bubble.dart` | Mascot illustration + speech bubble with `CustomPainter` tail. Used by every cat-create wizard step. |
 | `LineChartCard` | `line_chart_card.dart` | Two-line chart (your line vs theirs) inside a `DSCard`. Phase C0. |
 | `DSShimmer` / `ShimmerBone` / `ShimmerCircle` | `ds_shimmer.dart` | Loading-skeleton primitives on `shimmer`. `DSShimmer` wraps a bone subtree in the sweep (base `tintAsh`, highlight `surfaceCard`, 1200ms); `ShimmerBone` is a rounded block, `ShimmerCircle` a disc. Place real white `DSCard`s outside the wrapper, bones inside, so cards keep their surface while bones shimmer. |
+| `DSCircleIconButton` | `ds_circle_icon_button.dart` | Circular white-disc icon button with an `e1` lift, for actions floating over content rather than sitting in a header row. `icon` / `onPressed` / `iconColor` / `size` (default 36; the icon scales to half). Extracted from three identical private copies in Product Detail, Litter Detail and Recipe Detail. |
 | `DSAppBar` | `ds_app_bar.dart` | The extracted header (see §8c). `DSAppBar.tab(title, [trailing])` — large `displayLg` title + optional trailing icon, for tab pages. `DSAppBar.modal(onBack, [title], [actions])` — leading 28px chevron-back + optional centered `headlineMd` title + trailing actions. Private `_` constructor: use the factories. |
 | `DSHaptics` | `ds_haptics.dart` | Centralized haptics so intensity is tuned in one place. `DSHaptics.selection()` (light tick — picking an option from a list/grid/chip set) and `DSHaptics.tap()` (soft impact — primary CTAs). Call these, never `HapticFeedback` directly. |
 | `DSSparkleDecor` / `DSDecorItem` | `ds_sparkle_decor.dart` | Scattered decorative stars painted behind content via `_SparklePainter`. Each `DSDecorItem` positions + tints one star from the star palette (§2). |
@@ -317,7 +318,7 @@ routes outside the tab shell (`SearchRoute`, `ProductDetailRoute`, `ProductListi
 **Inline header pattern.** `TopAppBar` was retired; every tab and modal renders an inline header with one of two shapes:
 
 - **Tab pages** (Recipes, Profile): `Row(displayLg + trailing icon)` with `~24` horizontal padding. Home leads with a read-only `SearchTextField` instead of a title; the pushed Search page uses the modal header and adds an autofocused `SearchTextField` below it.
-- **Modal pages** (Cat Detail, Product Listing, Product Detail, Saved Products, Scan History, Health Record): leading 28px `Icons.chevron_left` `IconButton`, optional centered title (`headlineMd`), optional trailing action icons. Product Detail is the only screen using circular white-disc action buttons (bookmark + ⋯) — these may graduate into `DSCircleIconButton` if a second use appears.
+- **Modal pages** (Cat Detail, Product Listing, Product Detail, Saved Products, Scan History, Health Record): leading 28px `Icons.chevron_left` `IconButton`, optional centered title (`headlineMd`), optional trailing action icons. Circular white-disc action buttons are now the shared `DSCircleIconButton` (§8) — used by Product Detail (bookmark + ⋯), Litter Detail, and Recipe Detail's back button floating over the hero.
 
 **This was extracted — use `DSAppBar`** (`ds_app_bar.dart`, §8a): `DSAppBar.tab()` for the
 first shape, `DSAppBar.modal()` for the second. Don't hand-roll a new header row.
@@ -452,7 +453,6 @@ Chrome rules that belong to the design system:
 - **Visual QA pass** — iOS-sim review of the post-onboarding tabs. (This was originally a
   side-by-side against the BitePal screenshots; those are gone, so it's now a self-review
   against §2–§8.)
-- **`DSCircleIconButton`** — extract if a second call site for Product Detail's circular white-disc action buttons appears (§8c).
 
 ---
 

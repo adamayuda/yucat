@@ -1353,10 +1353,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recipesTabTitle => 'Recipes';
 
   @override
-  String get recipesEmptyHeadline => 'Recipes are coming';
+  String get recipesEmptyHeadline => 'No recipes match';
 
   @override
-  String get recipesEmptyBody => 'Cat-friendly recipes will show up here soon.';
+  String get recipesEmptyBody =>
+      'Try another search or pick a different category.';
+
+  @override
+  String get recipesSearchHint => 'Search for a recipe';
+
+  @override
+  String get recipesCategoryAll => 'All';
+
+  @override
+  String get recipesCategoryBiscuits => 'Biscuits';
+
+  @override
+  String get recipesCategoryCakes => 'Cakes';
+
+  @override
+  String get recipesCategoryFrozenTreats => 'Frozen treats';
+
+  @override
+  String get recipesCategoryOther => 'Other';
+
+  @override
+  String get recipesErrorBody => 'Something went wrong while loading recipes.';
+
+  @override
+  String get recipesDifficultyEasy => 'Easy';
+
+  @override
+  String get recipesDifficultyMedium => 'Medium';
+
+  @override
+  String get recipesDifficultyHard => 'Hard';
+
+  @override
+  String recipesPrepMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String recipesPrepMinutesPlusFreezing(int minutes) {
+    return '$minutes min + freezing';
+  }
+
+  @override
+  String get recipesCompatible => 'Matches their profile';
+
+  @override
+  String get recipesCaution => 'Check with your vet';
+
+  @override
+  String get recipesIncompatible => 'Not for their profile';
+
+  @override
+  String get recipeDetailIngredients => 'Ingredients';
+
+  @override
+  String get recipeDetailPreparation => 'Preparation';
+
+  @override
+  String get recipeDetailTip => 'Tip';
 
   @override
   String get productListingEmpty => 'No products found for this brand.';
