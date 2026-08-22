@@ -36,7 +36,13 @@ class DSColors {
   static const Color inkTertiary = Color(0xFF9999A3);
   static const Color inkInverse = Color(0xFFFFFFFF);
 
-  // Section surface tints (page backgrounds)
+  /// The app-shell page background — every post-onboarding scaffold (tabs and
+  /// modal routes) paints this. Deliberately separate from [tintLavender]:
+  /// that token still tints small surfaces (avatar discs, image placeholders,
+  /// mascot halos) which sit on white cards and must stay visibly darker.
+  static const Color pageBackground = Color(0xFFF2EDF8);
+
+  // Section surface tints
   static const Color tintLavender = Color(0xFFE8E5F0);
   static const Color tintSky = Color(0xFFDCE9F4);
   static const Color tintMint = Color(0xFFD8F0DD);
@@ -161,13 +167,6 @@ class DSGradients {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [Color(0xFFA5CAFF), DSColors.tintCloud],
-  );
-
-  /// Soft full-page wash behind the home dashboard.
-  static const LinearGradient homeBackground = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFFEDEAF7), DSColors.tintCloud],
   );
 
   /// Warm coral wash behind the home scan hero card.

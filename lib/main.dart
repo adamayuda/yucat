@@ -25,7 +25,6 @@ import 'package:yucat/features/product_listing/presentation/bloc/product_listing
 import 'package:yucat/features/profile/bloc/profile_bloc.dart';
 import 'package:yucat/features/saved_products/presentation/bloc/saved_products_bloc.dart';
 import 'package:yucat/features/scan_history/presentation/bloc/scan_history_bloc.dart';
-import 'package:yucat/features/search_products/presentation/bloc/search_bloc.dart';
 import 'package:yucat/service_locator.dart';
 import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/remote_config_service.dart';
@@ -125,7 +124,6 @@ class _AppState extends State<App> with WidgetsBindingObserver {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => sl<OnBoardingBloc>()),
-        BlocProvider(create: (context) => sl<SearchBloc>()),
         BlocProvider(create: (context) => sl<HomeBloc>()),
         BlocProvider(create: (context) => sl<ProfileBloc>()),
         BlocProvider(create: (context) => sl<ProductDetailBloc>()),

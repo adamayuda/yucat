@@ -33,11 +33,17 @@ YuCat's pink `#ED67CA` is **demoted** from primary UI color to brand mark only (
 All values below are transcribed from `lib/config/themes/theme.dart` (`DSColors`) — exact,
 not eyeballed. If you change a token, change it here in the same commit.
 
-### Section surface tints — page backgrounds
+### Page background
 
 | Token | Hex | Used for |
 |---|---|---|
-| `tintLavender` | `#E8E5F0` | Splash, transition beats, all three main tabs |
+| `pageBackground` | `#F2EDF8` | **Every post-onboarding scaffold** — the `MainPage` shell and its nav fade gradient, all three tabs, and every modal route outside the shell. Deliberately *not* `tintLavender`: that token still tints small surfaces which sit on white cards and must stay visibly darker. |
+
+### Section surface tints
+
+| Token | Hex | Used for |
+|---|---|---|
+| `tintLavender` | `#E8E5F0` | Splash, transition beats, avatar discs (`CatAvatar`), image placeholders, mascot halos |
 | `tintSky` | `#DCE9F4` | Welcome, value prop, "why YuCat works" |
 | `tintMint` | `#D8F0DD` | Social proof, completion / success |
 | `tintCoral` | `#F4D9D6` | Domain pitch, reminders |
@@ -262,7 +268,7 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | Component | File | Shape |
 |---|---|---|
 | `ProductRowCard` | `lib/features/search_products/presentation/widgets/product_row_card.dart` | 64×64 thumb (or `tintLavender` placeholder) + name + brand + soft score pill + chevron. Used by Search results AND Product Listing. |
-| `SearchTextField` | `lib/features/search_products/presentation/widgets/search_text_field.dart` | White pill input, `e1` shadow, search icon prefix. Search page. |
+| `SearchTextField` | `lib/features/search_products/presentation/widgets/search_text_field.dart` | White pill input, `e1` shadow, search icon prefix. Two modes: **editable** (`controller` + `onChanged` + `autofocus`) on the pushed Search page, and **read-only affordance** (`readOnly: true` + `onTap`, no controller) as the search bar at the top of Home, which pushes `SearchRoute`. |
 | `RingScore` | `lib/features/product_detail/presentation/widgets/ring_score.dart` | Circular ring score: `CircularProgressIndicator(value)` + centered number. Color buckets (green / amber / coral) follow `ProductRatingColor`. Used on product analysis card and per-cat verdict cards. |
 | `LitterListRow` | `lib/features/litter_detail/presentation/widgets/litter_list_row.dart` | 56×56 thumb (or `HatchedPlaceholder`) + name + brand + soft score pill. Used by BOTH the Saved-products and Scan-history lists, which is why it is one widget rather than the two near-copies the food rows are. The score pill is hidden when `dataUnavailable` — "0/100" reads as a damning grade, not as "no data". |
 | `HatchedPlaceholder` | `lib/features/product_detail/presentation/widgets/hatched_placeholder.dart` | 45° hatch `CustomPainter` + "PRODUCT" tag corner. Hero fallback when `imageUrl` is null. |
@@ -273,17 +279,30 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 
 Patterns shared across the post-onboarding app (`MainRoute`).
 
-**The three tabs are Search · Home · Profile** (`AutoTabsRouter routes:` in
-`lib/presentation/main/main_page.dart:16`). Cats is *not* a tab — it's reached from Home and
-Profile. All three tabs use `tintLavender` as the page background.
+**The nav has four slots over three tabs.** The tabs are **Home · Recipes · Profile**
+(`AutoTabsRouter routes:` in `lib/presentation/main/main_page.dart:16`); the nav renders a fourth
+slot, **Scan**, between Home and Recipes. Scan is an *action*, not a tab — it pushes the
+root-level `ScannerRoute`. `bottom_nav_bar.dart` owns the mapping (`_slotToTab` / `_tabToSlot`,
+with `-1` marking the action slot) and passes a *slot* index as `activeIndex`, so the scan slot
+can never equal it and never highlights. `DSBottomNav` itself stays dumb.
 
-`MainPage` is `Scaffold(backgroundColor: DSColors.tintLavender)` with the nav floating in a
+Tapping Scan first switches to the Home tab, then pushes the scanner: `HomeBloc` emits
+`HomeScanningState` after capture, and the scan theater only paints while Home is the active tab.
+
+⚠️ **Tab identity is duplicated in three places that must stay in sync**: `main_page.dart:16`,
+the `MainRoute` `children:` in `lib/config/routes/router.dart`, and `_tabScreenNames` +
+the two mapping tables in `lib/features/bottom_navigation_bar/bottom_nav_bar.dart`.
+
+Search and Cats are *not* tabs — Search is a pushed route reached from Home's search bar; Cats is
+reached from Home and Profile. All three tabs use `pageBackground` — none of them paints its own; the Home tab used to carry a `DSGradients.homeBackground` wash, now removed in favour of the flat shell colour.
+
+`MainPage` is `Scaffold(backgroundColor: DSColors.pageBackground)` with the nav floating in a
 **`Stack`**, not a transparent scaffold with `extendBody`. Both details are load-bearing and
 commented in the source:
 
 - **The scaffold is opaque on purpose.** `AutoTabsRouter` cross-fades between tabs, and
   mid-fade both pages are partially transparent — a transparent `Scaffold` lets the black
-  window show through as a **black blink**. `tintLavender` matches the Search/Profile
+  window show through as a **black blink**. `pageBackground` matches the Recipes/Profile
   scaffolds and the nav fade gradient.
 - **The nav floats in a `Stack`** rather than occupying the `bottomNavigationBar` slot, so
   each tab paints full-bleed to the bottom edge. A soft gradient fade (`bottomInset + 120`)
@@ -291,13 +310,13 @@ commented in the source:
   by a solid bar — mirroring the onboarding floating-CTA fade.
 
 Don't set per-page Scaffold backgrounds inside the tab pages — the shell handles it. Modal
-routes outside the tab shell (`ProductDetailRoute`, `ProductListingRoute`, `CatDetailRoute`,
-`CreateCatRoute`, `SavedProductsRoute`, `ScanHistoryRoute`,
-`PaywallRoute`) set their own `tintLavender` bg directly, since they're not under `MainPage`.
+routes outside the tab shell (`SearchRoute`, `ProductDetailRoute`, `ProductListingRoute`,
+`CatDetailRoute`, `CreateCatRoute`, `SavedProductsRoute`, `ScanHistoryRoute`,
+`PaywallRoute`) set their own `pageBackground` bg directly, since they're not under `MainPage`.
 
 **Inline header pattern.** `TopAppBar` was retired; every tab and modal renders an inline header with one of two shapes:
 
-- **Tab pages** (Search, Profile): `Row(displayLg + trailing icon)` with `~24` horizontal padding. Search adds a `SearchTextField` below.
+- **Tab pages** (Recipes, Profile): `Row(displayLg + trailing icon)` with `~24` horizontal padding. Home leads with a read-only `SearchTextField` instead of a title; the pushed Search page uses the modal header and adds an autofocused `SearchTextField` below it.
 - **Modal pages** (Cat Detail, Product Listing, Product Detail, Saved Products, Scan History, Health Record): leading 28px `Icons.chevron_left` `IconButton`, optional centered title (`headlineMd`), optional trailing action icons. Product Detail is the only screen using circular white-disc action buttons (bookmark + ⋯) — these may graduate into `DSCircleIconButton` if a second use appears.
 
 **This was extracted — use `DSAppBar`** (`ds_app_bar.dart`, §8a): `DSAppBar.tab()` for the

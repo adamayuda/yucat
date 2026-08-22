@@ -57,7 +57,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DSColors.tintLavender,
+      backgroundColor: DSColors.pageBackground,
       body: SafeArea(
         bottom: false,
         child: Column(

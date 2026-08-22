@@ -13,7 +13,7 @@ class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AutoTabsRouter(
-      routes: const [SearchRoute(), HomeRoute(), ProfileRoute()],
+      routes: const [HomeRoute(), RecipesRoute(), ProfileRoute()],
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
         final bottomInset = MediaQuery.of(context).padding.bottom;
@@ -24,7 +24,7 @@ class MainPage extends StatelessWidget {
           // a transparent Scaffold would let the black window show through
           // (a black blink). tintLavender matches the Search/Profile scaffolds
           // and the nav fade gradient below.
-          backgroundColor: DSColors.tintLavender,
+          backgroundColor: DSColors.pageBackground,
           // The nav floats over the page in a Stack rather than occupying a
           // bottomNavigationBar slot, so each tab paints full-bleed to the
           // bottom edge. A soft fade behind the pill lets scrolling content
@@ -45,8 +45,8 @@ class MainPage extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          DSColors.tintLavender.withValues(alpha: 0),
-                          DSColors.tintLavender,
+                          DSColors.pageBackground.withValues(alpha: 0),
+                          DSColors.pageBackground,
                         ],
                         stops: const [0.0, 0.7],
                       ),

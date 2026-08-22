@@ -32,7 +32,7 @@ class _ProductListingPage extends State<ProductListingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DSColors.tintLavender,
+      backgroundColor: DSColors.pageBackground,
       body: SafeArea(
         bottom: false,
         child: Column(

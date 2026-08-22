@@ -1176,14 +1176,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get homeReadyToScan => 'Kész vagy beszkennelni egy terméket?';
 
   @override
-  String get homeAddCatTitle => 'Add hozzá a macskádat';
-
-  @override
-  String get homeAddCatBody =>
-      'Hozz létre profilt személyre szabott élelmiszer-pontszámokhoz.';
-
-  @override
-  String get homeAddCatButton => 'Macska hozzáadása';
+  String get homeAddCatShort => 'Új';
 
   @override
   String homeProfileCompletionTitle(String name) {
@@ -1354,13 +1347,26 @@ class AppLocalizationsHu extends AppLocalizations {
   String get searchErrorBody => 'Hiba történt a keresés közben.';
 
   @override
-  String get bottomNavSearch => 'Keresés';
-
-  @override
   String get bottomNavHome => 'Főoldal';
 
   @override
+  String get bottomNavScan => 'Szkennelés';
+
+  @override
+  String get bottomNavRecipes => 'Receptek';
+
+  @override
   String get bottomNavProfile => 'Profil';
+
+  @override
+  String get recipesTabTitle => 'Receptek';
+
+  @override
+  String get recipesEmptyHeadline => 'Hamarosan jönnek a receptek';
+
+  @override
+  String get recipesEmptyBody =>
+      'A macskabarát receptek hamarosan itt jelennek meg.';
 
   @override
   String get productListingEmpty => 'Nem találhatók termékek ennél a márkánál.';

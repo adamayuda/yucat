@@ -11,6 +11,7 @@ import 'package:yucat/features/litter_detail/presentation/litter_detail_page.dar
 import 'package:yucat/features/litter_detail/presentation/models/litter_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/profile/profile_page.dart';
+import 'package:yucat/features/recipes/presentation/recipes_page.dart';
 import 'package:yucat/features/saved_products/presentation/saved_products_page.dart';
 import 'package:yucat/features/scan_history/presentation/scan_history_page.dart';
 import 'package:yucat/features/search_products/presentation/search_page.dart';
@@ -93,11 +94,12 @@ class AppRouter extends RootStackRouter {
       page: MainRoute.page,
       path: '/main',
       children: [
-        AutoRoute(page: SearchRoute.page, path: 'search'),
         AutoRoute(page: HomeRoute.page, path: 'home'),
+        AutoRoute(page: RecipesRoute.page, path: 'recipes'),
         AutoRoute(page: ProfileRoute.page, path: 'profile'),
       ],
     ),
+    AutoRoute(page: SearchRoute.page, path: '/search'),
     AutoRoute(
       page: ScannerRoute.page,
       path: '/scanner',

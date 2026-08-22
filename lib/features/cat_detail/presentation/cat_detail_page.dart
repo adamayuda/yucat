@@ -60,7 +60,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
       builder: (context, state) {
         if (state is CatDetailLoadingState) {
           return const Scaffold(
-            backgroundColor: DSColors.tintLavender,
+            backgroundColor: DSColors.pageBackground,
             body: SafeArea(child: CatDetailSkeleton()),
           );
         }
@@ -68,7 +68,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
         final cat = state is CatDetailLoadedState ? state.cat : widget.cat;
 
         return Scaffold(
-          backgroundColor: DSColors.tintLavender,
+          backgroundColor: DSColors.pageBackground,
           body: SafeArea(
             child: Column(
               children: [

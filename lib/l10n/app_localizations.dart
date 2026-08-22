@@ -2121,23 +2121,11 @@ abstract class AppLocalizations {
   /// **'Ready to scan a product?'**
   String get homeReadyToScan;
 
-  /// No description provided for @homeAddCatTitle.
+  /// No description provided for @homeAddCatShort.
   ///
   /// In en, this message translates to:
-  /// **'Add your cat'**
-  String get homeAddCatTitle;
-
-  /// No description provided for @homeAddCatBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Create a profile to get personalized food scores.'**
-  String get homeAddCatBody;
-
-  /// No description provided for @homeAddCatButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Add a cat'**
-  String get homeAddCatButton;
+  /// **'Add'**
+  String get homeAddCatShort;
 
   /// No description provided for @homeProfileCompletionTitle.
   ///
@@ -2409,23 +2397,47 @@ abstract class AppLocalizations {
   /// **'Something went wrong while searching.'**
   String get searchErrorBody;
 
-  /// No description provided for @bottomNavSearch.
-  ///
-  /// In en, this message translates to:
-  /// **'Search'**
-  String get bottomNavSearch;
-
   /// No description provided for @bottomNavHome.
   ///
   /// In en, this message translates to:
   /// **'Home'**
   String get bottomNavHome;
 
+  /// No description provided for @bottomNavScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get bottomNavScan;
+
+  /// No description provided for @bottomNavRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get bottomNavRecipes;
+
   /// No description provided for @bottomNavProfile.
   ///
   /// In en, this message translates to:
   /// **'Profile'**
   String get bottomNavProfile;
+
+  /// No description provided for @recipesTabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get recipesTabTitle;
+
+  /// No description provided for @recipesEmptyHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes are coming'**
+  String get recipesEmptyHeadline;
+
+  /// No description provided for @recipesEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Cat-friendly recipes will show up here soon.'**
+  String get recipesEmptyBody;
 
   /// No description provided for @productListingEmpty.
   ///

@@ -56,11 +56,3 @@ class SearchErrorState extends SearchState {
   List<Object?> get props => [];
 }
 
-class SearchNavigateToProductDetailState extends SearchState {
-  final ProductEntity productEntity;
-
-  const SearchNavigateToProductDetailState({required this.productEntity});
-
-  @override
-  List<Object?> get props => [productEntity];
-}

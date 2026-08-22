@@ -36,7 +36,7 @@ class _CatListingPageState extends State<CatListingPage> {
       builder: (context, state) {
         final l10n = AppLocalizations.of(context);
         return Scaffold(
-          backgroundColor: DSColors.tintLavender,
+          backgroundColor: DSColors.pageBackground,
           body: Column(
             children: [
               SafeArea(

@@ -1167,14 +1167,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeReadyToScan => 'Ready to scan a product?';
 
   @override
-  String get homeAddCatTitle => 'Add your cat';
-
-  @override
-  String get homeAddCatBody =>
-      'Create a profile to get personalized food scores.';
-
-  @override
-  String get homeAddCatButton => 'Add a cat';
+  String get homeAddCatShort => 'Add';
 
   @override
   String homeProfileCompletionTitle(String name) {
@@ -1345,13 +1338,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchErrorBody => 'Something went wrong while searching.';
 
   @override
-  String get bottomNavSearch => 'Search';
-
-  @override
   String get bottomNavHome => 'Home';
 
   @override
+  String get bottomNavScan => 'Scan';
+
+  @override
+  String get bottomNavRecipes => 'Recipes';
+
+  @override
   String get bottomNavProfile => 'Profile';
+
+  @override
+  String get recipesTabTitle => 'Recipes';
+
+  @override
+  String get recipesEmptyHeadline => 'Recipes are coming';
+
+  @override
+  String get recipesEmptyBody => 'Cat-friendly recipes will show up here soon.';
 
   @override
   String get productListingEmpty => 'No products found for this brand.';

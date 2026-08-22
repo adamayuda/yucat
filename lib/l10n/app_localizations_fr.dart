@@ -1184,14 +1184,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeReadyToScan => 'Prêt à scanner un produit ?';
 
   @override
-  String get homeAddCatTitle => 'Ajoute ton chat';
-
-  @override
-  String get homeAddCatBody =>
-      'Crée un profil pour obtenir des scores personnalisés.';
-
-  @override
-  String get homeAddCatButton => 'Ajouter un chat';
+  String get homeAddCatShort => 'Ajouter';
 
   @override
   String homeProfileCompletionTitle(String name) {
@@ -1363,13 +1356,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get searchErrorBody => 'Une erreur est survenue lors de la recherche.';
 
   @override
-  String get bottomNavSearch => 'Recherche';
-
-  @override
   String get bottomNavHome => 'Accueil';
 
   @override
+  String get bottomNavScan => 'Scan';
+
+  @override
+  String get bottomNavRecipes => 'Recettes';
+
+  @override
   String get bottomNavProfile => 'Profil';
+
+  @override
+  String get recipesTabTitle => 'Recettes';
+
+  @override
+  String get recipesEmptyHeadline => 'Les recettes arrivent';
+
+  @override
+  String get recipesEmptyBody =>
+      'Des recettes adaptées à votre chat apparaîtront bientôt ici.';
 
   @override
   String get productListingEmpty => 'Aucun produit trouvé pour cette marque.';

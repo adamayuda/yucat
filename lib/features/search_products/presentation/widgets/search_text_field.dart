@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 
+/// White pill search input, in two modes:
+///
+/// - **editable** (Search page): pass a [controller] + [onChanged].
+/// - **read-only affordance** (Home): pass `readOnly: true` + [onTap] and no
+///   controller — it renders the same pill but opens the Search page instead
+///   of raising the keyboard.
 class SearchTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
+  final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
   final String hintText;
 
   /// Called when the clear (✕) button is tapped. The button only renders while
@@ -13,13 +19,24 @@ class SearchTextField extends StatelessWidget {
   /// Called when the keyboard search/return key is pressed.
   final ValueChanged<String>? onSubmitted;
 
+  /// When true the field takes no input; use with [onTap] as a button.
+  final bool readOnly;
+
+  /// Tap handler for the whole field.
+  final VoidCallback? onTap;
+
+  final bool autofocus;
+
   const SearchTextField({
     super.key,
-    required this.controller,
-    required this.onChanged,
+    this.controller,
+    this.onChanged,
     required this.hintText,
     this.onClear,
     this.onSubmitted,
+    this.readOnly = false,
+    this.onTap,
+    this.autofocus = false,
   });
 
   @override
@@ -34,6 +51,9 @@ class SearchTextField extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         onSubmitted: onSubmitted,
+        readOnly: readOnly,
+        onTap: onTap,
+        autofocus: autofocus,
         style: DSTextStyles.bodyLg,
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
@@ -45,21 +65,23 @@ class SearchTextField extends StatelessWidget {
             Icons.search_rounded,
             color: DSColors.inkSecondary,
           ),
-          suffixIcon: ValueListenableBuilder<TextEditingValue>(
-            valueListenable: controller,
-            builder: (context, value, _) {
-              if (value.text.isEmpty) return const SizedBox.shrink();
-              return IconButton(
-                icon: const Icon(
-                  Icons.close_rounded,
-                  color: DSColors.inkSecondary,
-                  size: 20,
+          suffixIcon: controller == null
+              ? null
+              : ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: controller!,
+                  builder: (context, value, _) {
+                    if (value.text.isEmpty) return const SizedBox.shrink();
+                    return IconButton(
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: DSColors.inkSecondary,
+                        size: 20,
+                      ),
+                      splashRadius: 20,
+                      onPressed: onClear,
+                    );
+                  },
                 ),
-                splashRadius: 20,
-                onPressed: onClear,
-              );
-            },
-          ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: DSDimens.sizeS,
             vertical: DSDimens.sizeS,

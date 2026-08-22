@@ -1,9 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
-import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/search_products/presentation/bloc/search_bloc.dart';
 import 'package:yucat/features/search_products/presentation/widgets/product_row_card.dart';
@@ -31,15 +29,17 @@ class _SearchPage extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    _bloc = context.read<SearchBloc>();
+    // Search is a pushed route now, so this State disposes on every pop —
+    // own a fresh bloc per push rather than sharing (and closing) a global one.
+    _bloc = sl<SearchBloc>();
     _bloc.add(SearchInitialEvent());
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    super.dispose();
     _bloc.close();
+    super.dispose();
   }
 
   void _onQueryChanged(String value) {
@@ -69,39 +69,26 @@ class _SearchPage extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SearchBloc, SearchState>(
+    return BlocBuilder<SearchBloc, SearchState>(
       bloc: _bloc,
-      listenWhen: (previous, current) =>
-          current is SearchNavigateToProductDetailState,
-      listener: (context, state) {
-        if (state is SearchNavigateToProductDetailState) {
-          final productEntityToModelMapper = sl<ProductEntityToModelMapper>();
-          final productDetailModel = productEntityToModelMapper(
-            state.productEntity,
-          );
-          context.router.push(ProductDetailRoute(product: productDetailModel));
-        }
-      },
-      child: BlocBuilder<SearchBloc, SearchState>(
-        bloc: _bloc,
-        buildWhen: (previous, current) =>
-            previous != current &&
-            current is! SearchNavigateToProductDetailState,
-        builder: (context, state) => _buildScaffold(context, state),
-      ),
+      buildWhen: (previous, current) => previous != current,
+      builder: (context, state) => _buildScaffold(context, state),
     );
   }
 
   Widget _buildScaffold(BuildContext context, SearchState state) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: DSColors.tintLavender,
+      backgroundColor: DSColors.pageBackground,
       body: SafeArea(
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            DSAppBar.tab(title: l10n.searchTabTitle),
+            DSAppBar.modal(
+              onBack: () => context.router.maybePop(),
+              title: l10n.searchTabTitle,
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 DSDimens.sizeL,
@@ -111,6 +98,7 @@ class _SearchPage extends State<SearchPage> {
               ),
               child: SearchTextField(
                 controller: _searchController,
+                autofocus: true,
                 hintText: l10n.searchHint,
                 onChanged: _onQueryChanged,
                 onClear: _onClear,
@@ -191,7 +179,8 @@ class _ResultsList extends StatelessWidget {
     }
     final n = products.length;
     final caption = l10n.searchResultsCount(n);
-    final bottomInset = MediaQuery.of(context).padding.bottom + 96;
+    final bottomInset =
+        MediaQuery.of(context).padding.bottom + DSDimens.sizeL;
     return ListView.separated(
       padding: EdgeInsets.fromLTRB(
         DSDimens.sizeL,

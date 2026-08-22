@@ -563,9 +563,7 @@
     }
   },
   "homeReadyToScan": "Ready to scan a product?",
-  "homeAddCatTitle": "Add your cat",
-  "homeAddCatBody": "Create a profile to get personalized food scores.",
-  "homeAddCatButton": "Add a cat",
+  "homeAddCatShort": "Add",
   "homeProfileCompletionTitle": "Complete {name}'s profile",
   "@homeProfileCompletionTitle": {
     "placeholders": {
@@ -649,9 +647,13 @@
     }
   },
   "searchErrorBody": "Something went wrong while searching.",
-  "bottomNavSearch": "Search",
   "bottomNavHome": "Home",
+  "bottomNavScan": "Scan",
+  "bottomNavRecipes": "Recipes",
   "bottomNavProfile": "Profile",
+  "recipesTabTitle": "Recipes",
+  "recipesEmptyHeadline": "Recipes are coming",
+  "recipesEmptyBody": "Cat-friendly recipes will show up here soon.",
   "productListingEmpty": "No products found for this brand.",
   "commonAgeGroupKitten": "Kitten",
   "commonAgeGroupAdult": "Adult",

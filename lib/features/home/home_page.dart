@@ -44,6 +44,10 @@ class _HomePage extends State<HomePage> {
     context.router.push(ScannerRoute());
   }
 
+  void _openSearch() {
+    context.router.push(const SearchRoute());
+  }
+
   Future<void> _openProduct(ProductDisplayModel product) async {
     sl<LogEventUsecase>().call(
       eventName: 'Home Saved Product Tapped',
@@ -109,8 +113,12 @@ class _HomePage extends State<HomePage> {
     );
   }
 
-  void _openCreateCat() {
-    context.router.push(CreateCatRoute());
+  Future<void> _openCreateCat() async {
+    await context.router.push(CreateCatRoute());
+    // Re-fetch so a newly created cat shows up in the greeting card's picker —
+    // HomePage only loads in initState, so without this it stays hidden until
+    // the app restarts.
+    _bloc.add(HomeInitialEvent());
   }
 
   void _openCatList() {
@@ -135,12 +143,12 @@ class _HomePage extends State<HomePage> {
     switch (state) {
       case HomeLoadingState():
         return Scaffold(
-          backgroundColor: DSColors.tintLavender,
+          backgroundColor: DSColors.pageBackground,
           body: const HomeSkeleton(),
         );
       case HomeScanningState(:final imageBase64):
         return Scaffold(
-          backgroundColor: DSColors.tintLavender,
+          backgroundColor: DSColors.pageBackground,
           body: HomeLoadingWidget(imageBase64: imageBase64),
         );
       case HomeLoadedState(:final cats, :final savedProducts):
@@ -148,6 +156,7 @@ class _HomePage extends State<HomePage> {
           cats: cats,
           savedProducts: savedProducts,
           onScanTap: _openScanner,
+          onSearchTap: _openSearch,
           onCatTap: _openCatDetail,
           onProductTap: _openProduct,
           onSeeAllSaved: () => _openSavedProducts(savedProducts.length),
@@ -159,7 +168,7 @@ class _HomePage extends State<HomePage> {
       case HomeErrorState():
         final l10n = AppLocalizations.of(context);
         return Scaffold(
-          backgroundColor: DSColors.tintLavender,
+          backgroundColor: DSColors.pageBackground,
           body: SafeArea(
             child: DSStateView.error(
               body: _localizeError(state.errorType, l10n),

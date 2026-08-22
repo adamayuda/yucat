@@ -45,7 +45,7 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DSColors.tintLavender,
+      backgroundColor: DSColors.pageBackground,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

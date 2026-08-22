@@ -45,7 +45,7 @@ class _SavedProductsPageState extends State<SavedProductsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DSColors.tintLavender,
+      backgroundColor: DSColors.pageBackground,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

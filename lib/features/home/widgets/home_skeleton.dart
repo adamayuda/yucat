@@ -25,7 +25,9 @@ class HomeSkeleton extends StatelessWidget {
           ),
           physics: const NeverScrollableScrollPhysics(),
           children: const [
-            _HeaderBone(),
+            _SearchBarBone(),
+            SizedBox(height: DSDimens.sizeL),
+            _GreetingCardBone(),
             SizedBox(height: DSDimens.sizeL),
             _ScanHeroBone(),
             SizedBox(height: DSDimens.sizeM),
@@ -39,30 +41,63 @@ class HomeSkeleton extends StatelessWidget {
   }
 }
 
-class _HeaderBone extends StatelessWidget {
-  const _HeaderBone();
+class _SearchBarBone extends StatelessWidget {
+  const _SearchBarBone();
 
   @override
   Widget build(BuildContext context) {
-    return DSShimmer(
-      child: Row(
-        children: [
-          const ShimmerCircle(size: 48),
-          const SizedBox(width: DSDimens.sizeS),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return const DSShimmer(
+      child: ShimmerBone(
+        height: 56,
+        radius: DSRadii.pill,
+      ),
+    );
+  }
+}
+
+/// Mirrors `HomeGreetingCard`: greeting lines over the cat-picker row.
+class _GreetingCardBone extends StatelessWidget {
+  const _GreetingCardBone();
+
+  @override
+  Widget build(BuildContext context) {
+    return DSCard(
+      padding: const EdgeInsets.all(DSDimens.sizeL),
+      child: DSShimmer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                const ShimmerBone(width: 120, height: 20, radius: DSRadii.sm),
-                const SizedBox(height: DSDimens.sizeXxs),
-                FractionallySizedBox(
-                  widthFactor: 0.6,
-                  child: const ShimmerBone(height: 13, radius: DSRadii.sm),
+                const ShimmerCircle(size: 48),
+                const SizedBox(width: DSDimens.sizeS),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    ShimmerBone(width: 150, height: 24, radius: DSRadii.sm),
+                    SizedBox(height: DSDimens.sizeXxs),
+                    ShimmerBone(width: 110, height: 13, radius: DSRadii.sm),
+                  ],
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: DSDimens.sizeM),
+            Row(
+              children: [
+                for (var i = 0; i < 3; i++) ...[
+                  if (i > 0) const SizedBox(width: DSDimens.sizeM),
+                  Column(
+                    children: [
+                      const ShimmerCircle(size: 64),
+                      const SizedBox(height: DSDimens.sizeXxs),
+                      const ShimmerBone(width: 44, height: 12, radius: DSRadii.sm),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -24,7 +24,8 @@ class SearchDiscoverView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final bottomInset = MediaQuery.of(context).padding.bottom + 96;
+    final bottomInset =
+        MediaQuery.of(context).padding.bottom + DSDimens.sizeL;
     return ListView(
       padding: EdgeInsets.fromLTRB(
         DSDimens.sizeL,

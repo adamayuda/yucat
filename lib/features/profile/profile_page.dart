@@ -138,7 +138,7 @@ class _ProfilePage extends State<ProfilePage> {
                 _bloc.add(ResetOnboardingTapEvent(context: context)),
           ),
         _ => const Scaffold(
-            backgroundColor: DSColors.tintLavender,
+            backgroundColor: DSColors.pageBackground,
             body: ProfileSkeleton(),
           ),
       },
@@ -183,7 +183,7 @@ class _ProfileHub extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: DSColors.tintLavender,
+      backgroundColor: DSColors.pageBackground,
       body: SafeArea(
         bottom: false,
         child: ListView(

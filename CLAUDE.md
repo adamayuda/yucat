@@ -60,7 +60,8 @@ Grouped by area (each lives under `lib/features/<name>/`):
 **App shell / onboarding**
 - **splash**: Bootstraps services and routes to onboarding, paywall or main
 - **onboarding**: First-launch flow — a 12-phase `PageView` (the `OnBoardingPhase` enum *is* the order, and its ordinal is the Mixpanel `step_index`), then a router push-chain out of the bloc: cat-create wizard → current-food scan → result → paywall. `onboarding_completed` is written **when the cat is created**, before the scan and paywall. `RemoteConfigService.onboardingScanEnabled` skips the scan+result beats. **Full details in `lib/features/onboarding/README.md`** — read it before touching the feature
-- **bottom_navigation_bar**: Shared tab shell for the Main route (Search / Home / Profile)
+- **bottom_navigation_bar**: Shared tab shell for the Main route. Four nav slots (Home / Scan / Recipes / Profile) over **three** tabs — Scan is an action that pushes `ScannerRoute`, not a tab, so `bottom_nav_bar.dart` owns the slot↔tab mapping
+- **recipes**: Recipes tab — currently an empty-state placeholder (no bloc, no DI); content lands in its own plan
 - **profile**: Hub screen — Your Cats, Saved Products and Scan History rows with counts, legal links, and a debug-only Reset Onboarding row
 
 **Auth**
@@ -73,8 +74,8 @@ Grouped by area (each lives under `lib/features/<name>/`):
 - **cat_detail**: Single-cat detail view
 
 **Product discovery**
-- **home**: Dashboard + scanner entry point; image scan calls `fetchProductByImageV2`
-- **search** / **search_products**: Algolia-powered product/brand search
+- **home**: Dashboard + scanner entry point; image scan calls `fetchProductByImageV2`. Leads with a read-only `SearchTextField` that pushes `SearchRoute`, then `HomeGreetingCard` — greeting over a row of cat photos (blue `accentInfo` ring on the selected one, dashed "+ Add" tile at the end). That card is the **only** active-cat selector: `HomeDashboardPage` owns `_activeCatIndex` and hands the resolved cat to `MyCatsSection`, which renders the snapshot, completion nudge, diet tips and product picks for it
+- **search** / **search_products**: Algolia-powered product/brand search. `SearchPage` is a **pushed route** (reached from Home's search bar), not a tab — so it owns a fresh `SearchBloc` per push (`sl<SearchBloc>()` in `initState`, closed in `dispose`) rather than sharing the root provider
 - **brand**: Data-only feature (no presentation layer) backing brand search
 - **product**: Calls the `fetchProductByImageV2` Cloud Function and maps the response to `ProductEntity`
 - **product_listing**: Product list (e.g. by brand or search results)
@@ -287,15 +288,15 @@ Uses AutoRoute with declarative routing in `lib/config/routes/router.dart`. Rout
 
 Structure:
 - **Boot flow**: `SplashRoute` → `OnBoardingRoute` → `MainRoute`
-- **`MainRoute`** is a tabbed shell with three children: `SearchRoute`, `HomeRoute` (dashboard), `ProfileRoute`. (Cats is **not** a tab — it's reached from Home and Profile.) `MainPage` uses an **opaque** `tintLavender` Scaffold with the nav floating in a `Stack` — *not* `extendBody` + transparent, which caused a black blink during the `AutoTabsRouter` cross-fade. See `docs/design.md` §8c.
-- **Stacked / modal routes**: `ScannerRoute` (full-screen camera, opened from Home), `ProductDetailRoute`, `ProductListingRoute`, `CatDetailRoute`, `CreateCatRoute` (fullscreen dialog), `LitterDetailRoute`, `SavedProductsRoute` and `ScanHistoryRoute` (both opened from Profile, and both listing food and litter), `CurrentFoodRoute` and `ResultRoute` (the tail of the onboarding cascade), `PaywallRoute` (custom slide-up + `opaque: false` transition)
+- **`MainRoute`** is a tabbed shell with three children: `HomeRoute` (dashboard), `RecipesRoute`, `ProfileRoute` — but the nav renders **four** slots, with Scan sitting between Home and Recipes as an action that pushes `ScannerRoute`. (Search is **not** a tab — it's pushed from Home's search bar. Cats isn't either — it's reached from Home and Profile.) Tab identity is duplicated in three files that must stay in sync: `main_page.dart`, `router.dart`, `bottom_nav_bar.dart`. `MainPage` uses an **opaque** `tintLavender` Scaffold with the nav floating in a `Stack` — *not* `extendBody` + transparent, which caused a black blink during the `AutoTabsRouter` cross-fade. See `docs/design.md` §8c.
+- **Stacked / modal routes**: `SearchRoute` (pushed from Home's search bar, autofocused), `ScannerRoute` (full-screen camera, opened from Home's hero card or the nav's Scan slot), `ProductDetailRoute`, `ProductListingRoute`, `CatDetailRoute`, `CreateCatRoute` (fullscreen dialog), `LitterDetailRoute`, `SavedProductsRoute` and `ScanHistoryRoute` (both opened from Profile, and both listing food and litter), `CurrentFoodRoute` and `ResultRoute` (the tail of the onboarding cascade), `PaywallRoute` (custom slide-up + `opaque: false` transition)
 - **Screen-view analytics** auto-emitted via `AnalyticsRouteObserver` (`lib/config/routes/analytics_route_observer.dart`). `OnBoardingRoute` and `CreateCatRoute` are excluded — they handle their own multi-step PageView tracking inside the bloc.
 
 ## Themes & Design System
 
 `lib/config/themes/theme.dart` exposes design-system tokens — **prefer these over inline hex / magic numbers**. Brand pink `#ED67CA` is **demoted to logo/splash use only**; black + pastels do all the UI heavy lifting.
 
-- **`DSColors`** — section tints (`tintLavender` / `tintSky` / `tintMint` / `tintCoral` / `tintSand` / `tintAsh`), ink (`inkPrimary` / `inkSecondary` / `inkTertiary` / `inkInverse`), surfaces (`surfaceCard` / `surfaceCardDim`), accents (`accentSuccess` / `accentSuccessSoft` / `accentDanger` / `accentInfo`), `coralAccent` for emphasis chips, `brandPink` (logo only).
+- **`DSColors`** — `pageBackground` (`#F2EDF8`, every post-onboarding scaffold + the nav fade), section tints (`tintLavender` / `tintSky` / `tintMint` / `tintCoral` / `tintSand` / `tintAsh`), ink (`inkPrimary` / `inkSecondary` / `inkTertiary` / `inkInverse`), surfaces (`surfaceCard` / `surfaceCardDim`), accents (`accentSuccess` / `accentSuccessSoft` / `accentDanger` / `accentInfo`), `coralAccent` for emphasis chips, `brandPink` (logo only).
 - **`DSDimens`** — 4–64 px spacing scale (`sizeXxxs` → `size5xl`).
 - **`DSRadii`** — `sm`/`md`/`lg`/`xl`/`pill`. **`DSShadows`** — `e1`/`e2`/`e3`. **`DSMotion`** — durations + curves.
 - **`DSTextStyles`** — `displayHero` / `displayLg` / `headlineMd` (Bricolage Grotesque, wght 800 + wdth 75 condensed, via the bundled variable font); `titleMd`, `bodyLg` / `bodyMd`, `label`, `caption` (DM Sans via `google_fonts`).
@@ -389,7 +390,7 @@ The base methods live on the analytics datasource: `logEvent`, `logScreenView`, 
 
 - **iOS-first, Android shipping**: RevenueCat is initialized on both platforms (see `main.dart`), but iOS remains the primary target
 - **Tests**: there is **no `test/` directory** — unit coverage is currently zero. `integration_test/onboarding_screenshots_test.dart` is the only test file in the repo. (Docs referencing `test/features/paywall/trial_info_test.dart` are describing a file that was removed.)
-- **Localization**: every user-facing string goes through `gen_l10n` — **6 locales** (`en` template, `de`, `es`, `fr`, `hu`, `pt`) at 621 keys each, currently in parity. `l10n.yaml` sets `nullable-getter: false`; `pubspec.yaml` has `generate: true`, and the generated `app_localizations*.dart` are committed under `lib/l10n/`. A new string must be added to **all six** ARB files. Localized *art* goes through `localizedAssetPath(...)`; every call site passes all six locales explicitly, but the helper's own `available` **default** is a stale `{en, es, fr, hu}` — a new call site relying on it would silently serve English art to `de` and `pt`. Details in `docs/design.md` §13
+- **Localization**: every user-facing string goes through `gen_l10n` — **6 locales** (`en` template, `de`, `es`, `fr`, `hu`, `pt`) at 623 keys each, currently in parity. `l10n.yaml` sets `nullable-getter: false`; `pubspec.yaml` has `generate: true`, and the generated `app_localizations*.dart` are committed under `lib/l10n/`. A new string must be added to **all six** ARB files. Localized *art* goes through `localizedAssetPath(...)`; every call site passes all six locales explicitly, but the helper's own `available` **default** is a stale `{en, es, fr, hu}` — a new call site relying on it would silently serve English art to `de` and `pt`. Details in `docs/design.md` §13
 - **Push notifications**: OneSignal (`NotificationService`), **iOS only**, and deliberately no permission prompt at init — the ask lives on the onboarding `reminders` screen (phase 10 of 12). The `notifPrimer` screen before it is a mock that requests nothing. The service also writes a small set of **funnel-stage tags** (`funnel_stage`, `has_cat`, `paywall_seen`, `is_subscriber`, …) at the existing Mixpanel checkpoints, which is what makes drop-off Segments possible. ⚠️ Because permission is asked so late, users who abandon before `reminders` are tagged but **unreachable**. **`docs/onesignal.md` is the source of truth** — read it before touching push or the tags
 - **App Store review prompts**: `ReviewPromptService` gates on 5+ scans and 90+ days because Apple caps the native modal at 3 per 365 days. ⚠️ The onboarding `rating` screen bypasses that gate and calls `InAppReview.requestReview()` directly, spending one modal on every new user
 - **Auto-route generation**: Always run `build_runner` after modifying routes

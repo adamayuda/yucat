@@ -9,7 +9,8 @@ class SearchDiscoverSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom + 96;
+    final bottomInset =
+        MediaQuery.of(context).padding.bottom + DSDimens.sizeL;
     return DeferredSkeleton(
       child: DSShimmer(
         child: ListView(

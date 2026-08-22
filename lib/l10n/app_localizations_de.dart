@@ -1185,14 +1185,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeReadyToScan => 'Bereit, ein Produkt zu scannen?';
 
   @override
-  String get homeAddCatTitle => 'Füge deine Katze hinzu';
-
-  @override
-  String get homeAddCatBody =>
-      'Erstelle ein Profil, um personalisierte Futter-Punktzahlen zu erhalten.';
-
-  @override
-  String get homeAddCatButton => 'Katze hinzufügen';
+  String get homeAddCatShort => 'Neu';
 
   @override
   String homeProfileCompletionTitle(String name) {
@@ -1365,13 +1358,26 @@ class AppLocalizationsDe extends AppLocalizations {
   String get searchErrorBody => 'Bei der Suche ist etwas schiefgelaufen.';
 
   @override
-  String get bottomNavSearch => 'Suchen';
-
-  @override
   String get bottomNavHome => 'Start';
 
   @override
+  String get bottomNavScan => 'Scannen';
+
+  @override
+  String get bottomNavRecipes => 'Rezepte';
+
+  @override
   String get bottomNavProfile => 'Profil';
+
+  @override
+  String get recipesTabTitle => 'Rezepte';
+
+  @override
+  String get recipesEmptyHeadline => 'Rezepte sind bald da';
+
+  @override
+  String get recipesEmptyBody =>
+      'Katzenfreundliche Rezepte erscheinen hier in Kürze.';
 
   @override
   String get productListingEmpty =>

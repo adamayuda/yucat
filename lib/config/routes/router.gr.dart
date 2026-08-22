@@ -415,6 +415,22 @@ class ProfileRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [RecipesPage]
+class RecipesRoute extends PageRouteInfo<void> {
+  const RecipesRoute({List<PageRouteInfo>? children})
+    : super(RecipesRoute.name, initialChildren: children);
+
+  static const String name = 'RecipesRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const RecipesPage();
+    },
+  );
+}
+
+/// generated route for
 /// [ResultPage]
 class ResultRoute extends PageRouteInfo<ResultRouteArgs> {
   ResultRoute({
