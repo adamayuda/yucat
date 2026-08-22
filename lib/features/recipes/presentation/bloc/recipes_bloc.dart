@@ -29,7 +29,7 @@ class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
   ) async {
     emit(const RecipesLoadingState());
     try {
-      final recipes = await _getRecipesUsecase();
+      final recipes = await _getRecipesUsecase(language: event.language);
       emit(RecipesLoadedState(all: recipes.map(_mapper.call).toList()));
     } catch (_) {
       emit(const RecipesErrorState());

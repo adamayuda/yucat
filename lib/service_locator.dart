@@ -98,7 +98,8 @@ import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/services/cat_tracking_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 import 'package:yucat/features/litter/data/mappers/litter_to_domain_mapper.dart';
-import 'package:yucat/features/recipes/data/datasources/recipe_seed_datasource.dart';
+import 'package:yucat/features/recipes/data/datasources/recipe_firestore_datasource.dart';
+import 'package:yucat/features/recipes/data/mappers/recipe_document_mapper.dart';
 import 'package:yucat/features/recipes/data/repositories/recipes_repository_impl.dart';
 import 'package:yucat/features/recipes/domain/repositories/recipes_repository.dart';
 import 'package:yucat/features/recipes/domain/usecases/get_recipes_usecase.dart';
@@ -193,9 +194,9 @@ Future<void> _registerDataSources() async {
   sl.registerSingleton<BrandVerdictDataSource>(
     BrandVerdictDataSource(functions: sl<FirebaseFunctions>()),
   );
-  // Hard-coded catalogue for now — swap this for a remote datasource when
-  // recipes move to the backend.
-  sl.registerSingleton<RecipeSeedDataSource>(const RecipeSeedDataSource());
+  sl.registerSingleton<RecipeFirestoreDataSource>(
+    RecipeFirestoreDataSource(firestore: FirebaseFirestore.instance),
+  );
 }
 
 Future<void> _registerMappers() async {
@@ -220,6 +221,7 @@ Future<void> _registerMappers() async {
   sl.registerSingleton<RecipeEntityToModelMapper>(
     const RecipeEntityToModelMapper(),
   );
+  sl.registerSingleton<RecipeDocumentMapper>(const RecipeDocumentMapperImpl());
 }
 
 Future<void> _registerRepositories() async {
@@ -277,7 +279,10 @@ Future<void> _registerRepositories() async {
     LitterHistoryRepositoryImpl(prefs: sl<SharedPreferences>()),
   );
   sl.registerSingleton<RecipesRepository>(
-    RecipesRepositoryImpl(dataSource: sl<RecipeSeedDataSource>()),
+    RecipesRepositoryImpl(
+      dataSource: sl<RecipeFirestoreDataSource>(),
+      mapper: sl<RecipeDocumentMapper>(),
+    ),
   );
 }
 

@@ -5,7 +5,8 @@
 enum RecipeCategory {
   biscuits('biscuits'),
   cakes('cakes'),
-  frozenTreats('frozen-treats'),
+  frozenTreats('frozen'),
+  meals('meals'),
   other('other');
 
   const RecipeCategory(this.wire);
@@ -25,6 +26,7 @@ enum RecipeCategory {
     RecipeCategory.biscuits,
     RecipeCategory.cakes,
     RecipeCategory.frozenTreats,
+    RecipeCategory.meals,
   ];
 }
 

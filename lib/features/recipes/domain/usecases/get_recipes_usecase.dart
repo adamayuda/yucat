@@ -7,5 +7,6 @@ class GetRecipesUsecase {
   GetRecipesUsecase({required RecipesRepository repository})
       : _repository = repository;
 
-  Future<List<RecipeEntity>> call() => _repository.getRecipes();
+  Future<List<RecipeEntity>> call({String? language}) =>
+      _repository.getRecipes(language: language);
 }

@@ -1375,6 +1375,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recipesCategoryFrozenTreats => 'Frozen treats';
 
   @override
+  String get recipesCategoryMeals => 'Meals';
+
+  @override
   String get recipesCategoryOther => 'Other';
 
   @override

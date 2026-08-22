@@ -25,6 +25,7 @@ class RecipesPage extends StatefulWidget {
 
 class _RecipesPageState extends State<RecipesPage> {
   late RecipesBloc _bloc;
+  String? _language;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -33,7 +34,19 @@ class _RecipesPageState extends State<RecipesPage> {
     // Tab pattern: the bloc is owned by the root MultiBlocProvider, so this
     // page reads it and must NOT close it.
     _bloc = context.read<RecipesBloc>();
-    _bloc.add(const RecipesInitialEvent());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // App language (not the device locale) — the locale the app actually
+    // resolved to, so an unsupported device language correctly asks for
+    // English. Same rule as scanner_page.dart. Read here rather than in
+    // initState because Localizations needs a settled context.
+    final language = Localizations.localeOf(context).languageCode;
+    if (language == _language) return;
+    _language = language;
+    _bloc.add(RecipesInitialEvent(language: language));
   }
 
   @override
@@ -123,7 +136,8 @@ class _RecipesPageState extends State<RecipesPage> {
         ),
       RecipesErrorState() => DSStateView.error(
           body: l10n.recipesErrorBody,
-          onCtaPressed: () => _bloc.add(const RecipesInitialEvent()),
+          onCtaPressed: () =>
+              _bloc.add(RecipesInitialEvent(language: _language)),
         ),
       RecipesLoadedState(:final visible) => visible.isEmpty
           ? DSStateView.empty(

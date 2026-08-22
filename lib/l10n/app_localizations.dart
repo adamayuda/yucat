@@ -2469,6 +2469,12 @@ abstract class AppLocalizations {
   /// **'Frozen treats'**
   String get recipesCategoryFrozenTreats;
 
+  /// No description provided for @recipesCategoryMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'Meals'**
+  String get recipesCategoryMeals;
+
   /// No description provided for @recipesCategoryOther.
   ///
   /// In en, this message translates to:

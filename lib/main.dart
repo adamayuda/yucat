@@ -145,6 +145,21 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         theme: AppTheme.lightTheme,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        // Flutter's default falls back to supportedLocales.first, and the
+        // generated list is alphabetical — so an unmatched device language
+        // would resolve to GERMAN. Harmless for chrome, but recipes are served
+        // per language from Firestore, so it would hand a Japanese user German
+        // recipes. Fall back to English explicitly.
+        localeResolutionCallback: (locale, supported) {
+          if (locale != null) {
+            for (final candidate in supported) {
+              if (candidate.languageCode == locale.languageCode) {
+                return candidate;
+              }
+            }
+          }
+          return const Locale('en');
+        },
         routerConfig: _appRouter.config(
           navigatorObservers: () => [
             ...AutoRouterDelegate.defaultNavigatorObserversBuilder(),

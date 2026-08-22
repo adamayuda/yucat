@@ -1395,6 +1395,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get recipesCategoryFrozenTreats => 'Gefrorene Snacks';
 
   @override
+  String get recipesCategoryMeals => 'Mahlzeiten';
+
+  @override
   String get recipesCategoryOther => 'Sonstige';
 
   @override

@@ -1,0 +1,255 @@
+[
+  {
+    "id": "tuna-biscuits",
+    "category": "biscuits",
+    "prepMinutes": 25,
+    "requiresFreezing": false,
+    "difficulty": "easy",
+    "compatibility": "compatible",
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/recipes/tuna-biscuits.jpeg",
+    "published": true,
+    "order": 10,
+    "name": "Tuna biscuits",
+    "description": "Small homemade tuna biscuits baked until firm. Designed as an occasional treat, not a complete meal.",
+    "ingredients": [
+      {
+        "name": "Canned tuna in spring water, drained",
+        "quantity": "140 g"
+      },
+      {
+        "name": "Oat flour",
+        "quantity": "120 g"
+      },
+      {
+        "name": "Egg",
+        "quantity": "1"
+      },
+      {
+        "name": "Sunflower oil",
+        "quantity": "1 tbsp"
+      },
+      {
+        "name": "Water",
+        "quantity": "1-2 tbsp"
+      }
+    ],
+    "steps": [
+      "Preheat the oven to 180 C and line a baking tray with baking paper.",
+      "Drain the tuna thoroughly and mash it with a fork.",
+      "Combine the tuna with the egg, oat flour and sunflower oil.",
+      "Add a little water if needed and form a workable dough.",
+      "Shape into small biscuits and bake for 12-15 minutes. Allow to cool completely before serving."
+    ],
+    "tip": "Choose tuna in spring water rather than brine and keep portions small. These biscuits are an occasional treat."
+  },
+  {
+    "id": "chicken-biscuits",
+    "category": "biscuits",
+    "prepMinutes": 25,
+    "requiresFreezing": false,
+    "difficulty": "easy",
+    "compatibility": "compatible",
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/recipes/chicken-biscuits.jpeg",
+    "published": true,
+    "order": 20,
+    "name": "Chicken biscuits",
+    "description": "Homemade biscuits made with plain cooked chicken, egg and rice flour. Serve occasionally as a treat.",
+    "ingredients": [
+      {
+        "name": "Cooked chicken, skinless and boneless",
+        "quantity": "250 g"
+      },
+      {
+        "name": "Rice flour",
+        "quantity": "200 g"
+      },
+      {
+        "name": "Egg",
+        "quantity": "1"
+      },
+      {
+        "name": "Plain yogurt",
+        "quantity": "1 tbsp"
+      },
+      {
+        "name": "Sunflower oil",
+        "quantity": "1 tsp"
+      }
+    ],
+    "steps": [
+      "Preheat the oven to 175 C and line a baking tray with baking paper.",
+      "Finely chop or blend the plain cooked chicken.",
+      "Mix in the egg, yogurt and sunflower oil.",
+      "Gradually incorporate the rice flour until a dough forms.",
+      "Shape into small biscuits and bake for about 20 minutes. Cool completely before serving."
+    ],
+    "tip": "Use only plain cooked chicken with no salt, sauces, onion, garlic or seasoning."
+  },
+  {
+    "id": "tuna-mini-cake",
+    "category": "cakes",
+    "prepMinutes": 20,
+    "requiresFreezing": false,
+    "difficulty": "easy",
+    "compatibility": "compatible",
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/recipes/tuna-mini-cake.jpeg",
+    "published": true,
+    "order": 30,
+    "name": "Tuna mini-cake",
+    "description": "A small soft tuna cake made with egg and a little plain soft cheese. An occasional homemade treat for cats.",
+    "ingredients": [
+      {
+        "name": "Canned tuna in spring water, drained",
+        "quantity": "100 g"
+      },
+      {
+        "name": "Egg",
+        "quantity": "1"
+      },
+      {
+        "name": "Plain lactose-free soft cheese",
+        "quantity": "3 tbsp"
+      }
+    ],
+    "steps": [
+      "Preheat the oven to 180 C.",
+      "Drain the tuna thoroughly and break it into small pieces.",
+      "Mix the tuna with the egg and soft cheese until combined.",
+      "Transfer the mixture to a small muffin mould.",
+      "Bake until completely set, then allow to cool before serving."
+    ],
+    "tip": "Serve only a small portion. Dairy can cause digestive upset in some cats, so a lactose-free product is preferable."
+  },
+  {
+    "id": "frozen-tuna-bites",
+    "category": "frozen",
+    "prepMinutes": 5,
+    "requiresFreezing": true,
+    "difficulty": "easy",
+    "compatibility": "compatible",
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/recipes/frozen-tuna-bites.jpeg",
+    "published": true,
+    "order": 40,
+    "name": "Frozen tuna bites",
+    "description": "Simple frozen bites made from tuna and water. A refreshing occasional treat served in very small portions.",
+    "ingredients": [
+      {
+        "name": "Canned tuna in spring water, drained",
+        "quantity": "80 g"
+      },
+      {
+        "name": "Water",
+        "quantity": "60 ml"
+      }
+    ],
+    "steps": [
+      "Drain the tuna thoroughly.",
+      "Blend the tuna with the water until smooth.",
+      "Spoon the mixture into a small silicone mould or ice cube tray.",
+      "Freeze until completely solid.",
+      "Remove one small portion and let it soften slightly before offering it to your cat."
+    ],
+    "tip": "Make the portions very small and allow them to soften before serving rather than giving your cat a large hard-frozen piece."
+  },
+  {
+    "id": "frozen-wet-food-bites",
+    "category": "frozen",
+    "prepMinutes": 5,
+    "requiresFreezing": true,
+    "difficulty": "easy",
+    "compatibility": "compatible",
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/recipes/frozen-wet-food-bites.jpeg",
+    "published": true,
+    "order": 50,
+    "name": "Frozen wet food bites",
+    "description": "Your cat's usual wet food transformed into small frozen treats with a little added water.",
+    "ingredients": [
+      {
+        "name": "Your cat's usual complete wet food",
+        "quantity": "100 g"
+      },
+      {
+        "name": "Water",
+        "quantity": "2-3 tbsp"
+      }
+    ],
+    "steps": [
+      "Place the wet food in a bowl.",
+      "Mix in the water until the texture becomes smooth and slightly looser.",
+      "Divide the mixture between small silicone moulds.",
+      "Freeze until firm.",
+      "Let a portion soften slightly before serving."
+    ],
+    "tip": "Using your cat's usual complete wet food avoids introducing unnecessary new ingredients. Keep the portions small."
+  },
+  {
+    "id": "chicken-zucchini",
+    "category": "meals",
+    "prepMinutes": 15,
+    "requiresFreezing": false,
+    "difficulty": "easy",
+    "compatibility": "compatible",
+    "imageUrl": null,
+    "published": true,
+    "order": 60,
+    "name": "Chicken & zucchini",
+    "description": "Tender shredded chicken combined with soft cooked zucchini and a little water for extra moisture.",
+    "ingredients": [
+      {
+        "name": "Chicken breast, skinless and boneless",
+        "quantity": "100 g"
+      },
+      {
+        "name": "Zucchini",
+        "quantity": "30 g"
+      },
+      {
+        "name": "Water",
+        "quantity": "1-2 tbsp"
+      }
+    ],
+    "steps": [
+      "Cook the chicken thoroughly in plain water or steam it without salt, oil or seasoning.",
+      "Steam the zucchini until very soft.",
+      "Finely shred the chicken and chop or mash the zucchini into small pieces.",
+      "Mix the ingredients and add a little water for a moist texture.",
+      "Allow to cool to room temperature before serving."
+    ],
+    "tip": "This is a complementary homemade dish, not a nutritionally complete everyday diet. Serve occasionally alongside a complete cat food."
+  },
+  {
+    "id": "salmon-pumpkin",
+    "category": "meals",
+    "prepMinutes": 15,
+    "requiresFreezing": false,
+    "difficulty": "easy",
+    "compatibility": "compatible",
+    "imageUrl": null,
+    "published": true,
+    "order": 70,
+    "name": "Salmon & pumpkin",
+    "description": "Flaked cooked salmon mixed with tender pumpkin for a soft and simple homemade dish.",
+    "ingredients": [
+      {
+        "name": "Salmon fillet, skinless and boneless",
+        "quantity": "80 g"
+      },
+      {
+        "name": "Pumpkin",
+        "quantity": "30 g"
+      },
+      {
+        "name": "Water",
+        "quantity": "1-2 tbsp"
+      }
+    ],
+    "steps": [
+      "Cook the salmon thoroughly by steaming or baking it without salt, oil or seasoning.",
+      "Cook the pumpkin until completely soft.",
+      "Flake the salmon carefully and check again that no bones remain.",
+      "Mash or dice the pumpkin into small pieces and combine it with the salmon.",
+      "Add a little water for extra moisture and allow to cool before serving."
+    ],
+    "tip": "Check the salmon carefully for bones. This recipe should be offered as an occasional complementary dish rather than a complete daily meal."
+  }
+]

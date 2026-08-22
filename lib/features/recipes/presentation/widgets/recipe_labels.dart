@@ -9,6 +9,7 @@ extension RecipeCategoryL10n on RecipeCategory {
         RecipeCategory.biscuits => l10n.recipesCategoryBiscuits,
         RecipeCategory.cakes => l10n.recipesCategoryCakes,
         RecipeCategory.frozenTreats => l10n.recipesCategoryFrozenTreats,
+        RecipeCategory.meals => l10n.recipesCategoryMeals,
         RecipeCategory.other => l10n.recipesCategoryOther,
       };
 }

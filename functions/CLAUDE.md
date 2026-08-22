@@ -471,6 +471,8 @@ itself is not a declared dependency (`npx` fetches it).
 | `rescore-products.ts` | Batch re-grades `score` against `QUALITY_RUBRIC`, keeping the old value in `scoreLegacy` for rollback. Skips `score === 0`. Flags: `--dry-run`, `--limit=N`, `--concurrency=N` (10), `--query=`. |
 | `backfill-images.ts` | Finds + hosts images for products with `score > 0` and empty `imageUrl`, reusing the live self-heal path. Stamps `lastImageAttempt` even on failure, matching live throttling. Flags: `--dry-run`, `--limit=N`, `--concurrency=N` (5). |
 | `configure-litter-index.ts` | Applies `litters` index settings + litter synonyms. ⚠️ **Must be run once before the litter cache can work** — `searchLitterByNameV2` soft-filters on `brand`, and Algolia rejects a filter on an undeclared facet, so until then every lookup errors silently and every litter scan pays for a full analysis. |
+| `seed-recipes.ts` | Seeds the Firestore `recipes` collection from `scripts/data/recipes.json`, translating each recipe into the five non-English languages. **The only script that writes Firestore.** Re-runs are near-free: a recipe is re-translated only when its `translationsSourceHash` changes, or with `--force-retranslate`. Flags: `--dry-run`, `--limit=N`, `--only=<id>`, `--concurrency=N` (3), `--prune` (unpublishes stored recipes no longer in the JSON — documents are kept, and orphan detection is skipped when `--only`/`--limit` narrow the run, since everything else would look orphaned). Needs `ANTHROPIC_API_KEY` + `GOOGLE_APPLICATION_CREDENTIALS`. |
+| `upload-recipe-images.ts` | Optimizes local recipe photos (same `IMAGE_OPTIMIZATION` settings as the product pipeline — 800×800 inside, progressive JPEG q85) and uploads them to `recipes/{id}.jpeg` in Storage, then writes `imageUrl` to both Firestore **and** `scripts/data/recipes.json` so a later seed run doesn't null it back out. Photos are named in French after the dish, so `FILE_TO_RECIPE` maps them to English slugs explicitly rather than guessing — an unmapped file is a hard error. Filenames are `.normalize("NFC")`d because macOS stores them decomposed. Flags: `--source=<dir>` (required), `--dry-run`. |
 | `purge-cache-entry.ts` | `purge-cache-entry.ts "<brandSubstr>" [nameSubstr]` — deletes matching `img-*` entries so the next scan re-analyzes from scratch. **Deletes without confirmation** — review the printed matches, and tighten the filter if it catches too much. |
 
 All three write-scripts need `ALGOLIA_ADMIN_API_KEY` (search-only keys cannot mutate).
@@ -483,6 +485,52 @@ actually reads **`ALGOLIA_ADMIN_API_KEY`**.
 
 > Scripts that write to Algolia or Storage are production mutations — run them only when
 > explicitly asked, and prefer `--dry-run --limit=N` first.
+
+---
+
+## 11b. Recipes (`recipes` Firestore collection)
+
+Recipes are the one piece of content that is **authored, not discovered**. There is no
+callable, no analysis and no runtime translation — `scripts/seed-recipes.ts` writes the
+whole catalogue, every language included, and the Flutter client reads Firestore directly.
+
+- **Document** — `recipes/{slug}`. Shared fields (`category`, `prepMinutes`,
+  `requiresFreezing`, `difficulty`, `compatibility`, `imageUrl`, `published`, `order`),
+  canonical English flat (`name`, `description`, `ingredients[]`, `steps[]`, `tip`), and
+  `translations: Record<lang, RecipeText>` with **no `en` key** — same rule as
+  `Product.translations`.
+- **Types** — `src/models/recipe.ts`. The wire strings (`frozen-treats`, `easy`,
+  `compatible`, …) must match the Dart enums in
+  `lib/features/recipes/domain/entities/recipe_entity.dart`; the client parses them with a
+  lenient `fromWire` that degrades silently, so drift shows up as wrong categories rather
+  than errors.
+- **Translation** — `translateRecipeText()` (`services/anthropic.service.ts`) +
+  `prompts/translate-recipe.ts` + the `submit_recipe_translation` tool.
+  `translateProductText` could not be reused: it translates exactly five flat fields,
+  while recipes carry structured `ingredients` and `steps` arrays.
+  ⚠️ It enforces **same count, same order** on both arrays and returns `null` on a
+  mismatch. For products a mismatch desyncs a chip row; for recipes a dropped step
+  silently renumbers the instructions the user is following.
+- **Staleness** — the document stores `translationsSourceHash` (SHA-1 of the canonical
+  text). This is the one place translations *are* invalidated; the product path never
+  re-translates, so an English edit there leaves stale copy forever (see §13).
+- **Images** — `recipes/{id}.jpeg` in Storage, public URLs in `imageUrl`. Recipes without a
+  photo keep `imageUrl: null` and the client renders a tinted placeholder, so a missing
+  image is never a broken state.
+- **Rules and indexes** — `recipes` is public-read, Admin-SDK-write. Both rules and
+  indexes live outside this repo: there is no `firestore.rules`, and `firebase.json` has
+  no `firestore` block, so a rules deploy from here would replace the console ruleset
+  wholesale.
+  ⚠️ The client's list query is `where("published", "==", true).orderBy("order")`, which
+  **requires a composite index** on `published ASC, order ASC` — an equality filter plus an
+  `orderBy` on a *different* field is never covered by the single-field auto-indexes.
+  Created out-of-band with:
+  ```bash
+  gcloud firestore indexes composite create --project=yucat-d8fb5 \
+    --collection-group=recipes \
+    --field-config=field-path=published,order=ascending \
+    --field-config=field-path=order,order=ascending
+  ```
 
 ---
 

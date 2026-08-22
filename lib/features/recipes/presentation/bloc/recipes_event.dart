@@ -8,7 +8,14 @@ sealed class RecipesEvent extends Equatable {
 }
 
 class RecipesInitialEvent extends RecipesEvent {
-  const RecipesInitialEvent();
+  /// The app's resolved language code. Null or unsupported yields the
+  /// canonical English copy.
+  final String? language;
+
+  const RecipesInitialEvent({this.language});
+
+  @override
+  List<Object?> get props => [language];
 }
 
 class RecipesQueryChanged extends RecipesEvent {

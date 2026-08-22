@@ -10,12 +10,17 @@ import {
   LitterModel,
   TRISTATES,
 } from "../models/litter";
+import {RecipeIngredient, RecipeText} from "../models/recipe";
 import {generateIdentificationPrompt} from "../prompts/identify-product";
 import {
   generateLitterAnalysisSystemPrompt,
   generateLitterAnalysisUserPrompt,
 } from "../prompts/analyze-litter";
 import {generateTranslationSystemPrompt, generateTranslationUserPrompt} from "../prompts/translate-product";
+import {
+  generateRecipeTranslationSystemPrompt,
+  generateRecipeTranslationUserPrompt,
+} from "../prompts/translate-recipe";
 import {languageName} from "../prompts/languages";
 import {
   generateAnalysisSystemPrompt,
@@ -1481,6 +1486,161 @@ export async function translateProductText(
     };
   } catch (error) {
     logger.warn("translateProductText failed", {
+      languageCode,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return null;
+  }
+}
+
+const RECIPE_TRANSLATION_TOOLS: Anthropic.Tool[] = [
+  {
+    name: "submit_recipe_translation",
+    description: "Submit the translated recipe text.",
+    input_schema: {
+      type: "object",
+      required: ["name", "description", "ingredients", "steps", "tip"],
+      properties: {
+        name: {type: "string", description: "Translated recipe name."},
+        description: {
+          type: "string",
+          description: "Translated short description, same length as source.",
+        },
+        ingredients: {
+          type: "array",
+          description:
+            "Translated ingredients \u2014 same count and order as the source.",
+          items: {
+            type: "object",
+            required: ["name", "quantity"],
+            properties: {
+              name: {type: "string", description: "Translated ingredient."},
+              quantity: {
+                type: "string",
+                description:
+                  "Quantity phrase. Numbers and units unchanged; only the " +
+                  "wording is translated.",
+              },
+            },
+          },
+        },
+        steps: {
+          type: "array",
+          items: {type: "string"},
+          description:
+            "Translated steps \u2014 same count and order as the source, and " +
+            "never numbered (the app numbers them).",
+        },
+        tip: {
+          type: "string",
+          description:
+            "Translated tip. Safety wording must be preserved in full.",
+        },
+      },
+    },
+  },
+];
+
+/**
+ * Translates a recipe's renderable text into [language].
+ *
+ * One small Haiku call, no web search. Returns null on any failure or if the
+ * model changed the ingredient/step counts, so the caller can fall back to
+ * English. Never throws.
+ *
+ * The count guard matters more here than for products: a dropped step does not
+ * just desync a chip row, it silently renumbers the instructions the user is
+ * meant to follow.
+ */
+export async function translateRecipeText(
+  text: RecipeText,
+  languageCode: string
+): Promise<RecipeText | null> {
+  const language = languageName(languageCode);
+  const started = Date.now();
+  try {
+    const response = await withRetry("translateRecipeText", () =>
+      getClient().messages.create({
+        model: config.anthropic.model,
+        max_tokens: 4096,
+        temperature: 0,
+        system: [
+          {
+            type: "text",
+            text: generateRecipeTranslationSystemPrompt(),
+            cache_control: {type: "ephemeral"},
+          },
+        ],
+        messages: [
+          {role: "user", content: [
+            {
+              type: "text",
+              text: generateRecipeTranslationUserPrompt(text, language),
+            },
+          ]},
+        ],
+        tools: RECIPE_TRANSLATION_TOOLS,
+        tool_choice: {type: "tool", name: "submit_recipe_translation"},
+      })
+    );
+
+    const submit = findToolUse(response.content, "submit_recipe_translation");
+    const out = submit?.input;
+    if (!out) return null;
+
+    const rawIngredients =
+      Array.isArray(out.ingredients) ? out.ingredients : [];
+    const ingredients: RecipeIngredient[] = rawIngredients.map(
+      (item: unknown, i: number) => {
+        const obj = (item ?? {}) as Record<string, unknown>;
+        const source = text.ingredients[i];
+        return {
+          name: typeof obj.name === "string" ? obj.name : source?.name ?? "",
+          quantity:
+            typeof obj.quantity === "string" ?
+              obj.quantity :
+              source?.quantity ?? "",
+        };
+      }
+    );
+    const steps = Array.isArray(out.steps) ? out.steps.map(String) : [];
+
+    if (
+      ingredients.length !== text.ingredients.length ||
+      steps.length !== text.steps.length
+    ) {
+      logger.warn("translateRecipeText item-count mismatch \u2014 discarding", {
+        languageCode,
+        expectedIngredients: text.ingredients.length,
+        gotIngredients: ingredients.length,
+        expectedSteps: text.steps.length,
+        gotSteps: steps.length,
+        structuredData: true,
+      });
+      return null;
+    }
+
+    logger.info("translateRecipeText complete", {
+      languageCode,
+      ms: Date.now() - started,
+      inputTokens: response.usage?.input_tokens,
+      outputTokens: response.usage?.output_tokens,
+      structuredData: true,
+    });
+
+    return {
+      name: typeof out.name === "string" ? out.name : text.name,
+      description:
+        typeof out.description === "string" ?
+          out.description :
+          text.description,
+      ingredients,
+      steps,
+      tip: typeof out.tip === "string" ? out.tip : text.tip,
+    };
+  } catch (error) {
+    logger.warn("translateRecipeText failed", {
       languageCode,
       error: error instanceof Error ? error.message : String(error),
       structuredData: true,

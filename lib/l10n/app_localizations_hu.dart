@@ -1384,6 +1384,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get recipesCategoryFrozenTreats => 'Fagyasztott finomságok';
 
   @override
+  String get recipesCategoryMeals => 'Ételek';
+
+  @override
   String get recipesCategoryOther => 'Egyéb';
 
   @override

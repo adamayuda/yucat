@@ -1392,6 +1392,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get recipesCategoryFrozenTreats => 'Guloseimas geladas';
 
   @override
+  String get recipesCategoryMeals => 'Refeições';
+
+  @override
   String get recipesCategoryOther => 'Outras';
 
   @override

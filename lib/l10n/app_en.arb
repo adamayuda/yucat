@@ -659,6 +659,7 @@
   "recipesCategoryBiscuits": "Biscuits",
   "recipesCategoryCakes": "Cakes",
   "recipesCategoryFrozenTreats": "Frozen treats",
+  "recipesCategoryMeals": "Meals",
   "recipesCategoryOther": "Other",
   "recipesErrorBody": "Something went wrong while loading recipes.",
   "recipesDifficultyEasy": "Easy",

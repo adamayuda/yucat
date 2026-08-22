@@ -1393,6 +1393,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recipesCategoryFrozenTreats => 'Friandises glacées';
 
   @override
+  String get recipesCategoryMeals => 'Repas';
+
+  @override
   String get recipesCategoryOther => 'Autres';
 
   @override
