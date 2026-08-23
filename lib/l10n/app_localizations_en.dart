@@ -1196,6 +1196,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSeeAll => 'See all';
 
   @override
+  String get homeNewsEyebrow => 'Good to know today';
+
+  @override
+  String get homeNewsTitle => 'Why do cats drink so little?';
+
+  @override
+  String get homeNewsBody => 'Cats naturally have a low sense of thirst.';
+
+  @override
+  String get homeNewsLearnMore => 'Learn more';
+
+  @override
+  String get homeFoodGuideTitle => 'Food guide';
+
+  @override
+  String get homeFoodGuideMeats => 'Meats';
+
+  @override
+  String get homeFoodGuideFish => 'Fish';
+
+  @override
+  String get homeFoodGuideEggs => 'Eggs';
+
+  @override
+  String get homeFoodGuideFruitsVegetables => 'Fruits & vegetables';
+
+  @override
+  String get homeFoodGuideDairy => 'Dairy';
+
+  @override
+  String get homeFoodGuideDangerous => 'Dangerous foods';
+
+  @override
+  String get homeRecipesSectionTitle => 'Recipes for your cat';
+
+  @override
   String get homeNoSavedProductsTitle => 'No saved products yet';
 
   @override

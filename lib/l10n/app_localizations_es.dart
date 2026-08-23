@@ -1212,6 +1212,43 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeSeeAll => 'Ver todos';
 
   @override
+  String get homeNewsEyebrow => 'Bueno saberlo hoy';
+
+  @override
+  String get homeNewsTitle => '¿Por qué los gatos beben tan poco?';
+
+  @override
+  String get homeNewsBody =>
+      'El gato tiene de forma natural una baja sensación de sed.';
+
+  @override
+  String get homeNewsLearnMore => 'Saber más';
+
+  @override
+  String get homeFoodGuideTitle => 'Guía de alimentos';
+
+  @override
+  String get homeFoodGuideMeats => 'Carnes';
+
+  @override
+  String get homeFoodGuideFish => 'Pescados';
+
+  @override
+  String get homeFoodGuideEggs => 'Huevos';
+
+  @override
+  String get homeFoodGuideFruitsVegetables => 'Frutas y verduras';
+
+  @override
+  String get homeFoodGuideDairy => 'Lácteos';
+
+  @override
+  String get homeFoodGuideDangerous => 'Alimentos peligrosos';
+
+  @override
+  String get homeRecipesSectionTitle => 'Recetas para tu gato';
+
+  @override
   String get homeNoSavedProductsTitle => 'Aún no hay productos guardados';
 
   @override

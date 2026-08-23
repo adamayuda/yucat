@@ -1204,6 +1204,43 @@ class AppLocalizationsHu extends AppLocalizations {
   String get homeSeeAll => 'Összes megtekintése';
 
   @override
+  String get homeNewsEyebrow => 'Jó ma tudni';
+
+  @override
+  String get homeNewsTitle => 'Miért isznak a macskák ilyen keveset?';
+
+  @override
+  String get homeNewsBody =>
+      'A macskának természeténél fogva gyenge a szomjúságérzete.';
+
+  @override
+  String get homeNewsLearnMore => 'Tudj meg többet';
+
+  @override
+  String get homeFoodGuideTitle => 'Táplálkozási útmutató';
+
+  @override
+  String get homeFoodGuideMeats => 'Húsok';
+
+  @override
+  String get homeFoodGuideFish => 'Halak';
+
+  @override
+  String get homeFoodGuideEggs => 'Tojás';
+
+  @override
+  String get homeFoodGuideFruitsVegetables => 'Gyümölcs és zöldség';
+
+  @override
+  String get homeFoodGuideDairy => 'Tejtermékek';
+
+  @override
+  String get homeFoodGuideDangerous => 'Veszélyes ételek';
+
+  @override
+  String get homeRecipesSectionTitle => 'Receptek a macskádnak';
+
+  @override
   String get homeNoSavedProductsTitle => 'Még nincs mentett termék';
 
   @override

@@ -4,16 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/l10n/app_localizations.dart';
-import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
-import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
-import 'package:yucat/features/cat_listing/mappers/cat_entity_to_model_mapper.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/home/bloc/home_bloc.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
 import 'package:yucat/features/home/widgets/home_dashboard_page.dart';
 import 'package:yucat/features/home/widgets/home_loading_page.dart';
 import 'package:yucat/features/home/widgets/home_skeleton.dart';
-import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
+import 'package:yucat/features/recipes/presentation/models/recipe_display_model.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
 import 'package:yucat/service_locator.dart';
 
@@ -40,95 +38,21 @@ class _HomePage extends State<HomePage> {
   // in the shared provider, so re-mounting the Home tab threw "Cannot add new
   // events after calling close" from initState.
 
-  void _openScanner() {
-    context.router.push(ScannerRoute());
-  }
-
   void _openSearch() {
     context.router.push(const SearchRoute());
   }
 
-  Future<void> _openProduct(ProductDisplayModel product) async {
-    sl<LogEventUsecase>().call(
-      eventName: 'Home Saved Product Tapped',
-      properties: {
-        'product_name': product.name,
-        'product_brand': product.brand,
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-    await context.router.push(ProductDetailRoute(product: product));
-    // A bookmark may have been toggled on the detail page — refresh the
-    // preview so an unsaved item disappears on return.
-    _bloc.add(HomeInitialEvent());
+  /// Recipes is tab index 1 of `MainRoute`. ⚠️ Tab identity is duplicated in
+  /// `main_page.dart`, `router.dart` and `bottom_nav_bar.dart` (docs/design.md
+  /// §8c) — this is a fourth reader of that order. The screen-view log mirrors
+  /// what the nav emits on a tab switch.
+  void _openRecipesTab() {
+    AutoTabsRouter.of(context).setActiveIndex(1);
+    sl<LogScreenViewUsecase>()(screenName: RecipesRoute.name);
   }
 
-  void _openSavedProducts(int count) {
-    sl<LogEventUsecase>().call(
-      eventName: 'Home See All Saved Tapped',
-      properties: {
-        'count': count,
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-    context.router.push(const SavedProductsRoute());
-  }
-
-  Future<void> _openCatDetail(CatEntity cat) async {
-    sl<LogEventUsecase>().call(
-      eventName: 'Home Cat Snapshot Tapped',
-      properties: {
-        'cat_id': cat.id,
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-    final model = sl<CatEntityToModelMapper>()(cat);
-    await context.router.push(CatDetailRoute(cat: model));
-    // The cat may have been edited (or deleted) on the detail page — re-fetch
-    // so the snapshot, completion card, and recommendations reflect the change.
-    _bloc.add(HomeInitialEvent());
-  }
-
-  Future<void> _openEditCat(CatEntity cat) async {
-    sl<LogEventUsecase>().call(
-      eventName: 'Home Complete Profile Tapped',
-      properties: {
-        'cat_id': cat.id,
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-    final model = sl<CatEntityToModelMapper>()(cat);
-    await context.router.push(CreateCatRoute(cat: model));
-    // Re-fetch so the completion card and recommendations pick up the edits.
-    _bloc.add(HomeInitialEvent());
-  }
-
-  void _onActiveCatChanged(CatEntity cat) {
-    sl<LogEventUsecase>().call(
-      eventName: 'Home Active Cat Changed',
-      properties: {
-        'cat_id': cat.id,
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-  }
-
-  Future<void> _openCreateCat() async {
-    await context.router.push(CreateCatRoute());
-    // Re-fetch so a newly created cat shows up in the greeting card's picker —
-    // HomePage only loads in initState, so without this it stays hidden until
-    // the app restarts.
-    _bloc.add(HomeInitialEvent());
-  }
-
-  void _openCatList() {
-    sl<LogEventUsecase>().call(
-      eventName: 'Home See All Cats Tapped',
-      properties: {
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-    context.router.push(const CatListingRoute());
+  void _openRecipe(RecipeDisplayModel recipe) {
+    context.router.push(RecipeDetailRoute(recipe: recipe));
   }
 
   @override
@@ -151,19 +75,14 @@ class _HomePage extends State<HomePage> {
           backgroundColor: DSColors.pageBackground,
           body: HomeLoadingWidget(imageBase64: imageBase64),
         );
-      case HomeLoadedState(:final cats, :final savedProducts):
+      // `cats` is still loaded by HomeBloc — it drives the People-profile sync
+      // and the OneSignal `has_cat` tag — but nothing on the page renders it
+      // while the greeting card is unmounted.
+      case HomeLoadedState():
         return HomeDashboardPage(
-          cats: cats,
-          savedProducts: savedProducts,
-          onScanTap: _openScanner,
           onSearchTap: _openSearch,
-          onCatTap: _openCatDetail,
-          onProductTap: _openProduct,
-          onSeeAllSaved: () => _openSavedProducts(savedProducts.length),
-          onSeeAllCats: _openCatList,
-          onCreateCat: _openCreateCat,
-          onActiveCatChanged: _onActiveCatChanged,
-          onCompleteProfile: _openEditCat,
+          onSeeAllRecipes: _openRecipesTab,
+          onRecipeTap: _openRecipe,
         );
       case HomeErrorState():
         final l10n = AppLocalizations.of(context);

@@ -33,13 +33,16 @@ class BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final items = [
-      DSBottomNavItem(icon: Icons.home_rounded, label: l10n.bottomNavHome),
-      DSBottomNavItem(icon: Icons.crop_free_rounded, label: l10n.bottomNavScan),
+      DSBottomNavItem(icon: Icons.home_outlined, label: l10n.bottomNavHome),
+      DSBottomNavItem(icon: Icons.crop_free, label: l10n.bottomNavScan),
       DSBottomNavItem(
-        icon: Icons.ramen_dining_rounded,
+        icon: Icons.ramen_dining_outlined,
         label: l10n.bottomNavRecipes,
       ),
-      DSBottomNavItem(icon: Icons.person_rounded, label: l10n.bottomNavProfile),
+      DSBottomNavItem(
+        icon: Icons.person_outline_rounded,
+        label: l10n.bottomNavProfile,
+      ),
     ];
     return DSBottomNav(
       items: items,

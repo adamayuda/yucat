@@ -37,24 +37,14 @@ class HomeHiddenState extends HomeState {
 class HomeLoadedState extends HomeState {
   final int _timestamp;
 
-  /// The user's cats. Drives the greeting, the active-cat selector, the
-  /// snapshot card, and the per-cat scoring of saved products.
+  /// The user's cats. Drives the greeting and the active-cat selector.
   final List<CatEntity> cats;
 
-  /// Saved products, newest-first (the repository prepends on save).
-  final List<ProductDisplayModel> savedProducts;
-
-  HomeLoadedState({
-    this.cats = const [],
-    this.savedProducts = const [],
-  }) : _timestamp = DateTime.now().microsecondsSinceEpoch;
+  HomeLoadedState({this.cats = const []})
+      : _timestamp = DateTime.now().microsecondsSinceEpoch;
 
   @override
-  List<Object?> get props => [
-        _timestamp,
-        cats,
-        savedProducts,
-      ];
+  List<Object?> get props => [_timestamp, cats];
 }
 
 class HomeErrorState extends HomeState {

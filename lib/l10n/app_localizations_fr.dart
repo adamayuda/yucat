@@ -1213,6 +1213,43 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeSeeAll => 'Voir tout';
 
   @override
+  String get homeNewsEyebrow => 'À savoir aujourd\'hui';
+
+  @override
+  String get homeNewsTitle => 'Pourquoi les chats boivent-ils si peu ?';
+
+  @override
+  String get homeNewsBody =>
+      'Le chat possède naturellement une faible sensation de soif.';
+
+  @override
+  String get homeNewsLearnMore => 'En savoir plus';
+
+  @override
+  String get homeFoodGuideTitle => 'Guide des aliments';
+
+  @override
+  String get homeFoodGuideMeats => 'Viandes';
+
+  @override
+  String get homeFoodGuideFish => 'Poissons';
+
+  @override
+  String get homeFoodGuideEggs => 'Œufs';
+
+  @override
+  String get homeFoodGuideFruitsVegetables => 'Fruits & légumes';
+
+  @override
+  String get homeFoodGuideDairy => 'Produits laitiers';
+
+  @override
+  String get homeFoodGuideDangerous => 'Aliments dangereux';
+
+  @override
+  String get homeRecipesSectionTitle => 'Recettes pour votre chat';
+
+  @override
   String get homeNoSavedProductsTitle => 'Aucun produit enregistré';
 
   @override

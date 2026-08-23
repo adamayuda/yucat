@@ -16,44 +16,22 @@ class MainPage extends StatelessWidget {
       routes: const [HomeRoute(), RecipesRoute(), ProfileRoute()],
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
-        final bottomInset = MediaQuery.of(context).padding.bottom;
 
         return Scaffold(
           // Opaque tint behind the tabs: AutoTabsRouter cross-fades between
           // tabs, and during the fade both pages are partially transparent —
           // a transparent Scaffold would let the black window show through
-          // (a black blink). tintLavender matches the Search/Profile scaffolds
-          // and the nav fade gradient below.
+          // (a black blink). pageBackground matches the Recipes/Profile
+          // scaffolds.
           backgroundColor: DSColors.pageBackground,
           // The nav floats over the page in a Stack rather than occupying a
           // bottomNavigationBar slot, so each tab paints full-bleed to the
-          // bottom edge. A soft fade behind the pill lets scrolling content
-          // dissolve into the tint instead of being clipped by a solid bar —
-          // mirroring the onboarding floating-CTA fade.
+          // bottom edge and its content scrolls *under* the nav — which is
+          // what the nav's BackdropFilter frosts. Deliberately no gradient
+          // fade here: an opaque fade would be all the blur ever saw.
           body: Stack(
             children: [
               Positioned.fill(child: child),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: IgnorePointer(
-                  child: Container(
-                    height: bottomInset + 120,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          DSColors.pageBackground.withValues(alpha: 0),
-                          DSColors.pageBackground,
-                        ],
-                        stops: const [0.0, 0.7],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
               Align(
                 alignment: Alignment.bottomCenter,
                 child: BottomNavBar(

@@ -1214,6 +1214,43 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeSeeAll => 'Alle ansehen';
 
   @override
+  String get homeNewsEyebrow => 'Heute gut zu wissen';
+
+  @override
+  String get homeNewsTitle => 'Warum trinken Katzen so wenig?';
+
+  @override
+  String get homeNewsBody =>
+      'Katzen haben von Natur aus ein schwaches Durstgefühl.';
+
+  @override
+  String get homeNewsLearnMore => 'Mehr erfahren';
+
+  @override
+  String get homeFoodGuideTitle => 'Futter-Guide';
+
+  @override
+  String get homeFoodGuideMeats => 'Fleisch';
+
+  @override
+  String get homeFoodGuideFish => 'Fisch';
+
+  @override
+  String get homeFoodGuideEggs => 'Eier';
+
+  @override
+  String get homeFoodGuideFruitsVegetables => 'Obst & Gemüse';
+
+  @override
+  String get homeFoodGuideDairy => 'Milchprodukte';
+
+  @override
+  String get homeFoodGuideDangerous => 'Gefährliche Lebensmittel';
+
+  @override
+  String get homeRecipesSectionTitle => 'Rezepte für deine Katze';
+
+  @override
   String get homeNoSavedProductsTitle => 'Noch keine gespeicherten Produkte';
 
   @override

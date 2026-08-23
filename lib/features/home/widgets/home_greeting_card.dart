@@ -6,9 +6,14 @@ import 'package:yucat/features/home/widgets/home_cat_selector.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 
-/// Top card of the Home dashboard: greeting over the cat picker. It is the
-/// only place the active cat is chosen — the sections below read the selection
-/// rather than offering their own.
+/// Greeting card over a cat picker: "Welcome back" plus the row of cat photos
+/// that chooses the active cat.
+///
+/// ⚠️ **Currently unmounted.** Home stopped rendering it in the discovery
+/// revamp and nothing imports it today. It is kept deliberately — along with
+/// [HomeCatSelector] — to be reused on another screen, so don't remove it as
+/// dead code. Callers own the selected index and receive changes through
+/// `onCatSelected`.
 class HomeGreetingCard extends StatelessWidget {
   final List<CatEntity> cats;
   final int selectedIndex;

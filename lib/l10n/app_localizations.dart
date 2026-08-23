@@ -2169,6 +2169,78 @@ abstract class AppLocalizations {
   /// **'See all'**
   String get homeSeeAll;
 
+  /// No description provided for @homeNewsEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Good to know today'**
+  String get homeNewsEyebrow;
+
+  /// No description provided for @homeNewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why do cats drink so little?'**
+  String get homeNewsTitle;
+
+  /// No description provided for @homeNewsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Cats naturally have a low sense of thirst.'**
+  String get homeNewsBody;
+
+  /// No description provided for @homeNewsLearnMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn more'**
+  String get homeNewsLearnMore;
+
+  /// No description provided for @homeFoodGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Food guide'**
+  String get homeFoodGuideTitle;
+
+  /// No description provided for @homeFoodGuideMeats.
+  ///
+  /// In en, this message translates to:
+  /// **'Meats'**
+  String get homeFoodGuideMeats;
+
+  /// No description provided for @homeFoodGuideFish.
+  ///
+  /// In en, this message translates to:
+  /// **'Fish'**
+  String get homeFoodGuideFish;
+
+  /// No description provided for @homeFoodGuideEggs.
+  ///
+  /// In en, this message translates to:
+  /// **'Eggs'**
+  String get homeFoodGuideEggs;
+
+  /// No description provided for @homeFoodGuideFruitsVegetables.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruits & vegetables'**
+  String get homeFoodGuideFruitsVegetables;
+
+  /// No description provided for @homeFoodGuideDairy.
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy'**
+  String get homeFoodGuideDairy;
+
+  /// No description provided for @homeFoodGuideDangerous.
+  ///
+  /// In en, this message translates to:
+  /// **'Dangerous foods'**
+  String get homeFoodGuideDangerous;
+
+  /// No description provided for @homeRecipesSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes for your cat'**
+  String get homeRecipesSectionTitle;
+
   /// No description provided for @homeNoSavedProductsTitle.
   ///
   /// In en, this message translates to:

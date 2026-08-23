@@ -77,16 +77,16 @@ not eyeballed. If you change a token, change it here in the same commit.
 | Token | Hex | Use |
 |---|---|---|
 | `surfaceCard` | `#FFFFFF` | Cards, option rows |
-| `surfaceCardDim` | `#F5F5F8` | Disabled / nested card; `DSBottomNav` track |
+| `surfaceCardDim` | `#F5F5F8` | Disabled / nested card |
 
 ### Semantic / accent
 
 | Token | Hex | Use |
 |---|---|---|
 | `accentSuccess` | `#36C078` | Selection ring, ✓, success |
-| `accentSuccessSoft` | `#E3F5EA` | `DSBottomNav` selection chip, soft success surfaces |
+| `accentSuccessSoft` | `#E3F5EA` | Soft success surfaces |
 | `accentDanger` | `#E5564B` | Errors, destructive, "other apps" line |
-| `accentInfo` | `#3F8CDB` | Info highlights |
+| `accentInfo` | `#3F8CDB` | Info highlights; `DSBottomNav` selected slot |
 | `coralAccent` | `#FF7A59` | Selection accent — chips, slider, selected card border |
 | `coralSurface` | `#FFF1ED` | Soft coral surface behind `coralAccent` |
 | `brandPink` | `#ED67CA` | Logo / splash glyph only — **never** UI-primary |
@@ -242,9 +242,10 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 |---|---|---|
 | `OnboardingScaffold` | `onboarding_scaffold.dart` | Tinted bg + optional back chip + content + footer slot. Onboarding A–D screens. |
 | `WizardStepShell` | `wizard_step_shell.dart` | Top nav (× back + progress bar) + content + sticky CTA. Modes: bottom-anchored (default) or `floatingNext` overlay. Optional `altCtaLabel` ("None of these" on HealthConditions). |
-| `DSPillButton` | `ds_pill_button.dart` | Black-pill primary CTA with chevron. Variants: `primary` (black/inkInverse), `secondary` (white/inkPrimary), `danger` (`accentDanger`/inkInverse, for destructive CTAs). Props: `loading`, `leadingIcon`, `showChevron`, `verticalPadding`. Companion: `DSTextLink` for inline secondary text links. |
+| `DSPillButton` | `ds_pill_button.dart` | Black-pill primary CTA with chevron. Variants: `primary` (black/inkInverse), `secondary` (white/inkPrimary), `danger` (`accentDanger`/inkInverse, for destructive CTAs). Props: `loading`, `leadingIcon`, `showChevron`, `verticalPadding`. Companion: `DSTextLink` for inline text actions — `accentInfo` blue, optional `trailingIcon`. |
 | `OnboardingFloatingButton` | `onboarding_floating_button.dart` | Wraps `DSPillButton` with a consistent bottom margin. Placed as the LAST child of a survey screen's content column (preceding `Spacer`/`Expanded` pushes it down) so the CTA sits bottom-anchored at the same height across onboarding screens 2–4 (scan / attribution / proof chart). |
-| `DSCard` | `ds_card.dart` | White surface, `DSRadii.xl`, `e2` shadow. Optional `onTap` ripple. Base for nearly every grouping. |
+| `DSCard` | `ds_card.dart` | White surface, `DSRadii.xl`, `e2` shadow, `clipBehavior: antiAlias`. Optional `onTap` ripple. Base for nearly every grouping. `padding: EdgeInsets.zero` gives an edge-to-edge child (e.g. a poster image clipped to the top corners). |
+| `DSSectionHeader` | `ds_section_header.dart` | Top-level section heading: a **fixed** `headlineMd` title (`Expanded`, `maxLines: 2`, ellipsis) plus an optional `DSTextLink` action at the far edge. The size is deliberately fixed — an earlier `FittedBox(scaleDown)` made each section's title render at a different size depending on its copy length. Used by every Home section. |
 | `DSChip` | `ds_chip.dart` | Tinted soft pill with optional leading icon. Used for emphasis chips on stat/quote screens. |
 | `DSOptionRow` | `ds_option_row.dart` | White pill row, optional emoji/icon + label + radio indicator. Variants: `accent: success` (green ✓) / `danger` (coral ✗ — HealthConditions step). |
 | `DSStatPill` | `ds_stat_pill.dart` | Soft-tinted pill, bold number + body text. Phase C0 social proof. |
@@ -253,7 +254,7 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | `DSStateView` | `ds_state_view.dart` | Centered `MascotIllustration` + headline + body + optional CTA. Constructors `DSStateView.error()` (thinking cat on `tintCoral` + "Try again") and `DSStateView.empty()` (caller picks `mascotAsset` + `tint`). All empty/error states funnel through this. |
 | `MascotIllustration` | `mascot_illustration.dart` | Cat mascot SVG on a tinted circular halo, framed by gently-twinkling stars (native bob/twinkle, `animate` toggle). The single playful illustration for loading/empty/error — used by `AppLoadingWidget` and `DSStateView`. **No raster GIFs** (legacy `Illustrations/*.gif` removed). |
 | `DSConfirmDialog` | `ds_confirm_dialog.dart` | Centered confirmation via `showDSConfirmDialog(...)`. White `surfaceCard`, `DSRadii.xl`, tinted icon badge (`tintCoral`/`accentDanger` when `destructive`), `headlineMd` title + `bodyMd` body, stacked CTA: `DSPillButton` (`danger` variant) over a `DSTextLink` cancel. Returns `true`/`false`/`null`. The only confirmation pattern — no raw `AlertDialog`. |
-| `DSBottomNav` | `ds_bottom_nav.dart` | Floating pill nav. `DSBottomNavItem(icon, label)` per tab; `accentSuccessSoft` selection chip; `surfaceCardDim` track. |
+| `DSBottomNav` | `ds_bottom_nav.dart` | Full-width frosted nav, edge to edge. `DSBottomNavItem(icon, label)` per slot, rendered as an outlined 24px icon above its label; slots share the width via `Expanded`. `BackdropFilter` blur (sigma 24) under a 72% `surfaceCard` fill, hairline top border, safe-area inset *inside* the bar. Selected slot tints `accentInfo`, idle `inkTertiary`, cross-faded over `DSMotion.durFast`. |
 | `CatAvatar` | `cat_avatar.dart` | Circular cat photo or `Icons.pets` fallback on `tintLavender` disc. Default 56px; takes `size`. |
 | `MascotSpeechBubble` | `mascot_speech_bubble.dart` | Mascot illustration + speech bubble with `CustomPainter` tail. Used by every cat-create wizard step. |
 | `LineChartCard` | `line_chart_card.dart` | Two-line chart (your line vs theirs) inside a `DSCard`. Phase C0. |
@@ -295,20 +296,32 @@ the `MainRoute` `children:` in `lib/config/routes/router.dart`, and `_tabScreenN
 the two mapping tables in `lib/features/bottom_navigation_bar/bottom_nav_bar.dart`.
 
 Search and Cats are *not* tabs — Search is a pushed route reached from Home's search bar; Cats is
-reached from Home and Profile. All three tabs use `pageBackground` — none of them paints its own; the Home tab used to carry a `DSGradients.homeBackground` wash, now removed in favour of the flat shell colour.
+reached from Profile (Home only offers the greeting card's "+ Add" tile). All three tabs use `pageBackground` — none of them paints its own; the Home tab used to carry a `DSGradients.homeBackground` wash, now removed in favour of the flat shell colour.
 
-`MainPage` is `Scaffold(backgroundColor: DSColors.pageBackground)` with the nav floating in a
+**Home is a discovery surface.** Its `ListView` runs: read-only `SearchTextField` → `HomeNewsCard` →
+`FoodGuideSection` → `HomeRecipesSection`, with a
+uniform `DSDimens.sizeL` gap between sections. Card sections are wrapped in a `sizeL` `Padding`; the two
+**swimlanes are not** — they own an inner `ListView.separated(horizontal)` whose own
+`padding: symmetric(horizontal: sizeL)` lets tiles scroll under both screen edges. Every section header
+is a `DSSectionHeader`, and the page itself is **stateless** — nothing on it is per-cat (the recipe lane is the one section with state, and it owns that internally).  The scan-hero card, the
+saved-products preview and the per-cat block (snapshot, completion nudge, diet tips, product picks) were
+removed outright: those surfaces live on Cat Detail, saved products are reached from Profile, and scanning
+is the nav's Scan slot. `HomeGreetingCard` + `HomeCatSelector` are **parked, not deleted** — unmounted from
+Home and kept in `lib/features/home/widgets/` for reuse on another screen.
+
+`MainPage` is `Scaffold(backgroundColor: DSColors.pageBackground)` with the nav overlaid in a
 **`Stack`**, not a transparent scaffold with `extendBody`. Both details are load-bearing and
 commented in the source:
 
 - **The scaffold is opaque on purpose.** `AutoTabsRouter` cross-fades between tabs, and
   mid-fade both pages are partially transparent — a transparent `Scaffold` lets the black
   window show through as a **black blink**. `pageBackground` matches the Recipes/Profile
-  scaffolds and the nav fade gradient.
-- **The nav floats in a `Stack`** rather than occupying the `bottomNavigationBar` slot, so
-  each tab paints full-bleed to the bottom edge. A soft gradient fade (`bottomInset + 120`)
-  sits behind the pill so scrolling content dissolves into the tint instead of being clipped
-  by a solid bar — mirroring the onboarding floating-CTA fade.
+  scaffolds.
+- **The nav sits in a `Stack`** rather than occupying the `bottomNavigationBar` slot, so
+  each tab paints full-bleed to the bottom edge and its content scrolls *under* the bar —
+  which is exactly what `DSBottomNav`'s `BackdropFilter` frosts. There is deliberately **no
+  gradient fade** behind it any more: the old opaque `pageBackground` fade was all the blur
+  would ever see, so the frost read as flat. Content dissolving is now the blur's job.
 
 Don't set per-page Scaffold backgrounds inside the tab pages — the shell handles it. Modal
 routes outside the tab shell (`SearchRoute`, `ProductDetailRoute`, `ProductListingRoute`,
@@ -323,7 +336,7 @@ routes outside the tab shell (`SearchRoute`, `ProductDetailRoute`, `ProductListi
 **This was extracted — use `DSAppBar`** (`ds_app_bar.dart`, §8a): `DSAppBar.tab()` for the
 first shape, `DSAppBar.modal()` for the second. Don't hand-roll a new header row.
 
-**Bottom inset for floating nav.** Any scroll surface inside a tab page (lists, dashboards) needs a bottom padding of `MediaQuery.of(context).padding.bottom + ~96` so the last item clears the floating-nav pill. Modal pages don't need this — they're full-screen with no nav.
+**Bottom inset for the nav.** Any scroll surface inside a tab page (lists, dashboards) needs a bottom padding of `MediaQuery.of(context).padding.bottom + kFloatingNavClearance` (**76**) so the last item clears the nav bar. Modal pages don't need this — they're full-screen with no nav.
 
 ---
 

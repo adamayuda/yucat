@@ -17,8 +17,6 @@ import 'package:yucat/features/litter_detail/presentation/mappers/litter_entity_
 import 'package:yucat/features/product/domain/entities/scan_result_entity.dart';
 import 'package:yucat/features/product/domain/usecases/fetch_product_by_image_usecase.dart';
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
-import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
-import 'package:yucat/features/saved_products/domain/usecases/get_saved_products_usecase.dart';
 import 'package:yucat/features/scan_history/domain/usecases/add_litter_to_history_usecase.dart';
 import 'package:yucat/features/scan_history/domain/usecases/add_scan_to_history_usecase.dart';
 import 'package:yucat/services/notification_service.dart';
@@ -33,7 +31,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final SigninAnonymouslyUsecase _signinAnonymouslyUsecase;
   final ReviewPromptService _reviewPromptService;
   final GetCatsUsecase _getCatsUsecase;
-  final GetSavedProductsUsecase _getSavedProductsUsecase;
   final AddScanToHistoryUsecase _addScanToHistoryUsecase;
   final AddLitterToHistoryUsecase _addLitterToHistoryUsecase;
   final LogEventUsecase _logEventUsecase;
@@ -50,7 +47,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required SigninAnonymouslyUsecase signinAnonymouslyUsecase,
     required ReviewPromptService reviewPromptService,
     required GetCatsUsecase getCatsUsecase,
-    required GetSavedProductsUsecase getSavedProductsUsecase,
     required AddScanToHistoryUsecase addScanToHistoryUsecase,
     required AddLitterToHistoryUsecase addLitterToHistoryUsecase,
     required LogEventUsecase logEventUsecase,
@@ -64,7 +60,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
        _signinAnonymouslyUsecase = signinAnonymouslyUsecase,
        _reviewPromptService = reviewPromptService,
        _getCatsUsecase = getCatsUsecase,
-       _getSavedProductsUsecase = getSavedProductsUsecase,
        _addScanToHistoryUsecase = addScanToHistoryUsecase,
        _addLitterToHistoryUsecase = addLitterToHistoryUsecase,
        _logEventUsecase = logEventUsecase,
@@ -119,16 +114,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
     }
 
-    List<ProductDisplayModel> savedProducts = const [];
-    try {
-      savedProducts = await _getSavedProductsUsecase();
-    } catch (_) {
-      // Preview hides on read failure.
-    }
-
     debugPrint('CATDIAG home loaded cats='
         '${cats.map((c) => '${c.name}:breed=${c.breed}:health=${c.healthConditions}').toList()}');
-    emit(HomeLoadedState(cats: cats, savedProducts: savedProducts));
+    emit(HomeLoadedState(cats: cats));
   }
 
   Future<void> _onImageCapturedEvent(

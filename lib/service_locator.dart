@@ -497,7 +497,6 @@ Future<void> _registerBlocs() async {
       signinAnonymouslyUsecase: sl<SigninAnonymouslyUsecase>(),
       reviewPromptService: sl<ReviewPromptService>(),
       getCatsUsecase: sl<GetCatsUsecase>(),
-      getSavedProductsUsecase: sl<GetSavedProductsUsecase>(),
       addScanToHistoryUsecase: sl<AddScanToHistoryUsecase>(),
       addLitterToHistoryUsecase: sl<AddLitterToHistoryUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),

@@ -96,30 +96,48 @@ class DSPillButton extends StatelessWidget {
   }
 }
 
+/// Inline text action — "See all", "Clear", "Learn more". Tinted
+/// [DSColors.accentInfo], the same blue the bottom nav uses for its selected
+/// slot, so every actionable text in the app reads as one affordance.
 class DSTextLink extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
 
-  const DSTextLink({super.key, required this.label, required this.onPressed});
+  /// Optional glyph after the label (e.g. a forward arrow on "Learn more").
+  final IconData? trailingIcon;
+
+  const DSTextLink({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.trailingIcon,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final style = DSTextStyles.bodyLg.copyWith(
+      fontWeight: FontWeight.w600,
+      color: DSColors.accentInfo,
+    );
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        foregroundColor: DSColors.inkPrimary,
+        foregroundColor: DSColors.accentInfo,
         padding: const EdgeInsets.symmetric(
           horizontal: DSDimens.sizeS,
           vertical: DSDimens.sizeXs,
         ),
       ),
-      child: Text(
-        label,
-        style: DSTextStyles.bodyLg.copyWith(
-          fontWeight: FontWeight.w600,
-          color: DSColors.inkPrimary,
-        ),
-      ),
+      child: trailingIcon == null
+          ? Text(label, style: style)
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(label, style: style),
+                const SizedBox(width: DSDimens.sizeXxs),
+                Icon(trailingIcon, size: 18, color: DSColors.accentInfo),
+              ],
+            ),
     );
   }
 }
