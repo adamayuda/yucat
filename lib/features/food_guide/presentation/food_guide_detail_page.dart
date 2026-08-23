@@ -109,8 +109,7 @@ class _Hero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Null-check first so a category with no photo never starts a network
-    // request. Nothing hosts food-guide photos yet, so today this is always the
-    // emoji branch — the field exists so images can land without a migration.
+    // request; the tint sits behind the image so there's no white flash.
     final hasImage = imageUrl != null && imageUrl!.isNotEmpty;
     return Container(
       height: height,
@@ -123,30 +122,10 @@ class _Hero extends StatelessWidget {
               fit: BoxFit.cover,
               height: height,
               width: double.infinity,
-              errorBuilder: (_, __, ___) => _EmojiHero(emoji: emoji),
+              errorBuilder: (_, __, ___) =>
+                  FoodGuideEmoji(emoji: emoji, size: 96),
             )
-          : _EmojiHero(emoji: emoji),
-    );
-  }
-}
-
-class _EmojiHero extends StatelessWidget {
-  final String emoji;
-
-  const _EmojiHero({required this.emoji});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: emoji.isEmpty
-          ? const Icon(
-              Icons.restaurant_rounded,
-              color: DSColors.inkTertiary,
-              size: 56,
-            )
-          : ExcludeSemantics(
-              child: Text(emoji, style: const TextStyle(fontSize: 96)),
-            ),
+          : FoodGuideEmoji(emoji: emoji, size: 96),
     );
   }
 }

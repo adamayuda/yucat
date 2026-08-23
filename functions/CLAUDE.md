@@ -480,6 +480,7 @@ itself is not a declared dependency (`npx` fetches it).
 | `configure-litter-index.ts` | Applies `litters` index settings + litter synonyms. ⚠️ **Must be run once before the litter cache can work** — `searchLitterByNameV2` soft-filters on `brand`, and Algolia rejects a filter on an undeclared facet, so until then every lookup errors silently and every litter scan pays for a full analysis. |
 | `seed-food-guide.ts` | Seeds the Firestore `foodGuide` collection from `scripts/data/food-guide.json` — same shape as `seed-recipes.ts` (same flags, same `translationsSourceHash` reuse, same `--prune` semantics), against a simpler model: six scalar text fields, no arrays. ⚠️ An **empty string means "this row does not apply"** (a dangerous food has no `whyGood`/`howToServe`); the prompt is told to return empty fields unchanged, and the client turns `''` into `null`. Needs `ANTHROPIC_API_KEY` + Firestore credentials. |
 | `seed-recipes.ts` | Seeds the Firestore `recipes` collection from `scripts/data/recipes.json`, translating each recipe into the five non-English languages. One of the two Firestore seeders (see `seed-food-guide.ts`). Re-runs are near-free: a recipe is re-translated only when its `translationsSourceHash` changes, or with `--force-retranslate`. Flags: `--dry-run`, `--limit=N`, `--only=<id>`, `--concurrency=N` (3), `--prune` (unpublishes stored recipes no longer in the JSON — documents are kept, and orphan detection is skipped when `--only`/`--limit` narrow the run, since everything else would look orphaned). Needs `ANTHROPIC_API_KEY` + `GOOGLE_APPLICATION_CREDENTIALS`. |
+| `upload-food-guide-images.ts` | The food-guide twin of `upload-recipe-images.ts`: same `IMAGE_OPTIMIZATION` settings (~2 MB PNG → ~70 KB JPEG), same NFC filename normalization, same explicit `FILE_TO_ENTRY` map that hard-errors on an unmapped file rather than guessing. Uploads to `foodGuide/{id}.jpeg`, then writes `imageUrl` to Firestore **and** back into `scripts/data/food-guide.json`. ⚠️ Same ordering trap as the recipe script — run uploads **after** seeds, and commit the updated JSON, or the next seed run nulls `imageUrl` back out. Flags: `--source=<dir>` (required), `--dry-run`. |
 | `upload-recipe-images.ts` | Optimizes local recipe photos (same `IMAGE_OPTIMIZATION` settings as the product pipeline — 800×800 inside, progressive JPEG q85) and uploads them to `recipes/{id}.jpeg` in Storage, then writes `imageUrl` to both Firestore **and** `scripts/data/recipes.json` so a later seed run doesn't null it back out. Photos are named in French after the dish, so `FILE_TO_RECIPE` maps them to English slugs explicitly rather than guessing — an unmapped file is a hard error. Filenames are `.normalize("NFC")`d because macOS stores them decomposed. Flags: `--source=<dir>` (required), `--dry-run`. |
 | `purge-cache-entry.ts` | `purge-cache-entry.ts "<brandSubstr>" [nameSubstr]` — deletes matching `img-*` entries so the next scan re-analyzes from scratch. **Deletes without confirmation** — review the printed matches, and tighten the filter if it catches too much. |
 
@@ -560,9 +561,9 @@ screen.
 - **Empty string ≠ missing.** An empty text field means "this row does not apply", which
   is how `dangerous-foods` renders only its `avoid` row. Both the prompt and the tool
   schema say to return empty fields unchanged; the Dart mapper normalizes `''` to `null`.
-- **`imageUrl` is `null` for every entry today.** No photos are hosted and there is no
-  upload script; the detail hero renders the entry's `emoji` on a tint. The field exists so
-  images can land later without a migration.
+- **Photos** — `foodGuide/{id}.jpeg` in Storage, public URLs in `imageUrl`, uploaded by
+  `scripts/upload-food-guide-images.ts`. An entry without a photo keeps `imageUrl: null` and
+  the client falls back to its `emoji`, so a missing image is never a broken state.
 - **Translation** — `translateFoodGuideText()` + `prompts/translate-food-guide.ts` + the
   `submit_food_guide_translation` tool. Simpler than the recipe path: six scalars, so no
   item-count guard, just per-field fallback to the source. The system prompt leans hard on

@@ -87,6 +87,7 @@ not eyeballed. If you change a token, change it here in the same commit.
 | `accentSuccessSoft` | `#E3F5EA` | Soft success surfaces |
 | `accentDanger` | `#E5564B` | Errors, destructive, "other apps" line |
 | `accentInfo` | `#3F8CDB` | Info highlights; `DSBottomNav` selected slot |
+| `accentWarning` | `#A9791B` | Amber severity between success and danger — `FoodSafetyPill`'s caution state, on a `tintSand` surface. Not `coralAccent`, which is emphasis rather than severity. |
 | `coralAccent` | `#FF7A59` | Selection accent — chips, slider, selected card border |
 | `coralSurface` | `#FFF1ED` | Soft coral surface behind `coralAccent` |
 | `brandPink` | `#ED67CA` | Logo / splash glyph only — **never** UI-primary |
@@ -300,7 +301,7 @@ Search and Cats are *not* tabs — Search is a pushed route reached from Home's 
 reached from Profile (Home only offers the greeting card's "+ Add" tile). All three tabs use `pageBackground` — none of them paints its own; the Home tab used to carry a `DSGradients.homeBackground` wash, now removed in favour of the flat shell colour.
 
 **Home is a discovery surface.** Its `ListView` runs: read-only `SearchTextField` → `HomeNewsCard` →
-`FoodGuideSection` → `HomeRecipesSection` — both lanes Firestore-backed, each owning its own bloc — with a
+`FoodGuideSection` → `HomeRecipesSection` — both lanes Firestore-backed, each owning its own bloc, and the food guide's "See all" pushing `FoodGuideRoute` — with a
 uniform `DSDimens.sizeL` gap between sections. Card sections are wrapped in a `sizeL` `Padding`; the two
 **swimlanes are not** — they own an inner `ListView.separated(horizontal)` whose own
 `padding: symmetric(horizontal: sizeL)` lets tiles scroll under both screen edges. Every section header
@@ -338,6 +339,13 @@ routes outside the tab shell (`SearchRoute`, `ProductDetailRoute`, `ProductListi
 first shape, `DSAppBar.modal()` for the second. Don't hand-roll a new header row.
 
 **Bottom inset for the nav.** Any scroll surface inside a tab page (lists, dashboards) needs a bottom padding of `MediaQuery.of(context).padding.bottom + kFloatingNavClearance` (**76**) so the last item clears the nav bar. Modal pages don't need this — they're full-screen with no nav.
+
+**Two caution colours, on purpose.** `FoodSafetyPill`'s caution state is amber
+(`accentWarning` on `tintSand`); `RecipeCompatibilityPill`'s is coral
+(`coralAccent` on `coralSurface`). The food guide grades a *severity* — safe, watch,
+avoid — where amber sits naturally between green and red. A recipe's "check with your
+vet" is a nudge, not a middle severity, so it keeps the emphasis colour. Don't
+"unify" them without deciding which meaning wins.
 
 ---
 

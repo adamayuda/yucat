@@ -2232,14 +2232,32 @@ abstract class AppLocalizations {
   /// No description provided for @foodGuideSafetyCaution.
   ///
   /// In en, this message translates to:
-  /// **'In moderation'**
+  /// **'Watch closely'**
   String get foodGuideSafetyCaution;
 
   /// No description provided for @foodGuideSafetyUnsafe.
   ///
   /// In en, this message translates to:
-  /// **'Do not feed'**
+  /// **'Avoid'**
   String get foodGuideSafetyUnsafe;
+
+  /// No description provided for @foodGuideListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Food guide'**
+  String get foodGuideListTitle;
+
+  /// No description provided for @foodGuideErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while loading the food guide.'**
+  String get foodGuideErrorBody;
+
+  /// No description provided for @foodGuideEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The food guide is empty for now. Check back soon.'**
+  String get foodGuideEmptyBody;
 
   /// No description provided for @homeRecipesSectionTitle.
   ///

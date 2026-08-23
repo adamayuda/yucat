@@ -21,6 +21,7 @@ class HomeDashboardPage extends StatelessWidget {
   final VoidCallback onSeeAllRecipes;
   final ValueChanged<RecipeDisplayModel> onRecipeTap;
   final ValueChanged<FoodGuideDisplayModel> onFoodGuideTap;
+  final VoidCallback onSeeAllFoodGuide;
 
   const HomeDashboardPage({
     super.key,
@@ -28,6 +29,7 @@ class HomeDashboardPage extends StatelessWidget {
     required this.onSeeAllRecipes,
     required this.onRecipeTap,
     required this.onFoodGuideTap,
+    required this.onSeeAllFoodGuide,
   });
 
   @override
@@ -63,7 +65,10 @@ class HomeDashboardPage extends StatelessWidget {
             ),
             const SizedBox(height: DSDimens.sizeL),
             // Unpadded on purpose — the lane scrolls under the screen edges.
-            FoodGuideSection(onCategoryTap: onFoodGuideTap),
+            FoodGuideSection(
+              onSeeAll: onSeeAllFoodGuide,
+              onCategoryTap: onFoodGuideTap,
+            ),
             const SizedBox(height: DSDimens.sizeL),
             HomeRecipesSection(
               onSeeAll: onSeeAllRecipes,

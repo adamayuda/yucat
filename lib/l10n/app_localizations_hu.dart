@@ -1235,10 +1235,21 @@ class AppLocalizationsHu extends AppLocalizations {
   String get foodGuideSafetySafe => 'Ehet belőle';
 
   @override
-  String get foodGuideSafetyCaution => 'Mértékkel';
+  String get foodGuideSafetyCaution => 'Figyelj rá';
 
   @override
-  String get foodGuideSafetyUnsafe => 'Ne add oda';
+  String get foodGuideSafetyUnsafe => 'Kerülendő';
+
+  @override
+  String get foodGuideListTitle => 'Táplálkozási útmutató';
+
+  @override
+  String get foodGuideErrorBody =>
+      'Hiba történt a táplálkozási útmutató betöltésekor.';
+
+  @override
+  String get foodGuideEmptyBody =>
+      'A táplálkozási útmutató egyelőre üres. Nézz vissza hamarosan.';
 
   @override
   String get homeRecipesSectionTitle => 'Receptek a macskádnak';

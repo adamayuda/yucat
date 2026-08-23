@@ -1245,10 +1245,21 @@ class AppLocalizationsDe extends AppLocalizations {
   String get foodGuideSafetySafe => 'Darf sie fressen';
 
   @override
-  String get foodGuideSafetyCaution => 'In Maßen';
+  String get foodGuideSafetyCaution => 'Genau beobachten';
 
   @override
-  String get foodGuideSafetyUnsafe => 'Nicht füttern';
+  String get foodGuideSafetyUnsafe => 'Vermeiden';
+
+  @override
+  String get foodGuideListTitle => 'Futter-Guide';
+
+  @override
+  String get foodGuideErrorBody =>
+      'Beim Laden des Futter-Guides ist etwas schiefgelaufen.';
+
+  @override
+  String get foodGuideEmptyBody =>
+      'Der Futter-Guide ist noch leer. Schau bald wieder vorbei.';
 
   @override
   String get homeRecipesSectionTitle => 'Rezepte für deine Katze';

@@ -219,6 +219,22 @@ class FoodGuideDetailRouteArgs {
 }
 
 /// generated route for
+/// [FoodGuidePage]
+class FoodGuideRoute extends PageRouteInfo<void> {
+  const FoodGuideRoute({List<PageRouteInfo>? children})
+    : super(FoodGuideRoute.name, initialChildren: children);
+
+  static const String name = 'FoodGuideRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const FoodGuidePage();
+    },
+  );
+}
+
+/// generated route for
 /// [HomePage]
 class HomeRoute extends PageRouteInfo<void> {
   const HomeRoute({List<PageRouteInfo>? children})

@@ -70,6 +70,11 @@ class DSColors {
   static const Color accentDanger = Color(0xFFE5564B);
   static const Color accentInfo = Color(0xFF3F8CDB);
 
+  /// Amber "keep an eye on this" accent — the severity between success and
+  /// danger. Pairs with [tintSand] as its surface. Distinct from
+  /// [coralAccent], which is an emphasis colour rather than a severity.
+  static const Color accentWarning = Color(0xFFA9791B);
+
   // Brand (logo only — do not use as UI primary)
   static const Color brandPink = Color(0xFFED67CA);
 

@@ -1244,10 +1244,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get foodGuideSafetySafe => 'Peut en manger';
 
   @override
-  String get foodGuideSafetyCaution => 'Avec modération';
+  String get foodGuideSafetyCaution => 'À surveiller';
 
   @override
-  String get foodGuideSafetyUnsafe => 'À ne pas donner';
+  String get foodGuideSafetyUnsafe => 'À éviter';
+
+  @override
+  String get foodGuideListTitle => 'Guide des aliments';
+
+  @override
+  String get foodGuideErrorBody =>
+      'Une erreur est survenue lors du chargement du guide des aliments.';
+
+  @override
+  String get foodGuideEmptyBody =>
+      'Le guide des aliments est vide pour l\'instant. Revenez bientôt.';
 
   @override
   String get homeRecipesSectionTitle => 'Recettes pour votre chat';

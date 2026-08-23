@@ -15,16 +15,13 @@ import 'package:yucat/service_locator.dart';
 /// under both screen edges. Add it to the Home `ListView` **without** a
 /// `Padding` wrapper.
 class FoodGuideSection extends StatefulWidget {
-  /// Inert by default — there is no food-guide list screen to open yet, but the
-  /// link still renders so this header matches `HomeRecipesSection`'s.
-  final VoidCallback? onSeeAll;
-
+  final VoidCallback onSeeAll;
   final ValueChanged<FoodGuideDisplayModel> onCategoryTap;
 
   const FoodGuideSection({
     super.key,
+    required this.onSeeAll,
     required this.onCategoryTap,
-    this.onSeeAll,
   });
 
   /// Height the lane occupies — read by the Home skeleton's bone too.
@@ -90,7 +87,7 @@ class _FoodGuideSectionState extends State<FoodGuideSection> {
               child: DSSectionHeader(
                 title: l10n.homeFoodGuideTitle,
                 actionLabel: l10n.homeSeeAll,
-                onAction: widget.onSeeAll ?? () {},
+                onAction: widget.onSeeAll,
               ),
             ),
             const SizedBox(height: DSDimens.sizeS),

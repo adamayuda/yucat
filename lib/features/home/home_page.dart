@@ -60,6 +60,10 @@ class _HomePage extends State<HomePage> {
     context.router.push(FoodGuideDetailRoute(item: item));
   }
 
+  void _openFoodGuide() {
+    context.router.push(const FoodGuideRoute());
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
@@ -89,6 +93,7 @@ class _HomePage extends State<HomePage> {
           onSeeAllRecipes: _openRecipesTab,
           onRecipeTap: _openRecipe,
           onFoodGuideTap: _openFoodGuideItem,
+          onSeeAllFoodGuide: _openFoodGuide,
         );
       case HomeErrorState():
         final l10n = AppLocalizations.of(context);

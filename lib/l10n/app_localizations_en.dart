@@ -1226,10 +1226,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get foodGuideSafetySafe => 'Can eat';
 
   @override
-  String get foodGuideSafetyCaution => 'In moderation';
+  String get foodGuideSafetyCaution => 'Watch closely';
 
   @override
-  String get foodGuideSafetyUnsafe => 'Do not feed';
+  String get foodGuideSafetyUnsafe => 'Avoid';
+
+  @override
+  String get foodGuideListTitle => 'Food guide';
+
+  @override
+  String get foodGuideErrorBody =>
+      'Something went wrong while loading the food guide.';
+
+  @override
+  String get foodGuideEmptyBody =>
+      'The food guide is empty for now. Check back soon.';
 
   @override
   String get homeRecipesSectionTitle => 'Recipes for your cat';

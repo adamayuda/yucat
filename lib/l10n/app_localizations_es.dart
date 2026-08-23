@@ -1243,10 +1243,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get foodGuideSafetySafe => 'Puede comerlo';
 
   @override
-  String get foodGuideSafetyCaution => 'Con moderación';
+  String get foodGuideSafetyCaution => 'Con vigilancia';
 
   @override
-  String get foodGuideSafetyUnsafe => 'No se lo des';
+  String get foodGuideSafetyUnsafe => 'Evitar';
+
+  @override
+  String get foodGuideListTitle => 'Guía de alimentos';
+
+  @override
+  String get foodGuideErrorBody =>
+      'Algo salió mal al cargar la guía de alimentos.';
+
+  @override
+  String get foodGuideEmptyBody =>
+      'La guía de alimentos está vacía por ahora. Vuelve pronto.';
 
   @override
   String get homeRecipesSectionTitle => 'Recetas para tu gato';
