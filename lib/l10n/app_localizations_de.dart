@@ -1265,6 +1265,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeRecipesSectionTitle => 'Rezepte für deine Katze';
 
   @override
+  String get homeMissionTitle => 'Unsere Mission';
+
+  @override
+  String get homeMissionBody =>
+      'Jedem Halter helfen, die Ernährung seiner Katze zu verstehen — für ein gesünderes und glücklicheres Leben.';
+
+  @override
   String get homeNoSavedProductsTitle => 'Noch keine gespeicherten Produkte';
 
   @override

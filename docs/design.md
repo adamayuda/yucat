@@ -50,6 +50,7 @@ not eyeballed. If you change a token, change it here in the same commit.
 | `tintSand` | `#FAEBC8` | Rating ask, reviews |
 | `tintAsh` | `#EFEEF0` | Surveys, neutral / form-heavy phases; `DSShimmer` base |
 | `tintCloud` | `#EFEEF5` | Onboarding neutral backgrounds + gradient base |
+| `tintMist` | `#F1F0F9` | Quiet inset panel on `pageBackground` — `HomeMissionCard`. A shade lighter than `tintCloud`, which can't be nudged because the onboarding gradients end on it. |
 
 ### Soft pastel tints — gradient endpoints / highlighted surfaces
 
@@ -301,7 +302,7 @@ Search and Cats are *not* tabs — Search is a pushed route reached from Home's 
 reached from Profile (Home only offers the greeting card's "+ Add" tile). All three tabs use `pageBackground` — none of them paints its own; the Home tab used to carry a `DSGradients.homeBackground` wash, now removed in favour of the flat shell colour.
 
 **Home is a discovery surface.** Its `ListView` runs: read-only `SearchTextField` → `HomeNewsCard` →
-`FoodGuideSection` → `HomeRecipesSection` — both lanes Firestore-backed, each owning its own bloc, and the food guide's "See all" pushing `FoodGuideRoute` — with a
+`FoodGuideSection` → `HomeRecipesSection` — both lanes Firestore-backed, each owning its own bloc, and the food guide's "See all" pushing `FoodGuideRoute` — then `HomeMissionCard` as a sign-off, with a
 uniform `DSDimens.sizeL` gap between sections. Card sections are wrapped in a `sizeL` `Padding`; the two
 **swimlanes are not** — they own an inner `ListView.separated(horizontal)` whose own
 `padding: symmetric(horizontal: sizeL)` lets tiles scroll under both screen edges. Every section header

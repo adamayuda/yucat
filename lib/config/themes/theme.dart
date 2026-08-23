@@ -51,6 +51,12 @@ class DSColors {
   static const Color tintAsh = Color(0xFFEFEEF0);
   static const Color tintCloud = Color(0xFFEFEEF5);
 
+  /// A shade lighter than [tintCloud], for a panel that must read as a quiet
+  /// inset on `pageBackground` rather than a card. Near-duplicate on purpose:
+  /// `tintCloud` is load-bearing for the onboarding backgrounds and gradient
+  /// endpoints, so it can't be nudged.
+  static const Color tintMist = Color(0xFFF1F0F9);
+
   // Soft pastel tints (onboarding gradient endpoints / highlighted surfaces)
   static const Color tintBlueSoft = Color(0xFFE7EEFA);
   static const Color tintCoralSoft = Color(0xFFF8CDC6);

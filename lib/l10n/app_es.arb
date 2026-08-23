@@ -359,6 +359,8 @@
   "foodGuideErrorBody": "Algo salió mal al cargar la guía de alimentos.",
   "foodGuideEmptyBody": "La guía de alimentos está vacía por ahora. Vuelve pronto.",
   "homeRecipesSectionTitle": "Recetas para tu gato",
+  "homeMissionTitle": "Nuestra misión",
+  "homeMissionBody": "Ayudar a cada propietario a entender la alimentación de su gato para darle una vida más sana y feliz.",
   "homeNoSavedProductsTitle": "Aún no hay productos guardados",
   "homeNoSavedProductsBody": "Toca el marcador de un producto para guardarlo aquí.",
   "homeLoadingEyebrow": "Un momento",

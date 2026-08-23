@@ -359,6 +359,8 @@
   "foodGuideErrorBody": "Une erreur est survenue lors du chargement du guide des aliments.",
   "foodGuideEmptyBody": "Le guide des aliments est vide pour l'instant. Revenez bientôt.",
   "homeRecipesSectionTitle": "Recettes pour votre chat",
+  "homeMissionTitle": "Notre mission",
+  "homeMissionBody": "Aider chaque propriétaire à comprendre l'alimentation de son chat pour lui offrir une vie plus saine et plus heureuse.",
   "homeNoSavedProductsTitle": "Aucun produit enregistré",
   "homeNoSavedProductsBody": "Appuie sur le signet d'un produit pour l'enregistrer ici.",
   "homeLoadingEyebrow": "Un instant",

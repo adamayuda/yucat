@@ -1246,6 +1246,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeRecipesSectionTitle => 'Recipes for your cat';
 
   @override
+  String get homeMissionTitle => 'Our mission';
+
+  @override
+  String get homeMissionBody =>
+      'Helping every owner understand what their cat eats, so they can give them a healthier, happier life.';
+
+  @override
   String get homeNoSavedProductsTitle => 'No saved products yet';
 
   @override

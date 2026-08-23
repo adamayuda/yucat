@@ -1255,6 +1255,13 @@ class AppLocalizationsHu extends AppLocalizations {
   String get homeRecipesSectionTitle => 'Receptek a macskádnak';
 
   @override
+  String get homeMissionTitle => 'Küldetésünk';
+
+  @override
+  String get homeMissionBody =>
+      'Segítünk minden gazdinak megérteni a macskája táplálkozását, hogy egészségesebb és boldogabb életet adhasson neki.';
+
+  @override
   String get homeNoSavedProductsTitle => 'Még nincs mentett termék';
 
   @override

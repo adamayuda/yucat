@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/food_guide/presentation/models/food_guide_display_model.dart';
 import 'package:yucat/features/home/widgets/food_guide_section.dart';
+import 'package:yucat/features/home/widgets/home_mission_card.dart';
 import 'package:yucat/features/home/widgets/home_news_card.dart';
 import 'package:yucat/features/home/widgets/home_recipes_section.dart';
 import 'package:yucat/features/recipes/presentation/models/recipe_display_model.dart';
@@ -73,6 +74,11 @@ class HomeDashboardPage extends StatelessWidget {
             HomeRecipesSection(
               onSeeAll: onSeeAllRecipes,
               onRecipeTap: onRecipeTap,
+            ),
+            const SizedBox(height: DSDimens.sizeL),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+              child: HomeMissionCard(),
             ),
           ],
         ),

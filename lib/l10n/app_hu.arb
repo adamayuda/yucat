@@ -359,6 +359,8 @@
   "foodGuideErrorBody": "Hiba történt a táplálkozási útmutató betöltésekor.",
   "foodGuideEmptyBody": "A táplálkozási útmutató egyelőre üres. Nézz vissza hamarosan.",
   "homeRecipesSectionTitle": "Receptek a macskádnak",
+  "homeMissionTitle": "Küldetésünk",
+  "homeMissionBody": "Segítünk minden gazdinak megérteni a macskája táplálkozását, hogy egészségesebb és boldogabb életet adhasson neki.",
   "homeNoSavedProductsTitle": "Még nincs mentett termék",
   "homeNoSavedProductsBody": "Koppints a könyvjelzőre egy terméken, hogy ide mentsd.",
   "homeLoadingEyebrow": "Egy pillanat",

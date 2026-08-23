@@ -2265,6 +2265,18 @@ abstract class AppLocalizations {
   /// **'Recipes for your cat'**
   String get homeRecipesSectionTitle;
 
+  /// No description provided for @homeMissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Our mission'**
+  String get homeMissionTitle;
+
+  /// No description provided for @homeMissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Helping every owner understand what their cat eats, so they can give them a healthier, happier life.'**
+  String get homeMissionBody;
+
   /// No description provided for @homeNoSavedProductsTitle.
   ///
   /// In en, this message translates to:

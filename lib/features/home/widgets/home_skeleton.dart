@@ -6,9 +6,9 @@ import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_shimmer.dart';
 
-/// Skeleton for the Home dashboard load — search bar, news card and the two
-/// swimlane bones, mirroring `HomeDashboardPage`. Distinct from the multi-step
-/// scan animation (`HomeLoadingWidget`).
+/// Skeleton for the Home dashboard load — search bar, news card, the two
+/// swimlane bones and the mission panel, mirroring `HomeDashboardPage`.
+/// Distinct from the multi-step scan animation (`HomeLoadingWidget`).
 class HomeSkeleton extends StatelessWidget {
   const HomeSkeleton({super.key});
 
@@ -33,6 +33,8 @@ class HomeSkeleton extends StatelessWidget {
             _FoodGuideLaneBone(),
             SizedBox(height: DSDimens.sizeL),
             _RecipeLaneBone(),
+            SizedBox(height: DSDimens.sizeL),
+            _MissionBone(),
           ],
         ),
       ),
@@ -187,6 +189,36 @@ class _LaneStrip extends StatelessWidget {
           alignment: Alignment.centerLeft,
           maxWidth: double.infinity,
           child: Row(mainAxisSize: MainAxisSize.min, children: children),
+        ),
+      ),
+    );
+  }
+}
+
+/// Mirrors `HomeMissionCard`: a title over three body lines.
+class _MissionBone extends StatelessWidget {
+  const _MissionBone();
+
+  @override
+  Widget build(BuildContext context) {
+    return DSCard(
+      background: DSColors.tintMist,
+      padding: const EdgeInsets.all(DSDimens.sizeL),
+      child: DSShimmer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const ShimmerBone(width: 150, height: 24, radius: DSRadii.sm),
+            const SizedBox(height: DSDimens.sizeXs),
+            const ShimmerBone(height: 14, radius: DSRadii.sm),
+            const SizedBox(height: DSDimens.sizeXxs),
+            const ShimmerBone(height: 14, radius: DSRadii.sm),
+            const SizedBox(height: DSDimens.sizeXxs),
+            const FractionallySizedBox(
+              widthFactor: 0.6,
+              child: ShimmerBone(height: 14, radius: DSRadii.sm),
+            ),
+          ],
         ),
       ),
     );

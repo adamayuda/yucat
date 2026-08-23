@@ -1263,6 +1263,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeRecipesSectionTitle => 'Recetas para tu gato';
 
   @override
+  String get homeMissionTitle => 'Nuestra misión';
+
+  @override
+  String get homeMissionBody =>
+      'Ayudar a cada propietario a entender la alimentación de su gato para darle una vida más sana y feliz.';
+
+  @override
   String get homeNoSavedProductsTitle => 'Aún no hay productos guardados';
 
   @override

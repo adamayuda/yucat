@@ -1264,6 +1264,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeRecipesSectionTitle => 'Recettes pour votre chat';
 
   @override
+  String get homeMissionTitle => 'Notre mission';
+
+  @override
+  String get homeMissionBody =>
+      'Aider chaque propriétaire à comprendre l\'alimentation de son chat pour lui offrir une vie plus saine et plus heureuse.';
+
+  @override
   String get homeNoSavedProductsTitle => 'Aucun produit enregistré';
 
   @override

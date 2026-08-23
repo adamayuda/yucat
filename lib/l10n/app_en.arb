@@ -604,6 +604,8 @@
   "foodGuideErrorBody": "Something went wrong while loading the food guide.",
   "foodGuideEmptyBody": "The food guide is empty for now. Check back soon.",
   "homeRecipesSectionTitle": "Recipes for your cat",
+  "homeMissionTitle": "Our mission",
+  "homeMissionBody": "Helping every owner understand what their cat eats, so they can give them a healthier, happier life.",
   "homeNoSavedProductsTitle": "No saved products yet",
   "homeNoSavedProductsBody": "Tap the bookmark on a product to save it here.",
   "homeLoadingEyebrow": "Hang tight",

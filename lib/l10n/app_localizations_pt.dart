@@ -1264,6 +1264,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeRecipesSectionTitle => 'Receitas para o seu gato';
 
   @override
+  String get homeMissionTitle => 'A nossa missão';
+
+  @override
+  String get homeMissionBody =>
+      'Ajudar cada dono a compreender a alimentação do seu gato, para lhe dar uma vida mais saudável e feliz.';
+
+  @override
   String get homeNoSavedProductsTitle => 'Ainda não há produtos guardados';
 
   @override
