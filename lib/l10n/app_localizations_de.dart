@@ -1230,22 +1230,25 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeFoodGuideTitle => 'Futter-Guide';
 
   @override
-  String get homeFoodGuideMeats => 'Fleisch';
+  String get foodGuideWhyGood => 'Warum es gut ist';
 
   @override
-  String get homeFoodGuideFish => 'Fisch';
+  String get foodGuideHowToServe => 'So fütterst du es';
 
   @override
-  String get homeFoodGuideEggs => 'Eier';
+  String get foodGuideAvoid => 'Was zu vermeiden ist';
 
   @override
-  String get homeFoodGuideFruitsVegetables => 'Obst & Gemüse';
+  String get foodGuideTip => 'YuCat-Tipp';
 
   @override
-  String get homeFoodGuideDairy => 'Milchprodukte';
+  String get foodGuideSafetySafe => 'Darf sie fressen';
 
   @override
-  String get homeFoodGuideDangerous => 'Gefährliche Lebensmittel';
+  String get foodGuideSafetyCaution => 'In Maßen';
+
+  @override
+  String get foodGuideSafetyUnsafe => 'Nicht füttern';
 
   @override
   String get homeRecipesSectionTitle => 'Rezepte für deine Katze';

@@ -227,9 +227,12 @@ functions/
 │   ├── constants/index.ts        retry, image validation/optimization, score bounds
 │   ├── models/product.ts         Product interface + ProductModel (§9)
 │   ├── models/litter.ts          Litter interface + LitterModel + attribute enums
+│   ├── models/recipe.ts          Recipe + RecipeText + canonicalRecipeText
+│   ├── models/food-guide.ts      FoodGuideItem + FoodGuideText + canonicalFoodGuideText
 │   ├── prompts/                  (§6)
 │   │   ├── identify-product.ts   analyze-product.ts    quality-rubric.ts
 │   │   ├── analyze-litter.ts     litter-rubric.ts
+│   │   ├── translate-recipe.ts   translate-food-guide.ts
 │   │   └── cat-narrative.ts      brand-verdict.ts      rescore-product.ts
 │   ├── services/
 │   │   ├── anthropic.service.ts  ~1250 lines — every model call + all tool schemas
@@ -263,6 +266,8 @@ functions/
 | `cat-narrative.ts` | `generateCatNarrativeSystemPrompt/UserPrompt`, `CatNarrativeInput`, `DietTip`; internal `CARE_NOTES` (10 conditions), `deriveCombos()`, `LANGUAGE_NAMES` (en/es/fr/hu) | `generateCatNarrative` |
 | `brand-verdict.ts` | `generateBrandVerdictSystemPrompt/UserPrompt`, `BrandVerdictInput`, `BrandCatalogContext` | `analyzeBrand` |
 | `rescore-product.ts` | `generateRegradeSystemPrompt/UserPrompt`, `RegradeInput` | `regradeProductQuality` (scripts only) |
+| `translate-recipe.ts` | `generateRecipeTranslationSystemPrompt/UserPrompt` | `translateRecipeText` (seeder only) |
+| `translate-food-guide.ts` | `generateFoodGuideTranslationSystemPrompt/UserPrompt` | `translateFoodGuideText` (seeder only) |
 
 `QUALITY_RUBRIC` is the **single source of scoring truth** — change it there, and both
 live analysis and batch re-scoring move together. Then re-score the catalog (§11) or the
@@ -278,6 +283,8 @@ index carries two incompatible score generations.
 | `NARRATIVE_TOOLS` | `submit_narrative` | `narrative` (~50 words) + `outlook` (~25 words) |
 | `SCORE_TOOLS` | `submit_score` | `score` 0–100 |
 | `BRAND_VERDICT_TOOLS` | `submit_brand_verdict` | `score`, `headline`, `reasons` (2–4), optional `positives` (≤2) |
+| `RECIPE_TRANSLATION_TOOLS` | `submit_recipe_translation` | 5 required; **count guard** on `ingredients`/`steps` |
+| `FOOD_GUIDE_TRANSLATION_TOOLS` | `submit_food_guide_translation` | 6 required, all scalars — **no count guard needed** |
 | inline in `verifyMatchWithLLM` | `submit_match` | `matchIndex`, min −1 (= "none of these") |
 
 ---
@@ -471,11 +478,13 @@ itself is not a declared dependency (`npx` fetches it).
 | `rescore-products.ts` | Batch re-grades `score` against `QUALITY_RUBRIC`, keeping the old value in `scoreLegacy` for rollback. Skips `score === 0`. Flags: `--dry-run`, `--limit=N`, `--concurrency=N` (10), `--query=`. |
 | `backfill-images.ts` | Finds + hosts images for products with `score > 0` and empty `imageUrl`, reusing the live self-heal path. Stamps `lastImageAttempt` even on failure, matching live throttling. Flags: `--dry-run`, `--limit=N`, `--concurrency=N` (5). |
 | `configure-litter-index.ts` | Applies `litters` index settings + litter synonyms. ⚠️ **Must be run once before the litter cache can work** — `searchLitterByNameV2` soft-filters on `brand`, and Algolia rejects a filter on an undeclared facet, so until then every lookup errors silently and every litter scan pays for a full analysis. |
-| `seed-recipes.ts` | Seeds the Firestore `recipes` collection from `scripts/data/recipes.json`, translating each recipe into the five non-English languages. **The only script that writes Firestore.** Re-runs are near-free: a recipe is re-translated only when its `translationsSourceHash` changes, or with `--force-retranslate`. Flags: `--dry-run`, `--limit=N`, `--only=<id>`, `--concurrency=N` (3), `--prune` (unpublishes stored recipes no longer in the JSON — documents are kept, and orphan detection is skipped when `--only`/`--limit` narrow the run, since everything else would look orphaned). Needs `ANTHROPIC_API_KEY` + `GOOGLE_APPLICATION_CREDENTIALS`. |
+| `seed-food-guide.ts` | Seeds the Firestore `foodGuide` collection from `scripts/data/food-guide.json` — same shape as `seed-recipes.ts` (same flags, same `translationsSourceHash` reuse, same `--prune` semantics), against a simpler model: six scalar text fields, no arrays. ⚠️ An **empty string means "this row does not apply"** (a dangerous food has no `whyGood`/`howToServe`); the prompt is told to return empty fields unchanged, and the client turns `''` into `null`. Needs `ANTHROPIC_API_KEY` + Firestore credentials. |
+| `seed-recipes.ts` | Seeds the Firestore `recipes` collection from `scripts/data/recipes.json`, translating each recipe into the five non-English languages. One of the two Firestore seeders (see `seed-food-guide.ts`). Re-runs are near-free: a recipe is re-translated only when its `translationsSourceHash` changes, or with `--force-retranslate`. Flags: `--dry-run`, `--limit=N`, `--only=<id>`, `--concurrency=N` (3), `--prune` (unpublishes stored recipes no longer in the JSON — documents are kept, and orphan detection is skipped when `--only`/`--limit` narrow the run, since everything else would look orphaned). Needs `ANTHROPIC_API_KEY` + `GOOGLE_APPLICATION_CREDENTIALS`. |
 | `upload-recipe-images.ts` | Optimizes local recipe photos (same `IMAGE_OPTIMIZATION` settings as the product pipeline — 800×800 inside, progressive JPEG q85) and uploads them to `recipes/{id}.jpeg` in Storage, then writes `imageUrl` to both Firestore **and** `scripts/data/recipes.json` so a later seed run doesn't null it back out. Photos are named in French after the dish, so `FILE_TO_RECIPE` maps them to English slugs explicitly rather than guessing — an unmapped file is a hard error. Filenames are `.normalize("NFC")`d because macOS stores them decomposed. Flags: `--source=<dir>` (required), `--dry-run`. |
 | `purge-cache-entry.ts` | `purge-cache-entry.ts "<brandSubstr>" [nameSubstr]` — deletes matching `img-*` entries so the next scan re-analyzes from scratch. **Deletes without confirmation** — review the printed matches, and tighten the filter if it catches too much. |
 
-All three write-scripts need `ALGOLIA_ADMIN_API_KEY` (search-only keys cannot mutate).
+The two Firestore seeders (`seed-recipes.ts`, `seed-food-guide.ts`) need `ANTHROPIC_API_KEY`
+plus Firestore credentials, not Algolia. All three Algolia write-scripts need `ALGOLIA_ADMIN_API_KEY` (search-only keys cannot mutate).
 `backfill-images.ts` additionally uploads to Storage, so it needs application-default
 credentials — `GOOGLE_APPLICATION_CREDENTIALS` pointing at a service-account JSON, or
 `gcloud auth application-default login` with Storage object admin on the bucket.
@@ -531,6 +540,47 @@ whole catalogue, every language included, and the Flutter client reads Firestore
     --field-config=field-path=published,order=ascending \
     --field-config=field-path=order,order=ascending
   ```
+
+---
+
+## 11c. Food guide (`foodGuide` Firestore collection)
+
+The second authored catalogue, built on exactly the recipes pattern (§11b) — no callable,
+no analysis, no runtime translation. `scripts/seed-food-guide.ts` writes every language;
+the Flutter client reads Firestore directly and renders the Home swimlane plus a detail
+screen.
+
+- **Document** — `foodGuide/{slug}` (`meats`, `fish`, `eggs`, `fruits-vegetables`,
+  `dairy`, `dangerous-foods`). Shared fields (`emoji`, `safety`, `imageUrl`, `published`,
+  `order`), canonical English flat (`name`, `description`, `whyGood`, `howToServe`,
+  `avoid`, `tip`), and `translations: Record<lang, FoodGuideText>` with **no `en` key**.
+- **`safety`** is `safe | caution | unsafe`, driving the coloured pill. The Dart
+  `FoodSafety.fromWire` degrades unknown values to **`caution`, never `safe`** — a wire
+  typo must not read as a green light.
+- **Empty string ≠ missing.** An empty text field means "this row does not apply", which
+  is how `dangerous-foods` renders only its `avoid` row. Both the prompt and the tool
+  schema say to return empty fields unchanged; the Dart mapper normalizes `''` to `null`.
+- **`imageUrl` is `null` for every entry today.** No photos are hosted and there is no
+  upload script; the detail hero renders the entry's `emoji` on a tint. The field exists so
+  images can land later without a migration.
+- **Translation** — `translateFoodGuideText()` + `prompts/translate-food-guide.ts` + the
+  `submit_food_guide_translation` tool. Simpler than the recipe path: six scalars, so no
+  item-count guard, just per-field fallback to the source. The system prompt leans hard on
+  never softening a safety warning — this copy tells owners what is safe to feed.
+- **Staleness** — same `translationsSourceHash` (SHA-1 of `canonicalFoodGuideText`).
+  ⚠️ The hash is `JSON.stringify` of that object, so **key order is part of it**;
+  reordering the fields in `canonicalFoodGuideText` forces a full re-translation.
+- **Rules and indexes** — public-read, Admin-SDK-write, managed in the console like
+  `recipes`. ⚠️ The client query is `where("published", "==", true).orderBy("order")`, so it
+  **requires a composite index**:
+  ```bash
+  gcloud firestore indexes composite create --project=yucat-d8fb5 \
+    --collection-group=foodGuide \
+    --field-config=field-path=published,order=ascending \
+    --field-config=field-path=order,order=ascending
+  ```
+  Until both the index and the seeded documents exist, the Home section renders nothing at
+  all — error and empty both collapse it, header included.
 
 ---
 

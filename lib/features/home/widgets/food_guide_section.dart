@@ -1,73 +1,132 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/themes/theme.dart';
-import 'package:yucat/features/home/widgets/home_placeholder_content.dart';
+import 'package:yucat/features/food_guide/presentation/bloc/food_guide_bloc.dart';
+import 'package:yucat/features/food_guide/presentation/models/food_guide_display_model.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_section_header.dart';
+import 'package:yucat/presentation/components/ds_shimmer.dart';
+import 'package:yucat/service_locator.dart';
 
-/// "Food guide" swimlane — which human foods a cat can eat, by category.
+/// "Food guide" swimlane — which human foods a cat can eat, by category,
+/// backed by the Firestore catalogue.
 ///
 /// Full-bleed by design: the header is inset, the lane is not, so tiles scroll
 /// under both screen edges. Add it to the Home `ListView` **without** a
 /// `Padding` wrapper.
-class FoodGuideSection extends StatelessWidget {
-  /// Inert by default — there is no food-guide screen to open yet, but the
+class FoodGuideSection extends StatefulWidget {
+  /// Inert by default — there is no food-guide list screen to open yet, but the
   /// link still renders so this header matches `HomeRecipesSection`'s.
   final VoidCallback? onSeeAll;
 
-  /// Inert today, same reason.
-  final ValueChanged<FoodGuideCategory>? onCategoryTap;
+  final ValueChanged<FoodGuideDisplayModel> onCategoryTap;
 
-  const FoodGuideSection({super.key, this.onSeeAll, this.onCategoryTap});
+  const FoodGuideSection({
+    super.key,
+    required this.onCategoryTap,
+    this.onSeeAll,
+  });
 
   /// Height the lane occupies — read by the Home skeleton's bone too.
   static const double laneHeight = 116;
 
   @override
+  State<FoodGuideSection> createState() => _FoodGuideSectionState();
+}
+
+class _FoodGuideSectionState extends State<FoodGuideSection> {
+  late FoodGuideBloc _bloc;
+  String? _language;
+
+  @override
+  void initState() {
+    super.initState();
+    // A fresh factory instance — `FoodGuideBloc` is deliberately absent from
+    // main.dart's MultiBlocProvider, because this section is its only consumer.
+    // The repository memoizes per language, so remounting costs no round-trip.
+    _bloc = sl<FoodGuideBloc>();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // App language (not the device locale) — the locale the app actually
+    // resolved to, so an unsupported device language correctly asks for
+    // English. Same rule as `recipes_page.dart`. Read here rather than in
+    // initState because Localizations needs a settled context.
+    final language = Localizations.localeOf(context).languageCode;
+    if (language == _language) return;
+    _language = language;
+    _bloc.add(FoodGuideInitialEvent(language: language));
+  }
+
+  @override
+  void dispose() {
+    // This instance is ours, so closing it is required — unlike `RecipesPage`,
+    // which borrows the root-owned bloc and must NOT close it.
+    _bloc.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final categories = foodGuideCategories(l10n);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
-          child: DSSectionHeader(
-            title: l10n.homeFoodGuideTitle,
-            actionLabel: l10n.homeSeeAll,
-            onAction: onSeeAll ?? () {},
-          ),
-        ),
-        const SizedBox(height: DSDimens.sizeS),
-        SizedBox(
-          height: laneHeight,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
-            itemCount: categories.length,
-            separatorBuilder: (_, __) =>
-                const SizedBox(width: DSDimens.sizeXxxs),
-            itemBuilder: (context, index) {
-              final category = categories[index];
-              return _FoodGuideTile(
-                category: category,
-                onTap: onCategoryTap == null
-                    ? null
-                    : () => onCategoryTap!(category),
-              );
-            },
-          ),
-        ),
-      ],
+    return BlocBuilder<FoodGuideBloc, FoodGuideState>(
+      bloc: _bloc,
+      builder: (context, state) {
+        // Home is a discovery surface: a lane that failed or has nothing to
+        // show removes itself rather than shouting.
+        if (state is FoodGuideErrorState ||
+            (state is FoodGuideLoadedState && state.items.isEmpty)) {
+          return const SizedBox.shrink();
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+              child: DSSectionHeader(
+                title: l10n.homeFoodGuideTitle,
+                actionLabel: l10n.homeSeeAll,
+                onAction: widget.onSeeAll ?? () {},
+              ),
+            ),
+            const SizedBox(height: DSDimens.sizeS),
+            SizedBox(
+              height: FoodGuideSection.laneHeight,
+              child: state is FoodGuideLoadedState
+                  ? ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: DSDimens.sizeL,
+                      ),
+                      itemCount: state.items.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(width: DSDimens.sizeXxxs),
+                      itemBuilder: (context, index) {
+                        final item = state.items[index];
+                        return _FoodGuideTile(
+                          item: item,
+                          onTap: () => widget.onCategoryTap(item),
+                        );
+                      },
+                    )
+                  : const _FoodGuideLaneShimmer(),
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
 class _FoodGuideTile extends StatelessWidget {
-  final FoodGuideCategory category;
-  final VoidCallback? onTap;
+  final FoodGuideDisplayModel item;
+  final VoidCallback onTap;
 
-  const _FoodGuideTile({required this.category, this.onTap});
+  const _FoodGuideTile({required this.item, required this.onTap});
 
   static const double _width = 82;
   static const double _tile = 74;
@@ -75,8 +134,8 @@ class _FoodGuideTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: category.label,
-      button: onTap != null,
+      label: item.name,
+      button: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
@@ -94,7 +153,7 @@ class _FoodGuideTile extends StatelessWidget {
                 alignment: Alignment.center,
                 child: ExcludeSemantics(
                   child: Text(
-                    category.emoji,
+                    item.emoji,
                     style: const TextStyle(fontSize: 34),
                   ),
                 ),
@@ -103,7 +162,7 @@ class _FoodGuideTile extends StatelessWidget {
               Flexible(
                 child: ExcludeSemantics(
                   child: Text(
-                    category.label,
+                    item.name,
                     style: DSTextStyles.caption.copyWith(
                       fontWeight: FontWeight.w600,
                       color: DSColors.inkPrimary,
@@ -114,6 +173,35 @@ class _FoodGuideTile extends StatelessWidget {
                   ),
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tile bones while the catalogue loads. The lane's `SizedBox` clips the
+/// overhang, so the row can be wider than the screen the way the real lane is.
+class _FoodGuideLaneShimmer extends StatelessWidget {
+  const _FoodGuideLaneShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return DSShimmer(
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+        itemCount: 5,
+        separatorBuilder: (_, __) => const SizedBox(width: DSDimens.sizeXxxs),
+        itemBuilder: (_, __) => const SizedBox(
+          width: _FoodGuideTile._width,
+          child: Column(
+            children: [
+              ShimmerBone(width: 74, height: 74, radius: DSRadii.lg),
+              SizedBox(height: DSDimens.sizeXxs),
+              ShimmerBone(width: 52, height: 11, radius: DSRadii.sm),
             ],
           ),
         ),

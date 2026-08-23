@@ -1220,22 +1220,25 @@ class AppLocalizationsHu extends AppLocalizations {
   String get homeFoodGuideTitle => 'Táplálkozási útmutató';
 
   @override
-  String get homeFoodGuideMeats => 'Húsok';
+  String get foodGuideWhyGood => 'Miért jó';
 
   @override
-  String get homeFoodGuideFish => 'Halak';
+  String get foodGuideHowToServe => 'Hogyan add oda';
 
   @override
-  String get homeFoodGuideEggs => 'Tojás';
+  String get foodGuideAvoid => 'Mit kerülj';
 
   @override
-  String get homeFoodGuideFruitsVegetables => 'Gyümölcs és zöldség';
+  String get foodGuideTip => 'YuCat tipp';
 
   @override
-  String get homeFoodGuideDairy => 'Tejtermékek';
+  String get foodGuideSafetySafe => 'Ehet belőle';
 
   @override
-  String get homeFoodGuideDangerous => 'Veszélyes ételek';
+  String get foodGuideSafetyCaution => 'Mértékkel';
+
+  @override
+  String get foodGuideSafetyUnsafe => 'Ne add oda';
 
   @override
   String get homeRecipesSectionTitle => 'Receptek a macskádnak';

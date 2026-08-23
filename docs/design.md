@@ -245,6 +245,7 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | `DSPillButton` | `ds_pill_button.dart` | Black-pill primary CTA with chevron. Variants: `primary` (black/inkInverse), `secondary` (white/inkPrimary), `danger` (`accentDanger`/inkInverse, for destructive CTAs). Props: `loading`, `leadingIcon`, `showChevron`, `verticalPadding`. Companion: `DSTextLink` for inline text actions — `accentInfo` blue, optional `trailingIcon`. |
 | `OnboardingFloatingButton` | `onboarding_floating_button.dart` | Wraps `DSPillButton` with a consistent bottom margin. Placed as the LAST child of a survey screen's content column (preceding `Spacer`/`Expanded` pushes it down) so the CTA sits bottom-anchored at the same height across onboarding screens 2–4 (scan / attribution / proof chart). |
 | `DSCard` | `ds_card.dart` | White surface, `DSRadii.xl`, `e2` shadow, `clipBehavior: antiAlias`. Optional `onTap` ripple. Base for nearly every grouping. `padding: EdgeInsets.zero` gives an edge-to-edge child (e.g. a poster image clipped to the top corners). |
+| `DSTipCard` | `ds_tip_card.dart` | Soft `tintCream` advisory card: translucent white disc with a coral `lightbulb_outline`, `titleMd` title over `bodyMd` body. Caller supplies the title ("Tip", "YuCat tip"). Closes Recipe Detail and Food Guide Detail. |
 | `DSSectionHeader` | `ds_section_header.dart` | Top-level section heading: a **fixed** `headlineMd` title (`Expanded`, `maxLines: 2`, ellipsis) plus an optional `DSTextLink` action at the far edge. The size is deliberately fixed — an earlier `FittedBox(scaleDown)` made each section's title render at a different size depending on its copy length. Used by every Home section. |
 | `DSChip` | `ds_chip.dart` | Tinted soft pill with optional leading icon. Used for emphasis chips on stat/quote screens. |
 | `DSOptionRow` | `ds_option_row.dart` | White pill row, optional emoji/icon + label + radio indicator. Variants: `accent: success` (green ✓) / `danger` (coral ✗ — HealthConditions step). |
@@ -299,7 +300,7 @@ Search and Cats are *not* tabs — Search is a pushed route reached from Home's 
 reached from Profile (Home only offers the greeting card's "+ Add" tile). All three tabs use `pageBackground` — none of them paints its own; the Home tab used to carry a `DSGradients.homeBackground` wash, now removed in favour of the flat shell colour.
 
 **Home is a discovery surface.** Its `ListView` runs: read-only `SearchTextField` → `HomeNewsCard` →
-`FoodGuideSection` → `HomeRecipesSection`, with a
+`FoodGuideSection` → `HomeRecipesSection` — both lanes Firestore-backed, each owning its own bloc — with a
 uniform `DSDimens.sizeL` gap between sections. Card sections are wrapped in a `sizeL` `Padding`; the two
 **swimlanes are not** — they own an inner `ListView.separated(horizontal)` whose own
 `padding: symmetric(horizontal: sizeL)` lets tiles scroll under both screen edges. Every section header

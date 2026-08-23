@@ -8,6 +8,7 @@ import 'package:yucat/features/recipes/presentation/widgets/recipe_meta.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_circle_icon_button.dart';
+import 'package:yucat/presentation/components/ds_tip_card.dart';
 
 /// A single recipe: hero, meta, ingredients, numbered steps and an optional tip.
 ///
@@ -76,7 +77,10 @@ class RecipeDetailPage extends StatelessWidget {
                     ],
                     if (recipe.tip != null) ...[
                       const SizedBox(height: DSDimens.sizeL),
-                      _TipCard(tip: recipe.tip!),
+                      DSTipCard(
+                        title: l10n.recipeDetailTip,
+                        body: recipe.tip!,
+                      ),
                     ],
                   ],
                 ),
@@ -232,56 +236,6 @@ class _StepCard extends StatelessWidget {
           ),
           const SizedBox(width: DSDimens.sizeS),
           Expanded(child: Text(text, style: DSTextStyles.bodyLg)),
-        ],
-      ),
-    );
-  }
-}
-
-class _TipCard extends StatelessWidget {
-  final String tip;
-
-  const _TipCard({required this.tip});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return DSCard(
-      background: DSColors.tintCream,
-      padding: const EdgeInsets.all(DSDimens.sizeS),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: DSColors.surfaceCard.withValues(alpha: 0.6),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: const Icon(
-              Icons.lightbulb_outline_rounded,
-              color: DSColors.coralAccent,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: DSDimens.sizeS),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.recipeDetailTip, style: DSTextStyles.titleMd),
-                const SizedBox(height: DSDimens.sizeXxxs),
-                Text(
-                  tip,
-                  style: DSTextStyles.bodyMd.copyWith(
-                    color: DSColors.inkSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

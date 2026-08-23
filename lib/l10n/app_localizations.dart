@@ -2199,41 +2199,47 @@ abstract class AppLocalizations {
   /// **'Food guide'**
   String get homeFoodGuideTitle;
 
-  /// No description provided for @homeFoodGuideMeats.
+  /// No description provided for @foodGuideWhyGood.
   ///
   /// In en, this message translates to:
-  /// **'Meats'**
-  String get homeFoodGuideMeats;
+  /// **'Why it\'s good'**
+  String get foodGuideWhyGood;
 
-  /// No description provided for @homeFoodGuideFish.
+  /// No description provided for @foodGuideHowToServe.
   ///
   /// In en, this message translates to:
-  /// **'Fish'**
-  String get homeFoodGuideFish;
+  /// **'How to serve it'**
+  String get foodGuideHowToServe;
 
-  /// No description provided for @homeFoodGuideEggs.
+  /// No description provided for @foodGuideAvoid.
   ///
   /// In en, this message translates to:
-  /// **'Eggs'**
-  String get homeFoodGuideEggs;
+  /// **'What to avoid'**
+  String get foodGuideAvoid;
 
-  /// No description provided for @homeFoodGuideFruitsVegetables.
+  /// No description provided for @foodGuideTip.
   ///
   /// In en, this message translates to:
-  /// **'Fruits & vegetables'**
-  String get homeFoodGuideFruitsVegetables;
+  /// **'YuCat tip'**
+  String get foodGuideTip;
 
-  /// No description provided for @homeFoodGuideDairy.
+  /// No description provided for @foodGuideSafetySafe.
   ///
   /// In en, this message translates to:
-  /// **'Dairy'**
-  String get homeFoodGuideDairy;
+  /// **'Can eat'**
+  String get foodGuideSafetySafe;
 
-  /// No description provided for @homeFoodGuideDangerous.
+  /// No description provided for @foodGuideSafetyCaution.
   ///
   /// In en, this message translates to:
-  /// **'Dangerous foods'**
-  String get homeFoodGuideDangerous;
+  /// **'In moderation'**
+  String get foodGuideSafetyCaution;
+
+  /// No description provided for @foodGuideSafetyUnsafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not feed'**
+  String get foodGuideSafetyUnsafe;
 
   /// No description provided for @homeRecipesSectionTitle.
   ///

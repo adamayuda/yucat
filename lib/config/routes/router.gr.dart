@@ -182,6 +182,43 @@ class CurrentFoodRouteArgs {
 }
 
 /// generated route for
+/// [FoodGuideDetailPage]
+class FoodGuideDetailRoute extends PageRouteInfo<FoodGuideDetailRouteArgs> {
+  FoodGuideDetailRoute({
+    Key? key,
+    required FoodGuideDisplayModel item,
+    List<PageRouteInfo>? children,
+  }) : super(
+         FoodGuideDetailRoute.name,
+         args: FoodGuideDetailRouteArgs(key: key, item: item),
+         initialChildren: children,
+       );
+
+  static const String name = 'FoodGuideDetailRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<FoodGuideDetailRouteArgs>();
+      return FoodGuideDetailPage(key: args.key, item: args.item);
+    },
+  );
+}
+
+class FoodGuideDetailRouteArgs {
+  const FoodGuideDetailRouteArgs({this.key, required this.item});
+
+  final Key? key;
+
+  final FoodGuideDisplayModel item;
+
+  @override
+  String toString() {
+    return 'FoodGuideDetailRouteArgs{key: $key, item: $item}';
+  }
+}
+
+/// generated route for
 /// [HomePage]
 class HomeRoute extends PageRouteInfo<void> {
   const HomeRoute({List<PageRouteInfo>? children})

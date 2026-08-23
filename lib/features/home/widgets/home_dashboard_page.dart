@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/food_guide/presentation/models/food_guide_display_model.dart';
 import 'package:yucat/features/home/widgets/food_guide_section.dart';
 import 'package:yucat/features/home/widgets/home_news_card.dart';
 import 'package:yucat/features/home/widgets/home_recipes_section.dart';
@@ -19,12 +20,14 @@ class HomeDashboardPage extends StatelessWidget {
   final VoidCallback onSearchTap;
   final VoidCallback onSeeAllRecipes;
   final ValueChanged<RecipeDisplayModel> onRecipeTap;
+  final ValueChanged<FoodGuideDisplayModel> onFoodGuideTap;
 
   const HomeDashboardPage({
     super.key,
     required this.onSearchTap,
     required this.onSeeAllRecipes,
     required this.onRecipeTap,
+    required this.onFoodGuideTap,
   });
 
   @override
@@ -60,7 +63,7 @@ class HomeDashboardPage extends StatelessWidget {
             ),
             const SizedBox(height: DSDimens.sizeL),
             // Unpadded on purpose — the lane scrolls under the screen edges.
-            const FoodGuideSection(),
+            FoodGuideSection(onCategoryTap: onFoodGuideTap),
             const SizedBox(height: DSDimens.sizeL),
             HomeRecipesSection(
               onSeeAll: onSeeAllRecipes,

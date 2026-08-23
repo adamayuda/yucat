@@ -10,6 +10,7 @@ import {
   LitterModel,
   TRISTATES,
 } from "../models/litter";
+import {FoodGuideText} from "../models/food-guide";
 import {RecipeIngredient, RecipeText} from "../models/recipe";
 import {generateIdentificationPrompt} from "../prompts/identify-product";
 import {
@@ -21,6 +22,10 @@ import {
   generateRecipeTranslationSystemPrompt,
   generateRecipeTranslationUserPrompt,
 } from "../prompts/translate-recipe";
+import {
+  generateFoodGuideTranslationSystemPrompt,
+  generateFoodGuideTranslationUserPrompt,
+} from "../prompts/translate-food-guide";
 import {languageName} from "../prompts/languages";
 import {
   generateAnalysisSystemPrompt,
@@ -1641,6 +1646,127 @@ export async function translateRecipeText(
     };
   } catch (error) {
     logger.warn("translateRecipeText failed", {
+      languageCode,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return null;
+  }
+}
+
+const FOOD_GUIDE_TRANSLATION_TOOLS: Anthropic.Tool[] = [
+  {
+    name: "submit_food_guide_translation",
+    description: "Submit the translated food-guide entry.",
+    input_schema: {
+      type: "object",
+      required: [
+        "name",
+        "description",
+        "whyGood",
+        "howToServe",
+        "avoid",
+        "tip",
+      ],
+      properties: {
+        name: {type: "string", description: "Translated food category name."},
+        description: {
+          type: "string",
+          description: "Translated summary, same length as source.",
+        },
+        whyGood: {
+          type: "string",
+          description:
+            "Translated benefit text. Empty string if the source is empty.",
+        },
+        howToServe: {
+          type: "string",
+          description:
+            "Translated serving advice. Empty string if the source is empty.",
+        },
+        avoid: {
+          type: "string",
+          description:
+            "Translated warning. Safety wording must be preserved in full. " +
+            "Empty string if the source is empty.",
+        },
+        tip: {
+          type: "string",
+          description:
+            "Translated closing tip. Empty string if the source is empty.",
+        },
+      },
+    },
+  },
+];
+
+/**
+ * Translates one food-guide entry.
+ *
+ * Returns null on any failure so the seeder can keep whatever translation it
+ * already had — a stale translation still beats falling back to English.
+ * Per-field fallback to the source covers a partially-formed tool call.
+ */
+export async function translateFoodGuideText(
+  text: FoodGuideText,
+  languageCode: string
+): Promise<FoodGuideText | null> {
+  const language = languageName(languageCode);
+  const started = Date.now();
+  try {
+    const response = await withRetry("translateFoodGuideText", () =>
+      getClient().messages.create({
+        model: config.anthropic.model,
+        max_tokens: 4096,
+        temperature: 0,
+        system: [
+          {
+            type: "text",
+            text: generateFoodGuideTranslationSystemPrompt(),
+            cache_control: {type: "ephemeral"},
+          },
+        ],
+        messages: [
+          {role: "user", content: [
+            {
+              type: "text",
+              text: generateFoodGuideTranslationUserPrompt(text, language),
+            },
+          ]},
+        ],
+        tools: FOOD_GUIDE_TRANSLATION_TOOLS,
+        tool_choice: {type: "tool", name: "submit_food_guide_translation"},
+      })
+    );
+
+    const submit = findToolUse(
+      response.content,
+      "submit_food_guide_translation"
+    );
+    const out = submit?.input;
+    if (!out) return null;
+
+    const field = (key: keyof FoodGuideText): string =>
+      typeof out[key] === "string" ? (out[key] as string) : text[key];
+
+    logger.info("translateFoodGuideText complete", {
+      languageCode,
+      ms: Date.now() - started,
+      inputTokens: response.usage?.input_tokens,
+      outputTokens: response.usage?.output_tokens,
+      structuredData: true,
+    });
+
+    return {
+      name: field("name"),
+      description: field("description"),
+      whyGood: field("whyGood"),
+      howToServe: field("howToServe"),
+      avoid: field("avoid"),
+      tip: field("tip"),
+    };
+  } catch (error) {
+    logger.warn("translateFoodGuideText failed", {
       languageCode,
       error: error instanceof Error ? error.message : String(error),
       structuredData: true,

@@ -5,6 +5,7 @@ import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
+import 'package:yucat/features/food_guide/presentation/models/food_guide_display_model.dart';
 import 'package:yucat/features/home/bloc/home_bloc.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
@@ -55,6 +56,10 @@ class _HomePage extends State<HomePage> {
     context.router.push(RecipeDetailRoute(recipe: recipe));
   }
 
+  void _openFoodGuideItem(FoodGuideDisplayModel item) {
+    context.router.push(FoodGuideDetailRoute(item: item));
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
@@ -83,6 +88,7 @@ class _HomePage extends State<HomePage> {
           onSearchTap: _openSearch,
           onSeeAllRecipes: _openRecipesTab,
           onRecipeTap: _openRecipe,
+          onFoodGuideTap: _openFoodGuideItem,
         );
       case HomeErrorState():
         final l10n = AppLocalizations.of(context);

@@ -1211,22 +1211,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeFoodGuideTitle => 'Food guide';
 
   @override
-  String get homeFoodGuideMeats => 'Meats';
+  String get foodGuideWhyGood => 'Why it\'s good';
 
   @override
-  String get homeFoodGuideFish => 'Fish';
+  String get foodGuideHowToServe => 'How to serve it';
 
   @override
-  String get homeFoodGuideEggs => 'Eggs';
+  String get foodGuideAvoid => 'What to avoid';
 
   @override
-  String get homeFoodGuideFruitsVegetables => 'Fruits & vegetables';
+  String get foodGuideTip => 'YuCat tip';
 
   @override
-  String get homeFoodGuideDairy => 'Dairy';
+  String get foodGuideSafetySafe => 'Can eat';
 
   @override
-  String get homeFoodGuideDangerous => 'Dangerous foods';
+  String get foodGuideSafetyCaution => 'In moderation';
+
+  @override
+  String get foodGuideSafetyUnsafe => 'Do not feed';
 
   @override
   String get homeRecipesSectionTitle => 'Recipes for your cat';

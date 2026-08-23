@@ -1229,22 +1229,25 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeFoodGuideTitle => 'Guia dos alimentos';
 
   @override
-  String get homeFoodGuideMeats => 'Carnes';
+  String get foodGuideWhyGood => 'Porque é bom';
 
   @override
-  String get homeFoodGuideFish => 'Peixes';
+  String get foodGuideHowToServe => 'Como dar';
 
   @override
-  String get homeFoodGuideEggs => 'Ovos';
+  String get foodGuideAvoid => 'O que evitar';
 
   @override
-  String get homeFoodGuideFruitsVegetables => 'Frutas e legumes';
+  String get foodGuideTip => 'Dica YuCat';
 
   @override
-  String get homeFoodGuideDairy => 'Lacticínios';
+  String get foodGuideSafetySafe => 'Pode comer';
 
   @override
-  String get homeFoodGuideDangerous => 'Alimentos perigosos';
+  String get foodGuideSafetyCaution => 'Com moderação';
+
+  @override
+  String get foodGuideSafetyUnsafe => 'Não dar';
 
   @override
   String get homeRecipesSectionTitle => 'Receitas para o seu gato';

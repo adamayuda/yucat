@@ -98,6 +98,13 @@ import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/services/cat_tracking_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 import 'package:yucat/features/litter/data/mappers/litter_to_domain_mapper.dart';
+import 'package:yucat/features/food_guide/data/datasources/food_guide_firestore_datasource.dart';
+import 'package:yucat/features/food_guide/data/mappers/food_guide_document_mapper.dart';
+import 'package:yucat/features/food_guide/data/repositories/food_guide_repository_impl.dart';
+import 'package:yucat/features/food_guide/domain/repositories/food_guide_repository.dart';
+import 'package:yucat/features/food_guide/domain/usecases/get_food_guide_usecase.dart';
+import 'package:yucat/features/food_guide/presentation/bloc/food_guide_bloc.dart';
+import 'package:yucat/features/food_guide/presentation/mappers/food_guide_entity_to_model_mapper.dart';
 import 'package:yucat/features/recipes/data/datasources/recipe_firestore_datasource.dart';
 import 'package:yucat/features/recipes/data/mappers/recipe_document_mapper.dart';
 import 'package:yucat/features/recipes/data/repositories/recipes_repository_impl.dart';
@@ -197,6 +204,9 @@ Future<void> _registerDataSources() async {
   sl.registerSingleton<RecipeFirestoreDataSource>(
     RecipeFirestoreDataSource(firestore: FirebaseFirestore.instance),
   );
+  sl.registerSingleton<FoodGuideFirestoreDataSource>(
+    FoodGuideFirestoreDataSource(firestore: FirebaseFirestore.instance),
+  );
 }
 
 Future<void> _registerMappers() async {
@@ -222,6 +232,12 @@ Future<void> _registerMappers() async {
     const RecipeEntityToModelMapper(),
   );
   sl.registerSingleton<RecipeDocumentMapper>(const RecipeDocumentMapperImpl());
+  sl.registerSingleton<FoodGuideEntityToModelMapper>(
+    const FoodGuideEntityToModelMapper(),
+  );
+  sl.registerSingleton<FoodGuideDocumentMapper>(
+    const FoodGuideDocumentMapperImpl(),
+  );
 }
 
 Future<void> _registerRepositories() async {
@@ -282,6 +298,12 @@ Future<void> _registerRepositories() async {
     RecipesRepositoryImpl(
       dataSource: sl<RecipeFirestoreDataSource>(),
       mapper: sl<RecipeDocumentMapper>(),
+    ),
+  );
+  sl.registerSingleton<FoodGuideRepository>(
+    FoodGuideRepositoryImpl(
+      dataSource: sl<FoodGuideFirestoreDataSource>(),
+      mapper: sl<FoodGuideDocumentMapper>(),
     ),
   );
 }
@@ -397,6 +419,9 @@ Future<void> _registerUseCases() async {
   );
   sl.registerSingleton<GetRecipesUsecase>(
     GetRecipesUsecase(repository: sl<RecipesRepository>()),
+  );
+  sl.registerSingleton<GetFoodGuideUsecase>(
+    GetFoodGuideUsecase(repository: sl<FoodGuideRepository>()),
   );
 }
 
@@ -580,6 +605,14 @@ Future<void> _registerBlocs() async {
     () => RecipesBloc(
       getRecipesUsecase: sl<GetRecipesUsecase>(),
       mapper: sl<RecipeEntityToModelMapper>(),
+    ),
+  );
+  // Deliberately NOT in main.dart's MultiBlocProvider: there is no food-guide
+  // tab, so Home's FoodGuideSection is the only consumer and owns its instance.
+  sl.registerBloc<FoodGuideBloc>(
+    () => FoodGuideBloc(
+      getFoodGuideUsecase: sl<GetFoodGuideUsecase>(),
+      mapper: sl<FoodGuideEntityToModelMapper>(),
     ),
   );
 }
