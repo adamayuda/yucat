@@ -350,6 +350,28 @@
   "articlesCategoryHealth": "Gesundheit",
   "articlesCategoryBehaviour": "Verhalten",
   "articlesCategoryOther": "Sonstiges",
+  "articlesTitle": "Artikel",
+  "articlesSearchHint": "Artikel suchen",
+  "articlesErrorBody": "Beim Laden der Artikel ist etwas schiefgelaufen.",
+  "articlesEmptyHeadline": "Keine passenden Artikel",
+  "articlesEmptyBody": "Versuche eine andere Suche oder wähle eine andere Kategorie.",
+  "homeArticlesSectionTitle": "Artikel für dich",
+  "articlesReadMinutes": "{minutes} Min.",
+  "@articlesReadMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "articleDetailReadTime": "{minutes} Min. Lesezeit",
+  "@articleDetailReadTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "homeFoodGuideTitle": "Futter-Guide",
   "foodGuideWhyGood": "Warum es gut ist",
   "foodGuideHowToServe": "So fütterst du es",

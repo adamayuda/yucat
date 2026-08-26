@@ -350,6 +350,28 @@
   "articlesCategoryHealth": "Egészség",
   "articlesCategoryBehaviour": "Viselkedés",
   "articlesCategoryOther": "Egyéb",
+  "articlesTitle": "Cikkek",
+  "articlesSearchHint": "Cikk keresése",
+  "articlesErrorBody": "Hiba történt a cikkek betöltésekor.",
+  "articlesEmptyHeadline": "Nincs találat",
+  "articlesEmptyBody": "Próbálj másik keresést, vagy válassz másik kategóriát.",
+  "homeArticlesSectionTitle": "Neked ajánlott cikkek",
+  "articlesReadMinutes": "{minutes} perc",
+  "@articlesReadMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "articleDetailReadTime": "{minutes} perc olvasás",
+  "@articleDetailReadTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "homeFoodGuideTitle": "Táplálkozási útmutató",
   "foodGuideWhyGood": "Miért jó",
   "foodGuideHowToServe": "Hogyan add oda",

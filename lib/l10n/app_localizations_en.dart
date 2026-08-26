@@ -1217,6 +1217,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get articlesCategoryOther => 'Other';
 
   @override
+  String get articlesTitle => 'Articles';
+
+  @override
+  String get articlesSearchHint => 'Search for an article';
+
+  @override
+  String get articlesErrorBody =>
+      'Something went wrong while loading articles.';
+
+  @override
+  String get articlesEmptyHeadline => 'No articles match';
+
+  @override
+  String get articlesEmptyBody =>
+      'Try another search or pick a different category.';
+
+  @override
+  String get homeArticlesSectionTitle => 'Articles for you';
+
+  @override
+  String articlesReadMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String articleDetailReadTime(int minutes) {
+    return '$minutes min read';
+  }
+
+  @override
   String get homeFoodGuideTitle => 'Food guide';
 
   @override

@@ -302,7 +302,7 @@ Search and Cats are *not* tabs — Search is a pushed route reached from Home's 
 reached from Profile (Home only offers the greeting card's "+ Add" tile). All three tabs use `pageBackground` — none of them paints its own; the Home tab used to carry a `DSGradients.homeBackground` wash, now removed in favour of the flat shell colour.
 
 **Home is a discovery surface.** Every section below the search bar is Firestore-backed and owns its own bloc. Its `ListView` runs: read-only `SearchTextField` → `HomeNewsCard` →
-`FoodGuideSection` → `HomeRecipesSection` — both lanes Firestore-backed, each owning its own bloc, and the food guide's "See all" pushing `FoodGuideRoute` — then `HomeMissionCard` as a sign-off, with a
+`FoodGuideSection` → `HomeRecipesSection` → `HomeArticlesSection` — all three lanes Firestore-backed, each owning its own bloc, with the food guide's and articles' "See all" pushing `FoodGuideRoute` and `ArticlesRoute` — then `HomeMissionCard` as a sign-off, with a
 uniform `DSDimens.sizeL` gap between sections. Card sections are wrapped in a `sizeL` `Padding`; the two
 **swimlanes are not** — they own an inner `ListView.separated(horizontal)` whose own
 `padding: symmetric(horizontal: sizeL)` lets tiles scroll under both screen edges. Every section header

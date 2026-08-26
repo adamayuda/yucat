@@ -1225,6 +1225,35 @@ class AppLocalizationsHu extends AppLocalizations {
   String get articlesCategoryOther => 'Egyéb';
 
   @override
+  String get articlesTitle => 'Cikkek';
+
+  @override
+  String get articlesSearchHint => 'Cikk keresése';
+
+  @override
+  String get articlesErrorBody => 'Hiba történt a cikkek betöltésekor.';
+
+  @override
+  String get articlesEmptyHeadline => 'Nincs találat';
+
+  @override
+  String get articlesEmptyBody =>
+      'Próbálj másik keresést, vagy válassz másik kategóriát.';
+
+  @override
+  String get homeArticlesSectionTitle => 'Neked ajánlott cikkek';
+
+  @override
+  String articlesReadMinutes(int minutes) {
+    return '$minutes perc';
+  }
+
+  @override
+  String articleDetailReadTime(int minutes) {
+    return '$minutes perc olvasás';
+  }
+
+  @override
   String get homeFoodGuideTitle => 'Táplálkozási útmutató';
 
   @override

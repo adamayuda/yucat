@@ -1235,6 +1235,36 @@ class AppLocalizationsDe extends AppLocalizations {
   String get articlesCategoryOther => 'Sonstiges';
 
   @override
+  String get articlesTitle => 'Artikel';
+
+  @override
+  String get articlesSearchHint => 'Artikel suchen';
+
+  @override
+  String get articlesErrorBody =>
+      'Beim Laden der Artikel ist etwas schiefgelaufen.';
+
+  @override
+  String get articlesEmptyHeadline => 'Keine passenden Artikel';
+
+  @override
+  String get articlesEmptyBody =>
+      'Versuche eine andere Suche oder wähle eine andere Kategorie.';
+
+  @override
+  String get homeArticlesSectionTitle => 'Artikel für dich';
+
+  @override
+  String articlesReadMinutes(int minutes) {
+    return '$minutes Min.';
+  }
+
+  @override
+  String articleDetailReadTime(int minutes) {
+    return '$minutes Min. Lesezeit';
+  }
+
+  @override
   String get homeFoodGuideTitle => 'Futter-Guide';
 
   @override

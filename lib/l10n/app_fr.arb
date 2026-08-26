@@ -350,6 +350,28 @@
   "articlesCategoryHealth": "Santé",
   "articlesCategoryBehaviour": "Comportement",
   "articlesCategoryOther": "Autre",
+  "articlesTitle": "Articles",
+  "articlesSearchHint": "Rechercher un article",
+  "articlesErrorBody": "Une erreur est survenue lors du chargement des articles.",
+  "articlesEmptyHeadline": "Aucun article ne correspond",
+  "articlesEmptyBody": "Essayez une autre recherche ou choisissez une autre catégorie.",
+  "homeArticlesSectionTitle": "Articles pour vous",
+  "articlesReadMinutes": "{minutes} min",
+  "@articlesReadMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "articleDetailReadTime": "{minutes} min de lecture",
+  "@articleDetailReadTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "homeFoodGuideTitle": "Guide des aliments",
   "foodGuideWhyGood": "Pourquoi c'est bon",
   "foodGuideHowToServe": "Comment le donner",

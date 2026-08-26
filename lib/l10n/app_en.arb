@@ -595,6 +595,28 @@
   "articlesCategoryHealth": "Health",
   "articlesCategoryBehaviour": "Behaviour",
   "articlesCategoryOther": "Other",
+  "articlesTitle": "Articles",
+  "articlesSearchHint": "Search for an article",
+  "articlesErrorBody": "Something went wrong while loading articles.",
+  "articlesEmptyHeadline": "No articles match",
+  "articlesEmptyBody": "Try another search or pick a different category.",
+  "homeArticlesSectionTitle": "Articles for you",
+  "articlesReadMinutes": "{minutes} min",
+  "@articlesReadMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "articleDetailReadTime": "{minutes} min read",
+  "@articleDetailReadTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "homeFoodGuideTitle": "Food guide",
   "foodGuideWhyGood": "Why it's good",
   "foodGuideHowToServe": "How to serve it",

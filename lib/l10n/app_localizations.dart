@@ -2211,6 +2211,54 @@ abstract class AppLocalizations {
   /// **'Other'**
   String get articlesCategoryOther;
 
+  /// No description provided for @articlesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Articles'**
+  String get articlesTitle;
+
+  /// No description provided for @articlesSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for an article'**
+  String get articlesSearchHint;
+
+  /// No description provided for @articlesErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while loading articles.'**
+  String get articlesErrorBody;
+
+  /// No description provided for @articlesEmptyHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'No articles match'**
+  String get articlesEmptyHeadline;
+
+  /// No description provided for @articlesEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another search or pick a different category.'**
+  String get articlesEmptyBody;
+
+  /// No description provided for @homeArticlesSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Articles for you'**
+  String get homeArticlesSectionTitle;
+
+  /// No description provided for @articlesReadMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String articlesReadMinutes(int minutes);
+
+  /// No description provided for @articleDetailReadTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min read'**
+  String articleDetailReadTime(int minutes);
+
   /// No description provided for @homeFoodGuideTitle.
   ///
   /// In en, this message translates to:

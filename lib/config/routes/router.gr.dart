@@ -11,6 +11,59 @@
 part of 'router.dart';
 
 /// generated route for
+/// [ArticleDetailPage]
+class ArticleDetailRoute extends PageRouteInfo<ArticleDetailRouteArgs> {
+  ArticleDetailRoute({
+    Key? key,
+    required ArticleDisplayModel article,
+    List<PageRouteInfo>? children,
+  }) : super(
+         ArticleDetailRoute.name,
+         args: ArticleDetailRouteArgs(key: key, article: article),
+         initialChildren: children,
+       );
+
+  static const String name = 'ArticleDetailRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<ArticleDetailRouteArgs>();
+      return ArticleDetailPage(key: args.key, article: args.article);
+    },
+  );
+}
+
+class ArticleDetailRouteArgs {
+  const ArticleDetailRouteArgs({this.key, required this.article});
+
+  final Key? key;
+
+  final ArticleDisplayModel article;
+
+  @override
+  String toString() {
+    return 'ArticleDetailRouteArgs{key: $key, article: $article}';
+  }
+}
+
+/// generated route for
+/// [ArticlesPage]
+class ArticlesRoute extends PageRouteInfo<void> {
+  const ArticlesRoute({List<PageRouteInfo>? children})
+    : super(ArticlesRoute.name, initialChildren: children);
+
+  static const String name = 'ArticlesRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ArticlesPage();
+    },
+  );
+}
+
+/// generated route for
 /// [CatDetailPage]
 class CatDetailRoute extends PageRouteInfo<CatDetailRouteArgs> {
   CatDetailRoute({

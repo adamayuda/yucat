@@ -16,7 +16,9 @@ import 'package:yucat/service_locator.dart';
 /// Shows the **first** article in authored order — which article that is comes
 /// from the `order` field in the seed data, not from anything computed here.
 class HomeNewsCard extends StatefulWidget {
-  const HomeNewsCard({super.key});
+  final ValueChanged<ArticleDisplayModel> onArticleTap;
+
+  const HomeNewsCard({super.key, required this.onArticleTap});
 
   @override
   State<HomeNewsCard> createState() => _HomeNewsCardState();
@@ -30,9 +32,9 @@ class _HomeNewsCardState extends State<HomeNewsCard> {
   void initState() {
     super.initState();
     // A fresh factory instance — `ArticlesBloc` is deliberately absent from
-    // main.dart's MultiBlocProvider, because this card is its only consumer
-    // today. The repository memoizes per language, so remounting costs no
-    // round-trip.
+    // main.dart's MultiBlocProvider, so each consumer owns one. The repository
+    // memoizes per language, so this and `HomeArticlesSection` below share one
+    // Firestore round-trip between them.
     _bloc = sl<ArticlesBloc>();
   }
 
@@ -68,7 +70,11 @@ class _HomeNewsCardState extends State<HomeNewsCard> {
           // `all`, never `visible` — the list screen's filters must not reach
           // the Home card.
           if (state.all.isEmpty) return const SizedBox.shrink();
-          return _NewsCardBody(article: state.all.first);
+          final article = state.all.first;
+          return _NewsCardBody(
+            article: article,
+            onTap: () => widget.onArticleTap(article),
+          );
         }
         return const _NewsCardShimmer();
       },
@@ -78,8 +84,9 @@ class _HomeNewsCardState extends State<HomeNewsCard> {
 
 class _NewsCardBody extends StatelessWidget {
   final ArticleDisplayModel article;
+  final VoidCallback onTap;
 
-  const _NewsCardBody({required this.article});
+  const _NewsCardBody({required this.article, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -159,8 +166,7 @@ class _NewsCardBody extends StatelessWidget {
           DSTextLink(
             label: l10n.homeNewsLearnMore,
             trailingIcon: Icons.arrow_forward_rounded,
-            // TODO(articles): push ArticleDetailRoute once that screen exists.
-            onPressed: () {},
+            onPressed: onTap,
           ),
         ],
       ),

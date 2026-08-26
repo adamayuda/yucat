@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/food_guide/presentation/models/food_guide_display_model.dart';
 import 'package:yucat/features/home/widgets/food_guide_section.dart';
+import 'package:yucat/features/articles/presentation/models/article_display_model.dart';
+import 'package:yucat/features/home/widgets/home_articles_section.dart';
 import 'package:yucat/features/home/widgets/home_mission_card.dart';
 import 'package:yucat/features/home/widgets/home_news_card.dart';
 import 'package:yucat/features/home/widgets/home_recipes_section.dart';
@@ -23,6 +25,8 @@ class HomeDashboardPage extends StatelessWidget {
   final ValueChanged<RecipeDisplayModel> onRecipeTap;
   final ValueChanged<FoodGuideDisplayModel> onFoodGuideTap;
   final VoidCallback onSeeAllFoodGuide;
+  final VoidCallback onSeeAllArticles;
+  final ValueChanged<ArticleDisplayModel> onArticleTap;
 
   const HomeDashboardPage({
     super.key,
@@ -31,6 +35,8 @@ class HomeDashboardPage extends StatelessWidget {
     required this.onRecipeTap,
     required this.onFoodGuideTap,
     required this.onSeeAllFoodGuide,
+    required this.onSeeAllArticles,
+    required this.onArticleTap,
   });
 
   @override
@@ -60,9 +66,9 @@ class HomeDashboardPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: DSDimens.sizeL),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
-              child: HomeNewsCard(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+              child: HomeNewsCard(onArticleTap: onArticleTap),
             ),
             const SizedBox(height: DSDimens.sizeL),
             // Unpadded on purpose — the lane scrolls under the screen edges.
@@ -74,6 +80,11 @@ class HomeDashboardPage extends StatelessWidget {
             HomeRecipesSection(
               onSeeAll: onSeeAllRecipes,
               onRecipeTap: onRecipeTap,
+            ),
+            const SizedBox(height: DSDimens.sizeL),
+            HomeArticlesSection(
+              onSeeAll: onSeeAllArticles,
+              onArticleTap: onArticleTap,
             ),
             const SizedBox(height: DSDimens.sizeL),
             const Padding(
