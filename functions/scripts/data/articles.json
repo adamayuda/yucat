@@ -142,5 +142,61 @@
       "Renal diets, restricted in protein and phosphorus, are reserved for cats diagnosed with chronic kidney disease.",
       "Sources: AAHA/AAFP Feline Life Stage Guidelines, VCA Animal Hospitals."
     ]
+  },
+  {
+    "id": "hunting-mode",
+    "category": "behaviour",
+    "readMinutes": 4,
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/hunting-mode.jpeg",
+    "published": true,
+    "order": 100,
+    "title": "The cat's hunting mode",
+    "excerpt": "A well-fed cat still hunts.",
+    "body": [
+      "A cat living solely on what it catches would need to take roughly 10 to 20 prey a day, while each hunting attempt has less than a 50% chance of succeeding.",
+      "That constraint is what explains the behaviour: cats evolved to attempt a hunt whenever the opportunity arises, hungry or not. The sight or sound of prey is enough to trigger the sequence.",
+      "A stray cat spends an average of 12 hours a day hunting, against about 3 hours for an owned cat. The number of prey follows the same gap: on the order of 27 a year for a well-fed cat, against more than 270 for a stray.",
+      "Hunting activity also varies with age, physical condition, temperament, neutering and food security. It is strongest from spring through autumn.",
+      "A full bowl does not remove the need: daily play sessions that reproduce the stalk, chase and capture sequence reduce aggression and dawn wake-ups.",
+      "Sources: International Cat Care via Purina, LPO, Vetopsy."
+    ]
+  },
+  {
+    "id": "overweight-cats",
+    "category": "health",
+    "readMinutes": 5,
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/overweight-cats.jpeg",
+    "published": true,
+    "order": 110,
+    "title": "Overweight cats",
+    "excerpt": "Neutering, indoor life and middle age compound each other.",
+    "body": [
+      "Excess weight is now one of the most common nutritional disorders in cats. Estimates vary widely by country: about 11.5% in the United Kingdom, 15.7% in Australia and 41% in the United States, with some populations reaching 63%.",
+      "The identified risk factors converge: oversized portions, low energy expenditure, an unstimulating environment, an exclusively dry diet, a strictly indoor life, male sex and neutering.",
+      "Neutering is the best established factor: neutered cats are more than three times as likely to be overweight as entire cats, because of hormonal changes that reduce activity and increase food intake.",
+      "Prevalence rises from 2 to 3 years of age, peaks between 5 and 11 years, then tends to fall in older cats.",
+      "The consequences are documented: diabetes, insulin resistance, hepatic lipidosis, urinary problems, arthritis and lameness, skin disease, and a shorter life expectancy.",
+      "Owners often underestimate their cat's body condition: an assessment by a vet remains the reference point before starting any weight loss.",
+      "Sources: Veterinary Record 2025, Journal of Feline Medicine and Surgery."
+    ]
+  },
+  {
+    "id": "litter-box-material",
+    "category": "health",
+    "readMinutes": 4,
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/litter-box-material.jpeg",
+    "published": true,
+    "order": 120,
+    "title": "Litter box: plastic or stainless steel?",
+    "excerpt": "Hygiene against comfort: both have a case.",
+    "body": [
+      "Plastic is porous. Over time, acidic urine and claw marks create micro-scratches where bacteria settle, out of reach of cleaning products, which keeps a persistent smell alive despite washing.",
+      "That is why a plastic tray used by an adult cat should generally be replaced every 6 to 12 months to keep hygiene acceptable.",
+      "Stainless steel is non-porous: it holds neither fluids nor odours, cleans with a simple rinse, is dishwasher-safe, does not scratch under claws and lasts for years. It is also recyclable and gives off no chemical smell when new.",
+      "Stainless steel has real drawbacks that often go unmentioned: colder underfoot, and noisier when the cat digs or when the litter is sifted. Some sensitive cats hesitate to step in, or dig less willingly.",
+      "Non-slip pads under the tray and a thick enough layer of litter soften both the noise and the cold. When switching, leave the old tray in place for a few days and let the cat choose.",
+      "A cat with a history of urinary problems, or unexplained soiling, is the case where switching to stainless steel is most justified.",
+      "Sources: Gizmo, Les Trésors d'Owka, Avis Litière."
+    ]
   }
 ]

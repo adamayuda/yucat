@@ -52,6 +52,9 @@ const FILE_TO_ARTICLE: Record<string, string> = {
   "Portions et surpoids - ce qui compte vraiment": "portion-control",
   "Changer d'alimentation sans troubles digestifs": "food-transition",
   "L'alimentation du chat âgé": "senior-cat-nutrition",
+  "Le mode chasseur du chat": "hunting-mode",
+  "Les chats en surpoids": "overweight-cats",
+  "bac plastique ou l'inox": "litter-box-material",
 };
 
 const args = process.argv.slice(2);
