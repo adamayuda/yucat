@@ -2175,23 +2175,41 @@ abstract class AppLocalizations {
   /// **'Good to know today'**
   String get homeNewsEyebrow;
 
-  /// No description provided for @homeNewsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Why do cats drink so little?'**
-  String get homeNewsTitle;
-
-  /// No description provided for @homeNewsBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Cats naturally have a low sense of thirst.'**
-  String get homeNewsBody;
-
   /// No description provided for @homeNewsLearnMore.
   ///
   /// In en, this message translates to:
   /// **'Learn more'**
   String get homeNewsLearnMore;
+
+  /// No description provided for @articlesCategoryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get articlesCategoryAll;
+
+  /// No description provided for @articlesCategoryNutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition'**
+  String get articlesCategoryNutrition;
+
+  /// No description provided for @articlesCategoryHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get articlesCategoryHealth;
+
+  /// No description provided for @articlesCategoryBehaviour.
+  ///
+  /// In en, this message translates to:
+  /// **'Behaviour'**
+  String get articlesCategoryBehaviour;
+
+  /// No description provided for @articlesCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get articlesCategoryOther;
 
   /// No description provided for @homeFoodGuideTitle.
   ///

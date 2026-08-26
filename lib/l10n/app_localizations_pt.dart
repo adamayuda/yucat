@@ -1216,14 +1216,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeNewsEyebrow => 'Bom saber hoje';
 
   @override
-  String get homeNewsTitle => 'Porque é que os gatos bebem tão pouco?';
-
-  @override
-  String get homeNewsBody =>
-      'O gato tem naturalmente uma baixa sensação de sede.';
-
-  @override
   String get homeNewsLearnMore => 'Saber mais';
+
+  @override
+  String get articlesCategoryAll => 'Todos';
+
+  @override
+  String get articlesCategoryNutrition => 'Alimentação';
+
+  @override
+  String get articlesCategoryHealth => 'Saúde';
+
+  @override
+  String get articlesCategoryBehaviour => 'Comportamento';
+
+  @override
+  String get articlesCategoryOther => 'Outros';
 
   @override
   String get homeFoodGuideTitle => 'Guia dos alimentos';

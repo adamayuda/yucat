@@ -10,6 +10,7 @@ import {
   LitterModel,
   TRISTATES,
 } from "../models/litter";
+import {ArticleText} from "../models/article";
 import {FoodGuideText} from "../models/food-guide";
 import {RecipeIngredient, RecipeText} from "../models/recipe";
 import {generateIdentificationPrompt} from "../prompts/identify-product";
@@ -26,6 +27,10 @@ import {
   generateFoodGuideTranslationSystemPrompt,
   generateFoodGuideTranslationUserPrompt,
 } from "../prompts/translate-food-guide";
+import {
+  generateArticleTranslationSystemPrompt,
+  generateArticleTranslationUserPrompt,
+} from "../prompts/translate-article";
 import {languageName} from "../prompts/languages";
 import {
   generateAnalysisSystemPrompt,
@@ -1767,6 +1772,112 @@ export async function translateFoodGuideText(
     };
   } catch (error) {
     logger.warn("translateFoodGuideText failed", {
+      languageCode,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return null;
+  }
+}
+
+const ARTICLE_TRANSLATION_TOOLS: Anthropic.Tool[] = [
+  {
+    name: "submit_article_translation",
+    description: "Submit the translated article text.",
+    input_schema: {
+      type: "object",
+      required: ["title", "excerpt", "body"],
+      properties: {
+        title: {type: "string", description: "Translated article title."},
+        excerpt: {
+          type: "string",
+          description:
+            "Translated one-sentence teaser, same length as the source.",
+        },
+        body: {
+          type: "array",
+          items: {type: "string"},
+          description:
+            "Translated paragraphs \u2014 same count and order as the source, " +
+            "one paragraph per item, never numbered.",
+        },
+      },
+    },
+  },
+];
+
+/**
+ * Translates one article.
+ *
+ * Returns null on any failure so the seeder can keep whatever translation it
+ * already had — a stale translation still beats falling back to English.
+ */
+export async function translateArticleText(
+  text: ArticleText,
+  languageCode: string
+): Promise<ArticleText | null> {
+  const language = languageName(languageCode);
+  const started = Date.now();
+  try {
+    const response = await withRetry("translateArticleText", () =>
+      getClient().messages.create({
+        model: config.anthropic.model,
+        max_tokens: 4096,
+        temperature: 0,
+        system: [
+          {
+            type: "text",
+            text: generateArticleTranslationSystemPrompt(),
+            cache_control: {type: "ephemeral"},
+          },
+        ],
+        messages: [
+          {role: "user", content: [
+            {
+              type: "text",
+              text: generateArticleTranslationUserPrompt(text, language),
+            },
+          ]},
+        ],
+        tools: ARTICLE_TRANSLATION_TOOLS,
+        tool_choice: {type: "tool", name: "submit_article_translation"},
+      })
+    );
+
+    const submit = findToolUse(response.content, "submit_article_translation");
+    const out = submit?.input;
+    if (!out) return null;
+
+    const body = Array.isArray(out.body) ? out.body.map(String) : [];
+
+    // Same guard as translateRecipeText: a paragraph count mismatch means the
+    // model merged or dropped one, which would silently delete advice.
+    if (body.length !== text.body.length) {
+      logger.warn("translateArticleText paragraph-count mismatch \u2014 discarding", {
+        languageCode,
+        expected: text.body.length,
+        got: body.length,
+        structuredData: true,
+      });
+      return null;
+    }
+
+    logger.info("translateArticleText complete", {
+      languageCode,
+      ms: Date.now() - started,
+      inputTokens: response.usage?.input_tokens,
+      outputTokens: response.usage?.output_tokens,
+      structuredData: true,
+    });
+
+    return {
+      title: typeof out.title === "string" ? out.title : text.title,
+      excerpt:
+        typeof out.excerpt === "string" ? out.excerpt : text.excerpt,
+      body,
+    };
+  } catch (error) {
+    logger.warn("translateArticleText failed", {
       languageCode,
       error: error instanceof Error ? error.message : String(error),
       structuredData: true,

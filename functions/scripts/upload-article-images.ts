@@ -1,22 +1,25 @@
 /**
- * Uploads local food-guide photos to Firebase Storage and links them to their
+ * Uploads local article photos to Firebase Storage and links them to their
  * documents.
  *
- * Photos arrive named loosely in French ("Produit letier.png"); document ids
- * are authored slugs, so the mapping is spelled out below rather than derived
- * — a near-miss filename should be a hard error, not a silently wrong hero.
- * Each file is optimized with the same settings as the product image pipeline
- * (IMAGE_OPTIMIZATION: 800x800 inside, progressive JPEG q85) — the source PNGs
- * are ~2 MB each, which would be a miserable payload for a detail screen.
+ * Photos arrive named however the author saved them; document ids are authored
+ * slugs, so the mapping is spelled out below rather than derived — a near-miss
+ * filename should be a hard error, not a silently wrong hero. Each file is
+ * optimized with the same settings as the product image pipeline
+ * (IMAGE_OPTIMIZATION: 800x800 inside, progressive JPEG q85) — source PNGs run
+ * ~2 MB each, which would be a miserable payload for a list screen.
  *
- * Writes the resulting public URL to Firestore `foodGuide/{id}.imageUrl` AND
- * back into scripts/data/food-guide.json, so a later `seed-food-guide.ts` run
+ * Writes the resulting public URL to Firestore `articles/{id}.imageUrl` AND
+ * back into scripts/data/articles.json, so a later `seed-articles.ts` run
  * doesn't clobber it with null.
+ *
+ * ⚠️ FILE_TO_ARTICLE below starts EMPTY. Add one entry per photo before
+ * running, or every file is reported as unmapped.
  *
  * Usage:
  *   cd functions
- *   npx ts-node scripts/upload-food-guide-images.ts \
- *     --source="$HOME/Downloads/Images/guide aliments" --dry-run
+ *   npx ts-node scripts/upload-article-images.ts \
+ *     --source="$HOME/Downloads/article-images" --dry-run
  *
  * Firestore/Storage auth comes from GOOGLE_APPLICATION_CREDENTIALS or
  * `gcloud auth application-default login`.
@@ -32,14 +35,23 @@ const PROJECT_ID =
   process.env.GOOGLE_CLOUD_PROJECT ??
   "yucat-d8fb5";
 
-/** Source filename (without extension) → foodGuide document id. */
-const FILE_TO_ENTRY: Record<string, string> = {
-  "viande": "viandes",
-  "Poissons": "poissons",
-  "oeufs": "oeufs",
-  "Fruit et legume": "fruitslegumes",
-  "Produit letier": "laitiers",
-  "Aliments dangereux": "dangereux",
+/**
+ * Source filename (without extension) → article document id.
+ *
+ * Photos are named in French after the headline; ids are English slugs, so the
+ * mapping is spelled out rather than derived. Note the curly apostrophe in
+ * "l\u2019hydratation" — it is U+2019, not U+0027.
+ */
+const FILE_TO_ARTICLE: Record<string, string> = {
+  "Pourquoi les chats boivent-ils si peu ?": "why-cats-drink-little",
+  "Pourquoi l\u2019hydratation est essentielle": "why-hydration-matters",
+  "Comment bien choisir ses croquettes": "choosing-dry-food",
+  "Reconnaître les signes de stress chez le chat": "signs-of-stress",
+  "Pourquoi le chat est un carnivore strict": "obligate-carnivore",
+  "La taurine, un nutriment que le chat ne fabrique pas": "taurine-essential",
+  "Portions et surpoids - ce qui compte vraiment": "portion-control",
+  "Changer d'alimentation sans troubles digestifs": "food-transition",
+  "L'alimentation du chat âgé": "senior-cat-nutrition",
 };
 
 const args = process.argv.slice(2);
@@ -56,8 +68,8 @@ if (!SOURCE_DIR) {
   process.exit(1);
 }
 
-const DATA_PATH = path.join(__dirname, "data", "food-guide.json");
-const STORAGE_FOLDER = "foodGuide/";
+const DATA_PATH = path.join(__dirname, "data", "articles.json");
+const STORAGE_FOLDER = "articles/";
 
 async function main() {
   admin.initializeApp({
@@ -75,44 +87,48 @@ async function main() {
     .readdirSync(SOURCE_DIR!, {withFileTypes: true})
     .filter((e) => e.isFile() && !e.name.startsWith("."))
     .map((e) => e.name);
-  const entries = JSON.parse(fs.readFileSync(DATA_PATH, "utf8")) as {
+  const articles = JSON.parse(fs.readFileSync(DATA_PATH, "utf8")) as {
     id: string;
     imageUrl: string | null;
   }[];
-  const knownIds = new Set(entries.map((r) => r.id));
+  const knownIds = new Set(articles.map((r) => r.id));
 
-  // 1. Resolve every file to an entry, refusing to guess.
-  const jobs: {file: string; entryId: string}[] = [];
+  // 1. Resolve every file to an article, refusing to guess.
+  const jobs: {file: string; articleId: string}[] = [];
   for (const file of files) {
     // macOS stores filenames decomposed (NFD); the literals above are
     // composed (NFC), so an accented stem would not match without this.
     const stem = path.parse(file).name.normalize("NFC");
-    const entryId = FILE_TO_ENTRY[stem];
-    if (!entryId) {
-      console.error(`  UNMAPPED FILE: "${file}" — add it to FILE_TO_ENTRY.`);
+    const articleId = FILE_TO_ARTICLE[stem];
+    if (!articleId) {
+      console.error(`  UNMAPPED FILE: "${file}" — add it to FILE_TO_ARTICLE.`);
       process.exit(1);
     }
-    if (!knownIds.has(entryId)) {
-      console.error(`  "${file}" maps to unknown entry "${entryId}".`);
+    if (!knownIds.has(articleId)) {
+      console.error(`  "${file}" maps to unknown article "${articleId}".`);
       process.exit(1);
     }
-    jobs.push({file, entryId});
+    jobs.push({file, articleId});
   }
 
-  const withoutImage = entries
+  const withoutImage = articles
     .map((r) => r.id)
-    .filter((id) => !jobs.some((j) => j.entryId === id));
+    .filter((id) => !jobs.some((j) => j.articleId === id));
   if (withoutImage.length > 0) {
     console.log(
       `No photo supplied for: ${withoutImage.join(", ")} ` +
-        "(they keep the emoji hero)."
+        "(they keep the tinted placeholder)."
     );
   }
 
   // 2. Optimize + upload.
-  const results: {entryId: string; url: string; before: number; after: number}[] =
-    [];
-  for (const {file, entryId} of jobs) {
+  const results: {
+    articleId: string;
+    url: string;
+    before: number;
+    after: number;
+  }[] = [];
+  for (const {file, articleId} of jobs) {
     const source = fs.readFileSync(path.join(SOURCE_DIR!, file));
     const optimized = await sharp(source)
       .resize({
@@ -124,12 +140,12 @@ async function main() {
       .jpeg({quality: IMAGE_OPTIMIZATION.JPEG_QUALITY, progressive: true})
       .toBuffer();
 
-    const fileName = `${STORAGE_FOLDER}${entryId}.jpeg`;
+    const fileName = `${STORAGE_FOLDER}${articleId}.jpeg`;
     const url =
       `https://storage.googleapis.com/${bucket.name}/${fileName}`;
 
     console.log(
-      `  ${entryId.padEnd(15)} ${(source.length / 1024).toFixed(0)} KB -> ` +
+      `  ${articleId.padEnd(24)} ${(source.length / 1024).toFixed(0)} KB -> ` +
         `${(optimized.length / 1024).toFixed(0)} KB   ${fileName}`
     );
 
@@ -137,13 +153,13 @@ async function main() {
       const storageFile = bucket.file(fileName);
       await storageFile.save(optimized, {
         contentType: "image/jpeg",
-        metadata: {metadata: {entryId}},
+        metadata: {metadata: {articleId}},
       });
       await storageFile.makePublic();
     }
 
     results.push({
-      entryId,
+      articleId,
       url,
       before: source.length,
       after: optimized.length,
@@ -159,7 +175,7 @@ async function main() {
   const batch = db.batch();
   for (const r of results) {
     batch.set(
-      db.collection("foodGuide").doc(r.entryId),
+      db.collection("articles").doc(r.articleId),
       {
         imageUrl: r.url,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -170,16 +186,16 @@ async function main() {
   await batch.commit();
   console.log(`\nLinked ${results.length} image(s) to Firestore.`);
 
-  const byId = new Map(results.map((r) => [r.entryId, r.url]));
-  for (const entry of entries) {
-    const url = byId.get(entry.id);
-    if (url) entry.imageUrl = url;
+  const byId = new Map(results.map((r) => [r.articleId, r.url]));
+  for (const article of articles) {
+    const url = byId.get(article.id);
+    if (url) article.imageUrl = url;
   }
-  fs.writeFileSync(DATA_PATH, `${JSON.stringify(entries, null, 2)}\n`);
-  console.log("Updated scripts/data/food-guide.json.");
+  fs.writeFileSync(DATA_PATH, `${JSON.stringify(articles, null, 2)}\n`);
+  console.log("Updated scripts/data/articles.json.");
 }
 
 main().catch((error) => {
-  console.error("upload-food-guide-images failed:", error);
+  console.error("upload-article-images failed:", error);
   process.exit(1);
 });

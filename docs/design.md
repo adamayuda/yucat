@@ -301,7 +301,7 @@ the two mapping tables in `lib/features/bottom_navigation_bar/bottom_nav_bar.dar
 Search and Cats are *not* tabs — Search is a pushed route reached from Home's search bar; Cats is
 reached from Profile (Home only offers the greeting card's "+ Add" tile). All three tabs use `pageBackground` — none of them paints its own; the Home tab used to carry a `DSGradients.homeBackground` wash, now removed in favour of the flat shell colour.
 
-**Home is a discovery surface.** Its `ListView` runs: read-only `SearchTextField` → `HomeNewsCard` →
+**Home is a discovery surface.** Every section below the search bar is Firestore-backed and owns its own bloc. Its `ListView` runs: read-only `SearchTextField` → `HomeNewsCard` →
 `FoodGuideSection` → `HomeRecipesSection` — both lanes Firestore-backed, each owning its own bloc, and the food guide's "See all" pushing `FoodGuideRoute` — then `HomeMissionCard` as a sign-off, with a
 uniform `DSDimens.sizeL` gap between sections. Card sections are wrapped in a `sizeL` `Padding`; the two
 **swimlanes are not** — they own an inner `ListView.separated(horizontal)` whose own

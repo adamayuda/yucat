@@ -1,0 +1,146 @@
+[
+  {
+    "id": "why-cats-drink-little",
+    "category": "health",
+    "readMinutes": 3,
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/why-cats-drink-little.jpeg",
+    "published": true,
+    "order": 10,
+    "title": "Why do cats drink so little?",
+    "excerpt": "Cats naturally have a low sense of thirst.",
+    "body": [
+      "Cats naturally have a weak sense of thirst, inherited from their desert ancestors, who drew most of their water from the prey they ate.",
+      "Insufficient hydration raises the risk of urinary stones and kidney problems, which are especially common in older cats.",
+      "Favouring wet food, placing several water bowls around the home and using a water fountain can all encourage a cat to drink more."
+    ]
+  },
+  {
+    "id": "why-hydration-matters",
+    "category": "health",
+    "readMinutes": 3,
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/why-hydration-matters.jpeg",
+    "published": true,
+    "order": 20,
+    "title": "Why hydration is essential",
+    "excerpt": "Water supports a cat's kidneys and urinary tract.",
+    "body": [
+      "Water plays a part in digestion, temperature regulation and the elimination of waste by the kidneys.",
+      "A cat fed exclusively on dry food rarely drinks enough to make up for the lack of moisture in its ration.",
+      "A clean bowl, kept away from the litter tray and from the food, is often better accepted by the cat."
+    ]
+  },
+  {
+    "id": "choosing-dry-food",
+    "category": "nutrition",
+    "readMinutes": 4,
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/choosing-dry-food.jpeg",
+    "published": true,
+    "order": 30,
+    "title": "How to choose the right dry food",
+    "excerpt": "The ingredient list tells you almost everything about a kibble.",
+    "body": [
+      "The ingredient list should always be read first: animal proteins must appear at the top of the list.",
+      "Avoid kibble containing large amounts of cereals or poorly identified animal by-products.",
+      "Match your choice of kibble to your cat's age, activity level and state of health."
+    ]
+  },
+  {
+    "id": "signs-of-stress",
+    "category": "behaviour",
+    "readMinutes": 5,
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/signs-of-stress.jpeg",
+    "published": true,
+    "order": 40,
+    "title": "Recognising the signs of stress in cats",
+    "excerpt": "Stress shows up in behaviour above all.",
+    "body": [
+      "A stressed cat may hide more, urinate outside the litter tray or groom itself excessively.",
+      "Changes in environment, the arrival of a new animal or noise are frequent triggers.",
+      "Providing safe retreats and respecting the cat's routine helps to lower its stress level."
+    ]
+  },
+  {
+    "id": "obligate-carnivore",
+    "category": "nutrition",
+    "readMinutes": 3,
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/obligate-carnivore.jpeg",
+    "published": true,
+    "order": 50,
+    "title": "Why the cat is an obligate carnivore",
+    "excerpt": "Its needs can only be met by animal tissue.",
+    "body": [
+      "Nutritionally, the cat is classified as an obligate carnivore: its metabolism creates requirements that can only be met by a diet containing animal tissue, in particular for taurine, arginine, arachidonic acid, vitamin A and vitamin D.",
+      "The cat has at least 45 essential nutrients, and its requirements for protein, taurine, vitamin A or niacin are higher than those of an omnivore.",
+      "It can digest some nutrients of plant origin, but a vegetarian diet cannot cover its needs.",
+      "Sources: Merck Veterinary Manual, Royal Canin Academy."
+    ]
+  },
+  {
+    "id": "taurine-essential",
+    "category": "nutrition",
+    "readMinutes": 3,
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/taurine-essential.jpeg",
+    "published": true,
+    "order": 60,
+    "title": "Taurine, a nutrient cats cannot make",
+    "excerpt": "An essential amino acid that has to come from food.",
+    "body": [
+      "Taurine is an essential amino acid for cats: it is involved in vision, heart muscle function, digestion, and the nervous, immune and reproductive systems.",
+      "Unlike most mammals, the cat synthesises very little of it and loses it continuously in the digestive tract through the conjugation of bile salts.",
+      "Meat, offal and fish are rich in it; cereals provide only marginal or insufficient amounts.",
+      "Since 1987, cat foods meeting AAFCO standards have been required to contain a minimum level.",
+      "Sources: dvm360, VCA Animal Hospitals, AAFCO."
+    ]
+  },
+  {
+    "id": "portion-control",
+    "category": "nutrition",
+    "readMinutes": 4,
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/portion-control.jpeg",
+    "published": true,
+    "order": 70,
+    "title": "Portions and excess weight: what really counts",
+    "excerpt": "Portion control is the key to calorie intake.",
+    "body": [
+      "Excess weight appears when a cat takes in more energy than it uses: portions that are too large, frequent treats, an indoor life, food left out free-choice.",
+      "In cats, obesity raises the risk of diabetes and hepatic lipidosis, and comes with a higher frequency of urinary and joint problems.",
+      "Portion control remains the main lever: weigh the ration, split it into measured meals, and count treats in the daily total.",
+      "Weight loss should be slow, around 0.5 to 2% of body weight per week, and monitored by a vet.",
+      "Sources: dvm360, VCA Animal Hospitals, Association for Pet Obesity Prevention."
+    ]
+  },
+  {
+    "id": "food-transition",
+    "category": "nutrition",
+    "readMinutes": 3,
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/food-transition.jpeg",
+    "published": true,
+    "order": 80,
+    "title": "Switching foods without digestive upset",
+    "excerpt": "A gradual transition over 7 to 10 days.",
+    "body": [
+      "An abrupt food change often causes vomiting, diarrhoea or refusal of the bowl: the gut flora and digestive enzymes need time to adapt.",
+      "The recommended transition spreads over 7 to 10 days, replacing about a quarter of the old food every two days.",
+      "Some cats that are sensitive, older, or have eaten the same food for years need 14 days or more.",
+      "A cat that stops eating for more than 24 hours should be seen promptly by a vet.",
+      "Sources: Purina Institute, PetMD, AAHA."
+    ]
+  },
+  {
+    "id": "senior-cat-nutrition",
+    "category": "health",
+    "readMinutes": 4,
+    "imageUrl": "https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/senior-cat-nutrition.jpeg",
+    "published": true,
+    "order": 90,
+    "title": "Feeding the senior cat",
+    "excerpt": "After 11 years, energy requirements rise again.",
+    "body": [
+      "Cats enter their mature phase around 7 years of age, and are considered senior from 10 to 11 years.",
+      "Their digestive capacity declines: roughly 30 to 40% of older cats digest fats and proteins less well. Energy requirements first fall, then rise again around 11 years.",
+      "Contrary to a widespread belief, a healthy older cat should not be restricted in protein: it protects its muscle mass.",
+      "Renal diets, restricted in protein and phosphorus, are reserved for cats diagnosed with chronic kidney disease.",
+      "Sources: AAHA/AAFP Feline Life Stage Guidelines, VCA Animal Hospitals."
+    ]
+  }
+]

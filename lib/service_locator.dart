@@ -98,6 +98,13 @@ import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/services/cat_tracking_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 import 'package:yucat/features/litter/data/mappers/litter_to_domain_mapper.dart';
+import 'package:yucat/features/articles/data/datasources/article_firestore_datasource.dart';
+import 'package:yucat/features/articles/data/mappers/article_document_mapper.dart';
+import 'package:yucat/features/articles/data/repositories/articles_repository_impl.dart';
+import 'package:yucat/features/articles/domain/repositories/articles_repository.dart';
+import 'package:yucat/features/articles/domain/usecases/get_articles_usecase.dart';
+import 'package:yucat/features/articles/presentation/bloc/articles_bloc.dart';
+import 'package:yucat/features/articles/presentation/mappers/article_entity_to_model_mapper.dart';
 import 'package:yucat/features/food_guide/data/datasources/food_guide_firestore_datasource.dart';
 import 'package:yucat/features/food_guide/data/mappers/food_guide_document_mapper.dart';
 import 'package:yucat/features/food_guide/data/repositories/food_guide_repository_impl.dart';
@@ -207,6 +214,9 @@ Future<void> _registerDataSources() async {
   sl.registerSingleton<FoodGuideFirestoreDataSource>(
     FoodGuideFirestoreDataSource(firestore: FirebaseFirestore.instance),
   );
+  sl.registerSingleton<ArticleFirestoreDataSource>(
+    ArticleFirestoreDataSource(firestore: FirebaseFirestore.instance),
+  );
 }
 
 Future<void> _registerMappers() async {
@@ -237,6 +247,12 @@ Future<void> _registerMappers() async {
   );
   sl.registerSingleton<FoodGuideDocumentMapper>(
     const FoodGuideDocumentMapperImpl(),
+  );
+  sl.registerSingleton<ArticleEntityToModelMapper>(
+    const ArticleEntityToModelMapper(),
+  );
+  sl.registerSingleton<ArticleDocumentMapper>(
+    const ArticleDocumentMapperImpl(),
   );
 }
 
@@ -304,6 +320,12 @@ Future<void> _registerRepositories() async {
     FoodGuideRepositoryImpl(
       dataSource: sl<FoodGuideFirestoreDataSource>(),
       mapper: sl<FoodGuideDocumentMapper>(),
+    ),
+  );
+  sl.registerSingleton<ArticlesRepository>(
+    ArticlesRepositoryImpl(
+      dataSource: sl<ArticleFirestoreDataSource>(),
+      mapper: sl<ArticleDocumentMapper>(),
     ),
   );
 }
@@ -422,6 +444,9 @@ Future<void> _registerUseCases() async {
   );
   sl.registerSingleton<GetFoodGuideUsecase>(
     GetFoodGuideUsecase(repository: sl<FoodGuideRepository>()),
+  );
+  sl.registerSingleton<GetArticlesUsecase>(
+    GetArticlesUsecase(repository: sl<ArticlesRepository>()),
   );
 }
 
@@ -613,6 +638,14 @@ Future<void> _registerBlocs() async {
     () => FoodGuideBloc(
       getFoodGuideUsecase: sl<GetFoodGuideUsecase>(),
       mapper: sl<FoodGuideEntityToModelMapper>(),
+    ),
+  );
+  // Also absent from main.dart's MultiBlocProvider: Home's news card is the
+  // only consumer today and owns its instance.
+  sl.registerBloc<ArticlesBloc>(
+    () => ArticlesBloc(
+      getArticlesUsecase: sl<GetArticlesUsecase>(),
+      mapper: sl<ArticleEntityToModelMapper>(),
     ),
   );
 }

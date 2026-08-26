@@ -1216,14 +1216,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeNewsEyebrow => 'À savoir aujourd\'hui';
 
   @override
-  String get homeNewsTitle => 'Pourquoi les chats boivent-ils si peu ?';
-
-  @override
-  String get homeNewsBody =>
-      'Le chat possède naturellement une faible sensation de soif.';
-
-  @override
   String get homeNewsLearnMore => 'En savoir plus';
+
+  @override
+  String get articlesCategoryAll => 'Tous';
+
+  @override
+  String get articlesCategoryNutrition => 'Alimentation';
+
+  @override
+  String get articlesCategoryHealth => 'Santé';
+
+  @override
+  String get articlesCategoryBehaviour => 'Comportement';
+
+  @override
+  String get articlesCategoryOther => 'Autre';
 
   @override
   String get homeFoodGuideTitle => 'Guide des aliments';

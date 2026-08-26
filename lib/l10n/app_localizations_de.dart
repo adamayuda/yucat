@@ -1217,14 +1217,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeNewsEyebrow => 'Heute gut zu wissen';
 
   @override
-  String get homeNewsTitle => 'Warum trinken Katzen so wenig?';
-
-  @override
-  String get homeNewsBody =>
-      'Katzen haben von Natur aus ein schwaches Durstgefühl.';
-
-  @override
   String get homeNewsLearnMore => 'Mehr erfahren';
+
+  @override
+  String get articlesCategoryAll => 'Alle';
+
+  @override
+  String get articlesCategoryNutrition => 'Ernährung';
+
+  @override
+  String get articlesCategoryHealth => 'Gesundheit';
+
+  @override
+  String get articlesCategoryBehaviour => 'Verhalten';
+
+  @override
+  String get articlesCategoryOther => 'Sonstiges';
 
   @override
   String get homeFoodGuideTitle => 'Futter-Guide';

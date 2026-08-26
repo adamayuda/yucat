@@ -66,7 +66,12 @@ async function main() {
   const bucket = admin.storage().bucket(config.storage.bucketName);
   const db = admin.firestore();
 
-  const files = fs.readdirSync(SOURCE_DIR!).filter((f) => !f.startsWith("."));
+  // Files only: unzipping a macOS archive leaves a "__MACOSX" directory
+  // beside the photos, and an unmapped *directory* would hard-error below.
+  const files = fs
+    .readdirSync(SOURCE_DIR!, {withFileTypes: true})
+    .filter((e) => e.isFile() && !e.name.startsWith("."))
+    .map((e) => e.name);
   const recipes = JSON.parse(fs.readFileSync(DATA_PATH, "utf8")) as {
     id: string;
     imageUrl: string | null;

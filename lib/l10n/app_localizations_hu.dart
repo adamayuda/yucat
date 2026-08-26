@@ -1207,14 +1207,22 @@ class AppLocalizationsHu extends AppLocalizations {
   String get homeNewsEyebrow => 'Jó ma tudni';
 
   @override
-  String get homeNewsTitle => 'Miért isznak a macskák ilyen keveset?';
-
-  @override
-  String get homeNewsBody =>
-      'A macskának természeténél fogva gyenge a szomjúságérzete.';
-
-  @override
   String get homeNewsLearnMore => 'Tudj meg többet';
+
+  @override
+  String get articlesCategoryAll => 'Összes';
+
+  @override
+  String get articlesCategoryNutrition => 'Táplálkozás';
+
+  @override
+  String get articlesCategoryHealth => 'Egészség';
+
+  @override
+  String get articlesCategoryBehaviour => 'Viselkedés';
+
+  @override
+  String get articlesCategoryOther => 'Egyéb';
 
   @override
   String get homeFoodGuideTitle => 'Táplálkozási útmutató';

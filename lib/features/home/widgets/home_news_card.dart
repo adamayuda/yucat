@@ -1,17 +1,85 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/articles/presentation/bloc/articles_bloc.dart';
+import 'package:yucat/features/articles/presentation/models/article_display_model.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
+import 'package:yucat/presentation/components/ds_shimmer.dart';
+import 'package:yucat/service_locator.dart';
 
 /// The daily "good to know" card on Home: a blue eyebrow, a headline, a short
-/// body, a square thumbnail and a "Learn more" link.
+/// excerpt, a square thumbnail and a "Learn more" link.
 ///
-/// Content is a single hardcoded item for now — there is no article store and
-/// no destination screen, so the link is deliberately inert.
-class HomeNewsCard extends StatelessWidget {
+/// Shows the **first** article in authored order — which article that is comes
+/// from the `order` field in the seed data, not from anything computed here.
+class HomeNewsCard extends StatefulWidget {
   const HomeNewsCard({super.key});
+
+  @override
+  State<HomeNewsCard> createState() => _HomeNewsCardState();
+}
+
+class _HomeNewsCardState extends State<HomeNewsCard> {
+  late ArticlesBloc _bloc;
+  String? _language;
+
+  @override
+  void initState() {
+    super.initState();
+    // A fresh factory instance — `ArticlesBloc` is deliberately absent from
+    // main.dart's MultiBlocProvider, because this card is its only consumer
+    // today. The repository memoizes per language, so remounting costs no
+    // round-trip.
+    _bloc = sl<ArticlesBloc>();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // App language (not the device locale) — the locale the app actually
+    // resolved to, so an unsupported device language correctly asks for
+    // English. Read here rather than in initState because Localizations needs
+    // a settled context.
+    final language = Localizations.localeOf(context).languageCode;
+    if (language == _language) return;
+    _language = language;
+    _bloc.add(ArticlesInitialEvent(language: language));
+  }
+
+  @override
+  void dispose() {
+    // This instance is ours, so closing it is required.
+    _bloc.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ArticlesBloc, ArticlesState>(
+      bloc: _bloc,
+      builder: (context, state) {
+        // Home is a discovery surface: a card that failed or has nothing to
+        // show removes itself rather than shouting.
+        if (state is ArticlesErrorState) return const SizedBox.shrink();
+        if (state is ArticlesLoadedState) {
+          // `all`, never `visible` — the list screen's filters must not reach
+          // the Home card.
+          if (state.all.isEmpty) return const SizedBox.shrink();
+          return _NewsCardBody(article: state.all.first);
+        }
+        return const _NewsCardShimmer();
+      },
+    );
+  }
+}
+
+class _NewsCardBody extends StatelessWidget {
+  final ArticleDisplayModel article;
+
+  const _NewsCardBody({required this.article});
 
   @override
   Widget build(BuildContext context) {
@@ -65,14 +133,14 @@ class HomeNewsCard extends StatelessWidget {
                       ),
                       const SizedBox(height: DSDimens.sizeXs),
                       Text(
-                        l10n.homeNewsTitle,
+                        article.title,
                         style: DSTextStyles.headlineMd,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: DSDimens.sizeXxs),
                       Text(
-                        l10n.homeNewsBody,
+                        article.excerpt,
                         style: DSTextStyles.bodyLg.copyWith(
                           color: DSColors.inkSecondary,
                         ),
@@ -83,7 +151,7 @@ class HomeNewsCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: DSDimens.sizeS),
-                const _NewsThumb(),
+                _NewsThumb(imageUrl: article.imageUrl),
               ],
             ),
           ),
@@ -91,7 +159,7 @@ class HomeNewsCard extends StatelessWidget {
           DSTextLink(
             label: l10n.homeNewsLearnMore,
             trailingIcon: Icons.arrow_forward_rounded,
-            // TODO(home): point at the article screen once one exists.
+            // TODO(articles): push ArticleDetailRoute once that screen exists.
             onPressed: () {},
           ),
         ],
@@ -100,15 +168,18 @@ class HomeNewsCard extends StatelessWidget {
   }
 }
 
-/// Placeholder for the article photo — an emoji on a tinted square. Swapping
-/// in a real image is a one-widget change once articles carry one.
 class _NewsThumb extends StatelessWidget {
-  const _NewsThumb();
+  final String? imageUrl;
+
+  const _NewsThumb({required this.imageUrl});
 
   static const double _size = 88;
 
   @override
   Widget build(BuildContext context) {
+    // Check for a URL first so an article with no photo never starts a network
+    // request; the tint sits behind the image so there's no white flash.
+    final hasImage = imageUrl != null && imageUrl!.isNotEmpty;
     return Container(
       width: _size,
       height: _size,
@@ -116,9 +187,73 @@ class _NewsThumb extends StatelessWidget {
         color: DSColors.tintLavender,
         borderRadius: BorderRadius.circular(DSRadii.lg),
       ),
+      clipBehavior: Clip.antiAlias,
       alignment: Alignment.center,
-      child: const ExcludeSemantics(
-        child: Text('🐱', style: TextStyle(fontSize: 40)),
+      child: hasImage
+          ? Image.network(
+              imageUrl!,
+              fit: BoxFit.cover,
+              width: _size,
+              height: _size,
+              errorBuilder: (_, __, ___) => const _ThumbPlaceholder(),
+            )
+          : const _ThumbPlaceholder(),
+    );
+  }
+}
+
+class _ThumbPlaceholder extends StatelessWidget {
+  const _ThumbPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const ExcludeSemantics(
+      child: Text('🐱', style: TextStyle(fontSize: 40)),
+    );
+  }
+}
+
+/// Card silhouette while the catalogue loads — the same shape as
+/// `home_skeleton.dart`'s `_NewsCardBone`, which covers the earlier window
+/// before `HomeDashboardPage` mounts at all.
+class _NewsCardShimmer extends StatelessWidget {
+  const _NewsCardShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return DSCard(
+      padding: const EdgeInsets.all(DSDimens.sizeL),
+      child: DSShimmer(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  FractionallySizedBox(
+                    widthFactor: 0.55,
+                    child: ShimmerBone(height: 12, radius: DSRadii.sm),
+                  ),
+                  SizedBox(height: DSDimens.sizeS),
+                  ShimmerBone(height: 20, radius: DSRadii.sm),
+                  SizedBox(height: DSDimens.sizeXxs),
+                  FractionallySizedBox(
+                    widthFactor: 0.8,
+                    child: ShimmerBone(height: 20, radius: DSRadii.sm),
+                  ),
+                  SizedBox(height: DSDimens.sizeXs),
+                  FractionallySizedBox(
+                    widthFactor: 0.65,
+                    child: ShimmerBone(height: 13, radius: DSRadii.sm),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: DSDimens.sizeS),
+            const ShimmerBone(width: 88, height: 88, radius: DSRadii.lg),
+          ],
+        ),
       ),
     );
   }
