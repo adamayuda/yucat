@@ -59,7 +59,11 @@ class ProofChartScreen extends StatelessWidget {
                   vertical: DSDimens.sizeS,
                 ),
                 decoration: BoxDecoration(
-                  color: DSColors.tintMintSoft,
+                  // A soft tint one step deeper than the page, mirroring how
+                  // `nutrition_fact_screen` sits `tintBlueSoft` on
+                  // `tintSkyBright`. Replaced a mint fill — the screen's last
+                  // green — and deliberately not white, which read as a card.
+                  color: DSColors.tintLavender,
                   borderRadius: BorderRadius.circular(DSRadii.lg),
                 ),
                 child: Row(

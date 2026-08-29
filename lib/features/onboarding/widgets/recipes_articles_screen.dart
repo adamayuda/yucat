@@ -37,16 +37,31 @@ class RecipesArticlesScreen extends StatelessWidget {
               // Dissolves the tiles into the page at the boundaries instead of
               // cutting them on a hard line — more load-bearing now that the
               // collage scrolls and tiles genuinely straddle the edge.
+              //
+              // The ramp is quadratic (alpha ≈ t²), not linear, and spans 22%
+              // rather than 14%. A linear 14% band reached alpha 0.71 by a
+              // tenth of the height, which left a half-visible photo reading as
+              // a pale rounded rectangle against `tintCloud` — three of those
+              // side by side looked like a line across the top of the collage.
               shaderCallback: (bounds) => const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.transparent,
-                  Colors.black,
-                  Colors.black,
-                  Colors.transparent,
+                  Color(0x00000000),
+                  Color(0x10000000),
+                  Color(0x40000000),
+                  Color(0x90000000),
+                  Color(0xFF000000),
+                  Color(0xFF000000),
+                  Color(0x90000000),
+                  Color(0x40000000),
+                  Color(0x10000000),
+                  Color(0x00000000),
                 ],
-                stops: [0, 0.14, 0.86, 1],
+                stops: [
+                  0, 0.055, 0.11, 0.165, 0.22,
+                  0.78, 0.835, 0.89, 0.945, 1,
+                ],
               ).createShader(bounds),
               blendMode: BlendMode.dstIn,
               child: RecipesMarquee(active: active),
