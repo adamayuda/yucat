@@ -348,6 +348,13 @@ class AppLocalizationsHu extends AppLocalizations {
       'Irányítsd a kamerádat bármely\nmacskaeledel csomagolására és kapj értékelést';
 
   @override
+  String get onboardingRecipesTitle => 'Receptek és cikkek\na macskádnak';
+
+  @override
+  String get onboardingRecipesSubtitle =>
+      'Házi receptek a profiljához igazítva,\nés cikkek, hogy jobban megértsd.';
+
+  @override
   String get onboardingProfileIntroTitle => 'Hozzuk létre\na macskád profilját';
 
   @override
@@ -552,47 +559,42 @@ class AppLocalizationsHu extends AppLocalizations {
   String get paywallEverythingYouGet => 'Mindent megkapsz';
 
   @override
-  String get paywallFeatureIngredientScannerTitle => 'Összetevő-szkenner';
-
-  @override
-  String get paywallFeatureIngredientScannerBenefit =>
-      'Szkennelj bármilyen címkét másodpercek alatt';
-
-  @override
   String get paywallFeaturePersonalizedVerdictsTitle =>
       'Személyre szabott értékelések';
 
   @override
   String get paywallFeaturePersonalizedVerdictsBenefit =>
-      'Igazítva a macskád korához, fajtájához és egészségéhez';
+      'Kora és egészsége szerint';
 
   @override
   String get paywallFeatureUnlimitedScansTitle => 'Korlátlan szkennelés';
 
   @override
-  String get paywallFeatureUnlimitedScansBenefit => 'Soha nincs napi korlát';
-
-  @override
-  String get paywallFeatureReformulationAlertsTitle =>
-      'Receptúraváltozás-értesítők';
-
-  @override
-  String get paywallFeatureReformulationAlertsBenefit =>
-      'Azonnal tudj róla, ha megváltozik egy receptúra';
-
-  @override
-  String get paywallFeatureSavedFoodsTitle => 'Mentett ételek és előzmények';
-
-  @override
-  String get paywallFeatureSavedFoodsBenefit =>
-      'Minden átvizsgált étel egy helyen';
+  String get paywallFeatureUnlimitedScansBenefit => 'Nincs napi limit';
 
   @override
   String get paywallFeatureMultiCatTitle => 'Több macska profilja';
 
   @override
-  String get paywallFeatureMultiCatBenefit =>
-      'Személyre szabott profil minden macskádnak';
+  String get paywallFeatureMultiCatBenefit => 'Macskánként egy profil';
+
+  @override
+  String get paywallFeatureRecipesTitle => 'Az összes recept';
+
+  @override
+  String get paywallFeatureRecipesBenefit => 'A profiljára szűrve';
+
+  @override
+  String get paywallFeatureArticlesTitle => 'Az összes cikk';
+
+  @override
+  String get paywallFeatureArticlesBenefit => 'Táplálás, egészség, viselkedés';
+
+  @override
+  String get paywallFeatureFoodGuideTitle => 'Az élelmiszer-útmutató';
+
+  @override
+  String get paywallFeatureFoodGuideBenefit => 'Mit ehet és mit nem';
 
   @override
   String get paywallSuccessStoriesHeading => 'Sikertörténetek\nmacskaszülőktől';

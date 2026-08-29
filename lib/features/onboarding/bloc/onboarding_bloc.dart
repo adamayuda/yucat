@@ -45,6 +45,9 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     on<OnBoardingInitialEvent>(_onOnBoardingInitialEvent);
     on<OnBoardingGetStartedEvent>(_onOnBoardingGetStartedEvent);
     on<OnBoardingBackToWelcomeEvent>(_onOnBoardingBackToWelcomeEvent);
+    // Parked: nothing dispatches these since the attribution screen was
+    // unrouted from phase 2. Kept wired so reviving it is a one-case change
+    // in onboarding_page.dart — see widgets/attribution_screen.dart.
     on<OnBoardingAttributionSelectedEvent>(_onOnBoardingAttributionSelectedEvent);
     on<OnBoardingAttributionSkippedEvent>(_onOnBoardingAttributionSkippedEvent);
     on<OnBoardingAdvancePhaseEvent>(_onOnBoardingAdvancePhaseEvent);
@@ -170,7 +173,8 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
   ) {
     final current = _readyState();
     final next = switch (current.phase) {
-      OnBoardingPhase.scanDemo => OnBoardingPhase.attribution,
+      OnBoardingPhase.scanDemo => OnBoardingPhase.recipesArticles,
+      OnBoardingPhase.recipesArticles => OnBoardingPhase.proofChart,
       OnBoardingPhase.proofChart => OnBoardingPhase.whyYucat,
       OnBoardingPhase.whyYucat => OnBoardingPhase.nutritionFact,
       OnBoardingPhase.nutritionFact => OnBoardingPhase.profileIntro,
@@ -195,8 +199,8 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     final current = _readyState();
     final prev = switch (current.phase) {
       OnBoardingPhase.scanDemo => OnBoardingPhase.welcome,
-      OnBoardingPhase.attribution => OnBoardingPhase.scanDemo,
-      OnBoardingPhase.proofChart => OnBoardingPhase.attribution,
+      OnBoardingPhase.recipesArticles => OnBoardingPhase.scanDemo,
+      OnBoardingPhase.proofChart => OnBoardingPhase.recipesArticles,
       OnBoardingPhase.whyYucat => OnBoardingPhase.proofChart,
       OnBoardingPhase.nutritionFact => OnBoardingPhase.whyYucat,
       OnBoardingPhase.profileIntro => OnBoardingPhase.nutritionFact,

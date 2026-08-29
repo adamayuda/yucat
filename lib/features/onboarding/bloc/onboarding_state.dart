@@ -3,7 +3,10 @@ part of 'onboarding_bloc.dart';
 enum OnBoardingPhase {
   welcome,
   scanDemo,
-  attribution,
+  // Was `attribution` ("How did you hear about us?"). The screen is parked in
+  // widgets/attribution_screen.dart — the slot, and so every `step_index`
+  // after it, is unchanged; only `step_name` at index 2 differs.
+  recipesArticles,
   proofChart,
   whyYucat,
   nutritionFact,

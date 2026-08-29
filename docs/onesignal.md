@@ -62,7 +62,7 @@ Permission is requested at the onboarding **`reminders`** screen, which is
 `OnBoardingPhase` index **10 of 12**:
 
 ```
-0 welcome   1 scanDemo   2 attribution   3 proofChart   4 whyYucat   5 nutritionFact
+0 welcome   1 scanDemo   2 recipesArticles   3 proofChart   4 whyYucat   5 nutritionFact
 6 profileIntro   7 profileName   8 rating   9 notifPrimer   10 reminders   11 healthIntro
 ```
 

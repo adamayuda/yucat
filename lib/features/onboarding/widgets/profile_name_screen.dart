@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,19 +6,6 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 import 'package:yucat/presentation/components/onboarding_scaffold.dart';
-
-const _suggestedNames = [
-  'Mochi',
-  'Miso',
-  'Toro',
-  'Pickle',
-  'Luna',
-  'Whiskers',
-  'Biscuit',
-  'Pumpkin',
-  'Oreo',
-  'Cleo',
-];
 
 class ProfileNameScreen extends StatefulWidget {
   final String? initialName;
@@ -44,7 +30,6 @@ class ProfileNameScreen extends StatefulWidget {
 class _ProfileNameScreenState extends State<ProfileNameScreen> {
   late final TextEditingController _controller;
   final _focusNode = FocusNode();
-  final _random = Random();
 
   Timer? _keyboardTimer;
 
@@ -93,14 +78,6 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
     super.dispose();
   }
 
-  void _randomize() {
-    final name = _suggestedNames[_random.nextInt(_suggestedNames.length)];
-    _controller.text = name;
-    _controller.selection = TextSelection.fromPosition(
-      TextPosition(offset: name.length),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -108,20 +85,14 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
 
     return OnboardingScaffold(
       background: DSColors.tintAsh,
-      footer: Row(
-        children: [
-          _SuggestButton(onTap: _randomize),
-          const Spacer(),
-          DSPillButton(
-            label: l10n.commonNext,
-            onPressed: hasName
-                ? () {
-                    FocusScope.of(context).unfocus();
-                    widget.onNext(_controller.text.trim());
-                  }
-                : null,
-          ),
-        ],
+      footer: DSPillButton(
+        label: l10n.commonNext,
+        onPressed: hasName
+            ? () {
+                FocusScope.of(context).unfocus();
+                widget.onNext(_controller.text.trim());
+              }
+            : null,
       ),
       child: Stack(
         clipBehavior: Clip.none,
@@ -167,35 +138,6 @@ class _ProfileNameScreenState extends State<ProfileNameScreen> {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SuggestButton extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _SuggestButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: DSColors.surfaceCardDim,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: SizedBox(
-          width: 48,
-          height: 48,
-          child: Center(
-            child: SvgPicture.asset(
-              'assets/images/Games.svg',
-              width: 26,
-              height: 26,
-            ),
-          ),
-        ),
       ),
     );
   }

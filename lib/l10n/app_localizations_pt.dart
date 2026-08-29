@@ -349,6 +349,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Aponte a câmara para qualquer\nalimento para gatos e obtenha um veredito';
 
   @override
+  String get onboardingRecipesTitle => 'Receitas e artigos\npara o seu gato';
+
+  @override
+  String get onboardingRecipesSubtitle =>
+      'Receitas caseiras adaptadas ao perfil dele,\ne artigos para o compreender melhor.';
+
+  @override
   String get onboardingProfileIntroTitle =>
       'Vamos configurar\no perfil do seu gato';
 
@@ -555,48 +562,42 @@ class AppLocalizationsPt extends AppLocalizations {
   String get paywallEverythingYouGet => 'Tudo o que recebe';
 
   @override
-  String get paywallFeatureIngredientScannerTitle => 'Scanner de ingredientes';
-
-  @override
-  String get paywallFeatureIngredientScannerBenefit =>
-      'Digitalize qualquer rótulo em segundos';
-
-  @override
   String get paywallFeaturePersonalizedVerdictsTitle =>
       'Vereditos personalizados';
 
   @override
   String get paywallFeaturePersonalizedVerdictsBenefit =>
-      'À medida da idade, raça e saúde do seu gato';
+      'Consoante a idade e a saúde';
 
   @override
   String get paywallFeatureUnlimitedScansTitle => 'Digitalizações ilimitadas';
 
   @override
-  String get paywallFeatureUnlimitedScansBenefit =>
-      'Sem limites diários, nunca';
-
-  @override
-  String get paywallFeatureReformulationAlertsTitle =>
-      'Alertas de reformulação';
-
-  @override
-  String get paywallFeatureReformulationAlertsBenefit =>
-      'Saiba assim que uma receita muda';
-
-  @override
-  String get paywallFeatureSavedFoodsTitle => 'Alimentos guardados e histórico';
-
-  @override
-  String get paywallFeatureSavedFoodsBenefit =>
-      'Cada alimento que verificou, num só lugar';
+  String get paywallFeatureUnlimitedScansBenefit => 'Sem limite diário';
 
   @override
   String get paywallFeatureMultiCatTitle => 'Perfis para vários gatos';
 
   @override
-  String get paywallFeatureMultiCatBenefit =>
-      'Um perfil personalizado para cada um dos seus gatos';
+  String get paywallFeatureMultiCatBenefit => 'Um perfil por gato';
+
+  @override
+  String get paywallFeatureRecipesTitle => 'Todas as receitas';
+
+  @override
+  String get paywallFeatureRecipesBenefit => 'Filtradas para o perfil dele';
+
+  @override
+  String get paywallFeatureArticlesTitle => 'Todos os artigos';
+
+  @override
+  String get paywallFeatureArticlesBenefit => 'Nutrição, saúde, comportamento';
+
+  @override
+  String get paywallFeatureFoodGuideTitle => 'O guia alimentar';
+
+  @override
+  String get paywallFeatureFoodGuideBenefit => 'O que pode comer e o que não';
 
   @override
   String get paywallSuccessStoriesHeading =>

@@ -91,7 +91,7 @@ lib/features/paywall/
 └── widgets/
     ├── paywall_loaded_widget.dart hero, value props, CTA, disclosures, legal links
     ├── paywall_package_row.dart   the plan card — **not rendered** (see §11)
-    ├── paywall_value_props.dart   6 feature rows
+    ├── paywall_value_props.dart   6 feature cards in a 2×3 grid
     ├── paywall_testimonials.dart  carousel (placeholder testimonials)
     ├── paywall_skeleton.dart      shimmer while offerings load
     └── paywall_error_widget.dart  fatal load error + Try again
@@ -105,6 +105,40 @@ Related, outside the feature:
 | `lib/config/routes/router.dart` | `PaywallRoute` — `CustomRoute`, `/paywall`, `fullscreenDialog`, `opaque: false`, `slideBottom` |
 | `lib/main.dart` | `Purchases.configure`, app-level `BlocProvider(PaywallBloc)` |
 | ~~`test/features/paywall/trial_info_test.dart`~~ | **Removed.** There is no `test/` directory in the repo — see §9 |
+
+### The value-prop grid
+
+`paywall_value_props.dart` renders **six cards as three `IntrinsicHeight` rows of two**. Not a
+`Wrap` and not a `GridView`: a `Wrap` lets each child keep its own height, so a two-line benefit
+beside a one-line one leaves the pair visibly ragged, and a `GridView`'s fixed `childAspectRatio`
+would clip the longer German and French strings. `IntrinsicHeight` + `CrossAxisAlignment.stretch`
+sizes both cards in a row to the taller one, with no fixed height anywhere. Two media treatments:
+
+| Card | Media |
+|---|---|
+| Unlimited scans | `camera.svg` on `tintSky` |
+| Personalized verdicts | `Health.svg` on `tintMint` |
+| All the recipes | `paywall-recipe-{1,2}.jpg` |
+| All the articles | `paywall-article-{1,2}.jpg` |
+| The food guide | `paywall-guide-{1,2}.jpg` |
+| Multi-cat profiles | `cat-paw.svg` on `tintSand` |
+
+⚠️ **The six photos are bundled assets, not network images** — 168 px downscaled copies of the
+Storage originals under `recipes/`, `articles/` and `foodGuide/`, living in `assets/images/`
+(~72 KB total). The paywall makes **zero** network image requests and must render instantly, so
+don't "fix" this by pointing the cards at `imageUrl` from Firestore. The trade-off is that a
+re-shot recipe photo won't propagate here — re-download and re-commit when that happens.
+
+The cards are white-on-white with **no border** — `DSShadows.e2` is the only thing separating
+them from the page, which is why they use e2 rather than the e1 `_TestimonialCard` uses.
+
+⚠️ **`paywall_skeleton.dart` mirrors this grid** (six card bones in a 2-column `Wrap`; a fixed
+bone height is fine there since there's no text to size to). Change the card count or shape and
+the skeleton drifts — it already carried a stale plan-card bone once.
+
+The three benefits this replaced — **ingredient scanner**, **reformulation alerts** and
+**saved foods & history** — were dropped along with their ARB keys. Reformulation alerts in
+particular described a feature the app has never shipped.
 
 **Bloc lifetime gotcha:** `PaywallBloc` is registered as a *factory* in
 `service_locator.dart`, but `main.dart:140` wraps the app in a single
@@ -333,6 +367,10 @@ The app references **no product IDs** — only the entitlement above.
 51 `paywall*` keys across 6 locales (en/de/es/fr/hu/pt). `@key` metadata blocks
 live **only** in `app_en.arb`; other locales carry bare keys. Regenerate with
 `fvm flutter gen-l10n`.
+
+⚠️ The `paywallFeature*Benefit` strings are written for a **half-width card**, not a
+full-width row. Keep them short — the German and French ones are already the tallest
+cards in the grid, and `Wrap` sizes a whole row to its tallest member.
 
 Trial-related keys:
 

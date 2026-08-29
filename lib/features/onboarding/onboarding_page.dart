@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/onboarding/bloc/onboarding_bloc.dart';
-import 'package:yucat/features/onboarding/widgets/attribution_screen.dart';
 import 'package:yucat/features/onboarding/widgets/health_intro_screen.dart';
 import 'package:yucat/features/onboarding/widgets/notif_primer_screen.dart';
 import 'package:yucat/features/onboarding/widgets/nutrition_fact_screen.dart';
@@ -12,6 +11,7 @@ import 'package:yucat/features/onboarding/widgets/profile_intro_screen.dart';
 import 'package:yucat/features/onboarding/widgets/profile_name_screen.dart';
 import 'package:yucat/features/onboarding/widgets/proof_chart_screen.dart';
 import 'package:yucat/features/onboarding/widgets/rating_screen.dart';
+import 'package:yucat/features/onboarding/widgets/recipes_articles_screen.dart';
 import 'package:yucat/features/onboarding/widgets/reminders_screen.dart';
 import 'package:yucat/features/onboarding/widgets/scan_demo_screen.dart';
 import 'package:yucat/features/onboarding/widgets/welcome_screen.dart';
@@ -129,6 +129,8 @@ class _OnBoardingPage extends State<OnBoardingPage> {
   Widget _buildPhase(
     OnBoardingPhase phase,
     OnBoardingPhase currentPhase,
+    // Unused since the attribution screen was unrouted from phase 2. Kept
+    // threaded so reviving it is a one-case change — see attribution_screen.dart.
     String? selectedSource,
     String? seededName,
   ) {
@@ -141,12 +143,9 @@ class _OnBoardingPage extends State<OnBoardingPage> {
         return ScanDemoScreen(
           onNext: () => _bloc.add(const OnBoardingAdvancePhaseEvent()),
         );
-      case OnBoardingPhase.attribution:
-        return AttributionScreen(
-          initialSelection: selectedSource,
-          onSelect: (source) =>
-              _bloc.add(OnBoardingAttributionSelectedEvent(source)),
-          onSkip: () => _bloc.add(const OnBoardingAttributionSkippedEvent()),
+      case OnBoardingPhase.recipesArticles:
+        return RecipesArticlesScreen(
+          onNext: () => _bloc.add(const OnBoardingAdvancePhaseEvent()),
         );
       case OnBoardingPhase.proofChart:
         return ProofChartScreen(

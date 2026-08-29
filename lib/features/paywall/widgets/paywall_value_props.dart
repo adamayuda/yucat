@@ -1,44 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 
+/// The six things a subscription buys, as a 2-column card grid.
+///
+/// Two media treatments: the capability benefits get a tinted square with an
+/// icon, the content benefits (recipes / articles / food guide) get a pair of
+/// overlapping photos. Those photos are **bundled assets**, downscaled copies
+/// of the Storage originals — the paywall makes zero network image requests and
+/// must render instantly, so it doesn't read Firestore for them.
 class PaywallValueProps extends StatelessWidget {
   const PaywallValueProps({super.key});
 
   static List<_Feature> _features(AppLocalizations l10n) => [
     _Feature(
-      icon: Icons.document_scanner_outlined,
-      title: l10n.paywallFeatureIngredientScannerTitle,
-      benefit: l10n.paywallFeatureIngredientScannerBenefit,
-    ),
-    _Feature(
-      icon: Icons.favorite_rounded,
-      title: l10n.paywallFeaturePersonalizedVerdictsTitle,
-      benefit: l10n.paywallFeaturePersonalizedVerdictsBenefit,
-    ),
-    _Feature(
-      icon: Icons.all_inclusive_rounded,
+      media: const _IconMedia('assets/images/camera.svg', DSColors.tintSky),
       title: l10n.paywallFeatureUnlimitedScansTitle,
       benefit: l10n.paywallFeatureUnlimitedScansBenefit,
     ),
     _Feature(
-      icon: Icons.notifications_active_rounded,
-      title: l10n.paywallFeatureReformulationAlertsTitle,
-      benefit: l10n.paywallFeatureReformulationAlertsBenefit,
+      media: const _IconMedia('assets/images/Health.svg', DSColors.tintMint),
+      title: l10n.paywallFeaturePersonalizedVerdictsTitle,
+      benefit: l10n.paywallFeaturePersonalizedVerdictsBenefit,
     ),
     _Feature(
-      icon: Icons.bookmark_rounded,
-      title: l10n.paywallFeatureSavedFoodsTitle,
-      benefit: l10n.paywallFeatureSavedFoodsBenefit,
+      media: const _PhotoMedia([
+        'assets/images/paywall-recipe-1.jpg',
+        'assets/images/paywall-recipe-2.jpg',
+      ]),
+      title: l10n.paywallFeatureRecipesTitle,
+      benefit: l10n.paywallFeatureRecipesBenefit,
     ),
     _Feature(
-      icon: Icons.pets_rounded,
+      media: const _PhotoMedia([
+        'assets/images/paywall-article-1.jpg',
+        'assets/images/paywall-article-2.jpg',
+      ]),
+      title: l10n.paywallFeatureArticlesTitle,
+      benefit: l10n.paywallFeatureArticlesBenefit,
+    ),
+    _Feature(
+      media: const _PhotoMedia([
+        'assets/images/paywall-guide-1.jpg',
+        'assets/images/paywall-guide-2.jpg',
+      ]),
+      title: l10n.paywallFeatureFoodGuideTitle,
+      benefit: l10n.paywallFeatureFoodGuideBenefit,
+    ),
+    _Feature(
+      media: const _IconMedia('assets/images/cat-paw.svg', DSColors.tintSand),
       title: l10n.paywallFeatureMultiCatTitle,
       benefit: l10n.paywallFeatureMultiCatBenefit,
     ),
   ];
-
-  static const _tileSize = 36.0;
 
   @override
   Widget build(BuildContext context) {
@@ -55,14 +70,29 @@ class PaywallValueProps extends StatelessWidget {
           ),
         ),
         const SizedBox(height: DSDimens.sizeM),
-        for (var i = 0; i < features.length; i++) ...[
-          if (i > 0)
-            const Padding(
-              // Inset so the divider aligns under the text column, not the tile.
-              padding: EdgeInsets.only(left: _tileSize + DSDimens.sizeM),
-              child: Divider(height: 1, thickness: 1, color: DSColors.border),
+        // Rows of two rather than a Wrap or a GridView. A Wrap lets each child
+        // keep its own height, so a two-line benefit next to a one-line one
+        // leaves the pair ragged; IntrinsicHeight + stretch sizes both cards to
+        // the taller of the two. No fixed height, so the longer German and
+        // French strings just make a row taller.
+        for (var i = 0; i < features.length; i += 2) ...[
+          if (i > 0) const SizedBox(height: DSDimens.sizeS),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: _FeatureCard(feature: features[i])),
+                const SizedBox(width: DSDimens.sizeS),
+                // Empty half-slot if the list ever goes odd, so the last card
+                // keeps its column width instead of spanning the row.
+                Expanded(
+                  child: i + 1 < features.length
+                      ? _FeatureCard(feature: features[i + 1])
+                      : const SizedBox.shrink(),
+                ),
+              ],
             ),
-          _FeatureRow(feature: features[i]),
+          ),
         ],
       ],
     );
@@ -70,59 +100,123 @@ class PaywallValueProps extends StatelessWidget {
 }
 
 class _Feature {
-  final IconData icon;
+  final _Media media;
   final String title;
   final String benefit;
 
-  _Feature({
-    required this.icon,
+  const _Feature({
+    required this.media,
     required this.title,
     required this.benefit,
   });
 }
 
-class _FeatureRow extends StatelessWidget {
-  final _Feature feature;
+sealed class _Media extends StatelessWidget {
+  const _Media();
 
-  const _FeatureRow({required this.feature});
+  /// Every media variant occupies the same slot height so cards in a row line
+  /// their text up regardless of which treatment they use.
+  static const double size = 56;
+}
+
+class _IconMedia extends _Media {
+  final String asset;
+  final Color tint;
+
+  const _IconMedia(this.asset, this.tint);
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: DSDimens.sizeXs),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+    return Container(
+      width: _Media.size,
+      height: _Media.size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: tint,
+        borderRadius: BorderRadius.circular(DSRadii.md),
+      ),
+      child: SvgPicture.asset(asset, width: 28, height: 28),
+    );
+  }
+}
+
+class _PhotoMedia extends _Media {
+  final List<String> assets;
+
+  const _PhotoMedia(this.assets);
+
+  /// Leaves an 18px overlap between the two thumbnails.
+  static const double _step = 38;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: _Media.size,
+      width: _Media.size + (assets.length - 1) * _step,
+      child: Stack(
         children: [
-          Container(
-            width: PaywallValueProps._tileSize,
-            height: PaywallValueProps._tileSize,
-            decoration: BoxDecoration(
-              color: DSColors.paywallAccentSoft,
-              borderRadius: BorderRadius.circular(DSRadii.md),
+          for (var i = 0; i < assets.length; i++)
+            Positioned(
+              left: i * _step,
+              child: Container(
+                width: _Media.size,
+                height: _Media.size,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(DSRadii.md),
+                  // The ring is the page colour, so it reads as a gap between
+                  // the overlapping thumbnails rather than as a border.
+                  border: Border.all(color: DSColors.surfaceCard, width: 2),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(DSRadii.md - 2),
+                  child: Image.asset(
+                    assets[i],
+                    width: _Media.size - 4,
+                    height: _Media.size - 4,
+                    cacheWidth: 156,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
             ),
-            child: Icon(feature.icon, color: DSColors.paywallAccent, size: 18),
+        ],
+      ),
+    );
+  }
+}
+
+class _FeatureCard extends StatelessWidget {
+  final _Feature feature;
+
+  const _FeatureCard({required this.feature});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(DSDimens.sizeS),
+      decoration: BoxDecoration(
+        // No border — white card on a white page, so the elevation is the only
+        // thing separating it. e2 rather than e1 for that reason.
+        color: DSColors.surfaceCard,
+        borderRadius: BorderRadius.circular(DSRadii.lg),
+        boxShadow: DSShadows.e2,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          feature.media,
+          const SizedBox(height: DSDimens.sizeM),
+          Text(
+            feature.title,
+            style: DSTextStyles.bodyMd.copyWith(
+              color: DSColors.inkPrimary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          const SizedBox(width: DSDimens.sizeM),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  feature.title,
-                  style: DSTextStyles.bodyMd.copyWith(
-                    color: DSColors.inkPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: DSDimens.sizeXxxxs),
-                Text(
-                  feature.benefit,
-                  style: DSTextStyles.caption.copyWith(
-                    color: DSColors.inkSecondary,
-                  ),
-                ),
-              ],
-            ),
+          const SizedBox(height: DSDimens.sizeXxxxs),
+          Text(
+            feature.benefit,
+            style: DSTextStyles.caption.copyWith(color: DSColors.inkSecondary),
           ),
         ],
       ),

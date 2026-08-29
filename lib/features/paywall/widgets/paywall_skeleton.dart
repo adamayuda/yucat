@@ -3,7 +3,7 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/ds_shimmer.dart';
 
 /// Skeleton for the paywall load — mirrors `PaywallLoadedWidget` (full-bleed
-/// hero, one plan card, value props, laurel stats, fixed CTA) on the same white
+/// hero, the 2×3 value-prop card grid, laurel stats, fixed CTA) on the same white
 /// surface so there's no color flash when offerings resolve. The white
 /// background paints immediately; only the bones are deferred.
 class PaywallSkeleton extends StatelessWidget {
@@ -42,33 +42,28 @@ class PaywallSkeleton extends StatelessWidget {
                           radius: DSRadii.sm,
                         ),
                         const SizedBox(height: DSDimens.size3xl),
-                        // Single plan card.
-                        const ShimmerBone(height: 72, radius: DSRadii.xl),
-                        const SizedBox(height: DSDimens.size3xl),
-                        // Value props.
-                        for (var i = 0; i < 3; i++) ...[
-                          if (i > 0) const SizedBox(height: DSDimens.sizeS),
-                          Row(
-                            children: [
-                              const ShimmerBone(
-                                width: 24,
-                                height: 24,
-                                radius: DSRadii.sm,
-                              ),
-                              const SizedBox(width: DSDimens.sizeS),
-                              Expanded(
-                                child: FractionallySizedBox(
-                                  alignment: Alignment.centerLeft,
-                                  widthFactor: 0.7,
-                                  child: const ShimmerBone(
-                                    height: 14,
-                                    radius: DSRadii.sm,
+                        // Value props: a 2-column, 3-row card grid.
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            const gap = DSDimens.sizeS;
+                            final cardWidth =
+                                (constraints.maxWidth - gap) / 2;
+                            return Wrap(
+                              spacing: gap,
+                              runSpacing: gap,
+                              children: [
+                                for (var i = 0; i < 6; i++)
+                                  SizedBox(
+                                    width: cardWidth,
+                                    child: const ShimmerBone(
+                                      height: 148,
+                                      radius: DSRadii.lg,
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            );
+                          },
+                        ),
                         const SizedBox(height: DSDimens.size3xl),
                         // Laurel stats.
                         Row(

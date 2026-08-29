@@ -52,7 +52,8 @@ hide noise (e.g. Mixpanel's auto `$ae_*` events).
   `Product Detail Viewed`, `Paywall Shown`, `Paywall CTA Tapped`, `Subscription Completed`,
   `Subscription Purchase Failed`). Give each a one-line description.
 - **Profile Properties tab**: register the People properties from `analytics.md §1`
-  (`is_subscriber`, `cats_count`, `total_scans`, `attribution_source`, …) with types.
+  (`is_subscriber`, `cats_count`, `total_scans`, `attribution_source` — ⚠️ historical only,
+  see `analytics.md §1` — …) with types.
 - You can do this later — reports work without Lexicon — but it keeps the workspace clean.
 
 ---
@@ -75,7 +76,8 @@ down**, use the **"Breakdown"** control (top bar) → pick a property → applie
 4. Paywall Shown     filter: trigger = onboarding_complete
 5. Subscription Completed
 ```
-Breakdown by **`attribution_source`** to see which channel converts. The
+⚠️ Breakdown by **`attribution_source`** only splits users onboarded before the attribution
+screen was replaced; new users have no value. The
 `Onboarding Completed → Paywall Shown → Subscription Completed` legs are where you'll see the
 biggest drop. Save as **"A · Acquisition"**.
 
@@ -146,7 +148,7 @@ re-editing an existing cat (who jump to arbitrary steps and would pollute the cu
 ### Onboarding flow & drop-off — which screen, where they leave
 
 Built on the dedicated **`Onboarding Step Viewed`** event (fires once per onboarding screen with
-`step_index` 0–11 and a normalized `step_name`: `welcome, scanDemo, attribution, proofChart,
+`step_index` 0–11 and a normalized `step_name`: `welcome, scanDemo, recipesArticles, proofChart,
 whyYucat, nutritionFact, profileIntro, profileName, rating, notifPrimer, reminders,
 healthIntro`). Three complementary views — start with the first:
 
@@ -186,7 +188,7 @@ Filtering the wizard half on `step_index = 0` returns 0% — use `1→11`.
 |26|`Subscription Completed`|`trigger` = `onboarding_complete`|`26 Subscribed` |
 
 Onboarding step→label and wizard step→label:
-`1 welcome · 2 scanDemo · 3 attribution · 4 proofChart · 5 whyYucat · 6 nutritionFact ·
+`1 welcome · 2 scanDemo · 3 recipesArticles · 4 proofChart · 5 whyYucat · 6 nutritionFact ·
 7 profileIntro · 8 profileName · 9 rating · 10 notifPrimer · 11 reminders · 12 healthIntro` /
 `13 Gender · 14 ProfilePhoto · 15 Age · 16 BodyCondition · 17 Activity · 18 WaterIntakeFact ·
 19 NeuteredStatus · 20 Coat · 21 CoatFact · 22 HealthConditions · 23 Breed`.
@@ -214,7 +216,7 @@ then in any report use the **filter → "Cohort"** to scope it.
 | **Activated** | `has_cat` = true **AND** `total_scans` ≥ 1 |
 | **Power users** | `total_scans` ≥ 10 |
 | **Stalled (onboarded, not paying)** | `onboarding_completed` = true **AND** `is_subscriber` = false |
-| **By channel** | one cohort per `attribution_source` value, or just break funnels down by it |
+| **By channel** | one cohort per `attribution_source` value, or just break funnels down by it. ⚠️ Historical users only — the attribution screen was replaced |
 
 Use **Stalled** as a remarketing audience and as a funnel filter to study why they didn't convert.
 

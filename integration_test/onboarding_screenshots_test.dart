@@ -120,10 +120,8 @@ void main() {
       await shot('04-onboarding-value-carousel-3');
       await tapPill('Continue');
 
-      await shot('05-onboarding-attribution');
-      await tester.tap(find.text('Instagram'));
-      await idle();
-      await tapPill('Next'); // footer label flips from "Skip" once selected
+      await shot('05-onboarding-recipes-articles');
+      await tapPill('Next');
 
       await shot('07-onboarding-social-proof');
       await tapPill('Next');

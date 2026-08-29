@@ -245,7 +245,7 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | `OnboardingScaffold` | `onboarding_scaffold.dart` | Tinted bg + optional back chip + content + footer slot. Onboarding A–D screens. |
 | `WizardStepShell` | `wizard_step_shell.dart` | Top nav (× back + progress bar) + content + sticky CTA. Modes: bottom-anchored (default) or `floatingNext` overlay. Optional `altCtaLabel` ("None of these" on HealthConditions). |
 | `DSPillButton` | `ds_pill_button.dart` | Black-pill primary CTA with chevron. Variants: `primary` (black/inkInverse), `secondary` (white/inkPrimary), `danger` (`accentDanger`/inkInverse, for destructive CTAs). Props: `loading`, `leadingIcon`, `showChevron`, `verticalPadding`. Companion: `DSTextLink` for inline text actions — `accentInfo` blue, optional `trailingIcon`. |
-| `OnboardingFloatingButton` | `onboarding_floating_button.dart` | Wraps `DSPillButton` with a consistent bottom margin. Placed as the LAST child of a survey screen's content column (preceding `Spacer`/`Expanded` pushes it down) so the CTA sits bottom-anchored at the same height across onboarding screens 2–4 (scan / attribution / proof chart). |
+| `OnboardingFloatingButton` | `onboarding_floating_button.dart` | Wraps `DSPillButton` with a consistent bottom margin. Placed as the LAST child of a survey screen's content column (preceding `Spacer`/`Expanded` pushes it down) so the CTA sits bottom-anchored at the same height across onboarding screens 2–4 (scan / recipes+articles / proof chart). |
 | `DSCard` | `ds_card.dart` | White surface, `DSRadii.xl`, `e2` shadow, `clipBehavior: antiAlias`. Optional `onTap` ripple. Base for nearly every grouping. `padding: EdgeInsets.zero` gives an edge-to-edge child (e.g. a poster image clipped to the top corners). |
 | `DSTipCard` | `ds_tip_card.dart` | Soft `tintCream` advisory card: translucent white disc with a coral `lightbulb_outline`, `titleMd` title over `bodyMd` body. Caller supplies the title ("Tip", "YuCat tip"). Closes Recipe Detail and Food Guide Detail. |
 | `DSSectionHeader` | `ds_section_header.dart` | Top-level section heading: a **fixed** `headlineMd` title (`Expanded`, `maxLines: 2`, ellipsis) plus an optional `DSTextLink` action at the far edge. The size is deliberately fixed — an earlier `FittedBox(scaleDown)` made each section's title render at a different size depending on its copy length. Used by every Home section. |
@@ -367,7 +367,7 @@ Triggered when `SharedPreferences['onboarding_completed'] != true`.
 |---|---|---|---|
 | 0 | `welcome` | `welcome_screen.dart` | |
 | 1 | `scanDemo` | `scan_demo_screen.dart` | |
-| 2 | `attribution` | `attribution_screen.dart` | "How did you hear about us" → written to a Mixpanel People property |
+| 2 | `recipesArticles` | `recipes_articles_screen.dart` | Photo-collage hero + left-aligned headline. Replaced `attribution_screen.dart` ("How did you hear about us"), which is **parked, not deleted** — see the onboarding README §2 |
 | 3 | `proofChart` | `proof_chart_screen.dart` | Localized Lottie graph; pre-warmed in `didChangeDependencies` so it doesn't decode on the slide-in frame (visible jank) |
 | 4 | `whyYucat` | `why_yucat_screen.dart` | `DSGradients.onboardingWhyYucat` |
 | 5 | `nutritionFact` | `nutrition_fact_screen.dart` | |

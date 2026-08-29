@@ -35,13 +35,13 @@ Set on the user's People profile (keyed by Firebase UID). Use these to **segment
 | `primary_cat_age_group` | string | HomeBloc |
 | `total_scans` | int (incremented +1 per scan) | HomeBloc scan success — **food and litter both count** |
 | `last_scan_at` | ISO8601 string | HomeBloc scan success |
-| `attribution_source` | string | onboarding attribution step |
+| `attribution_source` | string | ⚠️ **no longer written** — the onboarding attribution step was replaced by `recipesArticles` (parked, not deleted). Historical values remain |
 | `onboarding_completed` | bool | onboarding finalized |
 | `onboarding_completed_at` | ISO8601 string | onboarding finalized |
 | `notifications_enabled` | bool | reminders permission prompt |
 
 **Suggested cohorts:** Subscribers (`is_subscriber = true`), Activated (`has_cat = true` AND
-`total_scans ≥ 1`), Power users (`total_scans ≥ 10`), By channel (`attribution_source`),
+`total_scans ≥ 1`), Power users (`total_scans ≥ 10`), By channel (`attribution_source` — ⚠️ historical users only),
 Stalled (`onboarding_completed = true` AND `is_subscriber = false`).
 
 > **These are mirrored, in part, to OneSignal.** A coarse subset — `funnel_stage`,
@@ -67,10 +67,10 @@ Stalled (`onboarding_completed = true` AND `is_subscriber = false`).
 | `Onboarding Started` | `source`, `timestamp` |
 | `Onboarding Get Started Tapped` | `timestamp` |
 | `Onboarding Step Viewed` | `step_index` (0–11), `step_name`, `timestamp` — **NEW**, fires once per onboarding screen; use this (not `Screen View`) for the onboarding-flow funnel & drop-off |
-| `Onboarding Attribution Selected` | `source`, `timestamp` |
-| `Onboarding Attribution Skipped` | `timestamp` |
+| `Onboarding Attribution Selected` | `source`, `timestamp` — ⚠️ **unreachable**, the screen was replaced |
+| `Onboarding Attribution Skipped` | `timestamp` — ⚠️ **unreachable**, same |
 | `Onboarding Step Back` | `from_phase`, `to_phase`, `timestamp` — **NEW**, backward drop-off marker |
-| `Onboarding Completed` | `total_time_seconds`, `steps_viewed`, `attribution_source`, `timestamp` |
+| `Onboarding Completed` | `total_time_seconds`, `steps_viewed`, `attribution_source` (⚠️ now always null), `timestamp` |
 | `Screen View` | `screen_name`, `index`, `name` — per onboarding phase |
 
 ### Cat lifecycle
@@ -138,7 +138,7 @@ litter scans too; segment on the outcome event to separate them.
 ## 3. Funnels to build in Mixpanel
 
 Build these as **Funnels** (Reports → Funnels). Segment each by the People properties above
-(e.g. break down by `attribution_source` or `platform`).
+(e.g. break down by `platform`; `attribution_source` only splits historical users).
 
 **A. Acquisition (new install → paying)**
 ```

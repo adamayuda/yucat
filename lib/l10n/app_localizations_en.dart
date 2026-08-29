@@ -342,6 +342,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Point your camera at any\ncat food and get a verdict';
 
   @override
+  String get onboardingRecipesTitle => 'Recipes and articles\nfor your cat';
+
+  @override
+  String get onboardingRecipesSubtitle =>
+      'Home-made recipes matched to their profile,\nand articles to understand them better.';
+
+  @override
   String get onboardingProfileIntroTitle =>
       'Let\'s set up\nyour cat\'s profile';
 
@@ -545,45 +552,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallEverythingYouGet => 'Everything you get';
 
   @override
-  String get paywallFeatureIngredientScannerTitle => 'Ingredient scanner';
-
-  @override
-  String get paywallFeatureIngredientScannerBenefit =>
-      'Scan any label in seconds';
-
-  @override
   String get paywallFeaturePersonalizedVerdictsTitle => 'Personalized verdicts';
 
   @override
   String get paywallFeaturePersonalizedVerdictsBenefit =>
-      'Matched to your cat\'s age, breed & health';
+      'Based on their age and health';
 
   @override
   String get paywallFeatureUnlimitedScansTitle => 'Unlimited scans';
 
   @override
-  String get paywallFeatureUnlimitedScansBenefit => 'No daily caps, ever';
-
-  @override
-  String get paywallFeatureReformulationAlertsTitle => 'Reformulation alerts';
-
-  @override
-  String get paywallFeatureReformulationAlertsBenefit =>
-      'Know the moment a recipe changes';
-
-  @override
-  String get paywallFeatureSavedFoodsTitle => 'Saved foods & history';
-
-  @override
-  String get paywallFeatureSavedFoodsBenefit =>
-      'Every food you\'ve checked, in one place';
+  String get paywallFeatureUnlimitedScansBenefit => 'No daily limit';
 
   @override
   String get paywallFeatureMultiCatTitle => 'Multi-cat profiles';
 
   @override
-  String get paywallFeatureMultiCatBenefit =>
-      'A tailored profile for each of your cats';
+  String get paywallFeatureMultiCatBenefit => 'One profile per cat';
+
+  @override
+  String get paywallFeatureRecipesTitle => 'All the recipes';
+
+  @override
+  String get paywallFeatureRecipesBenefit => 'Filtered for their profile';
+
+  @override
+  String get paywallFeatureArticlesTitle => 'All the articles';
+
+  @override
+  String get paywallFeatureArticlesBenefit => 'Nutrition, health, behaviour';
+
+  @override
+  String get paywallFeatureFoodGuideTitle => 'The food guide';
+
+  @override
+  String get paywallFeatureFoodGuideBenefit => 'What they can and can\'t eat';
 
   @override
   String get paywallSuccessStoriesHeading =>

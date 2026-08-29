@@ -43,7 +43,7 @@ page order and the analytics index** — `OnBoardingPage` pages via
 |---|---|---|
 | 0 | `welcome` | `OnBoardingGetStartedEvent` |
 | 1 | `scanDemo` | `OnBoardingAdvancePhaseEvent` |
-| 2 | `attribution` | `AttributionSelectedEvent` / `AttributionSkippedEvent` — **both jump to `proofChart`** |
+| 2 | `recipesArticles` | `OnBoardingAdvancePhaseEvent` |
 | 3 | `proofChart` | advance |
 | 4 | `whyYucat` | advance |
 | 5 | `nutritionFact` | advance |
@@ -65,8 +65,19 @@ page order and the analytics index** — `OnBoardingPage` pages via
 > If you must insert a phase, treat it as a breaking analytics change: coordinate with
 > whoever owns the Mixpanel funnels first.
 
-Note `attribution` has no `advance` transition — both its events hard-code `proofChart` as
-the next phase, so the `AdvancePhaseEvent` switch has no `attribution` case.
+> ### Phase 2 was `attribution`, and the screen is parked, not deleted
+>
+> `recipesArticles` replaced the "How did you hear about us?" screen **in the same slot**, so
+> every `step_index` is unchanged and the funnels below survive. Only `step_name` at index 2
+> differs. `attribution_screen.dart`, `OnBoardingAttributionSelectedEvent` / `SkippedEvent`,
+> their bloc handlers, `OnBoardingReadyState.selectedSource` and the six
+> `onboardingAttribution*` ARB keys are all still here and still compile — nothing dispatches
+> them. Reviving attribution means restoring one `case` in `onboarding_page.dart` (and giving
+> it a slot). Until then `attribution_source` is null everywhere.
+>
+> Note the old phase had **no `advance` transition** — both its events hard-coded `proofChart`.
+> `recipesArticles` uses the generic advance, so the `AdvancePhaseEvent` switch now has a
+> `recipesArticles => proofChart` case that did not exist before.
 
 ---
 
@@ -190,14 +201,16 @@ dimension splits across surfaces.
 
 Other onboarding events: `Onboarding Started` (`source: 'first_launch'`),
 `Onboarding Get Started Tapped`, `Onboarding Step Viewed`, `Onboarding Step Back`
-(`from_phase`, `to_phase`), `Onboarding Attribution Selected` / `Skipped`,
-`Onboarding Completed` (`total_time_seconds`, `steps_viewed`, `attribution_source`).
+(`from_phase`, `to_phase`), `Onboarding Completed` (`total_time_seconds`, `steps_viewed`,
+`attribution_source`).
 
 `Onboarding Skipped` **does not exist** despite appearing in older docs.
 
-Attribution also writes a Mixpanel **People property** via
-`UserAnalyticsService.setAttribution(source)` — that's what makes attribution a segment on
-every funnel, not just an event.
+⚠️ **`Onboarding Attribution Selected` / `Skipped` are now unreachable**, and with them
+`UserAnalyticsService.setAttribution(source)` — the Mixpanel **People property** that made
+attribution a segment on every funnel. `attribution_source` is null on `Onboarding Completed`
+and unset on every new user. The code is parked (§2), so this is reversible, but no channel
+data is being collected in the meantime.
 
 ---
 

@@ -349,6 +349,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Richte deine Kamera auf ein beliebiges\nKatzenfutter und erhalte ein Urteil';
 
   @override
+  String get onboardingRecipesTitle => 'Rezepte und Artikel\nfür deine Katze';
+
+  @override
+  String get onboardingRecipesSubtitle =>
+      'Hausgemachte Rezepte, abgestimmt auf ihr Profil,\nund Artikel, um sie besser zu verstehen.';
+
+  @override
   String get onboardingProfileIntroTitle =>
       'Lass uns das Profil\ndeiner Katze einrichten';
 
@@ -556,48 +563,44 @@ class AppLocalizationsDe extends AppLocalizations {
   String get paywallEverythingYouGet => 'Alles, was du bekommst';
 
   @override
-  String get paywallFeatureIngredientScannerTitle => 'Zutaten-Scanner';
-
-  @override
-  String get paywallFeatureIngredientScannerBenefit =>
-      'Scanne jedes Etikett in Sekunden';
-
-  @override
   String get paywallFeaturePersonalizedVerdictsTitle =>
       'Personalisierte Urteile';
 
   @override
   String get paywallFeaturePersonalizedVerdictsBenefit =>
-      'Abgestimmt auf Alter, Rasse und Gesundheit deiner Katze';
+      'Nach Alter und Gesundheit';
 
   @override
   String get paywallFeatureUnlimitedScansTitle => 'Unbegrenzte Scans';
 
   @override
-  String get paywallFeatureUnlimitedScansBenefit =>
-      'Keine täglichen Limits, niemals';
-
-  @override
-  String get paywallFeatureReformulationAlertsTitle =>
-      'Rezeptur-Benachrichtigungen';
-
-  @override
-  String get paywallFeatureReformulationAlertsBenefit =>
-      'Erfahre sofort, wenn sich ein Rezept ändert';
-
-  @override
-  String get paywallFeatureSavedFoodsTitle => 'Gespeicherte Futter & Verlauf';
-
-  @override
-  String get paywallFeatureSavedFoodsBenefit =>
-      'Jedes geprüfte Futter an einem Ort';
+  String get paywallFeatureUnlimitedScansBenefit => 'Kein Tageslimit';
 
   @override
   String get paywallFeatureMultiCatTitle => 'Profile für mehrere Katzen';
 
   @override
-  String get paywallFeatureMultiCatBenefit =>
-      'Ein maßgeschneidertes Profil für jede deiner Katzen';
+  String get paywallFeatureMultiCatBenefit => 'Ein Profil pro Katze';
+
+  @override
+  String get paywallFeatureRecipesTitle => 'Alle Rezepte';
+
+  @override
+  String get paywallFeatureRecipesBenefit => 'Passend zu ihrem Profil';
+
+  @override
+  String get paywallFeatureArticlesTitle => 'Alle Artikel';
+
+  @override
+  String get paywallFeatureArticlesBenefit =>
+      'Ernährung, Gesundheit, Verhalten';
+
+  @override
+  String get paywallFeatureFoodGuideTitle => 'Der Futter-Guide';
+
+  @override
+  String get paywallFeatureFoodGuideBenefit =>
+      'Was sie fressen darf und was nicht';
 
   @override
   String get paywallSuccessStoriesHeading =>

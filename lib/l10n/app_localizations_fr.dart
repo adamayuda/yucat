@@ -346,6 +346,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Pointe ta caméra sur n\'importe quel\naliment pour chat et obtiens un verdict';
 
   @override
+  String get onboardingRecipesTitle => 'Recettes et articles\npour ton chat';
+
+  @override
+  String get onboardingRecipesSubtitle =>
+      'Des recettes maison adaptées à son profil,\net des articles pour mieux le comprendre.';
+
+  @override
   String get onboardingProfileIntroTitle =>
       'Configurons\nle profil de ton chat';
 
@@ -554,49 +561,42 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paywallEverythingYouGet => 'Tout ce que tu obtiens';
 
   @override
-  String get paywallFeatureIngredientScannerTitle => 'Scanner d\'ingrédients';
-
-  @override
-  String get paywallFeatureIngredientScannerBenefit =>
-      'Scanne n\'importe quelle étiquette en quelques secondes';
-
-  @override
   String get paywallFeaturePersonalizedVerdictsTitle =>
       'Verdicts personnalisés';
 
   @override
   String get paywallFeaturePersonalizedVerdictsBenefit =>
-      'Adaptés à l\'âge, la race et la santé de ton chat';
+      'Selon son âge et sa santé';
 
   @override
   String get paywallFeatureUnlimitedScansTitle => 'Scans illimités';
 
   @override
-  String get paywallFeatureUnlimitedScansBenefit =>
-      'Aucune limite quotidienne, jamais';
-
-  @override
-  String get paywallFeatureReformulationAlertsTitle =>
-      'Alertes de reformulation';
-
-  @override
-  String get paywallFeatureReformulationAlertsBenefit =>
-      'Sois averti dès qu\'une recette change';
-
-  @override
-  String get paywallFeatureSavedFoodsTitle =>
-      'Aliments enregistrés & historique';
-
-  @override
-  String get paywallFeatureSavedFoodsBenefit =>
-      'Chaque aliment que tu as vérifié, en un seul endroit';
+  String get paywallFeatureUnlimitedScansBenefit => 'Aucune limite quotidienne';
 
   @override
   String get paywallFeatureMultiCatTitle => 'Profils multi-chats';
 
   @override
-  String get paywallFeatureMultiCatBenefit =>
-      'Un profil personnalisé pour chacun de tes chats';
+  String get paywallFeatureMultiCatBenefit => 'Un profil par chat';
+
+  @override
+  String get paywallFeatureRecipesTitle => 'Toutes les recettes';
+
+  @override
+  String get paywallFeatureRecipesBenefit => 'Filtrées pour son profil';
+
+  @override
+  String get paywallFeatureArticlesTitle => 'Tous les articles';
+
+  @override
+  String get paywallFeatureArticlesBenefit => 'Nutrition, santé, comportement';
+
+  @override
+  String get paywallFeatureFoodGuideTitle => 'Le guide alimentaire';
+
+  @override
+  String get paywallFeatureFoodGuideBenefit => 'Ce qu\'il peut manger ou non';
 
   @override
   String get paywallSuccessStoriesHeading =>
