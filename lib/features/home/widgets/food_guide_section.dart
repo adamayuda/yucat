@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/food_guide/presentation/bloc/food_guide_bloc.dart';
 import 'package:yucat/features/food_guide/presentation/models/food_guide_display_model.dart';
+import 'package:yucat/features/food_guide/presentation/widgets/food_guide_labels.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_section_header.dart';
 import 'package:yucat/presentation/components/ds_shimmer.dart';
@@ -130,6 +131,10 @@ class _FoodGuideTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check for a URL first so a category with no photo never starts a network
+    // request; the tint sits behind the image so there's no white flash.
+    final hasImage = item.imageUrl != null && item.imageUrl!.isNotEmpty;
+
     return Semantics(
       label: item.name,
       button: true,
@@ -147,13 +152,18 @@ class _FoodGuideTile extends StatelessWidget {
                   color: DSColors.tintLavender,
                   borderRadius: BorderRadius.circular(DSRadii.lg),
                 ),
+                clipBehavior: Clip.antiAlias,
                 alignment: Alignment.center,
-                child: ExcludeSemantics(
-                  child: Text(
-                    item.emoji,
-                    style: const TextStyle(fontSize: 34),
-                  ),
-                ),
+                child: hasImage
+                    ? Image.network(
+                        item.imageUrl!,
+                        fit: BoxFit.cover,
+                        width: _tile,
+                        height: _tile,
+                        errorBuilder: (_, __, ___) =>
+                            FoodGuideEmoji(emoji: item.emoji, size: 34),
+                      )
+                    : FoodGuideEmoji(emoji: item.emoji, size: 34),
               ),
               const SizedBox(height: DSDimens.sizeXxs),
               Flexible(

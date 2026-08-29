@@ -100,7 +100,7 @@ class _NewsCardBone extends StatelessWidget {
   }
 }
 
-/// Mirrors `FoodGuideSection`: a section title over a row of emoji tiles.
+/// Mirrors `FoodGuideSection`: a section title over a row of photo tiles.
 class _FoodGuideLaneBone extends StatelessWidget {
   const _FoodGuideLaneBone();
 

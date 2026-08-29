@@ -19,93 +19,85 @@ class ProofChartScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final width = MediaQuery.sizeOf(context).width;
 
+    // Flat `tintCloud`, matching the neutral onboarding screens (attribution,
+    // recipesArticles) rather than carrying its own accent wash. The green
+    // gradient this replaced clashed with the rest of the flow — see YUC-16.
     return Scaffold(
       backgroundColor: DSColors.tintCloud,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: DSGradients.onboardingProofChart,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Clear the back chip overlaid by onboarding_page.dart.
+              const SizedBox(height: 48),
+              Text(
+                l10n.onboardingProofChartTitle,
+                textAlign: TextAlign.center,
+                style: DSTextStyles.displayLg,
               ),
-            ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Clear the back chip overlaid by onboarding_page.dart.
-                  const SizedBox(height: 48),
-                  Text(
-                    l10n.onboardingProofChartTitle,
-                    textAlign: TextAlign.center,
-                    style: DSTextStyles.displayLg,
+              const Spacer(),
+              SizedBox(
+                width: width * 0.82,
+                height: width * 0.82,
+                child: Lottie.asset(
+                  localizedAssetPath(
+                    context,
+                    'assets/images/proof-graph',
+                    'json',
+                    available: const {'en', 'es', 'fr', 'hu', 'de', 'pt'},
                   ),
-                  const Spacer(),
-                  SizedBox(
-                    width: width * 0.82,
-                    height: width * 0.82,
-                    child: Lottie.asset(
-                      localizedAssetPath(
-                        context,
-                        'assets/images/proof-graph',
-                        'json',
-                        available: const {'en', 'es', 'fr', 'hu', 'de', 'pt'},
-                      ),
-                      fit: BoxFit.contain,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: DSDimens.sizeS,
+                  vertical: DSDimens.sizeS,
+                ),
+                decoration: BoxDecoration(
+                  color: DSColors.tintMintSoft,
+                  borderRadius: BorderRadius.circular(DSRadii.lg),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/images/onboarding-arrow-up.svg',
+                      width: 22,
                     ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: DSDimens.sizeS,
-                      vertical: DSDimens.sizeS,
-                    ),
-                    decoration: BoxDecoration(
-                      color: DSColors.tintMintSoft,
-                      borderRadius: BorderRadius.circular(DSRadii.lg),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/images/onboarding-arrow-up.svg',
-                          width: 22,
-                        ),
-                        const SizedBox(width: DSDimens.sizeXs),
-                        Expanded(
-                          child: Text.rich(
-                            TextSpan(
-                              style: DSTextStyles.bodyMd.copyWith(
-                                color: DSColors.inkSecondary,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: l10n.onboardingProofChartCalloutBold,
-                                  style: const TextStyle(
-                                    color: DSColors.inkPrimary,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: l10n.onboardingProofChartCalloutRest,
-                                ),
-                              ],
-                            ),
+                    const SizedBox(width: DSDimens.sizeXs),
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          style: DSTextStyles.bodyMd.copyWith(
+                            color: DSColors.inkSecondary,
                           ),
+                          children: [
+                            TextSpan(
+                              text: l10n.onboardingProofChartCalloutBold,
+                              style: const TextStyle(
+                                color: DSColors.inkPrimary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            TextSpan(
+                              text: l10n.onboardingProofChartCalloutRest,
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                  OnboardingFloatingButton(label: l10n.commonNext, onPressed: onNext),
-                ],
+                  ],
+                ),
               ),
-            ),
+              OnboardingFloatingButton(label: l10n.commonNext, onPressed: onNext),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

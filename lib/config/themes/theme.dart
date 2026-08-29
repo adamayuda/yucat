@@ -40,7 +40,7 @@ class DSColors {
   /// modal routes) paints this. Deliberately separate from [tintLavender]:
   /// that token still tints small surfaces (avatar discs, image placeholders,
   /// mascot halos) which sit on white cards and must stay visibly darker.
-  static const Color pageBackground = Color(0xFFF2EDF8);
+  static const Color pageBackground = Color(0xFFF8F6FB);
 
   // Section surface tints
   static const Color tintLavender = Color(0xFFE8E5F0);
@@ -71,10 +71,10 @@ class DSColors {
   static const Color surfaceCardDim = Color(0xFFF5F5F8);
 
   // Accents
-  static const Color accentSuccess = Color(0xFF36C078);
-  static const Color accentSuccessSoft = Color(0xFFE3F5EA);
+  static const Color accentSuccess = Color(0xFF00A12E);
+  static const Color accentSuccessSoft = Color(0xFFDAF4DE);
   static const Color accentDanger = Color(0xFFE5564B);
-  static const Color accentInfo = Color(0xFF3F8CDB);
+  static const Color accentInfo = Color(0xFF3F7CF0);
 
   /// Amber "keep an eye on this" accent — the severity between success and
   /// danger. Pairs with [tintSand] as its surface. Distinct from
@@ -130,12 +130,6 @@ class DSGradients {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [Color(0xFFCAD8FF), DSColors.tintCloud],
-  );
-
-  static const LinearGradient onboardingProofChart = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [Color(0xFFE3FFDD), DSColors.tintCloud],
   );
 
   static const LinearGradient onboardingHealthIntro = LinearGradient(

@@ -37,7 +37,7 @@ not eyeballed. If you change a token, change it here in the same commit.
 
 | Token | Hex | Used for |
 |---|---|---|
-| `pageBackground` | `#F2EDF8` | **Every post-onboarding scaffold** — the `MainPage` shell and its nav fade gradient, all three tabs, and every modal route outside the shell. Deliberately *not* `tintLavender`: that token still tints small surfaces which sit on white cards and must stay visibly darker. |
+| `pageBackground` | `#F8F6FB` | **Every post-onboarding scaffold** — the `MainPage` shell and its nav fade gradient, all three tabs, and every modal route outside the shell. Deliberately *not* `tintLavender`: that token still tints small surfaces which sit on white cards and must stay visibly darker. |
 
 ### Section surface tints
 
@@ -84,10 +84,10 @@ not eyeballed. If you change a token, change it here in the same commit.
 
 | Token | Hex | Use |
 |---|---|---|
-| `accentSuccess` | `#36C078` | Selection ring, ✓, success |
-| `accentSuccessSoft` | `#E3F5EA` | Soft success surfaces |
+| `accentSuccess` | `#00A12E` | Selection ring, ✓, success |
+| `accentSuccessSoft` | `#DAF4DE` | Soft success surfaces |
 | `accentDanger` | `#E5564B` | Errors, destructive, "other apps" line |
-| `accentInfo` | `#3F8CDB` | Info highlights; `DSBottomNav` selected slot |
+| `accentInfo` | `#3F7CF0` | Info highlights; `DSBottomNav` selected slot. Design-system "Blue/500". |
 | `accentWarning` | `#A9791B` | Amber severity between success and danger — `FoodSafetyPill`'s caution state, on a `tintSand` surface. Not `coralAccent`, which is emphasis rather than severity. |
 | `coralAccent` | `#FF7A59` | Selection accent — chips, slider, selected card border |
 | `coralSurface` | `#FFF1ED` | Soft coral surface behind `coralAccent` |
@@ -122,7 +122,6 @@ A first-class token family — 13 gradients. Prefer these over inline `LinearGra
 | `paywallBadge` | left→right | `#2E7BC4 → #5FA3E0` |
 | `paywallHero` | top→bottom | `#9FC9EF → #C4DEF6` |
 | `onboardingWhyYucat` | top→bottom | `#CAD8FF → tintCloud` |
-| `onboardingProofChart` | top→bottom | `#E3FFDD → tintCloud` |
 | `onboardingHealthIntro` | top→bottom | `#DFE6FD → tintCloud` |
 | `onboardingCurrentFood` | top→bottom | `#C2A5E4 → #EFEEF5` |
 | `onboardingSuccess` | top→bottom | `#E5FEDE → tintCloud` |
@@ -419,8 +418,10 @@ Three consequences worth knowing:
 ### Backgrounds
 
 Several beats use dedicated gradients rather than flat tints — see `DSGradients` in §2:
-`onboardingWhyYucat`, `onboardingProofChart`, `onboardingHealthIntro`, `onboardingCurrentFood`,
+`onboardingWhyYucat`, `onboardingHealthIntro`, `onboardingCurrentFood`,
 `onboardingSuccess`, `onboardingReminders`, `onboardingNotifPrimer`.
+The `proofChart` beat deliberately has **none** — it sits flat on `tintCloud` like the
+other neutral beats; its green wash was removed in YUC-16.
 
 ---
 
@@ -485,7 +486,7 @@ Chrome rules that belong to the design system:
 
 1. ~~**Display typeface**~~ — **Bricolage Grotesque** (bundled variable font, wght 800 / wdth 75). Sora was the original pick and was replaced before launch.
 2. ~~**Body typeface**~~ — **DM Sans** via `google_fonts`. Poppins was the original pick and was replaced.
-3. ~~**Selection accent**~~ — **Green** (`accentSuccess #36C078`) for selection ✓; coral (`coralAccent #FF7A59`) reserved for emphasis (chips, slider, "BEST VALUE" tag).
+3. ~~**Selection accent**~~ — **Green** (`accentSuccess #00A12E`) for selection ✓; coral (`coralAccent #FF7A59`) reserved for emphasis (chips, slider, "BEST VALUE" tag).
 4. ~~**Social-proof stat (C0)**~~ — **APOP** (Association for Pet Obesity Prevention) — "61% of US cats are overweight or obese". Sourced + linked to `petobesityprevention.org`.
 5. ~~**Domain pitch source (C2)**~~ — **WSAVA Global Nutrition Guidelines** — linked to `wsava.org/global-guidelines/global-nutrition-guidelines/`. Editorial copy points at the guidelines rather than fabricating a direct quote.
 6. ~~**Cat illustration style**~~ — **Cat-mascot SVGs** ship today. Loading / empty / error states render through `MascotIllustration` (cat SVG + tinted halo + twinkling stars, native bob animation); the home scan loader composes its own mascot scene. The legacy `assets/images/Illustrations/*.gif` were removed.

@@ -29,13 +29,15 @@ class FoodGuideEntity {
   final String name;
   final String description;
 
-  /// The glyph the Home lane tile renders. Never translated.
+  /// The fallback glyph, rendered by [FoodGuideEmoji] wherever [imageUrl] is
+  /// absent or fails to load. Never translated.
   final String emoji;
 
   final FoodSafety safety;
 
-  /// Null until the catalogue hosts photos; the detail hero falls back to
-  /// [emoji] on a tint in the meantime.
+  /// The category photo, hosted at `foodGuide/{id}.jpeg` in Storage. Populated
+  /// for every seeded entry today, but still nullable — the Home tile, the list
+  /// row and the detail hero all fall back to [emoji] on a tint.
   final String? imageUrl;
 
   /// The three fact rows, each optional. A dangerous food has no [whyGood] and
