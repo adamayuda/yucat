@@ -145,6 +145,33 @@ This is the **only** consumer of the flag in the app.
 
 ## 5. Screen-level traps
 
+### `recipesArticles` (phase 2) — the app's only perpetual animation on a long-lived page
+
+`RecipesMarquee` drifts three columns of photos continuously (outer down, middle up) behind the
+headline. Three things about it are load-bearing:
+
+- ⚠️ **It must be paused when the phase isn't visible.** `PageView.builder` is lazy, but the
+  280 ms `animateToPage` sweeps the scroll position across every intervening page — mounting each
+  — and the neighbour stays mounted afterwards. Flutter's `PageView` does **not** wrap children in
+  a disabled `TickerMode`, so a mounted-but-off-screen marquee keeps ticking at full frame cost.
+  `onboarding_page.dart` passes `active: phase == currentPhase` and the widget starts/stops its
+  controller on both edges in `didUpdateWidget` — the same shape `ProfileNameScreen` uses for the
+  keyboard. **Drop that flag and you get a permanent background animation nobody can see.**
+
+  Every other perpetual loop in the app (`MascotIllustration`, the scanner reticle,
+  `HomeLoadingPage`) lives on an ephemeral screen and stops by being unmounted, which is why none
+  of them needed this and there was no machinery to reuse.
+
+- **Tile aspect ratios are hardcoded** in `_Tile`, so column heights are known at layout time.
+  Measuring would mean decoding first — a frame late, with a visible jump. If you swap an asset,
+  update its ratio or the loop seam becomes visible.
+
+- **The seam is invisible only because each column renders its tiles twice** and translates by
+  exactly one copy's height, gaps included. A visible jump at the wrap means `cycleHeight`
+  disagrees with what's actually laid out.
+
+It also honours `MediaQuery.disableAnimationsOf` — the only place in the app that reads it.
+
 ### `rating` (phase 8) — burns Apple's review budget outside the gate
 
 `rating_screen.dart:_handleNext` calls `InAppReview.instance.requestReview()` **directly**.

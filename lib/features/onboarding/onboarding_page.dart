@@ -12,6 +12,7 @@ import 'package:yucat/features/onboarding/widgets/profile_name_screen.dart';
 import 'package:yucat/features/onboarding/widgets/proof_chart_screen.dart';
 import 'package:yucat/features/onboarding/widgets/rating_screen.dart';
 import 'package:yucat/features/onboarding/widgets/recipes_articles_screen.dart';
+import 'package:yucat/features/onboarding/widgets/recipes_marquee.dart';
 import 'package:yucat/features/onboarding/widgets/reminders_screen.dart';
 import 'package:yucat/features/onboarding/widgets/scan_demo_screen.dart';
 import 'package:yucat/features/onboarding/widgets/welcome_screen.dart';
@@ -56,6 +57,12 @@ class _OnBoardingPage extends State<OnBoardingPage> {
         available: const {'en', 'es', 'fr', 'hu', 'de', 'pt'},
       ),
     ).load();
+
+    // Same reasoning for the phase-2 collage: twelve photos decoding on the
+    // slide-in frame is the same jank, twelve times over.
+    for (final asset in RecipesMarquee.assets) {
+      precacheImage(AssetImage(asset), context);
+    }
   }
 
   @override
@@ -145,6 +152,7 @@ class _OnBoardingPage extends State<OnBoardingPage> {
         );
       case OnBoardingPhase.recipesArticles:
         return RecipesArticlesScreen(
+          active: phase == currentPhase,
           onNext: () => _bloc.add(const OnBoardingAdvancePhaseEvent()),
         );
       case OnBoardingPhase.proofChart:
