@@ -18,6 +18,15 @@ abstract class AnalyticsRepository {
 
   Future<void> setUserProperties(Map<String, dynamic> properties);
 
+  /// Write [propertyName] only if the profile does not already have it
+  /// (Mixpanel `$set_once`). For values that must record the *first* time
+  /// something happened — `$created` above all — where a plain set would
+  /// overwrite it on every launch.
+  Future<void> setUserPropertyOnce({
+    required String propertyName,
+    required dynamic value,
+  });
+
   /// Increment a numeric People property (e.g. a lifetime scan counter).
   Future<void> incrementUserProperty(String propertyName, double by);
 }

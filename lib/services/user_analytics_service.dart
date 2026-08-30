@@ -41,10 +41,37 @@ class UserAnalyticsService {
     try {
       await _identifyUserUsecase(uid);
       _sessionReplayService.identify(uid);
-      await _setUserPropertiesUsecase({UserProps.platform: _platform});
+      final now = DateTime.now().toIso8601String();
+      await _setUserPropertiesUsecase({
+        UserProps.platform: _platform,
+        // Refreshed every boot, which is what makes "no activity in 7 days"
+        // segmentable. Recency previously lived only as a OneSignal tag.
+        UserProps.lastActiveAt: now,
+      });
+      // `$created` must survive later launches, so it is the one property
+      // written with set-once. A plain set here would reset first-seen to today
+      // on every cold start and make cohort ageing meaningless.
+      await _setUserPropertiesUsecase.setSingleOnce(UserProps.created, now);
+      await _setUserPropertiesUsecase.increment(UserProps.totalSessions, 1);
     } catch (e) {
       _identified = false;
       debugPrint('UserAnalyticsService.identify error: $e');
+    }
+  }
+
+  /// App language and device country, stamped once the app has resolved its
+  /// locale. Two properties, not one: [UserProps.language] is what the user
+  /// reads (one of the six shipped locales, English for anything unsupported)
+  /// while [UserProps.country] is the market. Nothing recorded either, so the
+  /// six-locale investment was unmeasurable.
+  Future<void> syncLocale({required String language, String? country}) async {
+    try {
+      await _setUserPropertiesUsecase({
+        UserProps.language: language,
+        if (country != null) UserProps.country: country,
+      });
+    } catch (e) {
+      debugPrint('UserAnalyticsService.syncLocale error: $e');
     }
   }
 
@@ -69,6 +96,7 @@ class UserAnalyticsService {
   Future<void> syncCats({
     required int count,
     String? primaryAgeGroup,
+    String? primaryBreed,
   }) async {
     try {
       await _setUserPropertiesUsecase({
@@ -76,6 +104,10 @@ class UserAnalyticsService {
         UserProps.hasCat: count > 0,
         if (primaryAgeGroup != null)
           UserProps.primaryCatAgeGroup: primaryAgeGroup,
+        // Breed drives ~25 rules in `cat_product_assessment.dart`; recording it
+        // is how you find out whether real users own the breeds those rules
+        // cover, or mostly ones that fall through to the archetypes.
+        if (primaryBreed != null) UserProps.primaryCatBreed: primaryBreed,
       });
     } catch (e) {
       debugPrint('UserAnalyticsService.syncCats error: $e');

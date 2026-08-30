@@ -14,6 +14,7 @@ import 'package:yucat/features/search_products/presentation/mappers/brand_to_mod
 import 'package:yucat/features/search_products/presentation/mappers/product_to_model_mapper.dart';
 import 'package:yucat/features/search_products/presentation/models/brand_display_model.dart';
 import 'package:yucat/features/brand/domain/usecases/get_brands_usecase.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 
 part 'search_event.dart';
 part 'search_state.dart';
@@ -122,7 +123,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
           .toList();
 
       _logEventUsecase.call(
-        eventName: 'Product Searched',
+        eventName: AnalyticsEvents.productSearched,
         properties: {
           'query': event.query,
           'query_length': event.query.length,
@@ -132,7 +133,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       );
 
       _logEventUsecase.call(
-        eventName: 'Search Results Viewed',
+        eventName: AnalyticsEvents.searchResultsViewed,
         properties: {
           'query': event.query,
           'results_count': products.length,
@@ -158,7 +159,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     Emitter<SearchState> emit,
   ) async {
     _logEventUsecase.call(
-      eventName: 'Product Selected',
+      eventName: AnalyticsEvents.productSelected,
       properties: {
         'product_name': event.product.name,
         'product_brand': event.product.brand,

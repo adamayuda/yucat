@@ -5,6 +5,7 @@ import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/saved_products/domain/usecases/is_product_saved_usecase.dart';
 import 'package:yucat/features/saved_products/domain/usecases/save_product_usecase.dart';
 import 'package:yucat/features/saved_products/domain/usecases/unsave_product_usecase.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 
 part 'product_detail_event.dart';
 part 'product_detail_state.dart';
@@ -40,7 +41,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
 
     final product = event.product!;
     _logEventUsecase.call(
-      eventName: 'Product Detail Viewed',
+      eventName: AnalyticsEvents.productDetailViewed,
       properties: {
         'product_name': product.name,
         'product_brand': product.brand,
@@ -63,7 +64,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     if (nextSaved) {
       await _saveProductUsecase(current.product);
       _logEventUsecase.call(
-        eventName: 'Product Saved',
+        eventName: AnalyticsEvents.productSaved,
         properties: {
           'product_name': current.product.name,
           'product_brand': current.product.brand,
@@ -73,7 +74,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     } else {
       await _unsaveProductUsecase(current.product);
       _logEventUsecase.call(
-        eventName: 'Product Unsaved',
+        eventName: AnalyticsEvents.productUnsaved,
         properties: {
           'product_name': current.product.name,
           'product_brand': current.product.brand,

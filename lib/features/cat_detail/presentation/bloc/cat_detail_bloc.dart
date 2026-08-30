@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/delete_cat_usecase.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 
 part 'cat_detail_event.dart';
 part 'cat_detail_state.dart';
@@ -27,7 +28,7 @@ class CatDetailBloc extends Bloc<CatDetailEvent, CatDetailState> {
     Emitter<CatDetailState> emit,
   ) async {
     _logEventUsecase.call(
-      eventName: 'Cat Profile Viewed',
+      eventName: AnalyticsEvents.catProfileViewed,
       properties: {
         'cat_name': event.cat.name,
         'cat_age_group': event.cat.ageGroup ?? 'unknown',
@@ -49,7 +50,7 @@ class CatDetailBloc extends Bloc<CatDetailEvent, CatDetailState> {
       await _deleteCatUsecase.call(catId: event.catId);
 
       _logEventUsecase.call(
-        eventName: 'Cat Profile Deleted',
+        eventName: AnalyticsEvents.catProfileDeleted,
         properties: {
           'cat_id': event.catId,
           'timestamp': DateTime.now().toIso8601String(),
@@ -59,7 +60,7 @@ class CatDetailBloc extends Bloc<CatDetailEvent, CatDetailState> {
       emit(CatDetailDeletedState());
     } catch (e) {
       _logEventUsecase.call(
-        eventName: 'Cat Profile Delete Failed',
+        eventName: AnalyticsEvents.catProfileDeleteFailed,
         properties: {
           'cat_id': event.catId,
           'error_message': e.toString(),
@@ -76,7 +77,7 @@ class CatDetailBloc extends Bloc<CatDetailEvent, CatDetailState> {
     Emitter<CatDetailState> emit,
   ) async {
     _logEventUsecase.call(
-      eventName: 'Cat Profile Edit Started',
+      eventName: AnalyticsEvents.catProfileEditStarted,
       properties: {
         'cat_name': event.cat.name,
         'timestamp': DateTime.now().toIso8601String(),

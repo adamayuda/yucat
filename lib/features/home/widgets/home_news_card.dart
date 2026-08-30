@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/content_analytics.dart';
 import 'package:yucat/features/articles/presentation/bloc/articles_bloc.dart';
 import 'package:yucat/features/articles/presentation/models/article_display_model.dart';
 import 'package:yucat/l10n/app_localizations.dart';
@@ -24,7 +26,8 @@ class HomeNewsCard extends StatefulWidget {
   State<HomeNewsCard> createState() => _HomeNewsCardState();
 }
 
-class _HomeNewsCardState extends State<HomeNewsCard> {
+class _HomeNewsCardState extends State<HomeNewsCard>
+    with ContentLaneAnalytics {
   late ArticlesBloc _bloc;
   String? _language;
 
@@ -48,6 +51,7 @@ class _HomeNewsCardState extends State<HomeNewsCard> {
     final language = Localizations.localeOf(context).languageCode;
     if (language == _language) return;
     _language = language;
+    resetLaneViewed();
     _bloc.add(ArticlesInitialEvent(language: language));
   }
 
@@ -71,6 +75,10 @@ class _HomeNewsCardState extends State<HomeNewsCard> {
           // the Home card.
           if (state.all.isEmpty) return const SizedBox.shrink();
           final article = state.all.first;
+          // Always 1 — the card features a single article. It is tracked as its
+          // own section anyway, because it converts separately from the lane
+          // (`source = home_news_card`) and needs its own denominator.
+          reportLaneViewed(section: ContentSection.newsCard, itemCount: 1);
           return _NewsCardBody(
             article: article,
             onTap: () => widget.onArticleTap(article),

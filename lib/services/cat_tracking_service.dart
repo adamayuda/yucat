@@ -1,6 +1,7 @@
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 
 class CatTrackingService {
   static const int _maxFreeCats = 1;
@@ -44,7 +45,7 @@ class CatTrackingService {
     if (hasReachedLimit) {
       final catsCount = await _getCatsCount(userId: userId);
       _logEventUsecase.call(
-        eventName: 'Free Limit Hit',
+        eventName: AnalyticsEvents.freeLimitHit,
         properties: {
           'limit_type': 'cats',
           'limit_value': _maxFreeCats,

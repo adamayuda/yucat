@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 
 /// Free-tier scan gating.
 ///
@@ -55,7 +56,7 @@ class ScanTrackingService {
     } else {
       // Track that user hit the limit
       _logEventUsecase.call(
-        eventName: 'Free Limit Hit',
+        eventName: AnalyticsEvents.freeLimitHit,
         properties: {
           'limit_type': 'scans',
           'limit_value': _maxFreeScans,

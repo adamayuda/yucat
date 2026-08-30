@@ -5,6 +5,7 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/services/user_analytics_service.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 
 /// How far through the acquisition funnel a user has got.
 ///
@@ -104,7 +105,9 @@ class NotificationService {
     }
 
     _logEventUsecase.call(
-      eventName: granted ? 'Notifications Opted In' : 'Notifications Opted Out',
+      eventName: granted
+          ? AnalyticsEvents.notificationsOptedIn
+          : AnalyticsEvents.notificationsOptedOut,
       properties: {
         'source': 'onboarding_reminders',
         'timestamp': DateTime.now().toIso8601String(),

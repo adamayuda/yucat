@@ -60,9 +60,21 @@ class AnalyticsRepositoryImpl extends AnalyticsRepository {
 
   @override
   Future<void> setUserProperties(Map<String, dynamic> properties) async {
+    // One native call per key: `mixpanel_flutter`'s People API exposes only
+    // `set(prop, to)`, with no batch variant. The native SDK batches these into
+    // a single `$set` on flush, so the cost is method-channel hops, not
+    // requests.
     properties.forEach((key, value) {
       _mixpanel.getPeople().set(key, value);
     });
+  }
+
+  @override
+  Future<void> setUserPropertyOnce({
+    required String propertyName,
+    required dynamic value,
+  }) async {
+    _mixpanel.getPeople().setOnce(propertyName, value);
   }
 
   @override

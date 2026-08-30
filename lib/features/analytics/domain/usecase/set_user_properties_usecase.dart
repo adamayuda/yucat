@@ -16,6 +16,14 @@ class SetUserPropertiesUsecase {
     );
   }
 
+  /// See [AnalyticsRepository.setUserPropertyOnce] — first write wins.
+  Future<void> setSingleOnce(String propertyName, dynamic value) async {
+    return repository.setUserPropertyOnce(
+      propertyName: propertyName,
+      value: value,
+    );
+  }
+
   Future<void> increment(String propertyName, double by) async {
     return repository.incrementUserProperty(propertyName, by);
   }

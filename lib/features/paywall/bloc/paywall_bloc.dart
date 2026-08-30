@@ -20,6 +20,10 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   final NotificationService _notificationService;
 
   DateTime? _paywallShownTime;
+  /// Whether the user reached the store sheet during this paywall session.
+  /// Separates "looked and left" from "tried to buy and backed out" on
+  /// `Paywall Dismissed` — two very different abandonment stories.
+  bool _ctaTappedThisSession = false;
   String _trigger = 'manual';
 
   PaywallBloc({
@@ -82,6 +86,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     final eligibleTrial = await _eligibleTrialFor(selected);
 
     _paywallShownTime = DateTime.now();
+    _ctaTappedThisSession = false;
     _logEventUsecase.call(
       eventName: AnalyticsEvents.paywallShown,
       properties: {
@@ -174,6 +179,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     // presents or never resolves is still visible as intent). Carries the same
     // properties as Subscription Completed so both ends of the funnel segment
     // identically.
+    _ctaTappedThisSession = true;
     _logEventUsecase.call(
       eventName: AnalyticsEvents.paywallCtaTapped,
       properties: {
@@ -236,15 +242,23 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     } on PlatformException catch (e) {
       final code = PurchasesErrorHelper.getErrorCode(e);
       if (code == PurchasesErrorCode.purchaseCancelledError) {
-        _logPurchaseFailed(
-          reason: 'cancelled',
-          packageType: current.selectedPackage.packageType.name,
+        // Backing out of the store sheet is a normal outcome, not a failure.
+        // It used to be logged as `Subscription Purchase Failed`, where it
+        // outnumbered real errors ~6:1 and made the event useless.
+        _logEventUsecase.call(
+          eventName: AnalyticsEvents.paywallPurchaseCancelled,
+          properties: {
+            'package_type': current.selectedPackage.packageType.name,
+            'trigger': _trigger,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
         );
         emit(current.copyWith(isPurchasing: false));
         return;
       }
       _logPurchaseFailed(
         reason: 'platform_error',
+        errorCode: code.name,
         errorMessage: e.message,
         packageType: current.selectedPackage.packageType.name,
       );
@@ -270,6 +284,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
 
   void _logPurchaseFailed({
     required String reason,
+    String? errorCode,
     String? errorMessage,
     String? packageType,
   }) {
@@ -277,6 +292,9 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       eventName: AnalyticsEvents.subscriptionPurchaseFailed,
       properties: {
         'reason': reason,
+        // The RevenueCat error code — `reason` alone cannot tell a payment
+        // decline from a network drop from a store misconfiguration.
+        if (errorCode != null) 'error_code': errorCode,
         if (errorMessage != null) 'error_message': errorMessage,
         if (packageType != null) 'package_type': packageType,
         'trigger': _trigger,
@@ -320,7 +338,16 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
         _notificationService.setSubscriber(true);
         emit(const PaywallSuccessState(purchasedSubscription: true));
       } else {
-        _logRestoreFailed(reason: 'no_active_subscription');
+        // Nothing to restore is the expected outcome for a first-time user,
+        // not a failure — it was 100% of `Subscription Restore Failed`.
+        _logEventUsecase.call(
+          eventName: AnalyticsEvents.paywallRestoreCompleted,
+          properties: {
+            'restored': false,
+            'trigger': _trigger,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
         emit(current.copyWith(
           isPurchasing: false,
           transientError: PaywallTransientError.noActiveSubscription,
@@ -353,7 +380,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     PaywallDismissEvent event,
     Emitter<PaywallState> emit,
   ) {
-    _logPaywallDismissed(ctaTapped: false);
+    _logPaywallDismissed(ctaTapped: _ctaTappedThisSession);
     emit(const PaywallSuccessState(purchasedSubscription: false));
   }
 
@@ -366,9 +393,11 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   /// `Subscription Restored`, and intent by `Paywall CTA Tapped`, so those
   /// calls were removed.
   ///
-  /// `cta_tapped` is therefore always `false` now. It is kept rather than
-  /// dropped so existing Mixpanel reports filtering `cta_tapped == false` keep
-  /// working unchanged; ones filtering `== true` correctly fall to zero.
+  /// `cta_tapped` now means "reached the store sheet at some point during this
+  /// paywall session, then left anyway" — it was hardcoded `false`, which made
+  /// the property inert. True is the more interesting group: they wanted to
+  /// buy and something stopped them, and it should track `Paywall Purchase
+  /// Cancelled` closely.
   void _logPaywallDismissed({required bool ctaTapped}) {
     final timeViewedSeconds = _paywallShownTime != null
         ? DateTime.now().difference(_paywallShownTime!).inSeconds

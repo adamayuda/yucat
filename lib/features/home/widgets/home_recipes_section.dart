@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/content_analytics.dart';
 import 'package:yucat/features/recipes/presentation/bloc/recipes_bloc.dart';
 import 'package:yucat/features/recipes/presentation/models/recipe_display_model.dart';
 import 'package:yucat/features/recipes/presentation/widgets/recipe_poster_card.dart';
@@ -28,7 +30,8 @@ class HomeRecipesSection extends StatefulWidget {
   State<HomeRecipesSection> createState() => _HomeRecipesSectionState();
 }
 
-class _HomeRecipesSectionState extends State<HomeRecipesSection> {
+class _HomeRecipesSectionState extends State<HomeRecipesSection>
+    with ContentLaneAnalytics {
   /// How many of the catalogue's recipes the lane shows, in authored order.
   static const int _laneCount = 6;
 
@@ -57,6 +60,7 @@ class _HomeRecipesSectionState extends State<HomeRecipesSection> {
     final language = Localizations.localeOf(context).languageCode;
     if (language == _language) return;
     _language = language;
+    resetLaneViewed();
     _bloc.add(RecipesInitialEvent(language: language));
   }
 
@@ -86,6 +90,12 @@ class _HomeRecipesSectionState extends State<HomeRecipesSection> {
             (state is RecipesLoadedState && recipes.isEmpty)) {
           return const SizedBox.shrink();
         }
+        // Past the hide branch, so this only counts lanes the user could
+        // actually see. No-ops while loading, when `recipes` is still empty.
+        reportLaneViewed(
+          section: ContentSection.recipes,
+          itemCount: recipes.length,
+        );
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

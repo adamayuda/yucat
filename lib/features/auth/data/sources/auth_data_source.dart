@@ -1,22 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 
 class AuthFirebaseDataSource {
+  /// Signs in anonymously.
+  ///
+  /// Deliberately rethrows. This used to catch `FirebaseAuthException` and only
+  /// `debugPrint` it, so `network-request-failed`, `too-many-requests` and App
+  /// Check rejections all returned *normally* — callers then read a null
+  /// `currentUser` with no way to tell a failure from a cold start, and
+  /// `CatCreateBloc` force-unwrapped it. Callers decide how to recover.
   Future<void> signInAnonymously() async {
-    try {
-      await FirebaseAuth.instance.signInAnonymously();
-    } on FirebaseAuthException catch (e) {
-      debugPrint('signInAnonymously error: $e');
-    }
+    await FirebaseAuth.instance.signInAnonymously();
   }
 
-  User? currentUser() {
-    try {
-      FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-
-      return firebaseAuth.currentUser;
-    } catch (e) {
-      throw UnimplementedError();
-    }
-  }
+  User? currentUser() => FirebaseAuth.instance.currentUser;
 }

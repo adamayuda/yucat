@@ -21,6 +21,7 @@ import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/service_locator.dart';
 import 'package:yucat/features/litter_detail/presentation/models/litter_display_model.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
@@ -62,7 +63,7 @@ class _ProfilePage extends State<ProfilePage> {
 
   Future<void> _openCatDetail(CatEntity cat) async {
     sl<LogEventUsecase>().call(
-      eventName: 'Profile Cat Tapped',
+      eventName: AnalyticsEvents.profileCatTapped,
       properties: {
         'cat_id': cat.id,
         'timestamp': DateTime.now().toIso8601String(),
@@ -89,7 +90,7 @@ class _ProfilePage extends State<ProfilePage> {
 
   void _openScanHistory() {
     sl<LogEventUsecase>().call(
-      eventName: 'Scan History Viewed',
+      eventName: AnalyticsEvents.scanHistoryViewed,
       properties: {'timestamp': DateTime.now().toIso8601String()},
     );
     context.router.push(const ScanHistoryRoute());

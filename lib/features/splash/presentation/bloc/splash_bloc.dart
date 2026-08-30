@@ -7,8 +7,8 @@ import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/test_flags.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
-import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
-import 'package:yucat/features/auth/domain/usecase/signin_anonymously_usecase.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
+import 'package:yucat/features/auth/domain/usecase/ensure_signed_in_usecase.dart';
 import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 
@@ -21,22 +21,22 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   final SharedPreferences _prefs;
   final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
   final UserAnalyticsService _userAnalyticsService;
-  final CurrentUserUsecase _currentUserUsecase;
-  final SigninAnonymouslyUsecase _signinAnonymouslyUsecase;
+  final EnsureSignedInUsecase _ensureSignedInUsecase;
+  final LogEventUsecase _logEventUsecase;
   final NotificationService _notificationService;
 
   SplashBloc({
     required SharedPreferences prefs,
     required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
     required UserAnalyticsService userAnalyticsService,
-    required CurrentUserUsecase currentUserUsecase,
-    required SigninAnonymouslyUsecase signinAnonymouslyUsecase,
+    required EnsureSignedInUsecase ensureSignedInUsecase,
+    required LogEventUsecase logEventUsecase,
     required NotificationService notificationService,
   })  : _prefs = prefs,
         _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
         _userAnalyticsService = userAnalyticsService,
-        _currentUserUsecase = currentUserUsecase,
-        _signinAnonymouslyUsecase = signinAnonymouslyUsecase,
+        _ensureSignedInUsecase = ensureSignedInUsecase,
+        _logEventUsecase = logEventUsecase,
         _notificationService = notificationService,
         super(SplashLoadingState()) {
     on<SplashInitialEvent>(_onSplashInitialEvent);
@@ -108,18 +108,28 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   /// device record.
   Future<void> _ensureSignedIn() async {
     try {
-      if (_currentUserUsecase() == null) {
-        await _signinAnonymouslyUsecase();
+      final user = await _ensureSignedInUsecase();
+      if (user == null) {
+        // Boot continues into onboarding either way, but every uid-dependent
+        // screen downstream is now degraded — most sharply cat creation, which
+        // cannot write without one. Emit it so the failure is visible instead
+        // of surfacing later as a mystery crash at the end of the wizard.
+        _logEventUsecase.call(
+          eventName: AnalyticsEvents.authSignInFailed,
+          properties: {
+            'stage': 'splash',
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
+        return;
       }
-      final user = _currentUserUsecase();
-      if (user != null) {
-        await _userAnalyticsService.identify(user.uid);
-        await _notificationService.login(user.uid);
-        // Every launch passes through here, including new users who return
-        // early below — so this is the one place recency is guaranteed to be
-        // stamped for everyone.
-        await _notificationService.setLastActive();
-      }
+
+      await _userAnalyticsService.identify(user.uid);
+      await _notificationService.login(user.uid);
+      // Every launch passes through here, including new users who return
+      // early below — so this is the one place recency is guaranteed to be
+      // stamped for everyone.
+      await _notificationService.setLastActive();
     } catch (e) {
       debugPrint('SplashBloc._ensureSignedIn error: $e');
     }

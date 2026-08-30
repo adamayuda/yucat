@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dio/dio.dart';
@@ -11,19 +12,16 @@ import 'package:yucat/core/subscription/data/repositories/subscription_repositor
 import 'package:yucat/core/subscription/domain/repositories/subscription_repository.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 import 'package:yucat/features/analytics/data/repository/analytics_repository_impl.dart';
-import 'package:yucat/features/analytics/data/sources/analytics_data_source.dart';
 import 'package:yucat/features/analytics/domain/repository/analytics_repository.dart';
 import 'package:yucat/features/analytics/domain/usecase/identify_user_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
-import 'package:yucat/features/analytics/domain/usecase/log_login_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
-import 'package:yucat/features/analytics/domain/usecase/log_search_usecase.dart';
-import 'package:yucat/features/analytics/domain/usecase/log_sign_up_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/set_user_properties_usecase.dart';
 import 'package:yucat/features/auth/data/repository/auth_repository_impl.dart';
 import 'package:yucat/features/auth/data/sources/auth_data_source.dart';
 import 'package:yucat/features/auth/domain/repository/auth_repository.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
+import 'package:yucat/features/auth/domain/usecase/ensure_signed_in_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/signin_anonymously_usecase.dart';
 import 'package:yucat/features/brand/data/datasources/brand_datasource.dart';
 import 'package:yucat/features/brand/data/datasources/brand_verdict_datasource.dart';
@@ -163,7 +161,15 @@ Future<void> _registerMixpanel() async {
   // app's data; this super property is belt-and-suspenders + lets us segment
   // future builds. App version/build are auto-attached by the SDK
   // (trackAutomaticEvents) as $app_version_string / $app_build_number.
-  mixpanel.registerSuperProperties({'tracking_version': 'v2'});
+  //
+  // `platform` is also a People property, but a super property is what lets any
+  // *event* be broken down by platform without a profile join. The SDK's own
+  // `$os` is not a substitute: it reports iPadOS separately from iOS, which
+  // fragments every breakdown across three buckets instead of two.
+  mixpanel.registerSuperProperties({
+    'tracking_version': 'v2',
+    'platform': Platform.isIOS ? 'ios' : (Platform.isAndroid ? 'android' : 'other'),
+  });
   sl.registerSingleton<Mixpanel>(mixpanel);
 }
 
@@ -185,9 +191,6 @@ Future<void> _registerFirebaseFunctions() async {
 Future<void> _registerDataSources() async {
   sl.registerSingleton<BrandDataSource>(
     BrandDataSource(firestore: FirebaseFirestore.instance),
-  );
-  sl.registerSingleton<AnalyticsFirebaseDataSource>(
-    AnalyticsFirebaseDataSourceImpl(),
   );
   sl.registerSingleton<AlgoliaSearchDataSource>(AlgoliaSearchDataSource());
   sl.registerSingleton<RemoteSearchDataSource>(
@@ -354,15 +357,6 @@ Future<void> _registerUseCases() async {
   sl.registerSingleton<LogScreenViewUsecase>(
     LogScreenViewUsecase(repository: sl<AnalyticsRepository>()),
   );
-  sl.registerSingleton<LogLoginUsecase>(
-    LogLoginUsecase(repository: sl<AnalyticsRepository>()),
-  );
-  sl.registerSingleton<LogSignUpUsecase>(
-    LogSignUpUsecase(repository: sl<AnalyticsRepository>()),
-  );
-  sl.registerSingleton<LogSearchUsecase>(
-    LogSearchUsecase(repository: sl<AnalyticsRepository>()),
-  );
   sl.registerSingleton<SetUserPropertiesUsecase>(
     SetUserPropertiesUsecase(repository: sl<AnalyticsRepository>()),
   );
@@ -404,6 +398,9 @@ Future<void> _registerUseCases() async {
   );
   sl.registerSingleton<SigninAnonymouslyUsecase>(
     SigninAnonymouslyUsecase(repository: sl<AuthRepository>()),
+  );
+  sl.registerSingleton<EnsureSignedInUsecase>(
+    EnsureSignedInUsecase(repository: sl<AuthRepository>()),
   );
   sl.registerSingleton<HasActiveSubscriptionUseCase>(
     HasActiveSubscriptionUseCase(repository: sl<SubscriptionRepository>()),
@@ -522,8 +519,8 @@ Future<void> _registerBlocs() async {
       prefs: sl<SharedPreferences>(),
       hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
       userAnalyticsService: sl<UserAnalyticsService>(),
-      currentUserUsecase: sl<CurrentUserUsecase>(),
-      signinAnonymouslyUsecase: sl<SigninAnonymouslyUsecase>(),
+      ensureSignedInUsecase: sl<EnsureSignedInUsecase>(),
+      logEventUsecase: sl<LogEventUsecase>(),
       notificationService: sl<NotificationService>(),
     ),
   );
@@ -560,8 +557,7 @@ Future<void> _registerBlocs() async {
       fetchProductByImageUsecase: sl<FetchProductByImageUsecase>(),
       productEntityToModelMapper: sl<ProductEntityToModelMapper>(),
       litterEntityToModelMapper: sl<LitterEntityToModelMapper>(),
-      currentUserUsecase: sl<CurrentUserUsecase>(),
-      signinAnonymouslyUsecase: sl<SigninAnonymouslyUsecase>(),
+      ensureSignedInUsecase: sl<EnsureSignedInUsecase>(),
       reviewPromptService: sl<ReviewPromptService>(),
       getCatsUsecase: sl<GetCatsUsecase>(),
       addScanToHistoryUsecase: sl<AddScanToHistoryUsecase>(),
@@ -630,6 +626,7 @@ Future<void> _registerBlocs() async {
       updateCatUsecase: sl<UpdateCatUsecase>(),
       catModelToEntityMapper: sl<CatModelToEntityMapper>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
+      ensureSignedInUsecase: sl<EnsureSignedInUsecase>(),
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
       notificationService: sl<NotificationService>(),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/content_analytics.dart';
 import 'package:yucat/features/food_guide/presentation/bloc/food_guide_bloc.dart';
 import 'package:yucat/features/food_guide/presentation/models/food_guide_display_model.dart';
 import 'package:yucat/features/food_guide/presentation/widgets/food_guide_labels.dart';
@@ -32,7 +34,8 @@ class FoodGuideSection extends StatefulWidget {
   State<FoodGuideSection> createState() => _FoodGuideSectionState();
 }
 
-class _FoodGuideSectionState extends State<FoodGuideSection> {
+class _FoodGuideSectionState extends State<FoodGuideSection>
+    with ContentLaneAnalytics {
   late FoodGuideBloc _bloc;
   String? _language;
 
@@ -55,6 +58,7 @@ class _FoodGuideSectionState extends State<FoodGuideSection> {
     final language = Localizations.localeOf(context).languageCode;
     if (language == _language) return;
     _language = language;
+    resetLaneViewed();
     _bloc.add(FoodGuideInitialEvent(language: language));
   }
 
@@ -79,6 +83,12 @@ class _FoodGuideSectionState extends State<FoodGuideSection> {
             (state is FoodGuideLoadedState && state.items.isEmpty)) {
           return const SizedBox.shrink();
         }
+        // Uncapped, unlike the recipe and article lanes: this shows the whole
+        // published catalogue, so item_count is its real size.
+        reportLaneViewed(
+          section: ContentSection.foodGuide,
+          itemCount: state is FoodGuideLoadedState ? state.items.length : 0,
+        );
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

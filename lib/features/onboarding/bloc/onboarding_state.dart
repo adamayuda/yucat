@@ -18,6 +18,37 @@ enum OnBoardingPhase {
   healthIntro,
 }
 
+/// Stable, append-only analytics ids for [OnBoardingPhase].
+///
+/// The enum ordinal is the *position* in the PageView and changes whenever a
+/// screen is inserted, removed or swapped — which already happened once:
+/// `attribution` held ordinal 2 for 485 events before `recipesArticles` took
+/// the slot, so every historical funnel keyed on `step_index = 2` now mixes
+/// two unrelated screens.
+///
+/// [stepId] is the fix. A phase keeps its id forever; a replacement screen
+/// takes the next free number rather than inheriting the slot. Never reuse or
+/// renumber an entry here — retired ids (2 = `attribution`) stay retired.
+extension OnBoardingPhaseAnalytics on OnBoardingPhase {
+  static const _ids = <OnBoardingPhase, int>{
+    OnBoardingPhase.welcome: 0,
+    OnBoardingPhase.scanDemo: 1,
+    // 2 is burned: it belonged to the parked `attribution` screen.
+    OnBoardingPhase.proofChart: 3,
+    OnBoardingPhase.whyYucat: 4,
+    OnBoardingPhase.nutritionFact: 5,
+    OnBoardingPhase.profileIntro: 6,
+    OnBoardingPhase.profileName: 7,
+    OnBoardingPhase.rating: 8,
+    OnBoardingPhase.notifPrimer: 9,
+    OnBoardingPhase.reminders: 10,
+    OnBoardingPhase.healthIntro: 11,
+    OnBoardingPhase.recipesArticles: 12,
+  };
+
+  int get stepId => _ids[this]!;
+}
+
 sealed class OnBoardingState extends Equatable {
   const OnBoardingState();
 }

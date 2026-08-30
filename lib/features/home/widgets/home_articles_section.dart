@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/content_analytics.dart';
 import 'package:yucat/features/articles/presentation/bloc/articles_bloc.dart';
 import 'package:yucat/features/articles/presentation/models/article_display_model.dart';
 import 'package:yucat/features/articles/presentation/widgets/article_poster_card.dart';
@@ -27,7 +29,8 @@ class HomeArticlesSection extends StatefulWidget {
   State<HomeArticlesSection> createState() => _HomeArticlesSectionState();
 }
 
-class _HomeArticlesSectionState extends State<HomeArticlesSection> {
+class _HomeArticlesSectionState extends State<HomeArticlesSection>
+    with ContentLaneAnalytics {
   /// How many of the catalogue's articles the lane shows, in authored order.
   ///
   /// Starts at index 1: `HomeNewsCard` already features the first article at
@@ -53,6 +56,7 @@ class _HomeArticlesSectionState extends State<HomeArticlesSection> {
     final language = Localizations.localeOf(context).languageCode;
     if (language == _language) return;
     _language = language;
+    resetLaneViewed();
     _bloc.add(ArticlesInitialEvent(language: language));
   }
 
@@ -82,6 +86,12 @@ class _HomeArticlesSectionState extends State<HomeArticlesSection> {
             (state is ArticlesLoadedState && articles.isEmpty)) {
           return const SizedBox.shrink();
         }
+        // The count is post-skip: the news card's article is not on offer here,
+        // so counting it would inflate the lane's denominator by one.
+        reportLaneViewed(
+          section: ContentSection.articles,
+          itemCount: articles.length,
+        );
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

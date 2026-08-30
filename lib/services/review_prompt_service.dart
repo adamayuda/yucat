@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
 
 /// Lifecycle-aware wrapper around `in_app_review`.
 ///
@@ -51,7 +52,7 @@ class ReviewPromptService {
           DateTime.now().millisecondsSinceEpoch,
         );
         _logEventUsecase.call(
-          eventName: 'Review Prompt Requested',
+          eventName: AnalyticsEvents.reviewPromptRequested,
           properties: {
             'trigger': trigger,
             'timestamp': DateTime.now().toIso8601String(),

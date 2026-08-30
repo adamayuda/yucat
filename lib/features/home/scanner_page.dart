@@ -7,9 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/home/bloc/home_bloc.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/l10n/app_localizations.dart';
+import 'package:yucat/service_locator.dart';
 
 @RoutePage()
 class ScannerPage extends StatefulWidget {
@@ -32,6 +35,15 @@ class _ScannerPageState extends State<ScannerPage>
   bool _isTakingPicture = false;
   bool _hasCameraError = false;
 
+  /// Camera access is resolved once per scanner open, not once per
+  /// `_initCamera` — the lifecycle handler re-inits on every resume, and a
+  /// permission answer that has not changed is not news.
+  bool _accessReported = false;
+
+  /// Set when a photo is handed onward. Its absence at dispose is what makes
+  /// the visit a cancellation.
+  bool _captured = false;
+
   @override
   void initState() {
     super.initState();
@@ -42,8 +54,41 @@ class _ScannerPageState extends State<ScannerPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    // Opening the camera and backing out used to look identical to never
+    // opening it: `Product Image Captured` was the first event in the funnel,
+    // so everything upstream of the shutter was invisible.
+    if (!_captured) {
+      sl<LogEventUsecase>().call(
+        eventName: AnalyticsEvents.scanCancelled,
+        properties: {
+          // Distinguishes "changed their mind" from "the camera never worked".
+          'camera_ready': _isCameraInitialized,
+          'camera_error': _hasCameraError,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+    }
     _cameraController?.dispose();
     super.dispose();
+  }
+
+  /// Reports whether the camera is usable, exactly once per scanner open.
+  ///
+  /// The plugin surfaces a permission refusal as a `CameraException` whose code
+  /// is one of the `CameraAccess*` values, so denial is separable from a device
+  /// with no camera or a driver failure — worth keeping apart, because only the
+  /// first is recoverable by the user in Settings.
+  void _reportCameraAccess({required bool granted, String? errorCode}) {
+    if (_accessReported) return;
+    _accessReported = true;
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.cameraAccessResult,
+      properties: {
+        'granted': granted,
+        if (errorCode != null) 'error_code': errorCode,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
   }
 
   @override
@@ -78,6 +123,7 @@ class _ScannerPageState extends State<ScannerPage>
       final cameras = await availableCameras();
       if (!mounted) return;
       if (cameras.isEmpty) {
+        _reportCameraAccess(granted: false, errorCode: 'no_camera');
         setState(() => _hasCameraError = true);
         return;
       }
@@ -89,6 +135,7 @@ class _ScannerPageState extends State<ScannerPage>
       );
 
       await _cameraController!.initialize();
+      _reportCameraAccess(granted: true);
       if (mounted) {
         setState(() {
           _isCameraInitialized = true;
@@ -97,6 +144,10 @@ class _ScannerPageState extends State<ScannerPage>
       }
     } catch (e) {
       debugPrint('Camera init error: $e');
+      _reportCameraAccess(
+        granted: false,
+        errorCode: e is CameraException ? e.code : 'unknown',
+      );
       if (mounted) {
         setState(() => _hasCameraError = true);
       }
@@ -106,6 +157,7 @@ class _ScannerPageState extends State<ScannerPage>
   }
 
   void _onImageCaptured(String imageBase64, String mimeType) {
+    _captured = true;
     final router = context.router;
 
     // Caller-handled mode (e.g. onboarding): hand the image back and pop.

@@ -7,8 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
-import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
-import 'package:yucat/features/auth/domain/usecase/signin_anonymously_usecase.dart';
+import 'package:yucat/features/auth/domain/usecase/ensure_signed_in_usecase.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
@@ -27,8 +26,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final FetchProductByImageUsecase _fetchProductByImageUsecase;
   final ProductEntityToModelMapper _productEntityToModelMapper;
   final LitterEntityToModelMapper _litterEntityToModelMapper;
-  final CurrentUserUsecase _currentUserUsecase;
-  final SigninAnonymouslyUsecase _signinAnonymouslyUsecase;
+  final EnsureSignedInUsecase _ensureSignedInUsecase;
   final ReviewPromptService _reviewPromptService;
   final GetCatsUsecase _getCatsUsecase;
   final AddScanToHistoryUsecase _addScanToHistoryUsecase;
@@ -43,8 +41,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required FetchProductByImageUsecase fetchProductByImageUsecase,
     required ProductEntityToModelMapper productEntityToModelMapper,
     required LitterEntityToModelMapper litterEntityToModelMapper,
-    required CurrentUserUsecase currentUserUsecase,
-    required SigninAnonymouslyUsecase signinAnonymouslyUsecase,
+    required EnsureSignedInUsecase ensureSignedInUsecase,
     required ReviewPromptService reviewPromptService,
     required GetCatsUsecase getCatsUsecase,
     required AddScanToHistoryUsecase addScanToHistoryUsecase,
@@ -56,8 +53,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }) : _fetchProductByImageUsecase = fetchProductByImageUsecase,
        _productEntityToModelMapper = productEntityToModelMapper,
        _litterEntityToModelMapper = litterEntityToModelMapper,
-       _currentUserUsecase = currentUserUsecase,
-       _signinAnonymouslyUsecase = signinAnonymouslyUsecase,
+       _ensureSignedInUsecase = ensureSignedInUsecase,
        _reviewPromptService = reviewPromptService,
        _getCatsUsecase = getCatsUsecase,
        _addScanToHistoryUsecase = addScanToHistoryUsecase,
@@ -77,12 +73,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   ) async {
     emit(HomeLoadingState());
 
-    final currentUser = _currentUserUsecase();
-    if (currentUser == null) {
-      await _signinAnonymouslyUsecase();
-    }
-
-    final user = _currentUserUsecase();
+    final user = await _ensureSignedInUsecase();
 
     // Bind the anonymous Firebase UID as the Mixpanel distinct id so People
     // properties attach to a stable profile (idempotent per session).
@@ -103,6 +94,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         unawaited(_userAnalyticsService.syncCats(
           count: cats.length,
           primaryAgeGroup: cats.isNotEmpty ? cats.first.ageGroup : null,
+          primaryBreed: cats.isNotEmpty ? cats.first.breed : null,
         ));
         // Same correction for the OneSignal tag — cat_create only ever sets
         // has_cat = true, so this is where a delete gets reflected.
@@ -124,7 +116,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async {
     _logEventUsecase.call(
-      eventName: 'Product Image Captured',
+      eventName: AnalyticsEvents.productImageCaptured,
       properties: {
         'mime_type': event.mimeType,
         'timestamp': DateTime.now().toIso8601String(),
@@ -132,6 +124,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     );
 
     emit(HomeScanningState(imageBase64: event.imageBase64));
+
+    // Wall-clock from shutter to result. The backend can fan out to four
+    // parallel sources and web search, so `deadline-exceeded` is a real,
+    // already-classified error type — without a duration on the outcome there
+    // is no way to see the distribution creeping toward the timeout.
+    final startedAt = DateTime.now();
+    int elapsedMs() => DateTime.now().difference(startedAt).inMilliseconds;
 
     try {
       final scan = await _fetchProductByImageUsecase.call(
@@ -143,9 +142,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
       if (scan == null) {
         _logEventUsecase.call(
-          eventName: 'Product Image Scan Failed',
+          eventName: AnalyticsEvents.productImageScanFailed,
           properties: {
             'error_type': 'not_found',
+            'duration_ms': elapsedMs(),
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
@@ -156,7 +156,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // The camera is one entry point for both categories — the backend decides
       // which it was, and the two results have their own screens and stores.
       if (scan is ScanLitterResult) {
-        await _onLitterScanned(scan, event);
+        await _onLitterScanned(scan, event, durationMs: elapsedMs());
         return;
       }
 
@@ -170,11 +170,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       } catch (_) {}
 
       _logEventUsecase.call(
-        eventName: 'Product Selected',
+        eventName: AnalyticsEvents.productSelected,
         properties: {
           'product_name': productDetailModel.name,
           'product_brand': productDetailModel.brand,
           'source': 'image',
+          'duration_ms': elapsedMs(),
           'timestamp': DateTime.now().toIso8601String(),
         },
       );
@@ -192,10 +193,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       add(HomeInitialEvent());
     } catch (e) {
       _logEventUsecase.call(
-        eventName: 'Product Image Scan Failed',
+        eventName: AnalyticsEvents.productImageScanFailed,
         properties: {
           'error_type': 'error',
           'error_message': e.toString(),
+          'duration_ms': elapsedMs(),
           'timestamp': DateTime.now().toIso8601String(),
         },
       );
@@ -208,8 +210,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   /// toward `total_scans` and the review-prompt gate exactly like a food one.
   Future<void> _onLitterScanned(
     ScanLitterResult scan,
-    ImageCapturedEvent event,
-  ) async {
+    ImageCapturedEvent event, {
+    required int durationMs,
+  }) async {
     final litterModel = _litterEntityToModelMapper(scan.litter);
 
     // Best-effort: a persistence failure must never block the result screen.
@@ -224,6 +227,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         'litter_brand': litterModel.brand,
         'litter_material': litterModel.material.wire,
         'source': 'image',
+        'duration_ms': durationMs,
         'timestamp': DateTime.now().toIso8601String(),
       },
     );

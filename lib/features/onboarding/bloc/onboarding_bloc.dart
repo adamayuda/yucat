@@ -69,7 +69,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     _stepsViewed = 1;
 
     _logEventUsecase.call(
-      eventName: 'Onboarding Started',
+      eventName: AnalyticsEvents.onboardingStarted,
       properties: {
         'source': 'first_launch',
         'timestamp': DateTime.now().toIso8601String(),
@@ -94,8 +94,13 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     _logEventUsecase.call(
       eventName: AnalyticsEvents.onboardingStepViewed,
       properties: {
+        // Position in the PageView. Correct for ordering a chart, WRONG as a
+        // funnel key — it is reused when a screen is swapped out. Break funnels
+        // down by step_name or step_id instead.
         'step_index': index,
         'step_name': phase.name,
+        // Stable across releases; see OnBoardingPhaseAnalytics.
+        'step_id': phase.stepId,
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
@@ -113,7 +118,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     Emitter<OnBoardingState> emit,
   ) {
     _logEventUsecase.call(
-      eventName: 'Onboarding Get Started Tapped',
+      eventName: AnalyticsEvents.onboardingGetStartedTapped,
       properties: {'timestamp': DateTime.now().toIso8601String()},
     );
 
@@ -135,7 +140,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     Emitter<OnBoardingState> emit,
   ) {
     _logEventUsecase.call(
-      eventName: 'Onboarding Attribution Selected',
+      eventName: AnalyticsEvents.onboardingAttributionSelected,
       properties: {
         'source': event.source,
         'timestamp': DateTime.now().toIso8601String(),
@@ -159,7 +164,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     Emitter<OnBoardingState> emit,
   ) {
     _logEventUsecase.call(
-      eventName: 'Onboarding Attribution Skipped',
+      eventName: AnalyticsEvents.onboardingAttributionSkipped,
       properties: {'timestamp': DateTime.now().toIso8601String()},
     );
     _stepsViewed++;
@@ -293,7 +298,7 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
         : null;
 
     _logEventUsecase.call(
-      eventName: 'Onboarding Completed',
+      eventName: AnalyticsEvents.onboardingCompleted,
       properties: {
         'total_time_seconds': totalTimeSeconds,
         'steps_viewed': _stepsViewed,
