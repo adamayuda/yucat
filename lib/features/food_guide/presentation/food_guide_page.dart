@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/content_analytics.dart';
 import 'package:yucat/features/food_guide/presentation/bloc/food_guide_bloc.dart';
 import 'package:yucat/features/food_guide/presentation/models/food_guide_display_model.dart';
 import 'package:yucat/features/food_guide/presentation/widgets/food_guide_list_row.dart';
@@ -62,6 +64,7 @@ class _FoodGuidePageState extends State<FoodGuidePage> {
   }
 
   void _openItem(FoodGuideDisplayModel item) {
+    logFoodGuideItemSelected(item, source: ContentSource.foodGuideList);
     context.router.push(FoodGuideDetailRoute(item: item));
   }
 

@@ -1,6 +1,9 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/content_analytics.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/articles/presentation/bloc/articles_bloc.dart';
@@ -36,6 +39,10 @@ class _ArticlesPageState extends State<ArticlesPage> {
   String? _language;
   final TextEditingController _searchController = TextEditingController();
 
+  /// Analytics-only debounce — see the note in `recipes_page.dart`.
+  static const _searchDebounceTag = 'articles_search_analytics';
+  static const _searchDebounce = Duration(milliseconds: 800);
+
   @override
   void initState() {
     super.initState();
@@ -60,6 +67,7 @@ class _ArticlesPageState extends State<ArticlesPage> {
   @override
   void dispose() {
     // Both are ours: the controller and, unlike `RecipesPage`, the bloc.
+    EasyDebounce.cancel(_searchDebounceTag);
     _searchController.dispose();
     _bloc.close();
     super.dispose();
@@ -67,14 +75,31 @@ class _ArticlesPageState extends State<ArticlesPage> {
 
   void _onQueryChanged(String value) {
     _bloc.add(ArticlesQueryChanged(query: value));
+
+    final query = value.trim();
+    if (query.length < 3) {
+      EasyDebounce.cancel(_searchDebounceTag);
+      return;
+    }
+    EasyDebounce.debounce(_searchDebounceTag, _searchDebounce, () {
+      final state = _bloc.state;
+      if (state is! ArticlesLoadedState) return;
+      logContentSearched(
+        eventName: AnalyticsEvents.articlesSearched,
+        query: query,
+        resultsCount: state.visible.length,
+      );
+    });
   }
 
   void _onClear() {
+    EasyDebounce.cancel(_searchDebounceTag);
     _searchController.clear();
     _bloc.add(const ArticlesQueryChanged(query: ''));
   }
 
   void _openArticle(ArticleDisplayModel article) {
+    logArticleSelected(article, source: ContentSource.articlesList);
     context.router.push(ArticleDetailRoute(article: article));
   }
 
@@ -85,71 +110,88 @@ class _ArticlesPageState extends State<ArticlesPage> {
     return Scaffold(
       backgroundColor: DSColors.pageBackground,
       body: SafeArea(
-        child: BlocBuilder<ArticlesBloc, ArticlesState>(
+        child: BlocListener<ArticlesBloc, ArticlesState>(
           bloc: _bloc,
-          buildWhen: (previous, current) => previous != current,
-          builder: (context, state) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Not DSAppBar.modal: that renders a bare IconButton, and this
-                // screen's back control is the white disc the detail screens
-                // use. The title sits below it, inline with the content.
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    DSDimens.sizeL,
-                    DSDimens.sizeXxs,
-                    DSDimens.sizeL,
-                    DSDimens.sizeS,
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: DSCircleIconButton(
-                      icon: Icons.chevron_left,
-                      size: 40,
-                      onPressed: () => context.router.maybePop(),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    DSDimens.sizeL,
-                    0,
-                    DSDimens.sizeL,
-                    DSDimens.sizeS,
-                  ),
-                  child: Text(
-                    l10n.articlesTitle,
-                    style: DSTextStyles.displayLg,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    DSDimens.sizeL,
-                    0,
-                    DSDimens.sizeL,
-                    DSDimens.sizeS,
-                  ),
-                  child: SearchTextField(
-                    controller: _searchController,
-                    hintText: l10n.articlesSearchHint,
-                    onChanged: _onQueryChanged,
-                    onClear: _onClear,
-                  ),
-                ),
-                ArticleCategoryStrip(
-                  selected: state is ArticlesLoadedState
-                      ? state.selectedCategory
-                      : null,
-                  onSelected: (category) => _bloc.add(
-                    ArticlesCategorySelected(category: category),
-                  ),
-                ),
-                const SizedBox(height: DSDimens.sizeS),
-                Expanded(child: _buildBody(state, l10n)),
-              ],
+          // From the resulting state, not the chip callback — see the note in
+          // `recipes_page.dart`.
+          listenWhen: (previous, current) =>
+              previous is ArticlesLoadedState &&
+              current is ArticlesLoadedState &&
+              previous.selectedCategory != current.selectedCategory,
+          listener: (context, state) {
+            final loaded = state as ArticlesLoadedState;
+            logContentFiltered(
+              eventName: AnalyticsEvents.articlesFiltered,
+              category: loaded.selectedCategory?.wire,
+              resultsCount: loaded.visible.length,
             );
           },
+          child: BlocBuilder<ArticlesBloc, ArticlesState>(
+            bloc: _bloc,
+            buildWhen: (previous, current) => previous != current,
+            builder: (context, state) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Not DSAppBar.modal: that renders a bare IconButton, and this
+                  // screen's back control is the white disc the detail screens
+                  // use. The title sits below it, inline with the content.
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      DSDimens.sizeL,
+                      DSDimens.sizeXxs,
+                      DSDimens.sizeL,
+                      DSDimens.sizeS,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: DSCircleIconButton(
+                        icon: Icons.chevron_left,
+                        size: 40,
+                        onPressed: () => context.router.maybePop(),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      DSDimens.sizeL,
+                      0,
+                      DSDimens.sizeL,
+                      DSDimens.sizeS,
+                    ),
+                    child: Text(
+                      l10n.articlesTitle,
+                      style: DSTextStyles.displayLg,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      DSDimens.sizeL,
+                      0,
+                      DSDimens.sizeL,
+                      DSDimens.sizeS,
+                    ),
+                    child: SearchTextField(
+                      controller: _searchController,
+                      hintText: l10n.articlesSearchHint,
+                      onChanged: _onQueryChanged,
+                      onClear: _onClear,
+                    ),
+                  ),
+                  ArticleCategoryStrip(
+                    selected: state is ArticlesLoadedState
+                        ? state.selectedCategory
+                        : null,
+                    onSelected: (category) => _bloc.add(
+                      ArticlesCategorySelected(category: category),
+                    ),
+                  ),
+                  const SizedBox(height: DSDimens.sizeS),
+                  Expanded(child: _buildBody(state, l10n)),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

@@ -94,6 +94,7 @@ import 'package:yucat/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/remote_config_service.dart';
 import 'package:yucat/services/review_prompt_service.dart';
+import 'package:yucat/services/session_replay_service.dart';
 import 'package:yucat/services/scan_tracking_service.dart';
 import 'package:yucat/services/cat_tracking_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
@@ -267,7 +268,11 @@ Future<void> _registerRepositories() async {
     ),
   );
   sl.registerSingleton<AnalyticsRepository>(
-    AnalyticsRepositoryImpl(mixpanel: sl<Mixpanel>()),
+    AnalyticsRepositoryImpl(
+      mixpanel: sl<Mixpanel>(),
+      // Lazy: SessionReplayService is registered later, in _registerServices.
+      replayIdProvider: () => sl<SessionReplayService>().replayId,
+    ),
   );
   sl.registerSingleton<ProductRepository>(
     ProductRepositoryImpl(
@@ -451,10 +456,23 @@ Future<void> _registerUseCases() async {
 }
 
 Future<void> _registerServices() async {
+  // Registered first: SessionReplayService reads its kill switch from it, and
+  // UserAnalyticsService in turn depends on SessionReplayService. Note this is
+  // registration only — `initialize()` (the actual fetch) is awaited in
+  // `main.dart` before `runApp`, which is before anything reads a value.
+  sl.registerSingleton<RemoteConfigService>(RemoteConfigService());
+  sl.registerSingleton<SessionReplayService>(
+    SessionReplayService(
+      token: _mixpanelToken,
+      mixpanel: sl<Mixpanel>(),
+      remoteConfig: sl<RemoteConfigService>(),
+    ),
+  );
   sl.registerSingleton<UserAnalyticsService>(
     UserAnalyticsService(
       identifyUserUsecase: sl<IdentifyUserUsecase>(),
       setUserPropertiesUsecase: sl<SetUserPropertiesUsecase>(),
+      sessionReplayService: sl<SessionReplayService>(),
     ),
   );
   sl.registerSingleton<ScanTrackingService>(
@@ -487,7 +505,6 @@ Future<void> _registerServices() async {
       prefs: sl<SharedPreferences>(),
     ),
   );
-  sl.registerSingleton<RemoteConfigService>(RemoteConfigService());
 }
 
 extension BlocProviderRegistration on GetIt {

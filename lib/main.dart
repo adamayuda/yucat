@@ -29,6 +29,11 @@ import 'package:yucat/features/scan_history/presentation/bloc/scan_history_bloc.
 import 'package:yucat/service_locator.dart';
 import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/remote_config_service.dart';
+import 'package:yucat/services/session_replay_service.dart';
+// `show` scoped: the package also exports a `LogLevel` that collides with
+// RevenueCat's, used by `_configureRevenueCat` below.
+import 'package:mixpanel_flutter_session_replay/mixpanel_flutter_session_replay.dart'
+    show MixpanelSessionReplay, MixpanelSessionReplayWidget;
 
 import 'config/routes/analytics_route_observer.dart';
 import 'config/routes/router.dart';
@@ -55,6 +60,15 @@ Future<void> main() async {
   if (Platform.isIOS) {
     await sl<NotificationService>().initialize();
   }
+
+  // Awaited BEFORE runApp on purpose. `MixpanelSessionReplayWidget` renders its
+  // child bare while the instance is null, then wraps it in three widgets once
+  // one arrives — a different widget type in that slot, so Flutter unmounts the
+  // whole app subtree and rebuilds it. That closes every root bloc while live
+  // pages still hold references to them ("Cannot add new events after calling
+  // close"). Resolving first means the tree shape never changes. Cost is a
+  // local SQLite open, small next to the Remote Config fetch just above.
+  await sl<SessionReplayService>().start();
 
   runApp(App());
 }
@@ -86,6 +100,13 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> with WidgetsBindingObserver {
   final _appRouter = AppRouter();
+
+  /// Resolved in `main()` before `runApp`, so this is its final value — null
+  /// when replay is off for this build, non-null when it is on, and never
+  /// changing in between. See the note at the `start()` call: a null -> instance
+  /// transition here would remount the entire app.
+  final MixpanelSessionReplay? _sessionReplay =
+      sl<SessionReplayService>().instance;
 
   void _logAppOpened(String launchType) {
     final hasOnboarded = sl<SharedPreferences>().getBool('onboarding_completed') ?? false;
@@ -122,52 +143,55 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (context) => sl<OnBoardingBloc>()),
-        BlocProvider(create: (context) => sl<HomeBloc>()),
-        BlocProvider(create: (context) => sl<ProfileBloc>()),
-        BlocProvider(create: (context) => sl<RecipesBloc>()),
-        BlocProvider(create: (context) => sl<ProductDetailBloc>()),
-        BlocProvider(create: (context) => sl<LitterDetailBloc>()),
-        BlocProvider(create: (context) => sl<SavedProductsBloc>()),
-        BlocProvider(create: (context) => sl<ScanHistoryBloc>()),
-        BlocProvider(create: (context) => sl<CatListingBloc>()),
-        // CatCreateBloc is intentionally NOT provided here — CreateCatPage owns
-        // a fresh instance per session so wizard state never leaks across runs.
-        BlocProvider(create: (context) => sl<CatDetailBloc>()),
-        BlocProvider(create: (context) => sl<ProductListingBloc>()),
-        BlocProvider(create: (context) => sl<PaywallBloc>()),
-        BlocProvider(create: (context) => sl<SplashBloc>()),
-      ],
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        // Flutter's default falls back to supportedLocales.first, and the
-        // generated list is alphabetical — so an unmatched device language
-        // would resolve to GERMAN. Harmless for chrome, but recipes are served
-        // per language from Firestore, so it would hand a Japanese user German
-        // recipes. Fall back to English explicitly.
-        localeResolutionCallback: (locale, supported) {
-          if (locale != null) {
-            for (final candidate in supported) {
-              if (candidate.languageCode == locale.languageCode) {
-                return candidate;
+    return MixpanelSessionReplayWidget(
+      instance: _sessionReplay,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (context) => sl<OnBoardingBloc>()),
+          BlocProvider(create: (context) => sl<HomeBloc>()),
+          BlocProvider(create: (context) => sl<ProfileBloc>()),
+          BlocProvider(create: (context) => sl<RecipesBloc>()),
+          BlocProvider(create: (context) => sl<ProductDetailBloc>()),
+          BlocProvider(create: (context) => sl<LitterDetailBloc>()),
+          BlocProvider(create: (context) => sl<SavedProductsBloc>()),
+          BlocProvider(create: (context) => sl<ScanHistoryBloc>()),
+          BlocProvider(create: (context) => sl<CatListingBloc>()),
+          // CatCreateBloc is intentionally NOT provided here — CreateCatPage owns
+          // a fresh instance per session so wizard state never leaks across runs.
+          BlocProvider(create: (context) => sl<CatDetailBloc>()),
+          BlocProvider(create: (context) => sl<ProductListingBloc>()),
+          BlocProvider(create: (context) => sl<PaywallBloc>()),
+          BlocProvider(create: (context) => sl<SplashBloc>()),
+        ],
+        child: MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          // Flutter's default falls back to supportedLocales.first, and the
+          // generated list is alphabetical — so an unmatched device language
+          // would resolve to GERMAN. Harmless for chrome, but recipes are served
+          // per language from Firestore, so it would hand a Japanese user German
+          // recipes. Fall back to English explicitly.
+          localeResolutionCallback: (locale, supported) {
+            if (locale != null) {
+              for (final candidate in supported) {
+                if (candidate.languageCode == locale.languageCode) {
+                  return candidate;
+                }
               }
             }
-          }
-          return const Locale('en');
-        },
-        routerConfig: _appRouter.config(
-          navigatorObservers: () => [
-            ...AutoRouterDelegate.defaultNavigatorObserversBuilder(),
-            AnalyticsRouteObserver(
-              logScreenViewUsecase: sl<LogScreenViewUsecase>(),
-              router: _appRouter,
-            ),
-          ],
+            return const Locale('en');
+          },
+          routerConfig: _appRouter.config(
+            navigatorObservers: () => [
+              ...AutoRouterDelegate.defaultNavigatorObserversBuilder(),
+              AnalyticsRouteObserver(
+                logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+                router: _appRouter,
+              ),
+            ],
+          ),
         ),
       ),
     );

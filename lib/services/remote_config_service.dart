@@ -10,6 +10,16 @@ class RemoteConfigService {
   /// for new onboarding sessions without shipping a build.
   static const String onboardingScanEnabledKey = 'onboarding_scan_enabled';
 
+  /// When `false`, Mixpanel Session Replay never starts, whatever the build
+  /// type. Lets us stop recording from the Firebase console without shipping a
+  /// build — e.g. if replay quota runs low or a privacy question comes up.
+  static const String sessionReplayEnabledKey = 'session_replay_enabled';
+
+  /// Percentage of sessions to record (0–100). `0` is equivalent to disabling
+  /// replay; the SDK asserts the value is in range, so the getter clamps.
+  static const String sessionReplaySamplePercentKey =
+      'session_replay_sample_percent';
+
   final FirebaseRemoteConfig _remoteConfig;
 
   RemoteConfigService({FirebaseRemoteConfig? remoteConfig})
@@ -22,6 +32,8 @@ class RemoteConfigService {
     try {
       await _remoteConfig.setDefaults(const {
         onboardingScanEnabledKey: true,
+        sessionReplayEnabledKey: true,
+        sessionReplaySamplePercentKey: 100.0,
       });
       await _remoteConfig.setConfigSettings(
         RemoteConfigSettings(
@@ -37,4 +49,10 @@ class RemoteConfigService {
 
   bool get onboardingScanEnabled =>
       _remoteConfig.getBool(onboardingScanEnabledKey);
+
+  bool get sessionReplayEnabled =>
+      _remoteConfig.getBool(sessionReplayEnabledKey);
+
+  double get sessionReplaySamplePercent =>
+      _remoteConfig.getDouble(sessionReplaySamplePercentKey).clamp(0, 100);
 }

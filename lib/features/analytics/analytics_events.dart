@@ -50,6 +50,40 @@ class AnalyticsEvents {
   static const litterDetailViewed = 'Litter Detail Viewed';
   static const litterSaved = 'Litter Saved';
   static const litterUnsaved = 'Litter Unsaved';
+
+  // Content discovery — recipes, articles, food guide. `Screen View` already
+  // covers the routes (AnalyticsRouteObserver); these carry which item and,
+  // via `source`, which surface it was opened from.
+  static const recipeSelected = 'Recipe Selected';
+  static const recipesSearched = 'Recipes Searched';
+  static const recipesFiltered = 'Recipes Filtered';
+  static const articleSelected = 'Article Selected';
+  static const articlesSearched = 'Articles Searched';
+  static const articlesFiltered = 'Articles Filtered';
+  static const foodGuideItemSelected = 'Food Guide Item Selected';
+  static const contentSeeAllTapped = 'Content See All Tapped';
+}
+
+/// Values for the `source` property on content-discovery events — separates a
+/// Home lane tap from one on the item's own list screen, which is what makes
+/// lane conversion measurable.
+class ContentSource {
+  ContentSource._();
+
+  static const homeLane = 'home_lane';
+  static const homeNewsCard = 'home_news_card';
+  static const recipesTab = 'recipes_tab';
+  static const articlesList = 'articles_list';
+  static const foodGuideList = 'food_guide_list';
+}
+
+/// Values for the `section` property on [AnalyticsEvents.contentSeeAllTapped].
+class ContentSection {
+  ContentSection._();
+
+  static const recipes = 'recipes';
+  static const articles = 'articles';
+  static const foodGuide = 'food_guide';
 }
 
 /// Values for the `trigger` property on paywall events — lets Mixpanel funnels

@@ -37,6 +37,10 @@ const FILE_TO_RECIPE: Record<string, string> = {
   "Mini-gâteau au thon": "tuna-mini-cake",
   "Bouchées glacées au thon": "frozen-tuna-bites",
   "Bouchées glacées à la pâtée": "frozen-wet-food-bites",
+  // Supplied later, via YUC-19. Lowercase and "+" rather than "&" as the
+  // designer named them — the stems must match the files byte for byte.
+  "poulet & courgette": "chicken-zucchini",
+  "saumon + potiron": "salmon-pumpkin",
 };
 
 const args = process.argv.slice(2);

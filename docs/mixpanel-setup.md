@@ -21,13 +21,14 @@ UI labels below match Mixpanel as of 2026; if a menu moved, search the top bar �
    Pick data residency = **US** (matches your Firebase `us-central1`; only matters for EU data
    rules).
 2. **Copy the Project Token.** Gear ⚙️ → **Project Settings → Access Keys → "Project Token"**.
-   Copy that string and **paste it back to me** — I'll swap it into
-   `lib/service_locator.dart:_mixpanelToken` (there's a `TODO(revamp)` marker there now). The
-   app currently still points at the old token, so nothing breaks until we swap.
+   Copy that string and **paste it back to me** — it lives in
+   `lib/service_locator.dart:_mixpanelToken`. ✅ Already done: the app points at the v2 token.
+   The same const also seeds Session Replay (step 7 below).
 3. **Confirm identity mode.** Gear ⚙️ → **Project Settings → Identity Merge** → ensure
    **"ID Merge" is ON** (it's the default for new projects). This is what lets our
-   `mixpanel.identify(<firebase_uid>)` call (in `HomeBloc`) fuse the anonymous device profile
-   with the logged-in profile, so a user's pre- and post-identify events stay on one profile.
+   `mixpanel.identify(<firebase_uid>)` call (in `SplashBloc` at boot, repeated idempotently in
+   `HomeBloc`) fuse the anonymous device profile with the logged-in profile, so a user's pre-
+   and post-identify events stay on one profile.
 4. **Run the new build** (after I swap the token) on a device/simulator and use the app:
    launch → onboarding → paywall → (sandbox) subscribe → create a cat → scan.
 5. **Verify in Live View.** Left nav → **Events** → toggle **"Live View"** (real-time stream).
@@ -37,6 +38,18 @@ UI labels below match Mixpanel as of 2026; if a menu moved, search the top bar �
    Click any event row → check the properties panel shows `tracking_version`, `$app_version_string`.
 6. **Confirm no leakage.** Open the **old** project's Live View → the new build should send it
    **nothing** (only phones still running the legacy app appear there).
+7. **Turn on Session Replay.** Gear ⚙️ → **Project Settings → Session Replay** → enable it for
+   this project. Nothing is stored until this is on, however the app is configured.
+   - Verify with a **release** build (replay is off in debug unless you flip
+     `kTestBuildForceSessionReplay` in `lib/config/test_flags.dart`). In Live View look for a
+     **`$mp_session_record`** checkpoint event — that's Mixpanel's proof that replay initialised.
+     It doesn't count against your data allowance.
+   - Then open any normal event (say `Onboarding Step Viewed`) and confirm it carries
+     **`$mp_replay_id`**. That property is what makes the "watch session" affordance appear on
+     funnel steps and in the Users view.
+   - Sampling and the kill switch are **Firebase Remote Config**, not Mixpanel:
+     `session_replay_enabled` (bool) and `session_replay_sample_percent` (0–100). Both default
+     on/100 in-app, and a console change takes up to the 1 h fetch interval plus a cold launch.
 
 ✅ Once events stream into the new project, you're ready to build reports.
 

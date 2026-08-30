@@ -5,7 +5,9 @@ cohorts in the **Mixpanel** dashboard. Analytics is Mixpanel-primary (Firebase A
 infra exists but is unused). Events flow `LogEventUsecase → AnalyticsRepository →
 mixpanel.track(...)`. People properties flow through `UserAnalyticsService →
 SetUserPropertiesUsecase → mixpanel.getPeople().set/increment(...)`, bound to the
-anonymous Firebase UID via `mixpanel.identify(uid)` (called once per session in `HomeBloc`).
+anonymous Firebase UID via `mixpanel.identify(uid)` — called at boot in `SplashBloc`
+(`splash_bloc.dart`, right after anonymous sign-in), with `HomeBloc` making a second,
+idempotent call. `UserAnalyticsService._identified` is the per-session guard.
 
 New event/property names introduced for the funnel review live in
 `lib/features/analytics/analytics_events.dart`. Pre-existing events still use inline string
@@ -26,7 +28,7 @@ Set on the user's People profile (keyed by Firebase UID). Use these to **segment
 
 | Property | Type | Set where |
 |---|---|---|
-| `platform` | string (`ios`/`android`) | on identify (HomeBloc) |
+| `platform` | string (`ios`/`android`) | on identify (SplashBloc at boot) |
 | `is_subscriber` | bool | paywall purchase/restore; splash gate on every cold launch |
 | `subscription_plan` | string (`weekly`/`annual`) | paywall purchase |
 | `subscription_price` / `subscription_currency` | number / string | paywall purchase |
@@ -102,6 +104,32 @@ Stalled (`onboarding_completed = true` AND `is_subscriber = false`).
 | `Litter Selected` | `litter_name`, `litter_brand`, `litter_material`, `source` (`image`) |
 | `Litter Detail Viewed` | `litter_name`, `litter_brand`, `litter_material` |
 | `Litter Saved` / `Litter Unsaved` | `litter_name`, `litter_brand` |
+
+### Content discovery
+| Event | Key properties |
+|---|---|
+| `Recipe Selected` | `recipe_id`, `recipe_name`, `category`, `difficulty`, `prep_minutes`, `source` |
+| `Article Selected` | `article_id`, `article_title`, `category`, `read_minutes`, `source` |
+| `Food Guide Item Selected` | `item_id`, `item_name`, `safety`, `source` |
+| `Recipes Searched` / `Articles Searched` | `query`, `query_length`, `results_count` |
+| `Recipes Filtered` / `Articles Filtered` | `category` (`"all"` for the All chip), `results_count` |
+| `Content See All Tapped` | `section` (`recipes` / `articles` / `food_guide`) |
+
+`source` values come from `ContentSource`: `home_lane`, `home_news_card`, `recipes_tab`,
+`articles_list`, `food_guide_list` — the news card and the articles lane are separated
+because they open the same route from different surfaces.
+
+⚠️ **There is no `… Detail Viewed` event for these three.** The detail pages are stateless
+and bloc-free, `AnalyticsRouteObserver` already emits `Screen View` for their routes, and
+every path into them is one of the `… Selected` taps above, so the two would be 1:1. Add one
+if the app gains deep links into a detail screen.
+
+⚠️ **Emitted from the widget layer, never the blocs.** `ArticlesBloc` is constructed three
+times concurrently (Home's news card, Home's articles lane, `ArticlesPage`) and
+`RecipesBloc` / `FoodGuideBloc` twice each — a bloc-level hook fires two or three times per
+user action. The search events are debounced 800 ms in the page (`EasyDebounce`) because the
+list blocs filter in memory with no debounce; the filter events are logged from a
+`BlocListener` so `results_count` reflects the state *after* the change.
 
 ⚠️ **The capture and failure events are shared with food.** The camera is a single entry
 point — the backend decides whether the photo was food or litter — so
@@ -203,11 +231,78 @@ Build from `Cat Creation Step Completed` broken down by `step_name` (CatName →
 ProfilePhoto → Age → BodyCondition → Activity → … → Breed) to see which step sheds users.
 `Cat Creation Step Abandoned` shows backward movement.
 
+**G. Content discovery (Home lane → open → engage)**
+```
+Screen View (screen_name = HomeRoute)
+  → Content See All Tapped (section = recipes | articles | food_guide)
+  → Recipe Selected | Article Selected | Food Guide Item Selected
+```
+Run it twice, filtered on `source = home_lane` vs the list sources, to separate lane
+conversion from list-screen browsing. The lane has no impression event yet, so use
+`Screen View (HomeRoute)` as the denominator — it over-counts slightly, because a lane
+hides itself when its Firestore read fails or returns nothing. Break `Recipe Selected` down
+by `category` to see which content earns the taps, and watch `Recipes Filtered` /
+`Articles Filtered` for whether the category chips are used at all — if they aren't, the
+strips are costing vertical space for nothing.
+
 ---
 
-## 4. Maintenance
+## 4. Session Replay
+
+`mixpanel_flutter_session_replay` records screen captures alongside the events above, so any
+funnel step can be opened as "what did this user actually do". Owned by
+`lib/services/session_replay_service.dart`; the recording surface is
+`MixpanelSessionReplayWidget` wrapped around the app in `main.dart`.
+
+**It is a second, standalone SDK.** Pure Dart, with no bridge into `mixpanel_flutter`'s native
+`track`, so nothing is shared for free. Two hooks make replays and events line up, and both are
+load-bearing:
+
+| Hook | Where | Breaks if removed |
+|---|---|---|
+| `sessionReplayService.identify(uid)` | `UserAnalyticsService.identify` | Replays file under the pre-sign-in anonymous id, on a different profile than the events |
+| `$mp_replay_id` on every event | `AnalyticsRepositoryImpl._withReplayId` | No event links to its replay; only Mixpanel's server-side stitching (distinct id + timestamp) would associate them |
+
+Identity has a race: `SplashBloc` identifies at boot and can beat the SDK's async
+`initialize()`, so `SessionReplayService` buffers the uid in `_pendingDistinctId` and applies it
+once the instance exists.
+
+⚠️ **Boot order is load-bearing.** `start()` is awaited in `main()` before `runApp`.
+`MixpanelSessionReplayWidget` renders its child bare while `instance` is null and wraps it in
+three widgets once one arrives — a different widget type in the same slot, so Flutter unmounts
+the whole app subtree and rebuilds it, closing every root bloc under live pages. Moving the call
+back into `initState` (as Mixpanel's docs suggest) reintroduces
+`Bad state: Cannot add new events after calling close` on the first tap after init resolves.
+
+**When it records**
+
+- Release builds only — `kReleaseMode || kTestBuildForceSessionReplay` (`lib/config/test_flags.dart`).
+- AND `session_replay_enabled` is true in Remote Config, AND `session_replay_sample_percent > 0`.
+- Recording is never started explicitly: the widget starts it when the app foregrounds, sampling
+  at `session_replay_sample_percent`. It stops itself when the app loses focus.
+
+**Masking** — `autoMaskedViews: {AutoMaskedView.image}`.
+
+- Images are masked: cat photos, product images, scan captures.
+- Text is deliberately **not** masked, so replays are readable.
+- Text *input* (`TextField`, `TextFormField`, `CupertinoTextField`) is masked by the SDK
+  unconditionally and cannot be unmasked — typed cat names are covered for free.
+- ⚠️ A new surface that renders user-supplied text outside a text field needs an explicit
+  `MixpanelMask` wrapper.
+
+**Verifying it works** — a `$mp_session_record` checkpoint event appears in Mixpanel whenever a
+capture begins. It does not count against the data allowance, and it is the documented proof
+that replay initialised correctly. Then check that one of our own events carries
+`$mp_replay_id`.
+
+---
+
+## 5. Maintenance
 
 - Add new event/property names to `lib/features/analytics/analytics_events.dart` and this doc.
 - Keep `trigger` values in `PaywallTrigger` aligned with the funnel definitions above.
-- People properties are only meaningful because `mixpanel.identify(uid)` runs in `HomeBloc`;
-  don't remove that call.
+- People properties are only meaningful because `mixpanel.identify(uid)` runs at boot in
+  `SplashBloc` (with `HomeBloc` as an idempotent second call); don't remove either.
+- Session Replay is a **separate SDK** that shares nothing automatically — if you add a new
+  path that identifies the user or tracks an event outside `AnalyticsRepositoryImpl`, mirror
+  the two hooks in §4 or replays and events will drift apart.

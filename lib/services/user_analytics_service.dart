@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/identify_user_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/set_user_properties_usecase.dart';
+import 'package:yucat/services/session_replay_service.dart';
 
 /// Single place that owns Mixpanel People-profile identity and properties, so
 /// property names live in one file and call sites stay one-liners.
@@ -13,25 +14,33 @@ import 'package:yucat/features/analytics/domain/usecase/set_user_properties_usec
 class UserAnalyticsService {
   final IdentifyUserUsecase _identifyUserUsecase;
   final SetUserPropertiesUsecase _setUserPropertiesUsecase;
+  final SessionReplayService _sessionReplayService;
 
   bool _identified = false;
 
   UserAnalyticsService({
     required IdentifyUserUsecase identifyUserUsecase,
     required SetUserPropertiesUsecase setUserPropertiesUsecase,
-  })  : _identifyUserUsecase = identifyUserUsecase,
-        _setUserPropertiesUsecase = setUserPropertiesUsecase;
+    required SessionReplayService sessionReplayService,
+  }) : _identifyUserUsecase = identifyUserUsecase,
+       _setUserPropertiesUsecase = setUserPropertiesUsecase,
+       _sessionReplayService = sessionReplayService;
 
   String get _platform =>
       Platform.isIOS ? 'ios' : (Platform.isAndroid ? 'android' : 'other');
 
   /// Bind events to a stable profile keyed by the anonymous Firebase UID.
   /// Idempotent per session; also stamps the platform once.
+  ///
+  /// Session Replay is a separate SDK with its own copy of the distinct id, so
+  /// it has to be pointed at the same uid here — otherwise replays and events
+  /// land on two different Mixpanel profiles.
   Future<void> identify(String uid) async {
     if (_identified || uid.isEmpty) return;
     _identified = true;
     try {
       await _identifyUserUsecase(uid);
+      _sessionReplayService.identify(uid);
       await _setUserPropertiesUsecase({UserProps.platform: _platform});
     } catch (e) {
       _identified = false;

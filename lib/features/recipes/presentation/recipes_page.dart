@@ -1,6 +1,9 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/content_analytics.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/recipes/presentation/bloc/recipes_bloc.dart';
@@ -28,6 +31,12 @@ class _RecipesPageState extends State<RecipesPage> {
   String? _language;
   final TextEditingController _searchController = TextEditingController();
 
+  /// Analytics-only debounce. The bloc filters in memory with no debounce
+  /// on purpose, so hooking the query change directly would emit one event
+  /// per keystroke. Same approach as `search_bloc.dart`.
+  static const _searchDebounceTag = 'recipes_search_analytics';
+  static const _searchDebounce = Duration(milliseconds: 800);
+
   @override
   void initState() {
     super.initState();
@@ -52,20 +61,41 @@ class _RecipesPageState extends State<RecipesPage> {
   @override
   void dispose() {
     // The controller is ours; the bloc is not.
+    EasyDebounce.cancel(_searchDebounceTag);
     _searchController.dispose();
     super.dispose();
   }
 
   void _onQueryChanged(String value) {
     _bloc.add(RecipesQueryChanged(query: value));
+
+    // Below 3 characters isn't a search yet — matches `search_bloc.dart`.
+    final query = value.trim();
+    if (query.length < 3) {
+      EasyDebounce.cancel(_searchDebounceTag);
+      return;
+    }
+    EasyDebounce.debounce(_searchDebounceTag, _searchDebounce, () {
+      // Read the state now, not at keystroke time: the filter has settled, so
+      // `visible` is the count the user is actually looking at.
+      final state = _bloc.state;
+      if (state is! RecipesLoadedState) return;
+      logContentSearched(
+        eventName: AnalyticsEvents.recipesSearched,
+        query: query,
+        resultsCount: state.visible.length,
+      );
+    });
   }
 
   void _onClear() {
+    EasyDebounce.cancel(_searchDebounceTag);
     _searchController.clear();
     _bloc.add(const RecipesQueryChanged(query: ''));
   }
 
   void _openRecipe(RecipeDisplayModel recipe) {
+    logRecipeSelected(recipe, source: ContentSource.recipesTab);
     context.router.push(RecipeDetailRoute(recipe: recipe));
   }
 
@@ -77,41 +107,59 @@ class _RecipesPageState extends State<RecipesPage> {
       backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
-        child: BlocBuilder<RecipesBloc, RecipesState>(
+        child: BlocListener<RecipesBloc, RecipesState>(
           bloc: _bloc,
-          buildWhen: (previous, current) => previous != current,
-          builder: (context, state) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                DSAppBar.tab(title: l10n.recipesTabTitle),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    DSDimens.sizeL,
-                    0,
-                    DSDimens.sizeL,
-                    DSDimens.sizeS,
-                  ),
-                  child: SearchTextField(
-                    controller: _searchController,
-                    hintText: l10n.recipesSearchHint,
-                    onChanged: _onQueryChanged,
-                    onClear: _onClear,
-                  ),
-                ),
-                RecipeCategoryStrip(
-                  selected: state is RecipesLoadedState
-                      ? state.selectedCategory
-                      : null,
-                  onSelected: (category) => _bloc.add(
-                    RecipesCategorySelected(category: category),
-                  ),
-                ),
-                const SizedBox(height: DSDimens.sizeS),
-                Expanded(child: _buildBody(context, state, l10n)),
-              ],
+          // Logged from the resulting state rather than the chip callback:
+          // `add()` is async, so `results_count` read at tap time would be the
+          // count for the *previous* category.
+          listenWhen: (previous, current) =>
+              previous is RecipesLoadedState &&
+              current is RecipesLoadedState &&
+              previous.selectedCategory != current.selectedCategory,
+          listener: (context, state) {
+            final loaded = state as RecipesLoadedState;
+            logContentFiltered(
+              eventName: AnalyticsEvents.recipesFiltered,
+              category: loaded.selectedCategory?.wire,
+              resultsCount: loaded.visible.length,
             );
           },
+          child: BlocBuilder<RecipesBloc, RecipesState>(
+            bloc: _bloc,
+            buildWhen: (previous, current) => previous != current,
+            builder: (context, state) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DSAppBar.tab(title: l10n.recipesTabTitle),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      DSDimens.sizeL,
+                      0,
+                      DSDimens.sizeL,
+                      DSDimens.sizeS,
+                    ),
+                    child: SearchTextField(
+                      controller: _searchController,
+                      hintText: l10n.recipesSearchHint,
+                      onChanged: _onQueryChanged,
+                      onClear: _onClear,
+                    ),
+                  ),
+                  RecipeCategoryStrip(
+                    selected: state is RecipesLoadedState
+                        ? state.selectedCategory
+                        : null,
+                    onSelected: (category) => _bloc.add(
+                      RecipesCategorySelected(category: category),
+                    ),
+                  ),
+                  const SizedBox(height: DSDimens.sizeS),
+                  Expanded(child: _buildBody(context, state, l10n)),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

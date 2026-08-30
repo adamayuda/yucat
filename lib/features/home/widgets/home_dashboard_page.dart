@@ -28,6 +28,10 @@ class HomeDashboardPage extends StatelessWidget {
   final VoidCallback onSeeAllArticles;
   final ValueChanged<ArticleDisplayModel> onArticleTap;
 
+  /// The news card opens an article too, but from a different surface — kept
+  /// separate from [onArticleTap] purely so analytics can tell the two apart.
+  final ValueChanged<ArticleDisplayModel> onNewsArticleTap;
+
   const HomeDashboardPage({
     super.key,
     required this.onSearchTap,
@@ -37,6 +41,7 @@ class HomeDashboardPage extends StatelessWidget {
     required this.onSeeAllFoodGuide,
     required this.onSeeAllArticles,
     required this.onArticleTap,
+    required this.onNewsArticleTap,
   });
 
   @override
@@ -68,7 +73,7 @@ class HomeDashboardPage extends StatelessWidget {
             const SizedBox(height: DSDimens.sizeL),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
-              child: HomeNewsCard(onArticleTap: onArticleTap),
+              child: HomeNewsCard(onArticleTap: onNewsArticleTap),
             ),
             const SizedBox(height: DSDimens.sizeL),
             // Unpadded on purpose — the lane scrolls under the screen edges.

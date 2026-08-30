@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/l10n/app_localizations.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/content_analytics.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/articles/presentation/models/article_display_model.dart';
 import 'package:yucat/features/food_guide/presentation/models/food_guide_display_model.dart';
@@ -49,28 +52,51 @@ class _HomePage extends State<HomePage> {
   /// §8c) — this is a fourth reader of that order. The screen-view log mirrors
   /// what the nav emits on a tab switch.
   void _openRecipesTab() {
+    _logSeeAll(ContentSection.recipes);
     AutoTabsRouter.of(context).setActiveIndex(1);
     sl<LogScreenViewUsecase>()(screenName: RecipesRoute.name);
   }
 
   void _openRecipe(RecipeDisplayModel recipe) {
+    logRecipeSelected(recipe, source: ContentSource.homeLane);
     context.router.push(RecipeDetailRoute(recipe: recipe));
   }
 
   void _openFoodGuideItem(FoodGuideDisplayModel item) {
+    logFoodGuideItemSelected(item, source: ContentSource.homeLane);
     context.router.push(FoodGuideDetailRoute(item: item));
   }
 
   void _openFoodGuide() {
+    _logSeeAll(ContentSection.foodGuide);
     context.router.push(const FoodGuideRoute());
   }
 
   void _openArticles() {
+    _logSeeAll(ContentSection.articles);
     context.router.push(const ArticlesRoute());
   }
 
   void _openArticle(ArticleDisplayModel article) {
+    logArticleSelected(article, source: ContentSource.homeLane);
     context.router.push(ArticleDetailRoute(article: article));
+  }
+
+  /// Same destination as [_openArticle]; separate only so the news card and the
+  /// articles lane report different `source` values.
+  void _openNewsArticle(ArticleDisplayModel article) {
+    logArticleSelected(article, source: ContentSource.homeNewsCard);
+    context.router.push(ArticleDetailRoute(article: article));
+  }
+
+  void _logSeeAll(String section) {
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.contentSeeAllTapped,
+      properties: {
+        'section': section,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
   }
 
   @override
@@ -105,6 +131,7 @@ class _HomePage extends State<HomePage> {
           onSeeAllFoodGuide: _openFoodGuide,
           onSeeAllArticles: _openArticles,
           onArticleTap: _openArticle,
+          onNewsArticleTap: _openNewsArticle,
         );
       case HomeErrorState():
         final l10n = AppLocalizations.of(context);
