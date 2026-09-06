@@ -13,6 +13,7 @@ class CatModel {
   final String? coatType;
   final String? gender;
   final List<String>? healthConditions;
+  final List<String>? allergies;
 
   const CatModel({
     this.id,
@@ -29,5 +30,6 @@ class CatModel {
     this.coatType,
     this.gender,
     this.healthConditions,
+    this.allergies,
   });
 }

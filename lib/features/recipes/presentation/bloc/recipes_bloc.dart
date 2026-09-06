@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
+import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
 import 'package:yucat/features/recipes/domain/entities/recipe_entity.dart';
 import 'package:yucat/features/recipes/domain/usecases/get_recipes_usecase.dart';
 import 'package:yucat/features/recipes/presentation/mappers/recipe_entity_to_model_mapper.dart';
@@ -11,12 +13,18 @@ part 'recipes_state.dart';
 class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
   final GetRecipesUsecase _getRecipesUsecase;
   final RecipeEntityToModelMapper _mapper;
+  final GetCatsUsecase _getCatsUsecase;
+  final CurrentUserUsecase _currentUserUsecase;
 
   RecipesBloc({
     required GetRecipesUsecase getRecipesUsecase,
     required RecipeEntityToModelMapper mapper,
+    required GetCatsUsecase getCatsUsecase,
+    required CurrentUserUsecase currentUserUsecase,
   })  : _getRecipesUsecase = getRecipesUsecase,
         _mapper = mapper,
+        _getCatsUsecase = getCatsUsecase,
+        _currentUserUsecase = currentUserUsecase,
         super(const RecipesLoadingState()) {
     on<RecipesInitialEvent>(_onInitial);
     on<RecipesQueryChanged>(_onQueryChanged);
@@ -30,9 +38,38 @@ class RecipesBloc extends Bloc<RecipesEvent, RecipesState> {
     emit(const RecipesLoadingState());
     try {
       final recipes = await _getRecipesUsecase(language: event.language);
-      emit(RecipesLoadedState(all: recipes.map(_mapper.call).toList()));
+      emit(
+        RecipesLoadedState(
+          all: recipes.map(_mapper.call).toList(),
+          excludedAllergens: event.excludeCatAllergens
+              ? await _declaredAllergens()
+              : const {},
+        ),
+      );
     } catch (_) {
       emit(const RecipesErrorState());
+    }
+  }
+
+  /// The union of every cat's declared allergies.
+  ///
+  /// ⚠️ Failure is swallowed and returns an empty set, so a cat-fetch problem
+  /// degrades to "no filtering" rather than taking down the recipe list. The
+  /// trade-off is deliberate but worth knowing: an allergy filter that silently
+  /// stops filtering is a soft failure, so this must never become the only thing
+  /// standing between a cat and an allergen — which is why the product scan
+  /// flags allergens independently.
+  Future<Set<String>> _declaredAllergens() async {
+    try {
+      final user = _currentUserUsecase.call();
+      final uid = user?.uid;
+      if (uid == null) return const {};
+      final cats = await _getCatsUsecase.call(userId: uid);
+      return {
+        for (final cat in cats) ...?cat.allergies,
+      };
+    } catch (_) {
+      return const {};
     }
   }
 

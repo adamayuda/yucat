@@ -18,6 +18,10 @@ class RecipeDisplayModel extends Equatable {
   final List<String> steps;
   final String? tip;
 
+  /// Allergen keys from the recipe's canonical English ingredients, for
+  /// filtering against a cat's declared allergies. Never rendered.
+  final List<String> allergenKeys;
+
   const RecipeDisplayModel({
     required this.id,
     required this.name,
@@ -31,6 +35,7 @@ class RecipeDisplayModel extends Equatable {
     this.ingredients = const [],
     this.steps = const [],
     this.tip,
+    this.allergenKeys = const [],
   });
 
   /// Lower-cased name + description, so the list's filter doesn't re-derive the
@@ -51,5 +56,6 @@ class RecipeDisplayModel extends Equatable {
         ingredients,
         steps,
         tip,
+        allergenKeys,
       ];
 }

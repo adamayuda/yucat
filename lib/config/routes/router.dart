@@ -4,6 +4,7 @@ import 'package:yucat/features/cat_listing/models/cat_model.dart';
 import 'package:yucat/features/cat_create/create_cat_page.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
 import 'package:yucat/features/cat_detail/presentation/cat_detail_page.dart';
+import 'package:yucat/features/health_carnet/presentation/health_carnet_page.dart';
 import 'package:yucat/features/onboarding/current_food_page.dart';
 import 'package:yucat/features/onboarding/onboarding_page.dart';
 import 'package:yucat/features/onboarding/result_page.dart';
@@ -148,6 +149,7 @@ class AppRouter extends RootStackRouter {
       transitionsBuilder: _slideLeftCubic,
     ),
     AutoRoute(page: CatDetailRoute.page, path: '/cats/detail'),
+    AutoRoute(page: HealthCarnetRoute.page, path: '/cats/health-carnet'),
     CustomRoute(
       page: PaywallRoute.page,
       path: '/paywall',

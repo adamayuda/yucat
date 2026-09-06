@@ -118,4 +118,12 @@ class CatRepositoryImpl implements CatRepository {
     final catData = _mapper.toDocument(cat);
     return _dataSource.updateCat(catId: cat.id!, catData: catData);
   }
+
+  @override
+  Future<void> updateCatAllergies({
+    required String catId,
+    required List<String> allergies,
+  }) async {
+    await _dataSource.updateCatAllergies(catId: catId, allergies: allergies);
+  }
 }

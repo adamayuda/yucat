@@ -41,6 +41,33 @@ String catFormatLifeStageFromMonths(int ageInMonths, AppLocalizations l10n) {
   return l10n.commonAgeGroupSenior;
 }
 
+/// Localized label for a `CatAllergen` key. Falls back to the humanised key so
+/// a retired allergen still renders something.
+String catFormatAllergen(String key, AppLocalizations l10n) {
+  return switch (key.toLowerCase()) {
+    'chicken' => l10n.allergenChicken,
+    'turkey' => l10n.allergenTurkey,
+    'beef' => l10n.allergenBeef,
+    'lamb' => l10n.allergenLamb,
+    'pork' => l10n.allergenPork,
+    'duck' => l10n.allergenDuck,
+    'fish' => l10n.allergenFish,
+    'salmon' => l10n.allergenSalmon,
+    'tuna' => l10n.allergenTuna,
+    'shellfish' => l10n.allergenShellfish,
+    'dairy' => l10n.allergenDairy,
+    'egg' => l10n.allergenEgg,
+    'grain' => l10n.allergenGrain,
+    'soy' => l10n.allergenSoy,
+    'dust' => l10n.allergenDust,
+    'pollen' => l10n.allergenPollen,
+    'grass' => l10n.allergenGrass,
+    'mould' => l10n.allergenMould,
+    'flea_bite' => l10n.allergenFleaBite,
+    _ => catFormatSnakeCase(key),
+  };
+}
+
 String catFormatGender(String gender, AppLocalizations l10n) {
   return switch (gender.toLowerCase()) {
     'male' => l10n.genderMale,

@@ -1,3 +1,5 @@
+import 'package:yucat/features/cat/domain/entities/cat_allergen.dart';
+import 'package:yucat/features/cat/presentation/utils/cat_labels.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/l10n/app_localizations.dart';
@@ -119,6 +121,11 @@ const _kLimitedIngredient = [
 ];
 // Common feline allergens. Includes name-level proteins (salmon/tuna/lamb) since
 // the scanned text now includes the product name.
+//
+// This is the generic list used when the profile only says `food_allergies`
+// without naming anything. When the owner has declared specific allergens in the
+// health carnet, `_evaluateDeclaredAllergens` matches those instead, using the
+// richer needle sets on `CatAllergen`.
 const _kCommonAllergens = [
   'chicken',
   'fish',
@@ -246,14 +253,23 @@ CatProductAssessment evaluateCatProduct(
   final neutered = _evaluateNeutered(cat, n, text, l10n);
   final breed = _evaluateBreed(cat, n, text, l10n);
   final health = _evaluateHealth(cat, n, text, l10n);
+  final declared = _evaluateDeclaredAllergens(cat, text, l10n);
 
   // Weight category overrides neutered status when they pull in opposite
   // directions. An underweight neutered cat needs calories — drop the
   // neutered penalty + matching pro/con line rather than letting them cancel.
   final neuteredResolved = _resolveWeightVsNeutered(weight, neutered);
 
+  // Declared allergens ride on the health dimension's weight — they are a health
+  // fact about this specific cat, and the strongest one the profile carries.
+  final healthCombined = _DimensionResult(
+    pros: health.pros,
+    cons: [...declared.cons, ...health.cons],
+    delta: health.delta + declared.delta,
+  );
+
   final weighted =
-      (health.delta * _wHealth +
+      (healthCombined.delta * _wHealth +
               weight.delta * _wWeight +
               age.delta * _wAge +
               activity.delta * _wActivity +
@@ -264,7 +280,7 @@ CatProductAssessment evaluateCatProduct(
   // Concatenate in priority order so the most important findings appear first.
   return CatProductAssessment(
     pros: [
-      ...health.pros,
+      ...healthCombined.pros,
       ...weight.pros,
       ...age.pros,
       ...activity.pros,
@@ -272,7 +288,7 @@ CatProductAssessment evaluateCatProduct(
       ...breed.pros,
     ],
     cons: [
-      ...health.cons,
+      ...healthCombined.cons,
       ...weight.cons,
       ...age.cons,
       ...activity.cons,
@@ -281,6 +297,47 @@ CatProductAssessment evaluateCatProduct(
     ],
     delta: weighted,
   );
+}
+
+/// Allergens the owner declared on the cat's profile, matched against the
+/// product's canonical-English text.
+///
+/// Distinct from the `food_allergies` branch in [_evaluateHealth], which is a
+/// generic "this cat reacts to something" heuristic. This one names the culprit,
+/// so it earns a heavier penalty and a specific line.
+///
+/// ⚠️ Matching is plain substring, with no word boundary and no "-free"
+/// exclusion — so `"contains no chicken"` triggers and `fish` matches inside
+/// `fish oil`. That is inherited on purpose from `_kCommonAllergens`, which has
+/// always behaved this way: fixing it here alone would make the two branches
+/// disagree about the same product. On an allergy warning, over-reporting is the
+/// safer direction.
+_DimensionResult _evaluateDeclaredAllergens(
+  CatEntity cat,
+  String text,
+  AppLocalizations l10n,
+) {
+  final declared = CatAllergen.resolveAll(cat.allergies)
+      .where((a) => a.kind == CatAllergenKind.food);
+  if (declared.isEmpty) return const _DimensionResult();
+
+  final present = detectFoodAllergenKeys(text);
+  final cons = <CatProductFinding>[];
+  var delta = 0;
+
+  for (final allergen in declared) {
+    if (!present.contains(allergen.key)) continue;
+    cons.add(_p(
+      l10n.assessmentDeclaredAllergen(catFormatAllergen(allergen.key, l10n)),
+      CatAssessmentDimension.health,
+    ));
+    delta -= 14;
+  }
+
+  // One allergen already sinks the verdict; several should not drive the score
+  // to a floor that no product could recover from, because the message is the
+  // same either way — do not feed this to your cat.
+  return _DimensionResult(cons: cons, delta: delta.clamp(-24, 0));
 }
 
 _DimensionResult _resolveWeightVsNeutered(

@@ -96,6 +96,21 @@ class AnalyticsEvents {
   static const catProfileDeleted = 'Cat Profile Deleted';
   static const catProfileDeleteFailed = 'Cat Profile Delete Failed';
 
+  // Health carnet
+  //
+  // ⚠️ `healthTaskCompleted` carries `protocol_id` **and** `was_overdue`. That
+  // pair is the point of the feature: a completion only means something
+  // relative to whether the app surfaced the act in time. Break down by
+  // `protocol_id`, never aggregate completions alone.
+  static const healthCarnetViewed = 'Health Carnet Viewed';
+  static const healthCarnetTabChanged = 'Health Carnet Tab Changed';
+  static const healthTaskCompleted = 'Health Task Completed';
+  static const healthTaskSnoozed = 'Health Task Snoozed';
+  static const healthRecordAdded = 'Health Record Added';
+  static const healthRecordDeleted = 'Health Record Deleted';
+  static const healthAllergiesUpdated = 'Health Allergies Updated';
+  static const healthCarnetLoadFailed = 'Health Carnet Load Failed';
+
   // Product & search
   // Resolved once per scanner open, after the first `initialize()`. Without it
   // a user whose camera permission is denied is invisible — `Product Image

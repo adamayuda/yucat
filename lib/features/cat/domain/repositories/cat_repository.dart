@@ -30,4 +30,11 @@ abstract class CatRepository {
   });
   Future<void> deleteCat({required String catId});
   Future<void> updateCat({required CatEntity cat});
+
+  /// Replaces the cat's allergy list, empty included. Separate from [updateCat]
+  /// because the document mapper cannot express "clear this field".
+  Future<void> updateCatAllergies({
+    required String catId,
+    required List<String> allergies,
+  });
 }

@@ -33,6 +33,15 @@ import 'package:yucat/features/brand/domain/repositories/brand_verdict_repositor
 import 'package:yucat/features/brand/domain/usecases/analyze_brand_usecase.dart';
 import 'package:yucat/features/brand/domain/usecases/get_brands_usecase.dart';
 import 'package:yucat/features/cat/data/datasources/cat_datasource.dart';
+import 'package:yucat/features/health_carnet/data/datasources/health_event_datasource.dart';
+import 'package:yucat/features/health_carnet/data/mappers/health_event_document_mapper.dart';
+import 'package:yucat/features/health_carnet/data/repositories/health_carnet_repository_impl.dart';
+import 'package:yucat/features/health_carnet/domain/repositories/health_carnet_repository.dart';
+import 'package:yucat/features/cat/domain/usecases/update_cat_allergies_usecase.dart';
+import 'package:yucat/features/health_carnet/domain/usecases/add_health_event_usecase.dart';
+import 'package:yucat/features/health_carnet/domain/usecases/delete_health_event_usecase.dart';
+import 'package:yucat/features/health_carnet/domain/usecases/get_health_events_usecase.dart';
+import 'package:yucat/features/health_carnet/presentation/bloc/health_carnet_bloc.dart';
 import 'package:yucat/features/cat/data/datasources/cat_narrative_datasource.dart';
 import 'package:yucat/features/cat/data/mappers/cat_document_mapper.dart';
 import 'package:yucat/features/cat/data/repositories/cat_narrative_repository_impl.dart';
@@ -206,6 +215,9 @@ Future<void> _registerDataSources() async {
       storage: FirebaseStorage.instance,
     ),
   );
+  sl.registerSingleton<HealthEventDataSource>(
+    HealthEventDataSource(firestore: FirebaseFirestore.instance),
+  );
   sl.registerSingleton<CatNarrativeDataSource>(
     CatNarrativeDataSource(functions: sl<FirebaseFunctions>()),
   );
@@ -241,6 +253,9 @@ Future<void> _registerMappers() async {
   sl.registerSingleton<CatDocumentMapper>(CatDocumentMapperImpl());
   sl.registerSingleton<CatModelToEntityMapper>(CatModelToEntityMapper());
   sl.registerSingleton<CatModelToCreateMapper>(CatModelToCreateMapperImpl());
+  sl.registerSingleton<HealthEventDocumentMapper>(
+    const HealthEventDocumentMapperImpl(),
+  );
   sl.registerSingleton<BrandToModelMapper>(BrandToModelMapperImpl());
   sl.registerSingleton<RecipeEntityToModelMapper>(
     const RecipeEntityToModelMapper(),
@@ -297,6 +312,12 @@ Future<void> _registerRepositories() async {
     CatRepositoryImpl(
       dataSource: sl<CatDataSource>(),
       mapper: sl<CatDocumentMapper>(),
+    ),
+  );
+  sl.registerSingleton<HealthCarnetRepository>(
+    HealthCarnetRepositoryImpl(
+      dataSource: sl<HealthEventDataSource>(),
+      mapper: sl<HealthEventDocumentMapper>(),
     ),
   );
   sl.registerSingleton<CatNarrativeRepository>(
@@ -392,6 +413,18 @@ Future<void> _registerUseCases() async {
   );
   sl.registerSingleton<UpdateCatUsecase>(
     UpdateCatUsecase(repository: sl<CatRepository>()),
+  );
+  sl.registerSingleton<UpdateCatAllergiesUsecase>(
+    UpdateCatAllergiesUsecase(repository: sl<CatRepository>()),
+  );
+  sl.registerSingleton<GetHealthEventsUsecase>(
+    GetHealthEventsUsecase(repository: sl<HealthCarnetRepository>()),
+  );
+  sl.registerSingleton<AddHealthEventUsecase>(
+    AddHealthEventUsecase(repository: sl<HealthCarnetRepository>()),
+  );
+  sl.registerSingleton<DeleteHealthEventUsecase>(
+    DeleteHealthEventUsecase(repository: sl<HealthCarnetRepository>()),
   );
   sl.registerSingleton<CurrentUserUsecase>(
     CurrentUserUsecase(repository: sl<AuthRepository>()),
@@ -620,6 +653,19 @@ Future<void> _registerBlocs() async {
       logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
+  // ⚠️ Like `CatCreateBloc`, `FoodGuideBloc` and `ArticlesBloc`, this one is
+  // deliberately **absent** from `main.dart`'s `MultiBlocProvider`.
+  // `HealthCarnetPage` owns the instance and closes it in `dispose`; a shared
+  // one would carry one cat's records into the next cat's carnet.
+  sl.registerBloc<HealthCarnetBloc>(
+    () => HealthCarnetBloc(
+      getHealthEventsUsecase: sl<GetHealthEventsUsecase>(),
+      addHealthEventUsecase: sl<AddHealthEventUsecase>(),
+      deleteHealthEventUsecase: sl<DeleteHealthEventUsecase>(),
+      updateCatAllergiesUsecase: sl<UpdateCatAllergiesUsecase>(),
+      logEventUsecase: sl<LogEventUsecase>(),
+    ),
+  );
   sl.registerBloc<CatCreateBloc>(
     () => CatCreateBloc(
       createCatUsecase: sl<CreateCatUsecase>(),
@@ -644,6 +690,8 @@ Future<void> _registerBlocs() async {
     () => RecipesBloc(
       getRecipesUsecase: sl<GetRecipesUsecase>(),
       mapper: sl<RecipeEntityToModelMapper>(),
+      getCatsUsecase: sl<GetCatsUsecase>(),
+      currentUserUsecase: sl<CurrentUserUsecase>(),
     ),
   );
   // Deliberately NOT in main.dart's MultiBlocProvider: there is no food-guide

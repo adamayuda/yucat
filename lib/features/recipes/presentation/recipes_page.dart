@@ -55,7 +55,11 @@ class _RecipesPageState extends State<RecipesPage> {
     final language = Localizations.localeOf(context).languageCode;
     if (language == _language) return;
     _language = language;
-    _bloc.add(RecipesInitialEvent(language: language));
+    // Only the tab opts in — Home's swimlane deliberately does not, so a
+    // discovery surface never pays for a cat fetch. See `RecipesInitialEvent`.
+    _bloc.add(
+      RecipesInitialEvent(language: language, excludeCatAllergens: true),
+    );
   }
 
   @override
@@ -155,6 +159,9 @@ class _RecipesPageState extends State<RecipesPage> {
                     ),
                   ),
                   const SizedBox(height: DSDimens.sizeS),
+                  if (state is RecipesLoadedState &&
+                      state.hiddenByAllergies > 0)
+                    _AllergyNotice(count: state.hiddenByAllergies),
                   Expanded(child: _buildBody(context, state, l10n)),
                 ],
               );
@@ -184,8 +191,12 @@ class _RecipesPageState extends State<RecipesPage> {
         ),
       RecipesErrorState() => DSStateView.error(
           body: l10n.recipesErrorBody,
-          onCtaPressed: () =>
-              _bloc.add(RecipesInitialEvent(language: _language)),
+          onCtaPressed: () => _bloc.add(
+            RecipesInitialEvent(
+              language: _language,
+              excludeCatAllergens: true,
+            ),
+          ),
         ),
       RecipesLoadedState(:final visible) => visible.isEmpty
           ? DSStateView.empty(
@@ -213,5 +224,47 @@ class _RecipesPageState extends State<RecipesPage> {
               },
             ),
     };
+  }
+}
+
+/// Explains a shorter-than-expected list.
+///
+/// Hiding recipes without saying so would leave someone hunting for one they
+/// remember seeing — and the reason is exactly the kind of thing an owner wants
+/// confirmation the app is acting on.
+class _AllergyNotice extends StatelessWidget {
+  final int count;
+
+  const _AllergyNotice({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        DSDimens.sizeL,
+        0,
+        DSDimens.sizeL,
+        DSDimens.sizeS,
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.filter_alt_outlined,
+            size: 16,
+            color: DSColors.inkTertiary,
+          ),
+          const SizedBox(width: DSDimens.sizeXxs),
+          Expanded(
+            child: Text(
+              l10n.recipesHiddenByAllergies(count),
+              style: DSTextStyles.bodyMd.copyWith(
+                color: DSColors.inkTertiary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

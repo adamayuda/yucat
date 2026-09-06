@@ -17,5 +17,6 @@ class RecipeEntityToModelMapper {
         ingredients: entity.ingredients,
         steps: entity.steps,
         tip: entity.tip,
+        allergenKeys: entity.allergenKeys,
       );
 }

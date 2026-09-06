@@ -4148,6 +4148,918 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cat food'**
   String get foodSectionTitle;
+
+  /// No description provided for @healthProtocolAnnualCheckup.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual check-up'**
+  String get healthProtocolAnnualCheckup;
+
+  /// No description provided for @healthProtocolAnnualCheckupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Full exam, weigh-in and dental check at the same appointment.'**
+  String get healthProtocolAnnualCheckupDesc;
+
+  /// No description provided for @healthProtocolFvrcp.
+  ///
+  /// In en, this message translates to:
+  /// **'FVRCP booster'**
+  String get healthProtocolFvrcp;
+
+  /// No description provided for @healthProtocolFvrcpDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Protects against panleukopenia, herpesvirus and calicivirus.'**
+  String get healthProtocolFvrcpDesc;
+
+  /// No description provided for @healthProtocolRabies.
+  ///
+  /// In en, this message translates to:
+  /// **'Rabies booster'**
+  String get healthProtocolRabies;
+
+  /// No description provided for @healthProtocolRabiesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A core vaccine in most regions, and the one most often required.'**
+  String get healthProtocolRabiesDesc;
+
+  /// No description provided for @healthProtocolFelv.
+  ///
+  /// In en, this message translates to:
+  /// **'Feline leukaemia (FeLV)'**
+  String get healthProtocolFelv;
+
+  /// No description provided for @healthProtocolFelvDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended for every kitten, after a FeLV/FIV test.'**
+  String get healthProtocolFelvDesc;
+
+  /// No description provided for @healthProtocolFelvBooster.
+  ///
+  /// In en, this message translates to:
+  /// **'FeLV booster'**
+  String get healthProtocolFelvBooster;
+
+  /// No description provided for @healthProtocolFelvBoosterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'For cats that go outdoors or live with other cats.'**
+  String get healthProtocolFelvBoosterDesc;
+
+  /// No description provided for @healthProtocolDewormingInternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Deworming'**
+  String get healthProtocolDewormingInternal;
+
+  /// No description provided for @healthProtocolDewormingInternalDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment against internal parasites.'**
+  String get healthProtocolDewormingInternalDesc;
+
+  /// No description provided for @healthProtocolDewormingMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly deworming'**
+  String get healthProtocolDewormingMonthly;
+
+  /// No description provided for @healthProtocolDewormingMonthlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'For hunters, raw-fed cats, or homes with young children.'**
+  String get healthProtocolDewormingMonthlyDesc;
+
+  /// No description provided for @healthProtocolParasiteExternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Flea and tick treatment'**
+  String get healthProtocolParasiteExternal;
+
+  /// No description provided for @healthProtocolParasiteExternalDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'External parasite protection, all year round.'**
+  String get healthProtocolParasiteExternalDesc;
+
+  /// No description provided for @healthProtocolHeartworm.
+  ///
+  /// In en, this message translates to:
+  /// **'Heartworm prevention'**
+  String get healthProtocolHeartworm;
+
+  /// No description provided for @healthProtocolHeartwormDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Only needed in regions where heartworm is present.'**
+  String get healthProtocolHeartwormDesc;
+
+  /// No description provided for @healthProtocolDentalScaling.
+  ///
+  /// In en, this message translates to:
+  /// **'Dental scaling'**
+  String get healthProtocolDentalScaling;
+
+  /// No description provided for @healthProtocolDentalScalingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Under anaesthetic, when your vet advises it.'**
+  String get healthProtocolDentalScalingDesc;
+
+  /// No description provided for @healthProtocolSeniorPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Senior health panel'**
+  String get healthProtocolSeniorPanel;
+
+  /// No description provided for @healthProtocolSeniorPanelDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood count, chemistry, thyroid, urine and blood pressure.'**
+  String get healthProtocolSeniorPanelDesc;
+
+  /// No description provided for @healthProtocolRetrovirusTest.
+  ///
+  /// In en, this message translates to:
+  /// **'FeLV/FIV test'**
+  String get healthProtocolRetrovirusTest;
+
+  /// No description provided for @healthProtocolRetrovirusTestDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'At adoption, and after any bite wound.'**
+  String get healthProtocolRetrovirusTestDesc;
+
+  /// No description provided for @healthProtocolConditionFollowUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Condition follow-up'**
+  String get healthProtocolConditionFollowUp;
+
+  /// No description provided for @healthProtocolConditionFollowUpDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Recheck for your cat\'s diagnosed condition.'**
+  String get healthProtocolConditionFollowUpDesc;
+
+  /// No description provided for @healthProtocolNeutering.
+  ///
+  /// In en, this message translates to:
+  /// **'Neutering'**
+  String get healthProtocolNeutering;
+
+  /// No description provided for @healthProtocolNeuteringDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended by five months of age.'**
+  String get healthProtocolNeuteringDesc;
+
+  /// No description provided for @healthProtocolMicrochip.
+  ///
+  /// In en, this message translates to:
+  /// **'Microchip / identification'**
+  String get healthProtocolMicrochip;
+
+  /// No description provided for @healthProtocolMicrochipDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Required for travel, and in many countries.'**
+  String get healthProtocolMicrochipDesc;
+
+  /// No description provided for @healthCategoryVaccine.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccine'**
+  String get healthCategoryVaccine;
+
+  /// No description provided for @healthCategoryParasite.
+  ///
+  /// In en, this message translates to:
+  /// **'Parasites'**
+  String get healthCategoryParasite;
+
+  /// No description provided for @healthCategoryExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit'**
+  String get healthCategoryExam;
+
+  /// No description provided for @healthCategoryDental.
+  ///
+  /// In en, this message translates to:
+  /// **'Dental'**
+  String get healthCategoryDental;
+
+  /// No description provided for @healthCategorySurgery.
+  ///
+  /// In en, this message translates to:
+  /// **'Surgery'**
+  String get healthCategorySurgery;
+
+  /// No description provided for @healthCategoryLab.
+  ///
+  /// In en, this message translates to:
+  /// **'Tests'**
+  String get healthCategoryLab;
+
+  /// No description provided for @healthCategoryIdentification.
+  ///
+  /// In en, this message translates to:
+  /// **'ID'**
+  String get healthCategoryIdentification;
+
+  /// No description provided for @healthCategoryTreatment.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment'**
+  String get healthCategoryTreatment;
+
+  /// No description provided for @healthCategoryWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get healthCategoryWeight;
+
+  /// No description provided for @healthCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get healthCategoryOther;
+
+  /// No description provided for @healthCarnetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Health record'**
+  String get healthCarnetTitle;
+
+  /// No description provided for @healthCarnetUpdatedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {date}'**
+  String healthCarnetUpdatedOn(String date);
+
+  /// No description provided for @healthCarnetStatWeightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'WEIGHT'**
+  String get healthCarnetStatWeightLabel;
+
+  /// No description provided for @healthCarnetStatTodoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TO DO'**
+  String get healthCarnetStatTodoLabel;
+
+  /// No description provided for @healthCarnetWeightDelta.
+  ///
+  /// In en, this message translates to:
+  /// **'{delta} kg since {month}'**
+  String healthCarnetWeightDelta(String delta, String month);
+
+  /// No description provided for @healthCarnetWeightNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No weigh-in yet'**
+  String get healthCarnetWeightNoData;
+
+  /// No description provided for @healthCarnetTodoUrgent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{including 1 urgent} other{including {count} urgent}}'**
+  String healthCarnetTodoUrgent(int count);
+
+  /// No description provided for @healthCarnetTodoNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing urgent'**
+  String get healthCarnetTodoNone;
+
+  /// No description provided for @healthCarnetTabUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get healthCarnetTabUpcoming;
+
+  /// No description provided for @healthCarnetTabHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get healthCarnetTabHistory;
+
+  /// No description provided for @healthCarnetTabCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get healthCarnetTabCalendar;
+
+  /// No description provided for @healthCarnetAddCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a record'**
+  String get healthCarnetAddCta;
+
+  /// No description provided for @healthCarnetErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load this health record.'**
+  String get healthCarnetErrorBody;
+
+  /// No description provided for @healthCarnetRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get healthCarnetRetry;
+
+  /// No description provided for @healthCarnetUpcomingEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is due right now. Add a past record to build the schedule.'**
+  String get healthCarnetUpcomingEmpty;
+
+  /// No description provided for @healthCarnetDisclaimerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidance, not a prescription'**
+  String get healthCarnetDisclaimerTitle;
+
+  /// No description provided for @healthCarnetDisclaimerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These dates follow general veterinary guidelines. Your vet knows your cat — always follow their advice, and check what your country requires.'**
+  String get healthCarnetDisclaimerBody;
+
+  /// No description provided for @healthCarnetDisclaimerSource.
+  ///
+  /// In en, this message translates to:
+  /// **'WSAVA vaccination guidelines'**
+  String get healthCarnetDisclaimerSource;
+
+  /// No description provided for @healthCarnetMarkDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as done'**
+  String get healthCarnetMarkDone;
+
+  /// No description provided for @healthCarnetSnooze.
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze'**
+  String get healthCarnetSnooze;
+
+  /// No description provided for @healthCarnetDueBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Due by {date}'**
+  String healthCarnetDueBy(String date);
+
+  /// No description provided for @healthCarnetToSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'To schedule'**
+  String get healthCarnetToSchedule;
+
+  /// No description provided for @healthCarnetToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get healthCarnetToday;
+
+  /// No description provided for @healthCarnetTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get healthCarnetTomorrow;
+
+  /// No description provided for @healthCarnetInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{In 1 day} other{In {count} days}}'**
+  String healthCarnetInDays(int count);
+
+  /// No description provided for @healthCarnetInMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{In 1 month} other{In {count} months}}'**
+  String healthCarnetInMonths(int count);
+
+  /// No description provided for @healthCarnetInYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{In 1 year} other{In {count} years}}'**
+  String healthCarnetInYears(int count);
+
+  /// No description provided for @healthCarnetLateDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day late} other{{count} days late}}'**
+  String healthCarnetLateDays(int count);
+
+  /// No description provided for @healthCarnetLateMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 month late} other{{count} months late}}'**
+  String healthCarnetLateMonths(int count);
+
+  /// No description provided for @healthCarnetLateYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 year late} other{{count} years late}}'**
+  String healthCarnetLateYears(int count);
+
+  /// No description provided for @healthCarnetEveryDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Every day} other{Every {count} days}}'**
+  String healthCarnetEveryDays(int count);
+
+  /// No description provided for @healthCarnetEveryMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Every month} other{Every {count} months}}'**
+  String healthCarnetEveryMonths(int count);
+
+  /// No description provided for @healthCarnetEveryYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Every year} other{Every {count} years}}'**
+  String healthCarnetEveryYears(int count);
+
+  /// No description provided for @healthCarnetLastDoneOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Last on {date}.'**
+  String healthCarnetLastDoneOn(String date);
+
+  /// No description provided for @healthCarnetNoRecordYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No record yet.'**
+  String get healthCarnetNoRecordYet;
+
+  /// No description provided for @healthCarnetSeriesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of the kitten series.'**
+  String get healthCarnetSeriesNote;
+
+  /// No description provided for @healthCarnetRabiesIntervalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval depends on the vaccine used.'**
+  String get healthCarnetRabiesIntervalNote;
+
+  /// No description provided for @healthCarnetLegalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Requirements vary by country — check your local rules.'**
+  String get healthCarnetLegalNote;
+
+  /// No description provided for @healthCarnetSnoozeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Push this back by'**
+  String get healthCarnetSnoozeTitle;
+
+  /// No description provided for @healthCarnetSnoozeWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'One week'**
+  String get healthCarnetSnoozeWeek;
+
+  /// No description provided for @healthCarnetSnoozeMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'One month'**
+  String get healthCarnetSnoozeMonth;
+
+  /// No description provided for @healthCarnetSnoozeThreeMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Three months'**
+  String get healthCarnetSnoozeThreeMonths;
+
+  /// No description provided for @healthCarnetSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'That didn\'t save. Please try again.'**
+  String get healthCarnetSaveError;
+
+  /// No description provided for @healthAddSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to record?'**
+  String get healthAddSheetTitle;
+
+  /// No description provided for @healthAddSectionCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine care'**
+  String get healthAddSectionCare;
+
+  /// No description provided for @healthAddSectionOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Something else'**
+  String get healthAddSectionOther;
+
+  /// No description provided for @healthAddFieldTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get healthAddFieldTitleLabel;
+
+  /// No description provided for @healthAddFieldTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual visit'**
+  String get healthAddFieldTitleHint;
+
+  /// No description provided for @healthAddFieldDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get healthAddFieldDateLabel;
+
+  /// No description provided for @healthAddFieldNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get healthAddFieldNotesLabel;
+
+  /// No description provided for @healthAddFieldNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything worth remembering'**
+  String get healthAddFieldNotesHint;
+
+  /// No description provided for @healthAddFieldVetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vet'**
+  String get healthAddFieldVetLabel;
+
+  /// No description provided for @healthAddFieldVetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Dr. Haddad'**
+  String get healthAddFieldVetHint;
+
+  /// No description provided for @healthAddFieldClinicLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinic'**
+  String get healthAddFieldClinicLabel;
+
+  /// No description provided for @healthAddFieldClinicHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Al Wasl Clinic'**
+  String get healthAddFieldClinicHint;
+
+  /// No description provided for @healthAddFieldWeightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (kg)'**
+  String get healthAddFieldWeightLabel;
+
+  /// No description provided for @healthAddFieldWeightHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get healthAddFieldWeightHint;
+
+  /// No description provided for @healthAddRabiesIntervalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Next booster due'**
+  String get healthAddRabiesIntervalLabel;
+
+  /// No description provided for @healthAddRabiesOneYear.
+  ///
+  /// In en, this message translates to:
+  /// **'In 1 year'**
+  String get healthAddRabiesOneYear;
+
+  /// No description provided for @healthAddRabiesThreeYears.
+  ///
+  /// In en, this message translates to:
+  /// **'In 3 years'**
+  String get healthAddRabiesThreeYears;
+
+  /// No description provided for @healthAddSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get healthAddSave;
+
+  /// No description provided for @healthAddCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get healthAddCancel;
+
+  /// No description provided for @healthAddTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Give this record a title.'**
+  String get healthAddTitleRequired;
+
+  /// No description provided for @healthCarnetEntryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccines, visits and weight'**
+  String get healthCarnetEntryEmpty;
+
+  /// No description provided for @healthCarnetWeightChartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight trend'**
+  String get healthCarnetWeightChartTitle;
+
+  /// No description provided for @healthCarnetWeightChartSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Last month} other{Last {count} months}}'**
+  String healthCarnetWeightChartSubtitle(int count);
+
+  /// No description provided for @healthCarnetHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All records'**
+  String get healthCarnetHistoryTitle;
+
+  /// No description provided for @healthCarnetHistoryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 record} other{{count} records}}'**
+  String healthCarnetHistoryCount(int count);
+
+  /// No description provided for @healthCarnetHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing recorded yet. Add your cat\'s last visit or vaccine to start the carnet.'**
+  String get healthCarnetHistoryEmpty;
+
+  /// No description provided for @healthCarnetDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this record?'**
+  String get healthCarnetDeleteTitle;
+
+  /// No description provided for @healthCarnetDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It will be removed from the carnet and the upcoming dates will be recalculated.'**
+  String get healthCarnetDeleteBody;
+
+  /// No description provided for @healthCarnetDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get healthCarnetDeleteConfirm;
+
+  /// No description provided for @healthCarnetDeleteCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get healthCarnetDeleteCancel;
+
+  /// No description provided for @allergenChicken.
+  ///
+  /// In en, this message translates to:
+  /// **'Chicken'**
+  String get allergenChicken;
+
+  /// No description provided for @allergenTurkey.
+  ///
+  /// In en, this message translates to:
+  /// **'Turkey'**
+  String get allergenTurkey;
+
+  /// No description provided for @allergenBeef.
+  ///
+  /// In en, this message translates to:
+  /// **'Beef'**
+  String get allergenBeef;
+
+  /// No description provided for @allergenLamb.
+  ///
+  /// In en, this message translates to:
+  /// **'Lamb'**
+  String get allergenLamb;
+
+  /// No description provided for @allergenPork.
+  ///
+  /// In en, this message translates to:
+  /// **'Pork'**
+  String get allergenPork;
+
+  /// No description provided for @allergenDuck.
+  ///
+  /// In en, this message translates to:
+  /// **'Duck'**
+  String get allergenDuck;
+
+  /// No description provided for @allergenFish.
+  ///
+  /// In en, this message translates to:
+  /// **'Fish'**
+  String get allergenFish;
+
+  /// No description provided for @allergenSalmon.
+  ///
+  /// In en, this message translates to:
+  /// **'Salmon'**
+  String get allergenSalmon;
+
+  /// No description provided for @allergenTuna.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuna'**
+  String get allergenTuna;
+
+  /// No description provided for @allergenShellfish.
+  ///
+  /// In en, this message translates to:
+  /// **'Shellfish'**
+  String get allergenShellfish;
+
+  /// No description provided for @allergenDairy.
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy'**
+  String get allergenDairy;
+
+  /// No description provided for @allergenEgg.
+  ///
+  /// In en, this message translates to:
+  /// **'Egg'**
+  String get allergenEgg;
+
+  /// No description provided for @allergenGrain.
+  ///
+  /// In en, this message translates to:
+  /// **'Grain / gluten'**
+  String get allergenGrain;
+
+  /// No description provided for @allergenSoy.
+  ///
+  /// In en, this message translates to:
+  /// **'Soy'**
+  String get allergenSoy;
+
+  /// No description provided for @allergenDust.
+  ///
+  /// In en, this message translates to:
+  /// **'Dust'**
+  String get allergenDust;
+
+  /// No description provided for @allergenPollen.
+  ///
+  /// In en, this message translates to:
+  /// **'Pollen'**
+  String get allergenPollen;
+
+  /// No description provided for @allergenGrass.
+  ///
+  /// In en, this message translates to:
+  /// **'Grass'**
+  String get allergenGrass;
+
+  /// No description provided for @allergenMould.
+  ///
+  /// In en, this message translates to:
+  /// **'Mould'**
+  String get allergenMould;
+
+  /// No description provided for @allergenFleaBite.
+  ///
+  /// In en, this message translates to:
+  /// **'Flea bites'**
+  String get allergenFleaBite;
+
+  /// No description provided for @healthCarnetAllergiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allergies and sensitivities'**
+  String get healthCarnetAllergiesTitle;
+
+  /// No description provided for @healthCarnetAllergiesFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Foods on this list are flagged when you scan a product, and recipes that use them are hidden.'**
+  String get healthCarnetAllergiesFooter;
+
+  /// No description provided for @healthCarnetAllergiesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing recorded.'**
+  String get healthCarnetAllergiesEmpty;
+
+  /// No description provided for @healthCarnetAllergiesEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get healthCarnetAllergiesEdit;
+
+  /// No description provided for @healthCarnetAllergiesSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What does your cat react to?'**
+  String get healthCarnetAllergiesSheetTitle;
+
+  /// No description provided for @healthCarnetAllergiesSectionFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get healthCarnetAllergiesSectionFood;
+
+  /// No description provided for @healthCarnetAllergiesSectionEnvironment.
+  ///
+  /// In en, this message translates to:
+  /// **'Environment'**
+  String get healthCarnetAllergiesSectionEnvironment;
+
+  /// No description provided for @healthCarnetAllergiesSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get healthCarnetAllergiesSave;
+
+  /// No description provided for @healthCarnetOngoingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing treatments'**
+  String get healthCarnetOngoingTitle;
+
+  /// No description provided for @healthCarnetOngoingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next {date}'**
+  String healthCarnetOngoingNext(String date);
+
+  /// No description provided for @recipesHiddenByAllergies.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recipe hidden because of your cats\' allergies} other{{count} recipes hidden because of your cats\' allergies}}'**
+  String recipesHiddenByAllergies(int count);
+
+  /// No description provided for @assessmentDeclaredAllergen.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains {allergen}, which you flagged as an allergy'**
+  String assessmentDeclaredAllergen(String allergen);
+
+  /// No description provided for @healthCarnetCalendarSectionDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded'**
+  String get healthCarnetCalendarSectionDone;
+
+  /// No description provided for @healthCarnetCalendarSectionDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming up'**
+  String get healthCarnetCalendarSectionDue;
+
+  /// No description provided for @healthCarnetCalendarEmptyDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on this day.'**
+  String get healthCarnetCalendarEmptyDay;
+
+  /// No description provided for @healthCarnetCalendarPreviousMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get healthCarnetCalendarPreviousMonth;
+
+  /// No description provided for @healthCarnetCalendarNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get healthCarnetCalendarNextMonth;
+
+  /// No description provided for @healthCarnetCalendarLegendDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded'**
+  String get healthCarnetCalendarLegendDone;
+
+  /// No description provided for @healthCarnetCalendarLegendDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get healthCarnetCalendarLegendDue;
+
+  /// No description provided for @healthCarnetCalendarUnscheduledNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Items still to schedule have no date yet, so they are not shown here.'**
+  String get healthCarnetCalendarUnscheduledNote;
 }
 
 class _AppLocalizationsDelegate

@@ -24,6 +24,16 @@ class CatEntity {
   final String? gender;
   final List<String>? healthConditions;
 
+  /// Declared allergies and sensitivities, as `CatAllergen` keys.
+  ///
+  /// Edited from the health carnet, not the create wizard — which is why
+  /// `CatDocumentMapper.toDocument` writes the field only when it is non-empty.
+  /// A wizard save builds a `CatEntity` with no allergies, and omitting the key
+  /// from the update map leaves the stored value untouched instead of wiping it.
+  /// Clearing all allergies goes through `CatRepository.updateCatAllergies`,
+  /// which writes the empty list explicitly.
+  final List<String>? allergies;
+
   const CatEntity({
     this.id,
     required this.name,
@@ -39,6 +49,7 @@ class CatEntity {
     this.coatType,
     this.gender,
     this.healthConditions,
+    this.allergies,
   });
 
   CatEntity copyWith({String? profileImageUrl}) => CatEntity(
@@ -56,5 +67,6 @@ class CatEntity {
         coatType: coatType,
         gender: gender,
         healthConditions: healthConditions,
+        allergies: allergies,
       );
 }

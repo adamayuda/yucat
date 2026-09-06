@@ -2413,4 +2413,600 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get foodSectionTitle => 'Alimentation';
+
+  @override
+  String get healthProtocolAnnualCheckup => 'Examen annuel';
+
+  @override
+  String get healthProtocolAnnualCheckupDesc =>
+      'Bilan complet, pesée et contrôle dentaire au même rendez-vous.';
+
+  @override
+  String get healthProtocolFvrcp => 'Rappel typhus (FVRCP)';
+
+  @override
+  String get healthProtocolFvrcpDesc =>
+      'Protège du typhus, de l\'herpèsvirus et du calicivirus.';
+
+  @override
+  String get healthProtocolRabies => 'Rappel rage';
+
+  @override
+  String get healthProtocolRabiesDesc =>
+      'Vaccin essentiel dans la plupart des régions, et le plus souvent exigé.';
+
+  @override
+  String get healthProtocolFelv => 'Leucose féline (FeLV)';
+
+  @override
+  String get healthProtocolFelvDesc =>
+      'Recommandé pour tout chaton, après un test FeLV/FIV.';
+
+  @override
+  String get healthProtocolFelvBooster => 'Rappel FeLV';
+
+  @override
+  String get healthProtocolFelvBoosterDesc =>
+      'Pour les chats qui sortent ou vivent avec d\'autres chats.';
+
+  @override
+  String get healthProtocolDewormingInternal => 'Vermifuge';
+
+  @override
+  String get healthProtocolDewormingInternalDesc =>
+      'Traitement contre les parasites internes.';
+
+  @override
+  String get healthProtocolDewormingMonthly => 'Vermifuge mensuel';
+
+  @override
+  String get healthProtocolDewormingMonthlyDesc =>
+      'Pour les chasseurs, les chats nourris cru ou les foyers avec de jeunes enfants.';
+
+  @override
+  String get healthProtocolParasiteExternal => 'Antiparasitaire externe';
+
+  @override
+  String get healthProtocolParasiteExternalDesc =>
+      'Protection contre les puces et les tiques, toute l\'année.';
+
+  @override
+  String get healthProtocolHeartworm => 'Prévention du ver du cœur';
+
+  @override
+  String get healthProtocolHeartwormDesc =>
+      'Nécessaire uniquement dans les régions concernées.';
+
+  @override
+  String get healthProtocolDentalScaling => 'Détartrage';
+
+  @override
+  String get healthProtocolDentalScalingDesc =>
+      'Sous anesthésie, lorsque votre vétérinaire le conseille.';
+
+  @override
+  String get healthProtocolSeniorPanel => 'Bilan sénior';
+
+  @override
+  String get healthProtocolSeniorPanelDesc =>
+      'Numération, biochimie, thyroïde, urine et tension.';
+
+  @override
+  String get healthProtocolRetrovirusTest => 'Test FeLV/FIV';
+
+  @override
+  String get healthProtocolRetrovirusTestDesc =>
+      'À l\'adoption, et après toute morsure.';
+
+  @override
+  String get healthProtocolConditionFollowUp => 'Suivi de pathologie';
+
+  @override
+  String get healthProtocolConditionFollowUpDesc =>
+      'Contrôle pour la pathologie diagnostiquée de votre chat.';
+
+  @override
+  String get healthProtocolNeutering => 'Stérilisation';
+
+  @override
+  String get healthProtocolNeuteringDesc => 'Recommandée avant cinq mois.';
+
+  @override
+  String get healthProtocolMicrochip => 'Puce / identification';
+
+  @override
+  String get healthProtocolMicrochipDesc =>
+      'Obligatoire pour voyager et dans de nombreux pays.';
+
+  @override
+  String get healthCategoryVaccine => 'Vaccin';
+
+  @override
+  String get healthCategoryParasite => 'Antiparasitaire';
+
+  @override
+  String get healthCategoryExam => 'Visite';
+
+  @override
+  String get healthCategoryDental => 'Dentaire';
+
+  @override
+  String get healthCategorySurgery => 'Chirurgie';
+
+  @override
+  String get healthCategoryLab => 'Analyses';
+
+  @override
+  String get healthCategoryIdentification => 'Identification';
+
+  @override
+  String get healthCategoryTreatment => 'Traitement';
+
+  @override
+  String get healthCategoryWeight => 'Poids';
+
+  @override
+  String get healthCategoryOther => 'Autre';
+
+  @override
+  String get healthCarnetTitle => 'Carnet de santé';
+
+  @override
+  String healthCarnetUpdatedOn(String date) {
+    return 'Mis à jour le $date';
+  }
+
+  @override
+  String get healthCarnetStatWeightLabel => 'POIDS';
+
+  @override
+  String get healthCarnetStatTodoLabel => 'À FAIRE';
+
+  @override
+  String healthCarnetWeightDelta(String delta, String month) {
+    return '$delta kg depuis $month';
+  }
+
+  @override
+  String get healthCarnetWeightNoData => 'Aucune pesée';
+
+  @override
+  String healthCarnetTodoUrgent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'dont $count urgents',
+      one: 'dont 1 urgent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get healthCarnetTodoNone => 'Rien d\'urgent';
+
+  @override
+  String get healthCarnetTabUpcoming => 'À venir';
+
+  @override
+  String get healthCarnetTabHistory => 'Historique';
+
+  @override
+  String get healthCarnetTabCalendar => 'Calendrier';
+
+  @override
+  String get healthCarnetAddCta => 'Ajouter un acte';
+
+  @override
+  String get healthCarnetErrorBody =>
+      'Impossible de charger le carnet de santé.';
+
+  @override
+  String get healthCarnetRetry => 'Réessayer';
+
+  @override
+  String get healthCarnetUpcomingEmpty =>
+      'Rien à faire pour le moment. Ajoutez un acte passé pour construire le calendrier.';
+
+  @override
+  String get healthCarnetDisclaimerTitle => 'Des repères, pas une ordonnance';
+
+  @override
+  String get healthCarnetDisclaimerBody =>
+      'Ces dates suivent des recommandations vétérinaires générales. Votre vétérinaire connaît votre chat : suivez toujours son avis et vérifiez ce qu\'exige votre pays.';
+
+  @override
+  String get healthCarnetDisclaimerSource => 'Recommandations vaccinales WSAVA';
+
+  @override
+  String get healthCarnetMarkDone => 'Marquer comme fait';
+
+  @override
+  String get healthCarnetSnooze => 'Reporter';
+
+  @override
+  String healthCarnetDueBy(String date) {
+    return 'À faire avant le $date';
+  }
+
+  @override
+  String get healthCarnetToSchedule => 'À programmer';
+
+  @override
+  String get healthCarnetToday => 'Aujourd\'hui';
+
+  @override
+  String get healthCarnetTomorrow => 'Demain';
+
+  @override
+  String healthCarnetInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Dans $count jours',
+      one: 'Dans 1 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetInMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Dans $count mois',
+      one: 'Dans 1 mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetInYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Dans $count ans',
+      one: 'Dans 1 an',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetLateDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours de retard',
+      one: '1 jour de retard',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetLateMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mois de retard',
+      one: '1 mois de retard',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetLateYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ans de retard',
+      one: '1 an de retard',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetEveryDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tous les $count jours',
+      one: 'Tous les jours',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetEveryMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tous les $count mois',
+      one: 'Tous les mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetEveryYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tous les $count ans',
+      one: 'Tous les ans',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetLastDoneOn(String date) {
+    return 'Dernière fois le $date.';
+  }
+
+  @override
+  String get healthCarnetNoRecordYet => 'Aucun acte enregistré.';
+
+  @override
+  String get healthCarnetSeriesNote => 'Fait partie de la primo-vaccination.';
+
+  @override
+  String get healthCarnetRabiesIntervalNote =>
+      'Rappel selon le vaccin utilisé.';
+
+  @override
+  String get healthCarnetLegalNote =>
+      'Les obligations varient selon les pays — vérifiez la réglementation locale.';
+
+  @override
+  String get healthCarnetSnoozeTitle => 'Reporter de';
+
+  @override
+  String get healthCarnetSnoozeWeek => 'Une semaine';
+
+  @override
+  String get healthCarnetSnoozeMonth => 'Un mois';
+
+  @override
+  String get healthCarnetSnoozeThreeMonths => 'Trois mois';
+
+  @override
+  String get healthCarnetSaveError =>
+      'L\'enregistrement a échoué. Veuillez réessayer.';
+
+  @override
+  String get healthAddSheetTitle => 'Que souhaitez-vous enregistrer ?';
+
+  @override
+  String get healthAddSectionCare => 'Soins de routine';
+
+  @override
+  String get healthAddSectionOther => 'Autre chose';
+
+  @override
+  String get healthAddFieldTitleLabel => 'Intitulé';
+
+  @override
+  String get healthAddFieldTitleHint => 'Visite annuelle';
+
+  @override
+  String get healthAddFieldDateLabel => 'Date';
+
+  @override
+  String get healthAddFieldNotesLabel => 'Notes';
+
+  @override
+  String get healthAddFieldNotesHint => 'Ce qui mérite d’être noté';
+
+  @override
+  String get healthAddFieldVetLabel => 'Vétérinaire';
+
+  @override
+  String get healthAddFieldVetHint => 'Dr Haddad';
+
+  @override
+  String get healthAddFieldClinicLabel => 'Clinique';
+
+  @override
+  String get healthAddFieldClinicHint => 'Clinique Al Wasl';
+
+  @override
+  String get healthAddFieldWeightLabel => 'Poids (kg)';
+
+  @override
+  String get healthAddFieldWeightHint => 'Facultatif';
+
+  @override
+  String get healthAddRabiesIntervalLabel => 'Prochain rappel';
+
+  @override
+  String get healthAddRabiesOneYear => 'Dans 1 an';
+
+  @override
+  String get healthAddRabiesThreeYears => 'Dans 3 ans';
+
+  @override
+  String get healthAddSave => 'Enregistrer';
+
+  @override
+  String get healthAddCancel => 'Annuler';
+
+  @override
+  String get healthAddTitleRequired => 'Donnez un intitulé à cet acte.';
+
+  @override
+  String get healthCarnetEntryEmpty => 'Vaccins, visites et poids';
+
+  @override
+  String get healthCarnetWeightChartTitle => 'Évolution du poids';
+
+  @override
+  String healthCarnetWeightChartSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count derniers mois',
+      one: 'Dernier mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get healthCarnetHistoryTitle => 'Tous les actes';
+
+  @override
+  String healthCarnetHistoryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count actes',
+      one: '1 acte',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get healthCarnetHistoryEmpty =>
+      'Rien d\'enregistré. Ajoutez la dernière visite ou le dernier vaccin de votre chat pour commencer le carnet.';
+
+  @override
+  String get healthCarnetDeleteTitle => 'Supprimer cet acte ?';
+
+  @override
+  String get healthCarnetDeleteBody =>
+      'Il sera retiré du carnet et les prochaines échéances seront recalculées.';
+
+  @override
+  String get healthCarnetDeleteConfirm => 'Supprimer';
+
+  @override
+  String get healthCarnetDeleteCancel => 'Conserver';
+
+  @override
+  String get allergenChicken => 'Poulet';
+
+  @override
+  String get allergenTurkey => 'Dinde';
+
+  @override
+  String get allergenBeef => 'Bœuf';
+
+  @override
+  String get allergenLamb => 'Agneau';
+
+  @override
+  String get allergenPork => 'Porc';
+
+  @override
+  String get allergenDuck => 'Canard';
+
+  @override
+  String get allergenFish => 'Poisson';
+
+  @override
+  String get allergenSalmon => 'Saumon';
+
+  @override
+  String get allergenTuna => 'Thon';
+
+  @override
+  String get allergenShellfish => 'Crustacés';
+
+  @override
+  String get allergenDairy => 'Produits laitiers';
+
+  @override
+  String get allergenEgg => 'Œuf';
+
+  @override
+  String get allergenGrain => 'Céréales / gluten';
+
+  @override
+  String get allergenSoy => 'Soja';
+
+  @override
+  String get allergenDust => 'Poussière';
+
+  @override
+  String get allergenPollen => 'Pollen';
+
+  @override
+  String get allergenGrass => 'Herbe';
+
+  @override
+  String get allergenMould => 'Moisissure';
+
+  @override
+  String get allergenFleaBite => 'Piqûres de puces';
+
+  @override
+  String get healthCarnetAllergiesTitle => 'Allergies et sensibilités';
+
+  @override
+  String get healthCarnetAllergiesFooter =>
+      'Les aliments de cette liste sont signalés lors d\'un scan, et les recettes qui les utilisent sont masquées.';
+
+  @override
+  String get healthCarnetAllergiesEmpty => 'Rien d’enregistré.';
+
+  @override
+  String get healthCarnetAllergiesEdit => 'Modifier';
+
+  @override
+  String get healthCarnetAllergiesSheetTitle => 'À quoi votre chat réagit-il ?';
+
+  @override
+  String get healthCarnetAllergiesSectionFood => 'Aliments';
+
+  @override
+  String get healthCarnetAllergiesSectionEnvironment => 'Environnement';
+
+  @override
+  String get healthCarnetAllergiesSave => 'Enregistrer';
+
+  @override
+  String get healthCarnetOngoingTitle => 'Traitements en cours';
+
+  @override
+  String healthCarnetOngoingNext(String date) {
+    return 'Prochain $date';
+  }
+
+  @override
+  String recipesHiddenByAllergies(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recettes masquées à cause des allergies de vos chats',
+      one: '1 recette masquée à cause des allergies de vos chats',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String assessmentDeclaredAllergen(String allergen) {
+    return 'Contient $allergen, que vous avez signalé comme allergie';
+  }
+
+  @override
+  String get healthCarnetCalendarSectionDone => 'Enregistré';
+
+  @override
+  String get healthCarnetCalendarSectionDue => 'À venir';
+
+  @override
+  String get healthCarnetCalendarEmptyDay => 'Rien ce jour-là.';
+
+  @override
+  String get healthCarnetCalendarPreviousMonth => 'Mois précédent';
+
+  @override
+  String get healthCarnetCalendarNextMonth => 'Mois suivant';
+
+  @override
+  String get healthCarnetCalendarLegendDone => 'Enregistré';
+
+  @override
+  String get healthCarnetCalendarLegendDue => 'Prévu';
+
+  @override
+  String get healthCarnetCalendarUnscheduledNote =>
+      'Ce qui reste à programmer n\'a pas encore de date et n\'apparaît donc pas ici.';
 }

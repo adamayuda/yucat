@@ -1196,5 +1196,293 @@
   "litterAdditiveSilica": "Silica",
   "litterAdditiveEssentialOils": "Essential oils",
   "litterAdditiveDeodorizer": "Odour neutralizer",
-  "foodSectionTitle": "Cat food"
+  "foodSectionTitle": "Cat food",
+  "healthProtocolAnnualCheckup": "Annual check-up",
+  "healthProtocolAnnualCheckupDesc": "Full exam, weigh-in and dental check at the same appointment.",
+  "healthProtocolFvrcp": "FVRCP booster",
+  "healthProtocolFvrcpDesc": "Protects against panleukopenia, herpesvirus and calicivirus.",
+  "healthProtocolRabies": "Rabies booster",
+  "healthProtocolRabiesDesc": "A core vaccine in most regions, and the one most often required.",
+  "healthProtocolFelv": "Feline leukaemia (FeLV)",
+  "healthProtocolFelvDesc": "Recommended for every kitten, after a FeLV/FIV test.",
+  "healthProtocolFelvBooster": "FeLV booster",
+  "healthProtocolFelvBoosterDesc": "For cats that go outdoors or live with other cats.",
+  "healthProtocolDewormingInternal": "Deworming",
+  "healthProtocolDewormingInternalDesc": "Treatment against internal parasites.",
+  "healthProtocolDewormingMonthly": "Monthly deworming",
+  "healthProtocolDewormingMonthlyDesc": "For hunters, raw-fed cats, or homes with young children.",
+  "healthProtocolParasiteExternal": "Flea and tick treatment",
+  "healthProtocolParasiteExternalDesc": "External parasite protection, all year round.",
+  "healthProtocolHeartworm": "Heartworm prevention",
+  "healthProtocolHeartwormDesc": "Only needed in regions where heartworm is present.",
+  "healthProtocolDentalScaling": "Dental scaling",
+  "healthProtocolDentalScalingDesc": "Under anaesthetic, when your vet advises it.",
+  "healthProtocolSeniorPanel": "Senior health panel",
+  "healthProtocolSeniorPanelDesc": "Blood count, chemistry, thyroid, urine and blood pressure.",
+  "healthProtocolRetrovirusTest": "FeLV/FIV test",
+  "healthProtocolRetrovirusTestDesc": "At adoption, and after any bite wound.",
+  "healthProtocolConditionFollowUp": "Condition follow-up",
+  "healthProtocolConditionFollowUpDesc": "Recheck for your cat's diagnosed condition.",
+  "healthProtocolNeutering": "Neutering",
+  "healthProtocolNeuteringDesc": "Recommended by five months of age.",
+  "healthProtocolMicrochip": "Microchip / identification",
+  "healthProtocolMicrochipDesc": "Required for travel, and in many countries.",
+  "healthCategoryVaccine": "Vaccine",
+  "healthCategoryParasite": "Parasites",
+  "healthCategoryExam": "Visit",
+  "healthCategoryDental": "Dental",
+  "healthCategorySurgery": "Surgery",
+  "healthCategoryLab": "Tests",
+  "healthCategoryIdentification": "ID",
+  "healthCategoryTreatment": "Treatment",
+  "healthCategoryWeight": "Weight",
+  "healthCategoryOther": "Other",
+  "healthCarnetTitle": "Health record",
+  "healthCarnetUpdatedOn": "Updated {date}",
+  "@healthCarnetUpdatedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "healthCarnetStatWeightLabel": "WEIGHT",
+  "healthCarnetStatTodoLabel": "TO DO",
+  "healthCarnetWeightDelta": "{delta} kg since {month}",
+  "@healthCarnetWeightDelta": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "healthCarnetWeightNoData": "No weigh-in yet",
+  "healthCarnetTodoUrgent": "{count, plural, =1{including 1 urgent} other{including {count} urgent}}",
+  "@healthCarnetTodoUrgent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "healthCarnetTodoNone": "Nothing urgent",
+  "healthCarnetTabUpcoming": "Upcoming",
+  "healthCarnetTabHistory": "History",
+  "healthCarnetTabCalendar": "Calendar",
+  "healthCarnetAddCta": "Add a record",
+  "healthCarnetErrorBody": "We couldn't load this health record.",
+  "healthCarnetRetry": "Try again",
+  "healthCarnetUpcomingEmpty": "Nothing is due right now. Add a past record to build the schedule.",
+  "healthCarnetDisclaimerTitle": "Guidance, not a prescription",
+  "healthCarnetDisclaimerBody": "These dates follow general veterinary guidelines. Your vet knows your cat — always follow their advice, and check what your country requires.",
+  "healthCarnetDisclaimerSource": "WSAVA vaccination guidelines",
+  "healthCarnetMarkDone": "Mark as done",
+  "healthCarnetSnooze": "Snooze",
+  "healthCarnetDueBy": "Due by {date}",
+  "@healthCarnetDueBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "healthCarnetToSchedule": "To schedule",
+  "healthCarnetToday": "Today",
+  "healthCarnetTomorrow": "Tomorrow",
+  "healthCarnetInDays": "{count, plural, =1{In 1 day} other{In {count} days}}",
+  "@healthCarnetInDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "healthCarnetInMonths": "{count, plural, =1{In 1 month} other{In {count} months}}",
+  "@healthCarnetInMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "healthCarnetInYears": "{count, plural, =1{In 1 year} other{In {count} years}}",
+  "@healthCarnetInYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "healthCarnetLateDays": "{count, plural, =1{1 day late} other{{count} days late}}",
+  "@healthCarnetLateDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "healthCarnetLateMonths": "{count, plural, =1{1 month late} other{{count} months late}}",
+  "@healthCarnetLateMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "healthCarnetLateYears": "{count, plural, =1{1 year late} other{{count} years late}}",
+  "@healthCarnetLateYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "healthCarnetEveryDays": "{count, plural, =1{Every day} other{Every {count} days}}",
+  "@healthCarnetEveryDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "healthCarnetEveryMonths": "{count, plural, =1{Every month} other{Every {count} months}}",
+  "@healthCarnetEveryMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "healthCarnetEveryYears": "{count, plural, =1{Every year} other{Every {count} years}}",
+  "@healthCarnetEveryYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "healthCarnetLastDoneOn": "Last on {date}.",
+  "@healthCarnetLastDoneOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "healthCarnetNoRecordYet": "No record yet.",
+  "healthCarnetSeriesNote": "Part of the kitten series.",
+  "healthCarnetRabiesIntervalNote": "Interval depends on the vaccine used.",
+  "healthCarnetLegalNote": "Requirements vary by country — check your local rules.",
+  "healthCarnetSnoozeTitle": "Push this back by",
+  "healthCarnetSnoozeWeek": "One week",
+  "healthCarnetSnoozeMonth": "One month",
+  "healthCarnetSnoozeThreeMonths": "Three months",
+  "healthCarnetSaveError": "That didn't save. Please try again.",
+  "healthAddSheetTitle": "What would you like to record?",
+  "healthAddSectionCare": "Routine care",
+  "healthAddSectionOther": "Something else",
+  "healthAddFieldTitleLabel": "Title",
+  "healthAddFieldTitleHint": "Annual visit",
+  "healthAddFieldDateLabel": "Date",
+  "healthAddFieldNotesLabel": "Notes",
+  "healthAddFieldNotesHint": "Anything worth remembering",
+  "healthAddFieldVetLabel": "Vet",
+  "healthAddFieldVetHint": "Dr. Haddad",
+  "healthAddFieldClinicLabel": "Clinic",
+  "healthAddFieldClinicHint": "Al Wasl Clinic",
+  "healthAddFieldWeightLabel": "Weight (kg)",
+  "healthAddFieldWeightHint": "Optional",
+  "healthAddRabiesIntervalLabel": "Next booster due",
+  "healthAddRabiesOneYear": "In 1 year",
+  "healthAddRabiesThreeYears": "In 3 years",
+  "healthAddSave": "Save",
+  "healthAddCancel": "Cancel",
+  "healthAddTitleRequired": "Give this record a title.",
+  "healthCarnetEntryEmpty": "Vaccines, visits and weight",
+  "healthCarnetWeightChartTitle": "Weight trend",
+  "healthCarnetWeightChartSubtitle": "{count, plural, =1{Last month} other{Last {count} months}}",
+  "@healthCarnetWeightChartSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "healthCarnetHistoryTitle": "All records",
+  "healthCarnetHistoryCount": "{count, plural, =1{1 record} other{{count} records}}",
+  "@healthCarnetHistoryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "healthCarnetHistoryEmpty": "Nothing recorded yet. Add your cat's last visit or vaccine to start the carnet.",
+  "healthCarnetDeleteTitle": "Delete this record?",
+  "healthCarnetDeleteBody": "It will be removed from the carnet and the upcoming dates will be recalculated.",
+  "healthCarnetDeleteConfirm": "Delete",
+  "healthCarnetDeleteCancel": "Keep",
+  "allergenChicken": "Chicken",
+  "allergenTurkey": "Turkey",
+  "allergenBeef": "Beef",
+  "allergenLamb": "Lamb",
+  "allergenPork": "Pork",
+  "allergenDuck": "Duck",
+  "allergenFish": "Fish",
+  "allergenSalmon": "Salmon",
+  "allergenTuna": "Tuna",
+  "allergenShellfish": "Shellfish",
+  "allergenDairy": "Dairy",
+  "allergenEgg": "Egg",
+  "allergenGrain": "Grain / gluten",
+  "allergenSoy": "Soy",
+  "allergenDust": "Dust",
+  "allergenPollen": "Pollen",
+  "allergenGrass": "Grass",
+  "allergenMould": "Mould",
+  "allergenFleaBite": "Flea bites",
+  "healthCarnetAllergiesTitle": "Allergies and sensitivities",
+  "healthCarnetAllergiesFooter": "Foods on this list are flagged when you scan a product, and recipes that use them are hidden.",
+  "healthCarnetAllergiesEmpty": "Nothing recorded.",
+  "healthCarnetAllergiesEdit": "Edit",
+  "healthCarnetAllergiesSheetTitle": "What does your cat react to?",
+  "healthCarnetAllergiesSectionFood": "Food",
+  "healthCarnetAllergiesSectionEnvironment": "Environment",
+  "healthCarnetAllergiesSave": "Save",
+  "healthCarnetOngoingTitle": "Ongoing treatments",
+  "healthCarnetOngoingNext": "Next {date}",
+  "@healthCarnetOngoingNext": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recipesHiddenByAllergies": "{count, plural, =1{1 recipe hidden because of your cats' allergies} other{{count} recipes hidden because of your cats' allergies}}",
+  "@recipesHiddenByAllergies": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assessmentDeclaredAllergen": "Contains {allergen}, which you flagged as an allergy",
+  "@assessmentDeclaredAllergen": {
+    "placeholders": {
+      "allergen": {
+        "type": "String"
+      }
+    }
+  },
+  "healthCarnetCalendarSectionDone": "Recorded",
+  "healthCarnetCalendarSectionDue": "Coming up",
+  "healthCarnetCalendarEmptyDay": "Nothing on this day.",
+  "healthCarnetCalendarPreviousMonth": "Previous month",
+  "healthCarnetCalendarNextMonth": "Next month",
+  "healthCarnetCalendarLegendDone": "Recorded",
+  "healthCarnetCalendarLegendDue": "Scheduled",
+  "healthCarnetCalendarUnscheduledNote": "Items still to schedule have no date yet, so they are not shown here."
 }

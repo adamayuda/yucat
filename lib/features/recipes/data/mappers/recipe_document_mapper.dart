@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:yucat/features/cat/domain/entities/cat_allergen.dart';
 import 'package:yucat/features/recipes/domain/entities/recipe_entity.dart';
 import 'package:yucat/presentation/utils/supported_language.dart';
 
@@ -56,6 +57,9 @@ class RecipeDocumentMapperImpl implements RecipeDocumentMapper {
       ),
       steps: _steps(localized?['steps'] ?? data['steps']),
       tip: _tip(text('tip', '')),
+      // ⚠️ Always `data['ingredients']`, never the localized list: the needles
+      // are English, so matching has to run against the untranslated source.
+      allergenKeys: _allergenKeys(data['ingredients']),
     );
   }
 
@@ -74,6 +78,17 @@ class RecipeDocumentMapperImpl implements RecipeDocumentMapper {
           ),
         )
         .toList();
+  }
+
+  /// Allergen keys present in the canonical English ingredient names.
+  static List<String> _allergenKeys(Object? raw) {
+    if (raw is! List) return const [];
+    final text = raw
+        .whereType<Map<String, dynamic>>()
+        .map((item) => (item['name'] as String? ?? '').toLowerCase())
+        .join(' ');
+    if (text.isEmpty) return const [];
+    return detectFoodAllergenKeys(text).toList(growable: false)..sort();
   }
 
   static List<String> _steps(Object? raw) {

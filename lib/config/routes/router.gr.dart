@@ -288,6 +288,43 @@ class FoodGuideRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [HealthCarnetPage]
+class HealthCarnetRoute extends PageRouteInfo<HealthCarnetRouteArgs> {
+  HealthCarnetRoute({
+    Key? key,
+    required CatModel cat,
+    List<PageRouteInfo>? children,
+  }) : super(
+         HealthCarnetRoute.name,
+         args: HealthCarnetRouteArgs(key: key, cat: cat),
+         initialChildren: children,
+       );
+
+  static const String name = 'HealthCarnetRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<HealthCarnetRouteArgs>();
+      return HealthCarnetPage(key: args.key, cat: args.cat);
+    },
+  );
+}
+
+class HealthCarnetRouteArgs {
+  const HealthCarnetRouteArgs({this.key, required this.cat});
+
+  final Key? key;
+
+  final CatModel cat;
+
+  @override
+  String toString() {
+    return 'HealthCarnetRouteArgs{key: $key, cat: $cat}';
+  }
+}
+
+/// generated route for
 /// [HomePage]
 class HomeRoute extends PageRouteInfo<void> {
   const HomeRoute({List<PageRouteInfo>? children})

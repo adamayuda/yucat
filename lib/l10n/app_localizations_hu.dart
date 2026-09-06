@@ -2403,4 +2403,585 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get foodSectionTitle => 'Macskaeledel';
+
+  @override
+  String get healthProtocolAnnualCheckup => 'Éves vizsgálat';
+
+  @override
+  String get healthProtocolAnnualCheckupDesc =>
+      'Teljes vizsgálat, mérlegelés és fogellenőrzés ugyanazon a vizsgálaton.';
+
+  @override
+  String get healthProtocolFvrcp => 'FVRCP emlékeztető';
+
+  @override
+  String get healthProtocolFvrcpDesc =>
+      'Véd a panleukopénia, a herpeszvírus és a calicivírus ellen.';
+
+  @override
+  String get healthProtocolRabies => 'Veszettség emlékeztető';
+
+  @override
+  String get healthProtocolRabiesDesc =>
+      'A legtöbb régióban alapoltás, és a leggyakrabban megkövetelt.';
+
+  @override
+  String get healthProtocolFelv => 'Leukózis (FeLV)';
+
+  @override
+  String get healthProtocolFelvDesc =>
+      'Minden kölyökmacskának ajánlott, FeLV/FIV teszt után.';
+
+  @override
+  String get healthProtocolFelvBooster => 'FeLV emlékeztető';
+
+  @override
+  String get healthProtocolFelvBoosterDesc =>
+      'Kijáró vagy több macskával élő cicáknak.';
+
+  @override
+  String get healthProtocolDewormingInternal => 'Féreghajtás';
+
+  @override
+  String get healthProtocolDewormingInternalDesc =>
+      'Belső paraziták elleni kezelés.';
+
+  @override
+  String get healthProtocolDewormingMonthly => 'Havi féreghajtás';
+
+  @override
+  String get healthProtocolDewormingMonthlyDesc =>
+      'Vadászó, nyers étrendű macskáknak vagy kisgyermekes háztartásokba.';
+
+  @override
+  String get healthProtocolParasiteExternal => 'Külső élősködők elleni kezelés';
+
+  @override
+  String get healthProtocolParasiteExternalDesc =>
+      'Bolha- és kullancsvédelem egész évben.';
+
+  @override
+  String get healthProtocolHeartworm => 'Szívféreg-megelőzés';
+
+  @override
+  String get healthProtocolHeartwormDesc =>
+      'Csak azokban a régiókban szükséges, ahol előfordul.';
+
+  @override
+  String get healthProtocolDentalScaling => 'Fogkőeltávolítás';
+
+  @override
+  String get healthProtocolDentalScalingDesc =>
+      'Altatásban, ha az állatorvos javasolja.';
+
+  @override
+  String get healthProtocolSeniorPanel => 'Idős kori szűrés';
+
+  @override
+  String get healthProtocolSeniorPanelDesc =>
+      'Vérkép, biokémia, pajzsmirigy, vizelet és vérnyomás.';
+
+  @override
+  String get healthProtocolRetrovirusTest => 'FeLV/FIV teszt';
+
+  @override
+  String get healthProtocolRetrovirusTestDesc =>
+      'Örökbefogadáskor és minden harapás után.';
+
+  @override
+  String get healthProtocolConditionFollowUp => 'Betegségkontroll';
+
+  @override
+  String get healthProtocolConditionFollowUpDesc =>
+      'A macskád diagnosztizált betegségének ellenőrzése.';
+
+  @override
+  String get healthProtocolNeutering => 'Ivartalanítás';
+
+  @override
+  String get healthProtocolNeuteringDesc => 'Öt hónapos korig ajánlott.';
+
+  @override
+  String get healthProtocolMicrochip => 'Chip / azonosítás';
+
+  @override
+  String get healthProtocolMicrochipDesc =>
+      'Utazáshoz és sok országban kötelező.';
+
+  @override
+  String get healthCategoryVaccine => 'Oltás';
+
+  @override
+  String get healthCategoryParasite => 'Paraziták';
+
+  @override
+  String get healthCategoryExam => 'Vizsgálat';
+
+  @override
+  String get healthCategoryDental => 'Fogászat';
+
+  @override
+  String get healthCategorySurgery => 'Műtét';
+
+  @override
+  String get healthCategoryLab => 'Vizsgálatok';
+
+  @override
+  String get healthCategoryIdentification => 'Azonosítás';
+
+  @override
+  String get healthCategoryTreatment => 'Kezelés';
+
+  @override
+  String get healthCategoryWeight => 'Testsúly';
+
+  @override
+  String get healthCategoryOther => 'Egyéb';
+
+  @override
+  String get healthCarnetTitle => 'Egészségügyi kiskönyv';
+
+  @override
+  String healthCarnetUpdatedOn(String date) {
+    return 'Frissítve: $date';
+  }
+
+  @override
+  String get healthCarnetStatWeightLabel => 'TESTSÚLY';
+
+  @override
+  String get healthCarnetStatTodoLabel => 'TEENDŐ';
+
+  @override
+  String healthCarnetWeightDelta(String delta, String month) {
+    return '$delta kg $month óta';
+  }
+
+  @override
+  String get healthCarnetWeightNoData => 'Még nincs mérés';
+
+  @override
+  String healthCarnetTodoUrgent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ebből $count sürgős',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get healthCarnetTodoNone => 'Semmi sürgős';
+
+  @override
+  String get healthCarnetTabUpcoming => 'Közelgő';
+
+  @override
+  String get healthCarnetTabHistory => 'Előzmények';
+
+  @override
+  String get healthCarnetTabCalendar => 'Naptár';
+
+  @override
+  String get healthCarnetAddCta => 'Bejegyzés hozzáadása';
+
+  @override
+  String get healthCarnetErrorBody => 'Nem sikerült betölteni a kiskönyvet.';
+
+  @override
+  String get healthCarnetRetry => 'Újra';
+
+  @override
+  String get healthCarnetUpcomingEmpty =>
+      'Jelenleg nincs teendő. Adj hozzá egy korábbi bejegyzést az ütemterv felépítéséhez.';
+
+  @override
+  String get healthCarnetDisclaimerTitle => 'Iránymutatás, nem előírás';
+
+  @override
+  String get healthCarnetDisclaimerBody =>
+      'Ezek a dátumok általános állatorvosi ajánlásokat követnek. Az állatorvosod ismeri a macskádat — mindig az ő tanácsát kövesd, és nézd meg az országod előírásait.';
+
+  @override
+  String get healthCarnetDisclaimerSource => 'WSAVA oltási irányelvek';
+
+  @override
+  String get healthCarnetMarkDone => 'Kész';
+
+  @override
+  String get healthCarnetSnooze => 'Halasztás';
+
+  @override
+  String healthCarnetDueBy(String date) {
+    return 'Esedékes: $date';
+  }
+
+  @override
+  String get healthCarnetToSchedule => 'Ütemezendő';
+
+  @override
+  String get healthCarnetToday => 'Ma';
+
+  @override
+  String get healthCarnetTomorrow => 'Holnap';
+
+  @override
+  String healthCarnetInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nap múlva',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetInMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hónap múlva',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetInYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count év múlva',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetLateDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count napja esedékes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetLateMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hónapja esedékes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetLateYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count éve esedékes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetEveryDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count naponta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetEveryMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count havonta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetEveryYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count évente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetLastDoneOn(String date) {
+    return 'Utoljára: $date.';
+  }
+
+  @override
+  String get healthCarnetNoRecordYet => 'Még nincs bejegyzés.';
+
+  @override
+  String get healthCarnetSeriesNote => 'Az alapimmunizálás része.';
+
+  @override
+  String get healthCarnetRabiesIntervalNote =>
+      'Az időköz a felhasznált vakcinától függ.';
+
+  @override
+  String get healthCarnetLegalNote =>
+      'Az előírások országonként eltérnek — nézd meg a helyi szabályokat.';
+
+  @override
+  String get healthCarnetSnoozeTitle => 'Halasztás ennyivel';
+
+  @override
+  String get healthCarnetSnoozeWeek => 'Egy hét';
+
+  @override
+  String get healthCarnetSnoozeMonth => 'Egy hónap';
+
+  @override
+  String get healthCarnetSnoozeThreeMonths => 'Három hónap';
+
+  @override
+  String get healthCarnetSaveError => 'A mentés nem sikerült. Próbáld újra.';
+
+  @override
+  String get healthAddSheetTitle => 'Mit szeretnél rögzíteni?';
+
+  @override
+  String get healthAddSectionCare => 'Rutinellátás';
+
+  @override
+  String get healthAddSectionOther => 'Valami más';
+
+  @override
+  String get healthAddFieldTitleLabel => 'Megnevezés';
+
+  @override
+  String get healthAddFieldTitleHint => 'Éves vizsgálat';
+
+  @override
+  String get healthAddFieldDateLabel => 'Dátum';
+
+  @override
+  String get healthAddFieldNotesLabel => 'Megjegyzés';
+
+  @override
+  String get healthAddFieldNotesHint => 'Bármi, amit érdemes megjegyezni';
+
+  @override
+  String get healthAddFieldVetLabel => 'Állatorvos';
+
+  @override
+  String get healthAddFieldVetHint => 'Dr. Haddad';
+
+  @override
+  String get healthAddFieldClinicLabel => 'Rendelő';
+
+  @override
+  String get healthAddFieldClinicHint => 'Al Wasl rendelő';
+
+  @override
+  String get healthAddFieldWeightLabel => 'Testsúly (kg)';
+
+  @override
+  String get healthAddFieldWeightHint => 'Nem kötelező';
+
+  @override
+  String get healthAddRabiesIntervalLabel => 'Következő emlékeztető';
+
+  @override
+  String get healthAddRabiesOneYear => '1 év múlva';
+
+  @override
+  String get healthAddRabiesThreeYears => '3 év múlva';
+
+  @override
+  String get healthAddSave => 'Mentés';
+
+  @override
+  String get healthAddCancel => 'Mégse';
+
+  @override
+  String get healthAddTitleRequired => 'Adj meg egy megnevezést.';
+
+  @override
+  String get healthCarnetEntryEmpty => 'Oltások, vizsgálatok és testsúly';
+
+  @override
+  String get healthCarnetWeightChartTitle => 'Testsúly alakulása';
+
+  @override
+  String healthCarnetWeightChartSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Utolsó $count hónap',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get healthCarnetHistoryTitle => 'Összes bejegyzés';
+
+  @override
+  String healthCarnetHistoryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bejegyzés',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get healthCarnetHistoryEmpty =>
+      'Még nincs bejegyzés. Add hozzá a legutóbbi vizsgálatot vagy oltást a kiskönyv indításához.';
+
+  @override
+  String get healthCarnetDeleteTitle => 'Törlöd ezt a bejegyzést?';
+
+  @override
+  String get healthCarnetDeleteBody =>
+      'Törlődik a kiskönyvből, és a közelgő időpontok újraszámolódnak.';
+
+  @override
+  String get healthCarnetDeleteConfirm => 'Törlés';
+
+  @override
+  String get healthCarnetDeleteCancel => 'Megtartás';
+
+  @override
+  String get allergenChicken => 'Csirke';
+
+  @override
+  String get allergenTurkey => 'Pulyka';
+
+  @override
+  String get allergenBeef => 'Marha';
+
+  @override
+  String get allergenLamb => 'Bárány';
+
+  @override
+  String get allergenPork => 'Sertés';
+
+  @override
+  String get allergenDuck => 'Kacsa';
+
+  @override
+  String get allergenFish => 'Hal';
+
+  @override
+  String get allergenSalmon => 'Lazac';
+
+  @override
+  String get allergenTuna => 'Tonhal';
+
+  @override
+  String get allergenShellfish => 'Rákfélék';
+
+  @override
+  String get allergenDairy => 'Tejtermék';
+
+  @override
+  String get allergenEgg => 'Tojás';
+
+  @override
+  String get allergenGrain => 'Gabona / glutén';
+
+  @override
+  String get allergenSoy => 'Szója';
+
+  @override
+  String get allergenDust => 'Por';
+
+  @override
+  String get allergenPollen => 'Pollen';
+
+  @override
+  String get allergenGrass => 'Fű';
+
+  @override
+  String get allergenMould => 'Penész';
+
+  @override
+  String get allergenFleaBite => 'Bolhacsípés';
+
+  @override
+  String get healthCarnetAllergiesTitle => 'Allergiák és érzékenységek';
+
+  @override
+  String get healthCarnetAllergiesFooter =>
+      'A listán szereplő élelmiszereket a termékszkennelés jelzi, és az ezeket használó recepteket elrejtjük.';
+
+  @override
+  String get healthCarnetAllergiesEmpty => 'Nincs bejegyzés.';
+
+  @override
+  String get healthCarnetAllergiesEdit => 'Szerkesztés';
+
+  @override
+  String get healthCarnetAllergiesSheetTitle => 'Mire reagál a macskád?';
+
+  @override
+  String get healthCarnetAllergiesSectionFood => 'Élelmiszer';
+
+  @override
+  String get healthCarnetAllergiesSectionEnvironment => 'Környezet';
+
+  @override
+  String get healthCarnetAllergiesSave => 'Mentés';
+
+  @override
+  String get healthCarnetOngoingTitle => 'Folyamatban lévő kezelések';
+
+  @override
+  String healthCarnetOngoingNext(String date) {
+    return 'Következő: $date';
+  }
+
+  @override
+  String recipesHiddenByAllergies(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recept elrejtve a macskáid allergiái miatt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String assessmentDeclaredAllergen(String allergen) {
+    return '$allergen tartalmaz, amit allergiaként jelöltél';
+  }
+
+  @override
+  String get healthCarnetCalendarSectionDone => 'Rögzítve';
+
+  @override
+  String get healthCarnetCalendarSectionDue => 'Közelgő';
+
+  @override
+  String get healthCarnetCalendarEmptyDay => 'Ezen a napon nincs semmi.';
+
+  @override
+  String get healthCarnetCalendarPreviousMonth => 'Előző hónap';
+
+  @override
+  String get healthCarnetCalendarNextMonth => 'Következő hónap';
+
+  @override
+  String get healthCarnetCalendarLegendDone => 'Rögzítve';
+
+  @override
+  String get healthCarnetCalendarLegendDue => 'Tervezett';
+
+  @override
+  String get healthCarnetCalendarUnscheduledNote =>
+      'Az ütemezendő tételeknek még nincs dátumuk, ezért itt nem jelennek meg.';
 }

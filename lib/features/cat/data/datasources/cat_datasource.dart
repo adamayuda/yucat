@@ -147,6 +147,26 @@ class CatDataSource {
     }
   }
 
+  /// Writes the allergy list outright, including an empty one.
+  ///
+  /// Deliberately not routed through [updateCat]: the document mapper omits an
+  /// empty `allergies` key so a cat-wizard save can't wipe the list, which also
+  /// means it can never *clear* it. Clearing is a real user action, so it gets
+  /// its own write.
+  Future<void> updateCatAllergies({
+    required String catId,
+    required List<String> allergies,
+  }) async {
+    try {
+      await _firestore.collection('cats').doc(catId).update({
+        'allergies': allergies,
+      });
+    } catch (e) {
+      debugPrint('Error updating cat allergies: $e');
+      rethrow;
+    }
+  }
+
   Future<void> updateCat({
     required String catId,
     required Map<String, dynamic> catData,
