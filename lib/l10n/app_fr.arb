@@ -333,6 +333,8 @@
   "assessmentHairballControl": "Régime type contrôle des boules de poil (fibres 4–6 % ou allégations anti-boules de poil)",
   "homeScanProduct": "Scanner un produit",
   "homeScanProductSubtitle": "Photographier l'emballage",
+  "homeScanEyebrow": "Le scan YuCat",
+  "homeScanHeadline": "Ce paquet est-il bon pour votre chat ?",
   "homeGreetingHey": "Bon retour",
   "homeGreetingWelcome": "Bienvenue",
   "homeReadyForCat": "Prêt à trouver de la nourriture pour {name} ?",

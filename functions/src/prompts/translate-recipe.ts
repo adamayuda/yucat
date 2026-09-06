@@ -28,6 +28,15 @@ RULES
 - If a field is an empty string or an empty array, return it unchanged.
 - Never add information that is not in the source.
 
+MARKDOWN
+- "body" is the rendered recipe. Each item is one Markdown block - a paragraph, heading, list, table or image. Return the SAME number of items, in the SAME order, and never merge, split, add or drop a block.
+- Reproduce every markup character exactly: **bold**, _italic_, ## headings, - bullets, 1. numbered steps, > quotes, | tables |.
+- Translate only the human-readable words. Never add markup the source does not have, and never remove markup it does have.
+- Keep heading levels identical, and keep a table's row and column counts identical.
+- Numbered steps inside "body" ARE written as Markdown (1. 2. 3.) and must stay that way - this is the opposite of the bare "steps" array above, which the app numbers itself.
+- For a link written as [text](url) or an image ![alt](url): translate the text or alt, and copy the URL exactly.
+- Keep every quantity, temperature, weight and time exactly as-is.
+
 Output ONLY by calling submit_recipe_translation.
 `.trim();
 }

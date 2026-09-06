@@ -199,7 +199,16 @@ async function main() {
         item: {
           ...item,
           translations,
-          translationsSourceHash: hash,
+          // Advance the stored hash only when every language succeeded.
+          //
+          // Writing it unconditionally made the script's own "Re-run to retry"
+          // advice false: a plain re-run would see hashMatches plus a cached
+          // value, report the language as "reused", and freeze the stale
+          // translation until someone remembered --force-retranslate. Keeping
+          // the prior hash on a partial failure means the next run retries
+          // exactly the languages that failed.
+          translationsSourceHash:
+            failed.length === 0 ? hash : prior?.translationsSourceHash ?? "",
         },
         translated,
         reused,

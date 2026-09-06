@@ -1170,6 +1170,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeScanProductSubtitle => 'Photographier l\'emballage';
 
   @override
+  String get homeScanEyebrow => 'Le scan YuCat';
+
+  @override
+  String get homeScanHeadline => 'Ce paquet est-il bon pour votre chat ?';
+
+  @override
   String get homeGreetingHey => 'Bon retour';
 
   @override

@@ -56,6 +56,10 @@ class RecipeDocumentMapperImpl implements RecipeDocumentMapper {
       ),
       steps: _steps(localized?['steps'] ?? data['steps']),
       tip: _tip(text('tip', '')),
+      // Whole list, like ingredients and steps: the backend's count and markup
+      // guards make the translation same-length and same-order, and mixing two
+      // languages mid-recipe would be worse than showing one consistently.
+      body: _steps(localized?['body'] ?? data['body']),
     );
   }
 

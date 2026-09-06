@@ -15,8 +15,10 @@ export const ARTICLE_CATEGORIES: ArticleCategory[] = [
 /**
  * The translatable half of an article.
  *
- * `body` is an ARRAY, one entry per paragraph — so unlike `FoodGuideText` this
- * needs the same item-count guard `RecipeText` has. A dropped paragraph would
+ * `body` is an ARRAY, one entry per **Markdown block** (a paragraph, heading,
+ * list, table or image) — so unlike `FoodGuideText` this needs the item-count
+ * guard `RecipeText` has, plus the per-block `markupSignature` guard, because
+ * the count check is blind to structure *inside* a block. Dropped content would
  * silently delete advice the reader never learns was missing.
  */
 export interface ArticleText {
@@ -45,6 +47,7 @@ export interface Article {
    * rather than a clipped `body[0]`, which would cut mid-sentence.
    */
   excerpt: string;
+  /** Markdown blocks. Authored in `scripts/data/*.md`, converted at seed time. */
   body: string[];
 
   /**

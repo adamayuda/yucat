@@ -1156,6 +1156,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeScanProductSubtitle => 'Take a photo of the package';
 
   @override
+  String get homeScanEyebrow => 'The YuCat scan';
+
+  @override
+  String get homeScanHeadline => 'Is this pack good for your cat?';
+
+  @override
   String get homeGreetingHey => 'Welcome back';
 
   @override

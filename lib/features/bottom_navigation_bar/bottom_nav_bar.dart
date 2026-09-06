@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:yucat/config/routes/router.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_bottom_nav.dart';
@@ -13,20 +15,18 @@ const _slotToTab = [0, -1, 1, 2];
 const _tabToSlot = [0, 2, 3];
 
 /// Screen names per tab index, matching [MainPage] tab order.
-const _tabScreenNames = [
-  HomeRoute.name,
-  RecipesRoute.name,
-  ProfileRoute.name,
-];
+const _tabScreenNames = [HomeRoute.name, RecipesRoute.name, ProfileRoute.name];
 
 class BottomNavBar extends StatelessWidget {
   final TabsRouter tabsRouter;
   final LogScreenViewUsecase logScreenViewUsecase;
+  final LogEventUsecase logEventUsecase;
 
   const BottomNavBar({
     super.key,
     required this.tabsRouter,
     required this.logScreenViewUsecase,
+    required this.logEventUsecase,
   });
 
   @override
@@ -53,6 +53,18 @@ class BottomNavBar extends StatelessWidget {
           // photo is captured, and the scan theater only paints while Home is
           // the active tab. No screen-view log here — AnalyticsRouteObserver
           // already emits one for ScannerRoute.
+          //
+          // `Scan Started` *is* logged: it is the only thing separating this
+          // entry point from Home's header CTA, since `Product Image Captured`
+          // fires after the capture and knows nothing about which surface
+          // opened the camera.
+          logEventUsecase(
+            eventName: AnalyticsEvents.scanStarted,
+            properties: {
+              'source': ScanSource.bottomNav,
+              'timestamp': DateTime.now().toIso8601String(),
+            },
+          );
           tabsRouter.setActiveIndex(_slotToTab[0]);
           context.router.push(ScannerRoute());
           return;

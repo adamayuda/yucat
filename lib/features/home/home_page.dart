@@ -47,6 +47,20 @@ class _HomePage extends State<HomePage> {
     context.router.push(const SearchRoute());
   }
 
+  /// Home's scan CTA. Unlike the nav's Scan slot there is no `setActiveIndex`
+  /// dance here — Home is already the active tab, which is the tab the scan
+  /// theater (`HomeScanningState`) paints on.
+  void _openScanner() {
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.scanStarted,
+      properties: {
+        'source': ScanSource.homeHeader,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+    context.router.push(ScannerRoute());
+  }
+
   /// Recipes is tab index 1 of `MainRoute`. ⚠️ Tab identity is duplicated in
   /// `main_page.dart`, `router.dart` and `bottom_nav_bar.dart` (docs/design.md
   /// §8c) — this is a fourth reader of that order. The screen-view log mirrors
@@ -125,6 +139,7 @@ class _HomePage extends State<HomePage> {
       case HomeLoadedState():
         return HomeDashboardPage(
           onSearchTap: _openSearch,
+          onScanTap: _openScanner,
           onSeeAllRecipes: _openRecipesTab,
           onRecipeTap: _openRecipe,
           onFoodGuideTap: _openFoodGuideItem,

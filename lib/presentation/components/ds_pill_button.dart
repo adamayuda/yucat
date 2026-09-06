@@ -61,6 +61,11 @@ class DSPillButton extends StatelessWidget {
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
+              // Centres the label when a caller stretches the button to a
+              // fixed width (Home's scan CTA). A no-op for every shrink-wrapped
+              // caller, where MainAxisSize.min already sizes the row to its
+              // content.
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (leadingIcon != null) ...[
                   Icon(leadingIcon, color: fg, size: 18),

@@ -554,6 +554,8 @@
   "assessmentHairballControl": "Hairball control style diet (fiber 4–6% or hairball claims)",
   "homeScanProduct": "Scan a product",
   "homeScanProductSubtitle": "Take a photo of the package",
+  "homeScanEyebrow": "The YuCat scan",
+  "homeScanHeadline": "Is this pack good for your cat?",
   "homeGreetingHey": "Welcome back",
   "homeGreetingWelcome": "Welcome",
   "homeReadyForCat": "Ready to find food for {name}?",

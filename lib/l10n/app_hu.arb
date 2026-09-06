@@ -333,6 +333,8 @@
   "assessmentHairballControl": "Szőrgolyó-kontroll diéta (4–6% rosttartalom vagy szőrgolyó-kontroll állítás)",
   "homeScanProduct": "Termék szkennelése",
   "homeScanProductSubtitle": "Készíts fotót a csomagolásról",
+  "homeScanEyebrow": "A YuCat-szkennelés",
+  "homeScanHeadline": "Jó ez a csomag a macskádnak?",
   "homeGreetingHey": "Üdv újra",
   "homeGreetingWelcome": "Üdvözlünk",
   "homeReadyForCat": "Keressünk eledelt {name} számára?",

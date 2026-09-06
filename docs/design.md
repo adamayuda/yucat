@@ -88,6 +88,7 @@ not eyeballed. If you change a token, change it here in the same commit.
 | `accentSuccessSoft` | `#DAF4DE` | Soft success surfaces |
 | `accentDanger` | `#E5564B` | Errors, destructive, "other apps" line |
 | `accentInfo` | `#3F7CF0` | Info highlights; `DSBottomNav` selected slot. Design-system "Blue/500". |
+| `accentInfoDeep` | `#2B5FD9` | The deep stop of `DSGradients.homeScanHeader` only. `accentInfo` remains the single actionable-blue token. |
 | `accentWarning` | `#A9791B` | Amber severity between success and danger — `FoodSafetyPill`'s caution state, on a `tintSand` surface. Not `coralAccent`, which is emphasis rather than severity. |
 | `coralAccent` | `#FF7A59` | Selection accent — chips, slider, selected card border |
 | `coralSurface` | `#FFF1ED` | Soft coral surface behind `coralAccent` |
@@ -115,7 +116,7 @@ not eyeballed. If you change a token, change it here in the same commit.
 
 ### Gradients (`DSGradients`)
 
-A first-class token family — 13 gradients. Prefer these over inline `LinearGradient`s.
+A first-class token family — 14 gradients. Prefer these over inline `LinearGradient`s.
 
 | Token | Direction | Colors |
 |---|---|---|
@@ -129,7 +130,8 @@ A first-class token family — 13 gradients. Prefer these over inline `LinearGra
 | `onboardingNotifPrimer` | top→bottom | `tintCoralSoft → tintCoral → #F3EEEC` (stops `0 / .45 / 1`) |
 | `catCreateBackground` | top→bottom | `#A5CAFF → tintCloud` |
 | `homeBackground` | top→bottom | `#EDEAF7 → tintCloud` |
-| `homeScanCard` | ↘ diagonal | `tintCoralSoft → tintCoral` |
+| `homeScanHeader` | ↘ diagonal | `accentInfo → accentInfoDeep` — the Home scan header |
+| `homeScanCard` | ↘ diagonal | `tintCoralSoft → tintCoral` — ⚠️ orphaned; the coral scan hero it backed was deleted |
 | `homeProfileCard` | ↘ diagonal | `#DFF6E6 → #BFEBCF` |
 
 ### ⚠️ Legacy palette — deprecated, do not use in new code
@@ -249,6 +251,7 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | `DSTipCard` | `ds_tip_card.dart` | Soft `tintCream` advisory card: translucent white disc with a coral `lightbulb_outline`, `titleMd` title over `bodyMd` body. Caller supplies the title ("Tip", "YuCat tip"). Closes Recipe Detail and Food Guide Detail. |
 | `DSSectionHeader` | `ds_section_header.dart` | Top-level section heading: a **fixed** `headlineMd` title (`Expanded`, `maxLines: 2`, ellipsis) plus an optional `DSTextLink` action at the far edge. The size is deliberately fixed — an earlier `FittedBox(scaleDown)` made each section's title render at a different size depending on its copy length. Used by every Home section. |
 | `DSChip` | `ds_chip.dart` | Tinted soft pill with optional leading icon. Used for emphasis chips on stat/quote screens. |
+| `DSMarkdownBlock` | `ds_markdown.dart` | Renders one Markdown block of authored content (`ArticleEntity.body` items) through `flutter_markdown_plus` with a DS-token `MarkdownStyleSheet`. `blockSpacing: 0` — the caller owns the gaps, so block spacing stays layout. ⚠️ Headings pass `headlineMd`/`titleMd` through **unchanged**: their weight comes from `fontVariations` on the bundled Bricolage variable font, not `fontWeight`, and rebuilding the style by hand silently drops it. ⚠️ **Never use on a card or row** — `MarkdownBody` has no `maxLines`/ellipsis, which every list surface depends on; article `title` and `excerpt` stay plain strings. Links open externally via `url_launcher`. |
 | `DSOptionRow` | `ds_option_row.dart` | White pill row, optional emoji/icon + label + radio indicator. Variants: `accent: success` (green ✓) / `danger` (coral ✗ — HealthConditions step). |
 | `DSStatPill` | `ds_stat_pill.dart` | Soft-tinted pill, bold number + body text. Phase C0 social proof. |
 | `DSQuoteCard` | `ds_quote_card.dart` | Logo + body + underlined source link. Phase C2 domain pitch. |
@@ -272,7 +275,8 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | Component | File | Shape |
 |---|---|---|
 | `ProductRowCard` | `lib/features/search_products/presentation/widgets/product_row_card.dart` | 64×64 thumb (or `tintLavender` placeholder) + name + brand + soft score pill + chevron. Used by Search results AND Product Listing. |
-| `SearchTextField` | `lib/features/search_products/presentation/widgets/search_text_field.dart` | White pill input, `e1` shadow, search icon prefix. Two modes: **editable** (`controller` + `onChanged` + `autofocus`) on the pushed Search page, and **read-only affordance** (`readOnly: true` + `onTap`, no controller) as the search bar at the top of Home, which pushes `SearchRoute`. |
+| `SearchTextField` | `lib/features/search_products/presentation/widgets/search_text_field.dart` | White pill input, `e1` shadow, search icon prefix. Two modes: **editable** (`controller` + `onChanged` + `autofocus`) on the pushed Search page, and **read-only affordance** (`readOnly: true` + `onTap`, no controller) as the search bar at the top of Home — where it now sits *inside* `HomeScanHeader`'s blue rather than on `pageBackground`. Pushes `SearchRoute`. |
+| `HomeScanHeader` | `lib/features/home/widgets/home_scan_header.dart` | The top of Home as **one** full-bleed blue slab (`DSGradients.homeScanHeader`, bottom `DSRadii.xl`): the read-only `SearchTextField`, then eyebrow + headline + subtitle reversed out of the blue, a `_PackViewfinder`, and a **stretched** `DSPillButton.secondary`. Bleeds under the status bar — it adds `MediaQuery.padding.top` itself, so `HomeDashboardPage`'s `SafeArea` passes `top: false` and the list starts at zero top padding. Annotates `SystemUiOverlayStyle.light`; the page annotates `dark`, so the status-bar icons flip back when the header scrolls off. ⚠️ **No barcode iconography** — the scan pipeline reads a photo of the package, not a barcode, so the affordance is a viewfinder framing a pack and the eyebrow glyph is `Icons.crop_free`. |
 | `RingScore` | `lib/features/product_detail/presentation/widgets/ring_score.dart` | Circular ring score: `CircularProgressIndicator(value)` + centered number. Color buckets (green / amber / coral) follow `ProductRatingColor`. Used on product analysis card and per-cat verdict cards. |
 | `LitterListRow` | `lib/features/litter_detail/presentation/widgets/litter_list_row.dart` | 56×56 thumb (or `HatchedPlaceholder`) + name + brand + soft score pill. Used by BOTH the Saved-products and Scan-history lists, which is why it is one widget rather than the two near-copies the food rows are. The score pill is hidden when `dataUnavailable` — "0/100" reads as a damning grade, not as "no data". |
 | `HatchedPlaceholder` | `lib/features/product_detail/presentation/widgets/hatched_placeholder.dart` | 45° hatch `CustomPainter` + "PRODUCT" tag corner. Hero fallback when `imageUrl` is null. |
@@ -292,6 +296,12 @@ can never equal it and never highlights. `DSBottomNav` itself stays dumb.
 
 Tapping Scan first switches to the Home tab, then pushes the scanner: `HomeBloc` emits
 `HomeScanningState` after capture, and the scan theater only paints while Home is the active tab.
+
+There are now **two** scan entry points — this slot and `HomeScanHeader`'s CTA. The header
+skips the `setActiveIndex` step (Home is already active) and both emit
+`Scan Started { source }` (`ScanSource.bottomNav` / `ScanSource.homeHeader`), which is the
+only thing that tells them apart: `Product Image Captured` fires after the capture and knows
+nothing about which surface opened the camera.
 
 ⚠️ **Tab identity is duplicated in three places that must stay in sync**: `main_page.dart:16`,
 the `MainRoute` `children:` in `lib/config/routes/router.dart`, and `_tabScreenNames` +

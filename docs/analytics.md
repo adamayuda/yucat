@@ -128,6 +128,7 @@ Use `step_name` or `step_id` as the funnel key and `step_index` only for orderin
 ### Product & search
 | Event | Key properties |
 |---|---|
+| `Scan Started` | `source` (`home_header` / `bottom_nav`), `timestamp` |
 | `Camera Access Result` | `granted`, `error_code` (`no_camera`, or the plugin's `CameraAccess*` code) |
 | `Scan Cancelled` | `camera_ready`, `camera_error` |
 | `Product Image Captured` | `mime_type` |
@@ -189,9 +190,12 @@ user action. The search events are debounced 800 ms in the page (`EasyDebounce`)
 list blocs filter in memory with no debounce; the filter events are logged from a
 `BlocListener` so `results_count` reflects the state *after* the change.
 
-The scan funnel now has its **edges**: `Camera Access Result` resolves once per scanner
-open (so a user whose permission is denied is no longer invisible upstream of the shutter),
-`Scan Cancelled` fires on dispose when no photo was taken, and every scan *outcome* —
+The scan funnel now has its **edges**: `Scan Started` fires when the camera is *opened* and
+is the only event that knows which surface opened it (Home's `HomeScanHeader` CTA vs. the
+nav's Scan slot) — everything downstream, capture included, carries no surface, so it is the
+denominator for "which entry point earns scans". `Camera Access Result` resolves once per
+scanner open (so a user whose permission is denied is no longer invisible upstream of the
+shutter), `Scan Cancelled` fires on dispose when no photo was taken, and every scan *outcome* —
 `Product Selected`, `Litter Selected`, both `Product Image Scan Failed` branches — carries
 `duration_ms`. The backend fans out to four parallel sources plus web search, and
 `deadline-exceeded` is already a classified error type, so watch the duration distribution
@@ -290,7 +294,8 @@ Subscription Completed
 
 **E. Scan success funnel**
 ```
-Product Image Captured
+Scan Started                    (break down by `source` for entry-point conversion)
+  → Product Image Captured
   → Product Selected            (vs. Product Image Scan Failed — track as failure rate)
   → Product Detail Viewed
   → Product Saved

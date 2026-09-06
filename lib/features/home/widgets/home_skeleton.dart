@@ -16,25 +16,29 @@ class HomeSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return DeferredSkeleton(
       child: SafeArea(
+        // Matches HomeDashboardPage: the header bone bleeds under the status
+        // bar and adds the inset itself, so the two line up and the
+        // loading→loaded swap doesn't jump.
+        top: false,
         bottom: false,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(
-            DSDimens.sizeL,
-            DSDimens.sizeS,
-            DSDimens.sizeL,
-            MediaQuery.of(context).padding.bottom + kFloatingNavClearance,
+          padding: EdgeInsets.only(
+            bottom:
+                MediaQuery.of(context).padding.bottom + kFloatingNavClearance,
           ),
           physics: const NeverScrollableScrollPhysics(),
           children: const [
-            _SearchBarBone(),
+            // Full-bleed, like the real header — the horizontal inset lives on
+            // the individual bones below rather than on the list.
+            _ScanHeaderBone(),
             SizedBox(height: DSDimens.sizeL),
-            _NewsCardBone(),
+            _Inset(child: _NewsCardBone()),
             SizedBox(height: DSDimens.sizeL),
-            _FoodGuideLaneBone(),
+            _Inset(child: _FoodGuideLaneBone()),
             SizedBox(height: DSDimens.sizeL),
-            _RecipeLaneBone(),
+            _Inset(child: _RecipeLaneBone()),
             SizedBox(height: DSDimens.sizeL),
-            _MissionBone(),
+            _Inset(child: _MissionBone()),
           ],
         ),
       ),
@@ -42,15 +46,82 @@ class HomeSkeleton extends StatelessWidget {
   }
 }
 
-class _SearchBarBone extends StatelessWidget {
-  const _SearchBarBone();
+/// The page gutter the list itself no longer applies.
+class _Inset extends StatelessWidget {
+  final Widget child;
+
+  const _Inset({required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return const DSShimmer(
-      child: ShimmerBone(
-        height: 56,
-        radius: DSRadii.pill,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+      child: child,
+    );
+  }
+}
+
+/// Mirrors `HomeScanHeader`: the blue slab with a search pill, two copy lines
+/// and the CTA. Painted in `tintBlueSoft` rather than the live gradient — a
+/// skeleton states the shape, not the finish.
+class _ScanHeaderBone extends StatelessWidget {
+  const _ScanHeaderBone();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: DSColors.tintBlueSoft,
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(DSRadii.xl),
+        ),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        DSDimens.sizeL,
+        MediaQuery.of(context).padding.top + DSDimens.sizeS,
+        DSDimens.sizeL,
+        DSDimens.sizeL,
+      ),
+      child: const DSShimmer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ShimmerBone(height: 56, radius: DSRadii.pill),
+            SizedBox(height: DSDimens.sizeL),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FractionallySizedBox(
+                        widthFactor: 0.5,
+                        child: ShimmerBone(height: 12, radius: DSRadii.sm),
+                      ),
+                      SizedBox(height: DSDimens.sizeXs),
+                      ShimmerBone(height: 22, radius: DSRadii.sm),
+                      SizedBox(height: DSDimens.sizeXxs),
+                      FractionallySizedBox(
+                        widthFactor: 0.75,
+                        child: ShimmerBone(height: 22, radius: DSRadii.sm),
+                      ),
+                      SizedBox(height: DSDimens.sizeXs),
+                      FractionallySizedBox(
+                        widthFactor: 0.6,
+                        child: ShimmerBone(height: 14, radius: DSRadii.sm),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: DSDimens.sizeS),
+                ShimmerBone(width: 104, height: 104, radius: DSRadii.md),
+              ],
+            ),
+            SizedBox(height: DSDimens.sizeS),
+            ShimmerBone(height: 52, radius: DSRadii.pill),
+          ],
+        ),
       ),
     );
   }

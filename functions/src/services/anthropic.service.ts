@@ -1510,7 +1510,14 @@ const RECIPE_TRANSLATION_TOOLS: Anthropic.Tool[] = [
     description: "Submit the translated recipe text.",
     input_schema: {
       type: "object",
-      required: ["name", "description", "ingredients", "steps", "tip"],
+      required: [
+        "name",
+        "description",
+        "ingredients",
+        "steps",
+        "tip",
+        "body",
+      ],
       properties: {
         name: {type: "string", description: "Translated recipe name."},
         description: {
@@ -1547,6 +1554,15 @@ const RECIPE_TRANSLATION_TOOLS: Anthropic.Tool[] = [
           description:
             "Translated tip. Safety wording must be preserved in full.",
         },
+        body: {
+          type: "array",
+          items: {type: "string"},
+          description:
+            "Translated Markdown blocks \u2014 same count and order as the " +
+            "source, one block per item. Reproduce every Markdown marker " +
+            "exactly; translate link text and image alt text but copy URLs " +
+            "verbatim.",
+        },
       },
     },
   },
@@ -1573,7 +1589,10 @@ export async function translateRecipeText(
     const response = await withRetry("translateRecipeText", () =>
       getClient().messages.create({
         model: config.anthropic.model,
-        max_tokens: 4096,
+        // 8192 like the article path: `body` roughly triples a recipe's output
+        // and there is no continuation loop here, so truncation would land as
+        // a discarded language.
+        max_tokens: 8192,
         temperature: 0,
         system: [
           {
@@ -1616,9 +1635,12 @@ export async function translateRecipeText(
     );
     const steps = Array.isArray(out.steps) ? out.steps.map(String) : [];
 
+    const body = Array.isArray(out.body) ? out.body.map(String) : [];
+
     if (
       ingredients.length !== text.ingredients.length ||
-      steps.length !== text.steps.length
+      steps.length !== text.steps.length ||
+      body.length !== (text.body ?? []).length
     ) {
       logger.warn("translateRecipeText item-count mismatch \u2014 discarding", {
         languageCode,
@@ -1626,6 +1648,37 @@ export async function translateRecipeText(
         gotIngredients: ingredients.length,
         expectedSteps: text.steps.length,
         gotSteps: steps.length,
+        expectedBody: (text.body ?? []).length,
+        gotBody: body.length,
+        structuredData: true,
+      });
+      return null;
+    }
+
+    // Same two sub-item guards the article path uses: `body` items are
+    // Markdown, so a dropped bullet, a demoted heading or a lost table row
+    // leaves the item count untouched. See markupSignature.
+    const srcBody = text.body ?? [];
+    const emptyBlock = srcBody.findIndex(
+      (b, i) => b.trim().length > 0 && body[i].trim().length === 0
+    );
+    if (emptyBlock !== -1) {
+      logger.warn("translateRecipeText empty block \u2014 discarding", {
+        languageCode,
+        blockIndex: emptyBlock,
+        structuredData: true,
+      });
+      return null;
+    }
+    const badBlock = srcBody.findIndex(
+      (b, i) => markupSignature(b) !== markupSignature(body[i])
+    );
+    if (badBlock !== -1) {
+      logger.warn("translateRecipeText markup mismatch \u2014 discarding", {
+        languageCode,
+        blockIndex: badBlock,
+        expected: markupSignature(srcBody[badBlock]),
+        got: markupSignature(body[badBlock]),
         structuredData: true,
       });
       return null;
@@ -1648,6 +1701,7 @@ export async function translateRecipeText(
       ingredients,
       steps,
       tip: typeof out.tip === "string" ? out.tip : text.tip,
+      body,
     };
   } catch (error) {
     logger.warn("translateRecipeText failed", {
@@ -1780,6 +1834,57 @@ export async function translateFoodGuideText(
   }
 }
 
+/**
+ * Structural fingerprint of one Markdown block.
+ *
+ * The item-count guard on `body` only sees the array. Once the items carry
+ * Markdown, structure also lives *inside* each string — where a plain length
+ * check is blind. A model that drops one bullet from a three-bullet block, or
+ * demotes a heading, or helpfully localises a URL, returns the same item count
+ * and would otherwise sail through.
+ *
+ * Fingerprinted: heading levels (in order), bullet / ordered / quote line
+ * counts, table row and cell counts, every link and image URL, and the `**`
+ * count. Deliberately **not** `_italic_`: an underscore is common enough in
+ * ordinary prose and in URLs that tracking it would fail on legitimate
+ * translations more often than it would catch a real loss.
+ *
+ * Authored content uses tables for real lookups — treat allowances by cat
+ * weight, label terms and their meanings — so a dropped row or column is
+ * exactly the kind of quiet data loss this exists to catch. `cells` counts
+ * pipes across the whole block, which moves if a column disappears even when
+ * the row count holds.
+ *
+ * Exported only so it can be exercised directly — `functions/` has no test
+ * harness, and a silent regex bug here would re-open the very gap it exists to
+ * close. Nothing in production calls it from outside this file.
+ */
+export function markupSignature(block: string): string {
+  const lines = block.split("\n");
+  // Link targets are pulled out first so their punctuation can't inflate the
+  // emphasis count.
+  const urls = [...block.matchAll(/\[[^\]]*\]\(([^)]*)\)/g)].map((m) => m[1]);
+  const withoutLinks = block.replace(/\[[^\]]*\]\([^)]*\)/g, "L");
+
+  const tableLines = lines.filter((l) => /^\s*\|/.test(l));
+
+  return JSON.stringify({
+    headings: lines
+      .map((l) => /^\s{0,3}(#{1,6})\s/.exec(l)?.[1].length ?? 0)
+      .filter((n) => n > 0),
+    bullets: lines.filter((l) => /^\s*[-*+]\s/.test(l)).length,
+    ordered: lines.filter((l) => /^\s*\d+\.\s/.test(l)).length,
+    quotes: lines.filter((l) => /^\s*>/.test(l)).length,
+    tableRows: tableLines.length,
+    tableCells: tableLines.reduce(
+      (n, l) => n + (l.match(/\|/g) ?? []).length,
+      0
+    ),
+    urls,
+    bold: (withoutLinks.match(/\*\*/g) ?? []).length,
+  });
+}
+
 const ARTICLE_TRANSLATION_TOOLS: Anthropic.Tool[] = [
   {
     name: "submit_article_translation",
@@ -1798,8 +1903,10 @@ const ARTICLE_TRANSLATION_TOOLS: Anthropic.Tool[] = [
           type: "array",
           items: {type: "string"},
           description:
-            "Translated paragraphs \u2014 same count and order as the source, " +
-            "one paragraph per item, never numbered.",
+            "Translated Markdown blocks \u2014 same count and order as the " +
+            "source, one block per item. Reproduce every Markdown marker " +
+            "exactly (**bold**, ## headings, - bullets, [text](url)); " +
+            "translate link text but copy URLs verbatim.",
         },
       },
     },
@@ -1822,7 +1929,11 @@ export async function translateArticleText(
     const response = await withRetry("translateArticleText", () =>
       getClient().messages.create({
         model: config.anthropic.model,
-        max_tokens: 4096,
+        // 8192, not the 4096 the sibling translators use: Markdown adds syntax
+        // characters to every block, and there is no `pause_turn`/`max_tokens`
+        // continuation loop on this call — a truncated response yields a
+        // malformed tool call, which lands as a discarded language.
+        max_tokens: 8192,
         temperature: 0,
         system: [
           {
@@ -1850,13 +1961,45 @@ export async function translateArticleText(
 
     const body = Array.isArray(out.body) ? out.body.map(String) : [];
 
-    // Same guard as translateRecipeText: a paragraph count mismatch means the
+    // Same guard as translateRecipeText: a block count mismatch means the
     // model merged or dropped one, which would silently delete advice.
     if (body.length !== text.body.length) {
-      logger.warn("translateArticleText paragraph-count mismatch \u2014 discarding", {
+      logger.warn("translateArticleText block-count mismatch \u2014 discarding", {
         languageCode,
         expected: text.body.length,
         got: body.length,
+        structuredData: true,
+      });
+      return null;
+    }
+
+    // A block that comes back empty keeps the count *and* fingerprints as
+    // all-zeros, so it clears both other guards. Cheap to check, and it is the
+    // difference between losing a paragraph and noticing.
+    const emptyBlock = text.body.findIndex(
+      (source, i) => source.trim().length > 0 && body[i].trim().length === 0
+    );
+    if (emptyBlock !== -1) {
+      logger.warn("translateArticleText empty block \u2014 discarding", {
+        languageCode,
+        blockIndex: emptyBlock,
+        structuredData: true,
+      });
+      return null;
+    }
+
+    // Second guard, for the structure the count check cannot see: `body` items
+    // are Markdown, so a dropped bullet or a demoted heading leaves the item
+    // count untouched. See markupSignature.
+    const badBlock = text.body.findIndex(
+      (source, i) => markupSignature(source) !== markupSignature(body[i])
+    );
+    if (badBlock !== -1) {
+      logger.warn("translateArticleText markup mismatch \u2014 discarding", {
+        languageCode,
+        blockIndex: badBlock,
+        expected: markupSignature(text.body[badBlock]),
+        got: markupSignature(body[badBlock]),
         structuredData: true,
       });
       return null;

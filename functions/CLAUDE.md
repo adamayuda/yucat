@@ -286,9 +286,9 @@ index carries two incompatible score generations.
 | `NARRATIVE_TOOLS` | `submit_narrative` | `narrative` (~50 words) + `outlook` (~25 words) |
 | `SCORE_TOOLS` | `submit_score` | `score` 0–100 |
 | `BRAND_VERDICT_TOOLS` | `submit_brand_verdict` | `score`, `headline`, `reasons` (2–4), optional `positives` (≤2) |
-| `RECIPE_TRANSLATION_TOOLS` | `submit_recipe_translation` | 5 required; **count guard** on `ingredients`/`steps` |
+| `RECIPE_TRANSLATION_TOOLS` | `submit_recipe_translation` | **6** required; count guard on `ingredients`/`steps`/`body`, plus per-block `markupSignature` + empty-block guards on `body` |
 | `FOOD_GUIDE_TRANSLATION_TOOLS` | `submit_food_guide_translation` | 6 required, all scalars — **no count guard needed** |
-| `ARTICLE_TRANSLATION_TOOLS` | `submit_article_translation` | 3 required; **count guard** on the `body` paragraph array |
+| `ARTICLE_TRANSLATION_TOOLS` | `submit_article_translation` | 3 required; **count guard** on the `body` block array, **plus** a per-block `markupSignature` guard — items are Markdown |
 | inline in `verifyMatchWithLLM` | `submit_match` | `matchIndex`, min −1 (= "none of these") |
 
 ---
@@ -482,6 +482,8 @@ itself is not a declared dependency (`npx` fetches it).
 | `rescore-products.ts` | Batch re-grades `score` against `QUALITY_RUBRIC`, keeping the old value in `scoreLegacy` for rollback. Skips `score === 0`. Flags: `--dry-run`, `--limit=N`, `--concurrency=N` (10), `--query=`. |
 | `backfill-images.ts` | Finds + hosts images for products with `score > 0` and empty `imageUrl`, reusing the live self-heal path. Stamps `lastImageAttempt` even on failure, matching live throttling. Flags: `--dry-run`, `--limit=N`, `--concurrency=N` (5). |
 | `configure-litter-index.ts` | Applies `litters` index settings + litter synonyms. ⚠️ **Must be run once before the litter cache can work** — `searchLitterByNameV2` soft-filters on `brand`, and Algolia rejects a filter on an undeclared facet, so until then every lookup errors silently and every litter scan pays for a full analysis. |
+| `convert-markdown.ts` | Converts authored Markdown (`<dir>/articles/*.md`, `<dir>/recipes/*.md`, YAML front matter) into `scripts/data/<kind>.json`. Splits the body on blank lines into the block array, and **drops the leading `# H1`** — the detail screen already renders the title. ⚠️ Use **`--replace`** when the authored folder *is* the catalogue: the default merges by id, which would keep superseded entries alive *and* pay to re-translate them, since the seeders' `--prune` only unpublishes what is absent from the JSON. `--order-base=N` offsets `order` when appending instead. Flags: `--source=<dir>` (required), `--kind=`, `--only=`, `--replace`, `--order-base=`, `--dry-run`. Not compiled, not linted. |
+| `apply-translations.ts` | Applies hand-authored translations from `scripts/data/translations/<kind>/<id>.json` when the API path is unavailable (no credit, an outage). ⚠️ A substitute for the **model**, not for the **guards**: it runs the same count / `markupSignature` / empty-block checks, because a hand-written translation drops a bullet just as easily. Writes the identical `translationsSourceHash`, so the two paths interleave freely — a later `seed-*.ts` run reuses whatever this wrote instead of re-translating it. Flags: `--kind=`, `--only=`, `--dry-run`. |
 | `seed-articles.ts` | Seeds the Firestore `articles` collection from `scripts/data/articles.json` — same shape and flags as the other two seeders. ⚠️ `body` is a paragraph **array**, so `translateArticleText` enforces the same count-and-order guard recipes use and discards a mismatched language rather than writing it. ⚠️ The **first** published article by `order` is what Home's news card features, so `order` is an editorial decision. Needs `ANTHROPIC_API_KEY` + Firestore credentials. |
 | `upload-article-images.ts` | Article twin of `upload-food-guide-images.ts` → `articles/{id}.jpeg`. ⚠️ Its `FILE_TO_ARTICLE` map starts **empty** — add one entry per photo before running, or every file is reported unmapped. Same post-seed ordering rule. Flags: `--source=<dir>` (required), `--dry-run`. |
 | `seed-food-guide.ts` | Seeds the Firestore `foodGuide` collection from `scripts/data/food-guide.json` — same shape as `seed-recipes.ts` (same flags, same `translationsSourceHash` reuse, same `--prune` semantics), against a simpler model: six scalar text fields, no arrays. ⚠️ An **empty string means "this row does not apply"** (a dangerous food has no `whyGood`/`howToServe`); the prompt is told to return empty fields unchanged, and the client turns `''` into `null`. Needs `ANTHROPIC_API_KEY` + Firestore credentials. |
@@ -525,7 +527,14 @@ whole catalogue, every language included, and the Flutter client reads Firestore
   `translateProductText` could not be reused: it translates exactly five flat fields,
   while recipes carry structured `ingredients` and `steps` arrays.
   ⚠️ It enforces **same count, same order** on both arrays and returns `null` on a
-  mismatch. For products a mismatch desyncs a chip row; for recipes a dropped step
+  mismatch.
+- **`body` is the authored Markdown**, one block per item, and is what the detail screen
+  renders. Authored recipes express quantities as prose (`**150 g chicken liver**,
+  trimmed`) and carry Portioning / Storage / Variations / Cautions sections that the typed
+  fields cannot hold, so `ingredients`, `steps` and `tip` are seeded **empty** and the
+  client falls back to them only for older documents that predate `body`. ⚠️ Adding `body`
+  to `canonicalRecipeText` changed the key order, so every stored hash was invalidated
+  once by design. For products a mismatch desyncs a chip row; for recipes a dropped step
   silently renumbers the instructions the user is following.
 - **Staleness** — the document stores `translationsSourceHash` (SHA-1 of the canonical
   text). This is the one place translations *are* invalidated; the product path never
@@ -606,17 +615,37 @@ client reads Firestore directly.
   release still appears under "All".
 - **`excerpt` is its own field**, not a clipped `body[0]`. The Home card wants one
   short complete sentence; truncating prose at a character count cuts mid-word.
-- **`body` is an array of paragraphs**, so `translateArticleText` carries the same
-  item-count guard as `translateRecipeText` and returns `null` on a mismatch. For a
-  recipe a dropped step renumbers the instructions; for an article a dropped paragraph
+- **`body` is an array of Markdown blocks** — a paragraph, a heading, or a list per
+  item, rendered client-side by `DSMarkdownBlock`. It stays an array rather than one
+  Markdown document for two reasons: the client's `Article Read { paragraphs }` event is
+  `body.length`, and the item-count guard needs something to count.
+- **Two guards, not one.** `translateArticleText` returns `null` on an item-count
+  mismatch (as `translateRecipeText` does) **and** on a per-block `markupSignature`
+  mismatch. ⚠️ The count guard is blind *inside* an item: with Markdown, a dropped bullet
+  or a demoted heading or a localised URL leaves the count untouched. The signature
+  fingerprints heading levels, bullet/ordered/quote counts, every link URL and the `**`
+  count — deliberately **not** `_italic_`, since underscores are common in prose and URLs
+  and would fail legitimate translations more often than they'd catch a real loss.
+  For a recipe a dropped step renumbers the instructions; for an article dropped content
   silently deletes advice the reader never learns was missing.
+- `max_tokens` on this call is **8192**, not the 4096 its two siblings use: Markdown adds
+  syntax to every block and there is no continuation loop here, so a truncated response
+  becomes a discarded language.
+- ⚠️ **Authoring caveat**: prose containing `*`, `_`, `#` or `[` is now interpreted as
+  markup. Nothing in `articles.json` does today, but "5 * 3" or `snake_case` would
+  surprise someone.
 - **`order` is editorial.** The lowest-ordered published article is what Home's news
   card features, so re-ordering the seed file changes what users see first.
 - **Photos** — `articles/{id}.jpeg` in Storage via `scripts/upload-article-images.ts`.
   An article without one keeps `imageUrl: null` and the card renders its tinted
   placeholder, so a missing image is never a broken state.
 - **Staleness** — same `translationsSourceHash` (SHA-1 of `canonicalArticleText`).
-  ⚠️ Key order in that function is part of the hash.
+  ⚠️ Key order in that function is part of the hash. Note prompt changes do **not**
+  invalidate it, so a prompt edit alone re-translates nothing — an article re-translates
+  the first time its English body is edited, or under `--force-retranslate`.
+  All three seeders now advance the stored hash **only when every language succeeded**;
+  previously it advanced unconditionally, which made their own "Re-run to retry" advice
+  false and froze a failed language until someone remembered `--force-retranslate`.
 - **Rules and indexes** — public-read, Admin-SDK-write, managed in the console.
   ⚠️ Needs its own composite index:
   ```bash

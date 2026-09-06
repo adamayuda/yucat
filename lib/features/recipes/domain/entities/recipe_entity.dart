@@ -132,6 +132,14 @@ class RecipeEntity {
   /// Optional closing tip. Canonical English.
   final String? tip;
 
+  /// The rendered recipe, one entry per **Markdown block**.
+  ///
+  /// Authored content carries far more than [ingredients] and [steps] can hold
+  /// — portioning tables, storage, variations, cautions, inline photos — so the
+  /// detail screen renders this when it is non-empty and falls back to the
+  /// structured fields otherwise. Canonical English; see `DSMarkdownBlock`.
+  final List<String> body;
+
   const RecipeEntity({
     required this.id,
     required this.name,
@@ -145,5 +153,6 @@ class RecipeEntity {
     this.ingredients = const [],
     this.steps = const [],
     this.tip,
+    this.body = const [],
   });
 }

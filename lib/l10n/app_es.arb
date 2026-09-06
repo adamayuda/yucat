@@ -333,6 +333,8 @@
   "assessmentHairballControl": "Dieta tipo control de bolas de pelo (fibra 4–6% o indicaciones para bolas de pelo)",
   "homeScanProduct": "Escanea un producto",
   "homeScanProductSubtitle": "Fotografía el envase",
+  "homeScanEyebrow": "El escaneo YuCat",
+  "homeScanHeadline": "¿Este envase es bueno para tu gato?",
   "homeGreetingHey": "Bienvenido de nuevo",
   "homeGreetingWelcome": "Bienvenido",
   "homeReadyForCat": "¿Listo para encontrar comida para {name}?",

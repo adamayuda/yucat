@@ -66,6 +66,17 @@ export interface RecipeText {
   ingredients: RecipeIngredient[];
   steps: string[];
   tip: string;
+
+  /**
+   * The rendered recipe, one entry per **Markdown block**.
+   *
+   * Authored content carries far more than the structured fields can hold —
+   * portioning tables, storage, variations, cautions, inline photos — so the
+   * detail screen renders this and the typed fields below serve cards, filters
+   * and search. Guarded like `ArticleText.body`: item count, per-block markup
+   * signature, and no empty blocks.
+   */
+  body: string[];
 }
 
 export interface Recipe {
@@ -90,6 +101,9 @@ export interface Recipe {
   steps: string[];
   tip: string;
 
+  /** Markdown blocks — see `RecipeText.body`. Authored in `scripts/data/*.md`. */
+  body: string[];
+
   /**
    * Every other language. **No "en" key** — English is the flat fields above.
    */
@@ -111,5 +125,8 @@ export function canonicalRecipeText(recipe: Recipe): RecipeText {
     ingredients: recipe.ingredients,
     steps: recipe.steps,
     tip: recipe.tip,
+    // Appended last on purpose: key order is part of the hash, so adding it
+    // here invalidates every stored hash exactly once and re-translates.
+    body: recipe.body ?? [],
   };
 }

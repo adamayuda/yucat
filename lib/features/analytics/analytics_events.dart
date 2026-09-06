@@ -65,7 +65,8 @@ class AnalyticsEvents {
   // Unreachable: phase 2 became `recipesArticles` and the attribution screen is
   // parked in widgets/attribution_screen.dart. Kept because the screen is
   // parked rather than deleted.
-  static const onboardingAttributionSelected = 'Onboarding Attribution Selected';
+  static const onboardingAttributionSelected =
+      'Onboarding Attribution Selected';
   static const onboardingAttributionSkipped = 'Onboarding Attribution Skipped';
 
   // Onboarding scan funnel
@@ -105,6 +106,11 @@ class AnalyticsEvents {
   // spot: opening the camera and backing out looked identical to never opening
   // it.
   static const scanCancelled = 'Scan Cancelled';
+  // Scanner opened, before any photo exists. `Product Image Captured` only
+  // fires *after* a capture, so without this the two entry points — the Home
+  // header CTA and the nav's Scan slot — are indistinguishable, and an
+  // opened-then-abandoned scanner is attributable to neither.
+  static const scanStarted = 'Scan Started';
   static const productImageCaptured = 'Product Image Captured';
   static const productImageScanFailed = 'Product Image Scan Failed';
   static const productSelected = 'Product Selected';
@@ -151,6 +157,16 @@ class AnalyticsEvents {
   // read; this is the only signal that says whether the editorial catalogue is
   // worth its seeding cost.
   static const articleRead = 'Article Read';
+}
+
+/// Values for the `source` property on [AnalyticsEvents.scanStarted] — which
+/// surface opened the camera. The onboarding scan keeps its own
+/// `Onboarding Scan *` namespace and does not emit this event.
+class ScanSource {
+  ScanSource._();
+
+  static const homeHeader = 'home_header';
+  static const bottomNav = 'bottom_nav';
 }
 
 /// Values for the `source` property on content-discovery events — separates a

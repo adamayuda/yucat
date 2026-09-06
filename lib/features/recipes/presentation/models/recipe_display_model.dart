@@ -18,6 +18,9 @@ class RecipeDisplayModel extends Equatable {
   final List<String> steps;
   final String? tip;
 
+  /// Markdown blocks the detail screen renders. See `RecipeEntity.body`.
+  final List<String> body;
+
   const RecipeDisplayModel({
     required this.id,
     required this.name,
@@ -31,6 +34,7 @@ class RecipeDisplayModel extends Equatable {
     this.ingredients = const [],
     this.steps = const [],
     this.tip,
+    this.body = const [],
   });
 
   /// Lower-cased name + description, so the list's filter doesn't re-derive the
@@ -51,5 +55,6 @@ class RecipeDisplayModel extends Equatable {
         ingredients,
         steps,
         tip,
+        body,
       ];
 }

@@ -6,6 +6,7 @@ import 'package:yucat/features/articles/presentation/models/article_display_mode
 import 'package:yucat/features/articles/presentation/widgets/article_meta.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_circle_icon_button.dart';
+import 'package:yucat/presentation/components/ds_markdown.dart';
 
 /// One article: hero, category pill, headline, read time and body paragraphs.
 ///
@@ -110,18 +111,14 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
                       ),
                     ),
                     const SizedBox(height: DSDimens.sizeL),
-                    // Paragraphs, not one blob: `body` is authored as a list so
+                    // Blocks, not one blob: `body` is authored as a list so
                     // the spacing between them is layout rather than whitespace
-                    // the translator could disturb.
+                    // the translator could disturb — and so the backend's
+                    // item-count guard still has something to count. Each item
+                    // is Markdown; see `DSMarkdownBlock`.
                     for (var i = 0; i < article.body.length; i++) ...[
                       if (i > 0) const SizedBox(height: DSDimens.sizeS),
-                      Text(
-                        article.body[i],
-                        style: DSTextStyles.bodyLg.copyWith(
-                          color: DSColors.inkSecondary,
-                          height: 1.55,
-                        ),
-                      ),
+                      DSMarkdownBlock(data: article.body[i]),
                     ],
                   ],
                 ),

@@ -8,6 +8,7 @@ import 'package:yucat/features/recipes/presentation/widgets/recipe_meta.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_circle_icon_button.dart';
+import 'package:yucat/presentation/components/ds_markdown.dart';
 import 'package:yucat/presentation/components/ds_tip_card.dart';
 
 /// A single recipe: hero, meta, ingredients, numbered steps and an optional tip.
@@ -60,27 +61,41 @@ class RecipeDetailPage extends StatelessWidget {
                     RecipeCompatibilityPill(
                       compatibility: recipe.compatibility,
                     ),
-                    if (recipe.ingredients.isNotEmpty) ...[
+                    // Authored recipes carry a Markdown `body` that holds
+                    // far more than ingredients and steps — portioning,
+                    // storage, variations, cautions, inline photos — and it
+                    // supplies its own section headings. Older seeded recipes
+                    // have no `body`, so the structured rendering below stays
+                    // as the fallback rather than being deleted.
+                    if (recipe.body.isNotEmpty) ...[
                       const SizedBox(height: DSDimens.sizeL),
-                      _SectionHeader(title: l10n.recipeDetailIngredients),
-                      const SizedBox(height: DSDimens.sizeXs),
-                      _IngredientsCard(ingredients: recipe.ingredients),
-                    ],
-                    if (recipe.steps.isNotEmpty) ...[
-                      const SizedBox(height: DSDimens.sizeL),
-                      _SectionHeader(title: l10n.recipeDetailPreparation),
-                      const SizedBox(height: DSDimens.sizeXs),
-                      for (var i = 0; i < recipe.steps.length; i++) ...[
-                        if (i > 0) const SizedBox(height: DSDimens.sizeXs),
-                        _StepCard(number: i + 1, text: recipe.steps[i]),
+                      for (var i = 0; i < recipe.body.length; i++) ...[
+                        if (i > 0) const SizedBox(height: DSDimens.sizeS),
+                        DSMarkdownBlock(data: recipe.body[i]),
                       ],
-                    ],
-                    if (recipe.tip != null) ...[
-                      const SizedBox(height: DSDimens.sizeL),
-                      DSTipCard(
-                        title: l10n.recipeDetailTip,
-                        body: recipe.tip!,
-                      ),
+                    ] else ...[
+                      if (recipe.ingredients.isNotEmpty) ...[
+                        const SizedBox(height: DSDimens.sizeL),
+                        _SectionHeader(title: l10n.recipeDetailIngredients),
+                        const SizedBox(height: DSDimens.sizeXs),
+                        _IngredientsCard(ingredients: recipe.ingredients),
+                      ],
+                      if (recipe.steps.isNotEmpty) ...[
+                        const SizedBox(height: DSDimens.sizeL),
+                        _SectionHeader(title: l10n.recipeDetailPreparation),
+                        const SizedBox(height: DSDimens.sizeXs),
+                        for (var i = 0; i < recipe.steps.length; i++) ...[
+                          if (i > 0) const SizedBox(height: DSDimens.sizeXs),
+                          _StepCard(number: i + 1, text: recipe.steps[i]),
+                        ],
+                      ],
+                      if (recipe.tip != null) ...[
+                        const SizedBox(height: DSDimens.sizeL),
+                        DSTipCard(
+                          title: l10n.recipeDetailTip,
+                          body: recipe.tip!,
+                        ),
+                      ],
                     ],
                   ],
                 ),

@@ -76,6 +76,11 @@ class DSColors {
   static const Color accentDanger = Color(0xFFE5564B);
   static const Color accentInfo = Color(0xFF3F7CF0);
 
+  /// The deep end of the Home scan header's blue. Only ever used as the second
+  /// stop of [DSGradients.homeScanHeader] — [accentInfo] stays the single
+  /// actionable-blue token everything else reads.
+  static const Color accentInfoDeep = Color(0xFF2B5FD9);
+
   /// Amber "keep an eye on this" accent — the severity between success and
   /// danger. Pairs with [tintSand] as its surface. Distinct from
   /// [coralAccent], which is an emphasis colour rather than a severity.
@@ -109,6 +114,15 @@ class DSColors {
 }
 
 class DSGradients {
+  /// The Home scan header — one full-bleed blue slab that carries the search
+  /// bar *and* the scan pitch, so the top of Home reads as a single section
+  /// rather than a pill floating above a banner.
+  static const LinearGradient homeScanHeader = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [DSColors.accentInfo, DSColors.accentInfoDeep],
+  );
+
   /// Left→right blue gradient for the paywall "Plus" badges.
   static const LinearGradient paywallBadge = LinearGradient(
     begin: Alignment.centerLeft,
@@ -159,11 +173,7 @@ class DSGradients {
   static const LinearGradient onboardingNotifPrimer = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [
-      DSColors.tintCoralSoft,
-      DSColors.tintCoral,
-      Color(0xFFF3EEEC),
-    ],
+    colors: [DSColors.tintCoralSoft, DSColors.tintCoral, Color(0xFFF3EEEC)],
     stops: [0.0, 0.45, 1.0],
   );
 
@@ -215,27 +225,15 @@ class DSRadii {
 
 class DSShadows {
   static const List<BoxShadow> e1 = [
-    BoxShadow(
-      color: Color(0x0A000000),
-      offset: Offset(0, 1),
-      blurRadius: 2,
-    ),
+    BoxShadow(color: Color(0x0A000000), offset: Offset(0, 1), blurRadius: 2),
   ];
 
   static const List<BoxShadow> e2 = [
-    BoxShadow(
-      color: Color(0x0F000000),
-      offset: Offset(0, 4),
-      blurRadius: 12,
-    ),
+    BoxShadow(color: Color(0x0F000000), offset: Offset(0, 4), blurRadius: 12),
   ];
 
   static const List<BoxShadow> e3 = [
-    BoxShadow(
-      color: Color(0x14000000),
-      offset: Offset(0, 8),
-      blurRadius: 24,
-    ),
+    BoxShadow(color: Color(0x14000000), offset: Offset(0, 8), blurRadius: 24),
   ];
 }
 

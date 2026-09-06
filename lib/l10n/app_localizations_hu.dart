@@ -1164,6 +1164,12 @@ class AppLocalizationsHu extends AppLocalizations {
   String get homeScanProductSubtitle => 'Készíts fotót a csomagolásról';
 
   @override
+  String get homeScanEyebrow => 'A YuCat-szkennelés';
+
+  @override
+  String get homeScanHeadline => 'Jó ez a csomag a macskádnak?';
+
+  @override
   String get homeGreetingHey => 'Üdv újra';
 
   @override

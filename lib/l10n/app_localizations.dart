@@ -2109,6 +2109,18 @@ abstract class AppLocalizations {
   /// **'Take a photo of the package'**
   String get homeScanProductSubtitle;
 
+  /// No description provided for @homeScanEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'The YuCat scan'**
+  String get homeScanEyebrow;
+
+  /// No description provided for @homeScanHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Is this pack good for your cat?'**
+  String get homeScanHeadline;
+
   /// No description provided for @homeGreetingHey.
   ///
   /// In en, this message translates to:

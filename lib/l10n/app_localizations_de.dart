@@ -1174,6 +1174,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeScanProductSubtitle => 'Fotografiere die Verpackung';
 
   @override
+  String get homeScanEyebrow => 'Der YuCat-Scan';
+
+  @override
+  String get homeScanHeadline => 'Ist diese Packung gut für deine Katze?';
+
+  @override
   String get homeGreetingHey => 'Willkommen zurück';
 
   @override

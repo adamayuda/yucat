@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/bottom_navigation_bar/bottom_nav_bar.dart';
 import 'package:yucat/service_locator.dart';
@@ -37,6 +38,7 @@ class MainPage extends StatelessWidget {
                 child: BottomNavBar(
                   tabsRouter: tabsRouter,
                   logScreenViewUsecase: sl<LogScreenViewUsecase>(),
+                  logEventUsecase: sl<LogEventUsecase>(),
                 ),
               ),
             ],
