@@ -33,9 +33,11 @@ class _HomeArticlesSectionState extends State<HomeArticlesSection>
     with ContentLaneAnalytics {
   /// How many of the catalogue's articles the lane shows, in authored order.
   ///
-  /// Starts at index 1: `HomeNewsCard` already features the first article at
-  /// the top of the page, so leading with it here would show it twice.
-  static const int _skip = 1;
+  /// ⚠️ `_skip` is 0 and must stay 0 while `HomeNewsCard` is unmounted (YUC-24).
+  /// It was 1 only because the card already featured the first article at the
+  /// top of the page; with the card parked, skipping would drop article 0 from
+  /// Home entirely. Re-mounting the card means restoring it to 1.
+  static const int _skip = 0;
   static const int _laneCount = 6;
 
   late ArticlesBloc _bloc;
@@ -80,14 +82,14 @@ class _HomeArticlesSectionState extends State<HomeArticlesSection>
             all.skip(_skip).take(_laneCount).toList(),
           _ => const <ArticleDisplayModel>[],
         };
-        // Home is a discovery surface: a lane that failed or has nothing left
-        // to show after the news card takes the first article removes itself.
+        // Home is a discovery surface: a lane that failed or has nothing to
+        // show removes itself, header included.
         if (state is ArticlesErrorState ||
             (state is ArticlesLoadedState && articles.isEmpty)) {
           return const SizedBox.shrink();
         }
-        // The count is post-skip: the news card's article is not on offer here,
-        // so counting it would inflate the lane's denominator by one.
+        // The count is post-skip, so `Content Lane Viewed` always counts what
+        // was actually on offer here rather than the catalogue size.
         reportLaneViewed(
           section: ContentSection.articles,
           itemCount: articles.length,

@@ -96,12 +96,10 @@ class _HomePage extends State<HomePage> {
     context.router.push(ArticleDetailRoute(article: article));
   }
 
-  /// Same destination as [_openArticle]; separate only so the news card and the
-  /// articles lane report different `source` values.
-  void _openNewsArticle(ArticleDisplayModel article) {
-    logArticleSelected(article, source: ContentSource.homeNewsCard);
-    context.router.push(ArticleDetailRoute(article: article));
-  }
+  // NOTE: `_openNewsArticle` went with `HomeNewsCard` in YUC-24 — it was
+  // `_openArticle` with `ContentSource.homeNewsCard` instead of `homeLane`.
+  // `ContentSource.homeNewsCard` is kept but is now unreachable; restore both
+  // together if the card is re-mounted.
 
   void _logSeeAll(String section) {
     sl<LogEventUsecase>().call(
@@ -146,7 +144,6 @@ class _HomePage extends State<HomePage> {
           onSeeAllFoodGuide: _openFoodGuide,
           onSeeAllArticles: _openArticles,
           onArticleTap: _openArticle,
-          onNewsArticleTap: _openNewsArticle,
         );
       case HomeErrorState():
         final l10n = AppLocalizations.of(context);

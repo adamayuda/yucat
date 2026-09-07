@@ -158,9 +158,11 @@ Use `step_name` or `step_id` as the funnel key and `step_index` only for orderin
 | `Content Lane Viewed` | `section`, `item_count` |
 | `Article Read` | `article_id`, `article_title`, `category`, `read_minutes`, `seconds`, `scroll_pct`, `paragraphs` |
 
-`source` values come from `ContentSource`: `home_lane`, `home_news_card`, `recipes_tab`,
-`articles_list`, `food_guide_list` — the news card and the articles lane are separated
-because they open the same route from different surfaces.
+`source` values come from `ContentSource`: `home_lane`, `recipes_tab`, `articles_list`,
+`food_guide_list`. ⚠️ `home_news_card` is **unreachable** — `HomeNewsCard` was unmounted
+from Home in YUC-24 (parked, not deleted). The constant is kept so re-mounting the card
+restores the historical name rather than minting a second one; the same goes for
+`ContentSection.news_card` on `Content Lane Viewed`.
 
 ⚠️ **There is no `… Detail Viewed` event for these three.** The detail pages are bloc-free,
 `AnalyticsRouteObserver` already emits `Screen View` for their routes, and every path into
@@ -168,12 +170,12 @@ them is one of the `… Selected` taps above, so the two would be 1:1. Add one i
 deep links into a detail screen.
 
 `Content Lane Viewed` fires **once per load, per lane, and only when the lane renders at
-least one item** — the four Home sections each hide themselves entirely on an error or empty
+least one item** — the three Home lanes each hide themselves entirely on an error or empty
 catalogue, so a lane that never appeared correctly contributes nothing. This is the honest
 denominator for lane conversion; `Screen View (HomeRoute)` over-counts. The guard is a
-`_loggedItemCount` field in each section widget, not a bloc hook: `ArticlesBloc` is
-constructed three times concurrently on Home and `RecipesBloc` / `FoodGuideBloc` twice each,
-so a bloc-level hook would fire two or three times for one page load.
+`_loggedItemCount` field in each section widget, not a bloc hook: `ArticlesBloc`,
+`RecipesBloc` and `FoodGuideBloc` are each constructed twice concurrently (the Home lane
+plus its own screen), so a bloc-level hook would fire twice for one page load.
 
 `Article Read` is emitted on **dispose** of `ArticleDetailRoute`, which is the only reason
 that screen is a `StatefulWidget` — none of the measured state reaches its build output.
@@ -183,10 +185,9 @@ post-frame check rather than left at 0 where it would be indistinguishable from 
 Compare `seconds` against the article's own claimed `read_minutes` to see whether the
 editorial estimates are honest, and `scroll_pct` against `paragraphs` to control for length.
 
-⚠️ **Emitted from the widget layer, never the blocs.** `ArticlesBloc` is constructed three
-times concurrently (Home's news card, Home's articles lane, `ArticlesPage`) and
-`RecipesBloc` / `FoodGuideBloc` twice each — a bloc-level hook fires two or three times per
-user action. The search events are debounced 800 ms in the page (`EasyDebounce`) because the
+⚠️ **Emitted from the widget layer, never the blocs.** `ArticlesBloc` is constructed twice
+concurrently (Home's articles lane, `ArticlesPage`), as are `RecipesBloc` and
+`FoodGuideBloc` — a bloc-level hook fires twice per user action. The search events are debounced 800 ms in the page (`EasyDebounce`) because the
 list blocs filter in memory with no debounce; the filter events are logged from a
 `BlocListener` so `results_count` reflects the state *after* the change.
 

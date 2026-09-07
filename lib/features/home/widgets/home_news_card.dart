@@ -17,6 +17,15 @@ import 'package:yucat/service_locator.dart';
 ///
 /// Shows the **first** article in authored order — which article that is comes
 /// from the `order` field in the seed data, not from anything computed here.
+///
+/// ⚠️ **PARKED — nothing mounts this today.** YUC-24 removed it from
+/// `HomeDashboardPage` to lift the content lanes above the fold. It is kept, not
+/// deleted, the same way `HomeGreetingCard` is: don't prune it as dead code, and
+/// don't "fix" `ContentSource.homeNewsCard` / `ContentSection.newsCard` as
+/// unused. Re-mounting it means three coordinated changes: add it back to the
+/// page (with an `onNewsArticleTap` that logs `ContentSource.homeNewsCard`),
+/// restore `HomeArticlesSection._skip` to 1 so its article isn't listed twice,
+/// and restore `_NewsCardBone` in `HomeSkeleton`.
 class HomeNewsCard extends StatefulWidget {
   final ValueChanged<ArticleDisplayModel> onArticleTap;
 

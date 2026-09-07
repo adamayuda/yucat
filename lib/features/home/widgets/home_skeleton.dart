@@ -6,9 +6,12 @@ import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_shimmer.dart';
 
-/// Skeleton for the Home dashboard load — search bar, news card, the two
-/// swimlane bones and the mission panel, mirroring `HomeDashboardPage`.
+/// Skeleton for the Home dashboard load — the blue header, the two swimlane
+/// bones and the mission panel, mirroring `HomeDashboardPage`.
 /// Distinct from the multi-step scan animation (`HomeLoadingWidget`).
+///
+/// ⚠️ Every dimension in `_ScanHeaderBone` mirrors `HomeScanHeader`. Change one
+/// and change the other, or the loading→loaded swap jumps.
 class HomeSkeleton extends StatelessWidget {
   const HomeSkeleton({super.key});
 
@@ -31,8 +34,6 @@ class HomeSkeleton extends StatelessWidget {
             // Full-bleed, like the real header — the horizontal inset lives on
             // the individual bones below rather than on the list.
             _ScanHeaderBone(),
-            SizedBox(height: DSDimens.sizeL),
-            _Inset(child: _NewsCardBone()),
             SizedBox(height: DSDimens.sizeL),
             _Inset(child: _FoodGuideLaneBone()),
             SizedBox(height: DSDimens.sizeL),
@@ -80,14 +81,14 @@ class _ScanHeaderBone extends StatelessWidget {
         DSDimens.sizeL,
         MediaQuery.of(context).padding.top + DSDimens.sizeS,
         DSDimens.sizeL,
-        DSDimens.sizeL,
+        DSDimens.sizeS,
       ),
       child: const DSShimmer(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ShimmerBone(height: 56, radius: DSRadii.pill),
-            SizedBox(height: DSDimens.sizeL),
+            SizedBox(height: DSDimens.sizeS),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -115,55 +116,11 @@ class _ScanHeaderBone extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: DSDimens.sizeS),
-                ShimmerBone(width: 104, height: 104, radius: DSRadii.md),
+                ShimmerBone(width: 88, height: 88, radius: DSRadii.md),
               ],
             ),
             SizedBox(height: DSDimens.sizeS),
             ShimmerBone(height: 52, radius: DSRadii.pill),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Mirrors `HomeNewsCard`: eyebrow, headline, body and a square thumbnail.
-class _NewsCardBone extends StatelessWidget {
-  const _NewsCardBone();
-
-  @override
-  Widget build(BuildContext context) {
-    return DSCard(
-      padding: const EdgeInsets.all(DSDimens.sizeL),
-      child: DSShimmer(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const FractionallySizedBox(
-                    widthFactor: 0.55,
-                    child: ShimmerBone(height: 12, radius: DSRadii.sm),
-                  ),
-                  const SizedBox(height: DSDimens.sizeS),
-                  const ShimmerBone(height: 20, radius: DSRadii.sm),
-                  const SizedBox(height: DSDimens.sizeXxs),
-                  const FractionallySizedBox(
-                    widthFactor: 0.8,
-                    child: ShimmerBone(height: 20, radius: DSRadii.sm),
-                  ),
-                  const SizedBox(height: DSDimens.sizeXs),
-                  const FractionallySizedBox(
-                    widthFactor: 0.65,
-                    child: ShimmerBone(height: 13, radius: DSRadii.sm),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: DSDimens.sizeS),
-            const ShimmerBone(width: 88, height: 88, radius: DSRadii.lg),
           ],
         ),
       ),

@@ -176,6 +176,10 @@ class ContentSource {
   ContentSource._();
 
   static const homeLane = 'home_lane';
+
+  /// ⚠️ **Unreachable since YUC-24** — `HomeNewsCard` was unmounted from Home
+  /// (parked in `lib/features/home/widgets/`, not deleted). Kept so a re-mount
+  /// resumes the historical name instead of minting a second one.
   static const homeNewsCard = 'home_news_card';
   static const recipesTab = 'recipes_tab';
   static const articlesList = 'articles_list';
@@ -190,11 +194,13 @@ class ContentSection {
   static const articles = 'articles';
   static const foodGuide = 'food_guide';
 
-  /// [AnalyticsEvents.contentLaneViewed] only. The news card is a distinct Home
-  /// surface from the articles lane — it features one article and converts on
-  /// its own "Learn more" — so it needs its own denominator. It is not a valid
-  /// `section` for [AnalyticsEvents.contentSeeAllTapped]: the card has no
-  /// "See all".
+  /// [AnalyticsEvents.contentLaneViewed] only — the news card had its own
+  /// denominator because it featured one article and converted on its own
+  /// "Learn more". Never a valid `section` for
+  /// [AnalyticsEvents.contentSeeAllTapped]: the card has no "See all".
+  ///
+  /// ⚠️ **Unreachable since YUC-24**, with [ContentSource.homeNewsCard] — the
+  /// card is parked, not deleted. Kept for the same reason.
   static const newsCard = 'news_card';
 }
 

@@ -82,11 +82,14 @@ class _HomeScanHeaderState extends State<HomeScanHeader>
           children: [
             const Positioned.fill(child: _Backdrop()),
             Padding(
+              // Bottom inset is `sizeS`, not `sizeL` (YUC-24): the header is
+              // the only thing between the status bar and the first lane, so
+              // every point it gives back is one the lanes gain above the fold.
               padding: EdgeInsets.fromLTRB(
                 DSDimens.sizeL,
                 topInset + DSDimens.sizeS,
                 DSDimens.sizeL,
-                DSDimens.sizeL,
+                DSDimens.sizeS,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +99,7 @@ class _HomeScanHeaderState extends State<HomeScanHeader>
                     hintText: l10n.searchHint,
                     onTap: widget.onSearchTap,
                   ),
-                  const SizedBox(height: DSDimens.sizeL),
+                  const SizedBox(height: DSDimens.sizeS),
                   _ScanPitch(l10n: l10n, sweep: _sweep),
                   const SizedBox(height: DSDimens.sizeS),
                   SizedBox(
@@ -244,8 +247,11 @@ class _PackViewfinder extends StatelessWidget {
 
   const _PackViewfinder({required this.sweep});
 
-  static const double _size = 104;
-  static const double _inner = 72;
+  // The viewfinder, not the copy, sets the header's floor — the subtitle wraps
+  // to at most three lines, which is shorter than this. Trimmed from 104/72 in
+  // YUC-24; `_BracketPainter._arm` stays 20, which reads the same at this size.
+  static const double _size = 88;
+  static const double _inner = 62;
 
   /// The closest thing the repo has to a pack shot. Swap for a real pouch/tin
   /// photo when one exists.

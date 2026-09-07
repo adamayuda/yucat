@@ -6,14 +6,13 @@ import 'package:yucat/features/home/widgets/food_guide_section.dart';
 import 'package:yucat/features/articles/presentation/models/article_display_model.dart';
 import 'package:yucat/features/home/widgets/home_articles_section.dart';
 import 'package:yucat/features/home/widgets/home_mission_card.dart';
-import 'package:yucat/features/home/widgets/home_news_card.dart';
 import 'package:yucat/features/home/widgets/home_recipes_section.dart';
 import 'package:yucat/features/home/widgets/home_scan_header.dart';
 import 'package:yucat/features/recipes/presentation/models/recipe_display_model.dart';
 import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 
 /// The Home tab's discovery feed: [HomeScanHeader] (search + the scan CTA, as
-/// one blue slab) then the news card and the content lanes.
+/// one blue slab) then the three content lanes and the mission panel.
 ///
 /// ⚠️ The header bleeds under the status bar, so this page's `SafeArea` passes
 /// `top: false` and the list starts at zero top padding — [HomeScanHeader] adds
@@ -26,6 +25,13 @@ import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 /// `lib/features/home/widgets/` and are meant to be reused on another screen.
 /// Nothing on this page reads the active cat any more, which is why the page
 /// is stateless and takes no cat data.
+///
+/// ⚠️ `HomeNewsCard` is **parked the same way** (YUC-24): it used to sit
+/// between the header and the food-guide lane, featuring the first article by
+/// `order`. It was removed to lift the lanes above the fold, not deleted — so
+/// don't prune it as dead code. Two things moved with it:
+/// `HomeArticlesSection._skip` went back to 0 (it existed only to stop the
+/// card's article showing twice), and `HomeSkeleton` lost its news-card bone.
 class HomeDashboardPage extends StatelessWidget {
   final VoidCallback onSearchTap;
   final VoidCallback onScanTap;
@@ -35,10 +41,6 @@ class HomeDashboardPage extends StatelessWidget {
   final VoidCallback onSeeAllFoodGuide;
   final VoidCallback onSeeAllArticles;
   final ValueChanged<ArticleDisplayModel> onArticleTap;
-
-  /// The news card opens an article too, but from a different surface — kept
-  /// separate from [onArticleTap] purely so analytics can tell the two apart.
-  final ValueChanged<ArticleDisplayModel> onNewsArticleTap;
 
   const HomeDashboardPage({
     super.key,
@@ -50,7 +52,6 @@ class HomeDashboardPage extends StatelessWidget {
     required this.onSeeAllFoodGuide,
     required this.onSeeAllArticles,
     required this.onArticleTap,
-    required this.onNewsArticleTap,
   });
 
   @override
@@ -78,11 +79,6 @@ class HomeDashboardPage extends StatelessWidget {
             children: [
               // Unpadded on purpose: the blue runs to both screen edges.
               HomeScanHeader(onSearchTap: onSearchTap, onScanTap: onScanTap),
-              const SizedBox(height: DSDimens.sizeL),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
-                child: HomeNewsCard(onArticleTap: onNewsArticleTap),
-              ),
               const SizedBox(height: DSDimens.sizeL),
               // Unpadded on purpose — the lane scrolls under the screen edges.
               FoodGuideSection(
