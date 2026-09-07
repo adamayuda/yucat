@@ -321,6 +321,14 @@ removed outright: those surfaces live on Cat Detail, saved products are reached 
 is the nav's Scan slot. `HomeGreetingCard` + `HomeCatSelector` are **parked, not deleted** — unmounted from
 Home and kept in `lib/features/home/widgets/` for reuse on another screen.
 
+`HomeMissionCard`'s mascot is a **looping Lottie** (`assets/images/cat-idle.json`, 3 s at
+30 fps) rendered at `width: 80`, which is where the static `cat-thumb.svg` used to sit — the
+two share an aspect ratio to within 1 %, so the swap didn't move the card. ⚠️ It passes
+`frameRate: FrameRate.composition`. The loop never ends and the card sits at the foot of a
+`ListView`, which keeps it animating off-screen inside the cache extent; the default drives
+repaints at the device refresh rate, so a 120 Hz screen would repaint four times per authored
+frame for nothing. Any always-on Lottie in a scrolling list wants the same treatment.
+
 `MainPage` is `Scaffold(backgroundColor: DSColors.pageBackground)` with the nav overlaid in a
 **`Stack`**, not a transparent scaffold with `extendBody`. Both details are load-bearing and
 commented in the source:

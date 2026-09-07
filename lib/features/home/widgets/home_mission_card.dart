@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 
@@ -40,13 +40,26 @@ class HomeMissionCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: DSDimens.sizeS),
-          // The winking cat the removed scan hero card used — the mascot has no
-          // other home on Home now, and it carries the brand's tone better than
-          // an abstract glyph. Rendered at its own colours: no ColorFilter.
+          // The idle mascot — a 3 s loop that carries the brand's tone better
+          // than an abstract glyph. It replaced the static `cat-thumb.svg`
+          // (YUC-25), which is still used by the cat-create coat step.
+          //
+          // `width: 80` is unchanged from the SVG on purpose: the two share an
+          // aspect ratio to within 1 % (257×289 vs 300×335), so the swap moves
+          // the card's height by well under a pixel.
+          //
+          // ⚠️ `frameRate: FrameRate.composition` is load-bearing, not a
+          // flourish. This loops forever at the foot of a `ListView`, which
+          // keeps it ticking inside the cache extent even when it's scrolled
+          // off — and the default drives repaints at the device refresh rate,
+          // so a 120 Hz ProMotion screen would repaint 4× per authored frame
+          // for no visible gain. `composition` pins it to the file's own
+          // 30 fps and follows the asset if it's ever re-exported.
           ExcludeSemantics(
-            child: SvgPicture.asset(
-              'assets/images/cat-thumb.svg',
+            child: Lottie.asset(
+              'assets/images/cat-idle.json',
               width: 80,
+              frameRate: FrameRate.composition,
             ),
           ),
         ],
