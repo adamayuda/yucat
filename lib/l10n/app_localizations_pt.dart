@@ -1325,7 +1325,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeLoadingEyebrow => 'Um momento';
 
   @override
-  String get homeLoadingMsgReading => 'A ler o rótulo…';
+  String get homeLoadingMsgReading => 'A ler a embalagem…';
 
   @override
   String get homeLoadingMsgSniffing => 'A cheirar os ingredientes…';
@@ -1350,7 +1350,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeChooseFromGallery => 'Escolher da galeria';
 
   @override
-  String get homeScannerHint => 'Aponte para o rótulo do produto';
+  String get homeScannerHint => 'Aponte para o produto';
 
   @override
   String get homeErrorProductNotFound => 'Produto não encontrado';
@@ -2199,7 +2199,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get onboardingScanFailed =>
-      'Não conseguimos ler esse rótulo. Tente novamente com a parte da frente da embalagem visível.';
+      'Não conseguimos identificar esse produto. Tente novamente com a parte da frente da embalagem visível.';
 
   @override
   String get onboardingScanRetry => 'Digitalizar de novo';

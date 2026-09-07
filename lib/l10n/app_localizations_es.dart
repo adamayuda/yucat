@@ -1325,7 +1325,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeLoadingEyebrow => 'Un momento';
 
   @override
-  String get homeLoadingMsgReading => 'Leyendo la etiqueta…';
+  String get homeLoadingMsgReading => 'Leyendo el paquete…';
 
   @override
   String get homeLoadingMsgSniffing => 'Olfateando los ingredientes…';
@@ -1350,7 +1350,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeChooseFromGallery => 'Elegir de la galería';
 
   @override
-  String get homeScannerHint => 'Apunta a la etiqueta del producto';
+  String get homeScannerHint => 'Apunta al producto';
 
   @override
   String get homeErrorProductNotFound => 'Producto no encontrado';
@@ -2200,7 +2200,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get onboardingScanFailed =>
-      'No pudimos leer esa etiqueta. Inténtalo de nuevo con la parte frontal del paquete a la vista.';
+      'No pudimos identificar ese producto. Inténtalo de nuevo con la parte frontal del paquete a la vista.';
 
   @override
   String get onboardingScanRetry => 'Escanear de nuevo';

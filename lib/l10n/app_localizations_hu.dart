@@ -1317,7 +1317,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get homeLoadingEyebrow => 'Egy pillanat';
 
   @override
-  String get homeLoadingMsgReading => 'Címke beolvasása…';
+  String get homeLoadingMsgReading => 'Csomagolás beolvasása…';
 
   @override
   String get homeLoadingMsgSniffing => 'Összetevők szimatolása…';
@@ -1342,7 +1342,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get homeChooseFromGallery => 'Választás galériából';
 
   @override
-  String get homeScannerHint => 'Irányítsd a termék címkéjére';
+  String get homeScannerHint => 'Irányítsd a termékre';
 
   @override
   String get homeErrorProductNotFound => 'A termék nem található';
@@ -2189,7 +2189,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get onboardingScanFailed =>
-      'Nem tudtuk leolvasni a címkét. Próbáld újra úgy, hogy a csomagolás eleje jól látszódjon.';
+      'Nem tudtuk azonosítani a terméket. Próbáld újra úgy, hogy a csomagolás eleje jól látszódjon.';
 
   @override
   String get onboardingScanRetry => 'Újra beolvasás';

@@ -1311,7 +1311,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeLoadingEyebrow => 'Hang tight';
 
   @override
-  String get homeLoadingMsgReading => 'Reading the label…';
+  String get homeLoadingMsgReading => 'Reading the package…';
 
   @override
   String get homeLoadingMsgSniffing => 'Sniffing the ingredients…';
@@ -1336,7 +1336,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeChooseFromGallery => 'Choose from gallery';
 
   @override
-  String get homeScannerHint => 'Point at the product label';
+  String get homeScannerHint => 'Point at the product';
 
   @override
   String get homeErrorProductNotFound => 'Product not found';
@@ -2175,7 +2175,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingScanFailed =>
-      'We couldn\'t read that label. Try again with the front of the package in frame.';
+      'We couldn\'t identify that product. Try again with the front of the package in frame.';
 
   @override
   String get onboardingScanRetry => 'Scan again';

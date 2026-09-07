@@ -2388,7 +2388,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeLoadingMsgReading.
   ///
   /// In en, this message translates to:
-  /// **'Reading the label…'**
+  /// **'Reading the package…'**
   String get homeLoadingMsgReading;
 
   /// No description provided for @homeLoadingMsgSniffing.
@@ -2436,7 +2436,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeScannerHint.
   ///
   /// In en, this message translates to:
-  /// **'Point at the product label'**
+  /// **'Point at the product'**
   String get homeScannerHint;
 
   /// No description provided for @homeErrorProductNotFound.
@@ -3792,7 +3792,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingScanFailed.
   ///
   /// In en, this message translates to:
-  /// **'We couldn\'t read that label. Try again with the front of the package in frame.'**
+  /// **'We couldn\'t identify that product. Try again with the front of the package in frame.'**
   String get onboardingScanFailed;
 
   /// No description provided for @onboardingScanRetry.
