@@ -1,0 +1,42 @@
+{
+  "fr": {
+    "title": "Pâtée ou croquettes ? La comparaison honnête",
+    "excerpt": "L'une gagne sur l'hydratation et les protéines, l'autre sur le prix et la praticité.",
+    "body": [
+      "*Le débat se mène en général comme si l'une était de la nourriture et l'autre du poison. Ni l'un ni l'autre n'est vrai.*",
+      "![Un chat à côté de sa gamelle](https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/wet-food-versus-dry-food.jpeg)\n*La plupart des chats vont mieux avec un mélange, à dominante humide.*",
+      "---",
+      "## La plus grande différence",
+      "**L'humidité.** La pâtée contient environ 75 à 80 % d'eau. Les croquettes, autour de 6 à 10 %.",
+      "Ce seul chiffre explique la plupart des avantages réels. La sensation de soif du chat est faible, héritée d'ancêtres du désert qui tiraient leur eau de leurs proies. Les chats nourris aux croquettes boivent effectivement davantage, mais rarement assez pour combler l'écart — ce qui compte pour la santé urinaire et rénale sur toute une vie.",
+      "---",
+      "## Face à face",
+      "| | Pâtée | Croquettes |\n|---|---|---|\n| Humidité | 75–80 % | 6–10 % |\n| Protéines, sur matière sèche | Généralement plus élevées | Généralement plus faibles |\n| Glucides | Généralement plus faibles | Plus élevés — l'amidon est nécessaire à la formation de la croquette |\n| Densité calorique | Faible, donc plus de volume par calorie | Élevée, facile de suralimenter |\n| Coût par calorie | Plus élevé | Plus faible |\n| Alimentation à volonté | À éviter de laisser à l'air libre | Possible, mais rarement conseillée |\n| Effet dentaire | Neutre | **Neutre** — les croquettes classiques ne nettoient pas les dents |\n| Conservation après ouverture | 24 heures au réfrigérateur | Plusieurs semaines |",
+      "> L'idée que les croquettes nettoient les dents est le mythe le plus tenace de la nutrition féline. La croquette standard se brise au contact, au-dessus du liseré gingival, là où la maladie commence réellement. Seuls certains aliments dentaires spécifiques, à croquettes plus grosses et fibreuses, ont un effet mesurable.",
+      "---",
+      "## Là où la pâtée gagne vraiment",
+      "- **Santé urinaire.** Urines plus diluées, moins de cristaux urinaires, moins d'irritation.\n- **Contrôle du poids.** Plus de volume par calorie : un repas rassasiant coûte moins cher en énergie.\n- **Protéines.** Généralement plus élevées sur matière sèche, et le chat est un carnivore strict.\n- **Chats âgés.** Plus facile à manger en cas de maladie dentaire, plus douce pour des reins vieillissants.\n- **Appétence.** L'odeur et la texture comptent pour un chat qui s'est détourné de sa gamelle.",
+      "## Là où les croquettes gagnent vraiment",
+      "- **Le prix.** Souvent nettement moins cher par calorie.\n- **La praticité.** Pas de réfrigération, pas d'altération, faciles à emporter.\n- **Les jeux alimentaires.** Elles fonctionnent dans les balles et les jouets distributeurs, qui ajoutent de l'activité.\n- **Les distributeurs programmables.** Pratiques pour les longues journées de travail.",
+      "---",
+      "## Comparer les étiquettes honnêtement",
+      "Vous ne pouvez pas lire les deux tableaux côte à côte. Convertissez d'abord les deux **sur matière sèche** :",
+      "```\n% sur matière sèche = (% brut) / (100 - % humidité) × 100\n```",
+      "| | Pâtée | Croquettes |\n|---|---|---|\n| Protéines telles qu'affichées | 10 % | 32 % |\n| Humidité | 78 % | 8 % |\n| **Protéines, sur matière sèche** | **45,5 %** | **34,8 %** |",
+      "La pâtée, qui semblait bien plus pauvre, passe confortablement devant.",
+      "---",
+      "## Une voie médiane concrète",
+      "Pour la plupart des chats adultes en bonne santé :",
+      "1. **Au moins un repas humide par jour**, idéalement deux\n2. **Des croquettes pesées, pas à volonté** — mesurez la quantité quotidienne\n3. **Utilisez les croquettes dans des jeux distributeurs** pour qu'elles se méritent\n4. **De l'eau fraîche toujours disponible**, loin de la gamelle de nourriture\n5. **Des friandises sous les 10 %** des calories quotidiennes, décomptées du total",
+      "Les chats ayant des antécédents d'obstruction urétrale, de cristaux urinaires ou de maladie rénale doivent en général être nourris **principalement à la pâtée**, et cette décision revient à votre vétérinaire.",
+      "---",
+      "## Nourrir en toute sécurité",
+      "- Ne laissez pas la pâtée à l'air libre plus d'une heure ou deux dans une pièce chaude\n- Conservez une boîte entamée au réfrigérateur, couverte, 24 heures au maximum\n- Servez à température ambiante — les chats refusent la nourriture froide, et l'odeur commande l'appétit\n- Conservez les croquettes fermées dans leur sac d'origine : à l'air libre, la graisse s'oxyde et rancit",
+      "---",
+      "## En résumé",
+      "La pâtée est meilleure pour l'hydratation, le poids et la santé urinaire. Les croquettes sont moins chères et plus pratiques. Un mélange mesuré, à dominante humide, convient à la plupart des chats — et l'argument dentaire en faveur des croquettes ne tient pas.",
+      "---",
+      "*Conseils généraux uniquement. Les chats atteints d'une maladie rénale, urinaire ou de diabète ont besoin d'une alimentation choisie avec leur vétérinaire.*"
+    ]
+  }
+}

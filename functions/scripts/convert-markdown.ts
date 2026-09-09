@@ -14,6 +14,9 @@
  */
 import * as fs from "fs";
 import * as path from "path";
+// Shared with import-md-translations.ts: the translation guards compare block
+// counts across the two, so both must split identically.
+import {parseFrontMatter, toBlocks} from "./lib/markdown";
 
 const args = process.argv.slice(2);
 const flag = (name: string): string | undefined =>
@@ -41,65 +44,6 @@ if (!SOURCE) {
 if (KIND !== "articles" && KIND !== "recipes") {
   console.error(`Unsupported --kind=${KIND}. Use articles or recipes.`);
   process.exit(1);
-}
-
-/**
- * Minimal front-matter reader.
- *
- * Deliberately not a YAML dependency: the front matter is flat `key: value`
- * with optionally-quoted scalars, and `scripts/` is unlinted and untyped, so
- * the fewer moving parts the better. It rejects anything it does not
- * understand rather than guessing.
- */
-function parseFrontMatter(raw: string): {
-  meta: Record<string, string>;
-  body: string;
-} {
-  if (!raw.startsWith("---")) {
-    throw new Error("file does not start with front matter");
-  }
-  const close = raw.indexOf("\n---", 3);
-  if (close === -1) throw new Error("unterminated front matter");
-
-  const meta: Record<string, string> = {};
-  for (const line of raw.slice(4, close).split("\n")) {
-    if (!line.trim() || line.trimStart().startsWith("#")) continue;
-    const at = line.indexOf(":");
-    if (at === -1) throw new Error(`unparsable front-matter line: ${line}`);
-    const key = line.slice(0, at).trim();
-    let value = line.slice(at + 1).trim();
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-    meta[key] = value;
-  }
-
-  const body = raw.slice(raw.indexOf("\n", close + 1) + 1);
-  return {meta, body};
-}
-
-/**
- * Splits a Markdown document into the block array the client renders and the
- * translator guards.
- *
- * Blank lines are the separator, which keeps every multi-line construct intact:
- * tables, lists and fenced code contain no blank lines, so they survive as one
- * block each. Verified against the whole authored corpus — no table row or list
- * item leaks out of its block.
- *
- * The leading `# H1` is dropped: it repeats the `title`/`name` the detail screen
- * already renders as `displayLg`, and keeping it would print the headline twice.
- */
-function toBlocks(body: string): string[] {
-  const blocks = body
-    .split(/\n\s*\n/)
-    .map((b) => b.trim())
-    .filter((b) => b.length > 0);
-  if (blocks.length > 0 && /^#\s/.test(blocks[0])) blocks.shift();
-  return blocks;
 }
 
 function requireField(

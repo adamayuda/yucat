@@ -18,6 +18,11 @@
  *
  * The hash is only written when all five languages pass, matching the seeders —
  * so a partial run leaves the item retryable instead of frozen.
+ *
+ * `--languages=fr,es` narrows the run to the languages actually supplied, for
+ * when a catalogue is translated one language at a time. Those languages are
+ * validated and written as usual, but the hash is still withheld until all five
+ * exist on the document, so the seeders keep translating the rest.
  */
 import * as admin from "firebase-admin";
 import * as crypto from "crypto";
@@ -36,7 +41,18 @@ const KIND = flag("kind") ?? "articles";
 const ONLY = flag("only");
 const DRY_RUN = has("dry-run");
 const PROJECT_ID = process.env.GCLOUD_PROJECT ?? "yucat-d8fb5";
-const TARGET_LANGUAGES = ["es", "fr", "hu", "de", "pt"];
+const ALL_LANGUAGES = ["es", "fr", "hu", "de", "pt"];
+/** Languages this run is expected to supply. Defaults to all five. */
+const TARGET_LANGUAGES = (flag("languages") ?? ALL_LANGUAGES.join(","))
+  .split(",")
+  .map((l) => l.trim())
+  .filter((l) => l.length > 0);
+
+const unknown = TARGET_LANGUAGES.filter((l) => !ALL_LANGUAGES.includes(l));
+if (unknown.length > 0) {
+  console.error(`Unsupported --languages entry: ${unknown.join(", ")}`);
+  process.exit(1);
+}
 
 if (KIND !== "articles" && KIND !== "recipes") {
   console.error(`Unsupported --kind=${KIND}`);
@@ -86,7 +102,25 @@ async function main() {
   const ok: string[] = [];
   const skipped: string[] = [];
   const rejected: string[] = [];
-  const writes: {id: string; translations: Record<string, AnyText>; hash: string}[] = [];
+  const writes: {
+    id: string;
+    translations: Record<string, AnyText>;
+    hash: string | null;
+  }[] = [];
+
+  // What each document already carries, so a partial run can tell whether it
+  // completes the set. Read once, before any write.
+  const stored = new Map<string, Set<string>>();
+  for (const item of items) {
+    if (ONLY && item.id !== ONLY) continue;
+    const snap = await db.collection(KIND).doc(item.id).get();
+    stored.set(
+      item.id,
+      new Set(Object.keys((snap.data()?.translations as object) ?? {}))
+    );
+  }
+  const existingLanguages = (id: string): Set<string> =>
+    stored.get(id) ?? new Set<string>();
 
   for (const item of items) {
     if (ONLY && item.id !== ONLY) continue;
@@ -130,18 +164,33 @@ async function main() {
 
     // Same hash the seeders compute, so a later `seed-*.ts` run sees these as
     // current and reuses them instead of paying to translate again.
-    const hash = crypto
-      .createHash("sha1")
-      .update(JSON.stringify(canonical))
-      .digest("hex");
+    //
+    // ⚠️ Withheld unless this run completes the set. On a partial run the
+    // document gains real translations but stays hash-less, which is what keeps
+    // the seeders translating the languages nobody has hand-written yet —
+    // writing it early would freeze the item with a hole in it.
+    const complete = ALL_LANGUAGES.every(
+      (l) => translations[l] !== undefined || existingLanguages(item.id).has(l)
+    );
+    const hash = complete ?
+      crypto.createHash("sha1").update(JSON.stringify(canonical)).digest("hex") :
+      null;
     writes.push({id: item.id, translations, hash});
     ok.push(item.id);
   }
 
   console.log(
     `\n${KIND}: ${ok.length} valid, ${rejected.length} rejected, ` +
-      `${skipped.length} without a translation file`
+      `${skipped.length} without a translation file ` +
+      `(languages: ${TARGET_LANGUAGES.join(", ")})`
   );
+  const partial = writes.filter((w) => w.hash === null).length;
+  if (partial > 0) {
+    console.log(
+      `  ${partial} item(s) still incomplete — hash withheld so the seeders ` +
+        `translate the missing language(s).`
+    );
+  }
   if (skipped.length > 0 && skipped.length <= 60) {
     console.log(`  awaiting: ${skipped.join(", ")}`);
   }
@@ -156,15 +205,12 @@ async function main() {
   for (let i = 0; i < writes.length; i += batchSize) {
     const batch = db.batch();
     for (const w of writes.slice(i, i + batchSize)) {
-      batch.set(
-        db.collection(KIND).doc(w.id),
-        {
-          translations: w.translations,
-          translationsSourceHash: w.hash,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        },
-        {merge: true}
-      );
+      const payload: Record<string, unknown> = {
+        translations: w.translations,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+      if (w.hash !== null) payload.translationsSourceHash = w.hash;
+      batch.set(db.collection(KIND).doc(w.id), payload, {merge: true});
     }
     await batch.commit();
     console.log(`Wrote ${Math.min(i + batchSize, writes.length)}/${writes.length}`);

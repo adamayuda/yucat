@@ -79,9 +79,31 @@ const ONLY = strFlag("only");
 const CONCURRENCY = numFlag("concurrency") ?? 3;
 
 /** Every supported language except the canonical one. */
-const TARGET_LANGUAGES = Object.keys(LANGUAGE_NAMES).filter(
+const ALL_LANGUAGES = Object.keys(LANGUAGE_NAMES).filter(
   (lang) => lang !== CANONICAL_LANGUAGE
 );
+
+/**
+ * Languages this run may translate. Defaults to all of them.
+ *
+ * ⚠️ A language left out is **preserved, not dropped** — its stored text is
+ * carried through untouched. That is what makes hand-authored translations
+ * safe: `apply-translations.ts` can write a language this script would
+ * otherwise overwrite with a machine translation on the next run, because a
+ * document with no `translationsSourceHash` re-translates every language.
+ */
+const TARGET_LANGUAGES = (strFlag("languages") ?? ALL_LANGUAGES.join(","))
+  .split(",")
+  .map((l) => l.trim())
+  .filter((l) => l.length > 0);
+
+const unknownLanguages = TARGET_LANGUAGES.filter(
+  (l) => !ALL_LANGUAGES.includes(l)
+);
+if (unknownLanguages.length > 0) {
+  console.error(`Unsupported --languages entry: ${unknownLanguages.join(", ")}`);
+  process.exit(1);
+}
 
 const DATA_PATH = path.join(__dirname, "data", "recipes.json");
 
@@ -166,8 +188,16 @@ async function main() {
       const reused: string[] = [];
       const failed: string[] = [];
 
-      for (const lang of TARGET_LANGUAGES) {
+      // Languages outside this run keep whatever they already had.
+      for (const lang of ALL_LANGUAGES) {
         const cached = priorTranslations[lang];
+        if (!TARGET_LANGUAGES.includes(lang)) {
+          if (cached) {
+            translations[lang] = cached;
+            reused.push(lang);
+          }
+          continue;
+        }
         if (cached && hashMatches && !FORCE) {
           translations[lang] = cached;
           reused.push(lang);
@@ -198,7 +228,10 @@ async function main() {
           // the prior hash on a partial failure means the next run retries
           // exactly the languages that failed.
           translationsSourceHash:
-            failed.length === 0 ? hash : prior?.translationsSourceHash ?? "",
+            failed.length === 0 &&
+            ALL_LANGUAGES.every((l) => translations[l] !== undefined) ?
+              hash :
+              prior?.translationsSourceHash ?? "",
         },
         translated,
         reused,

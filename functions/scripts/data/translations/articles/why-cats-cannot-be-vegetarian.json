@@ -1,0 +1,36 @@
+{
+  "fr": {
+    "title": "Pourquoi un chat ne peut pas être végétarien",
+    "excerpt": "Ce n'est pas une préférence. C'est un ensemble d'enzymes manquantes.",
+    "body": [
+      "*Le chien est omnivore, et on peut en débattre. Le chat est un carnivore strict, et le débat s'arrête à sa biochimie.*",
+      "![Une planche de viandes crues](https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/why-cats-cannot-be-vegetarian.jpeg)\n*Les chats ont évolué en mangeant de petits animaux entiers, et leur métabolisme n'a jamais prévu de plan B.*",
+      "---",
+      "## Ce que veut dire « carnivore strict »",
+      "Au fil de millions d'années passées à ne manger presque que de la viande, les chats ont perdu des voies métaboliques dont ils n'avaient plus besoin. Une fois qu'une voie a disparu, le nutriment qu'elle produisait doit arriver tout prêt dans l'alimentation — et en pratique, cela veut dire depuis des tissus animaux.",
+      "Ce n'est pas une simple préférence. Plusieurs de ces carences provoquent des dégâts irréversibles.",
+      "---",
+      "## Les cinq choses que le chat ne sait pas fabriquer",
+      "### La taurine\nUn acide aminé que l'on trouve presque exclusivement dans les tissus animaux. Le chat n'en synthétise pas assez, et la carence provoque une **dégénérescence rétinienne irréversible menant à la cécité** ainsi qu'une **cardiomyopathie dilatée**, une insuffisance cardiaque qui peut être mortelle. Le lien n'a été identifié que dans les années 1980, après que des chats nourris avec des aliments industriels pauvres en taurine ont commencé à perdre la vue.",
+      "### La vitamine A préformée\nL'humain et le chien convertissent le bêta-carotène des végétaux en vitamine A. Le chat n'a pas une activité enzymatique suffisante pour le faire. Il lui faut du **rétinol**, issu du foie et d'autres tissus animaux.",
+      "### L'acide arachidonique\nUn acide gras essentiel pour la peau, le pelage, la reproduction et la régulation de l'inflammation. Les autres espèces le fabriquent à partir de l'acide linoléique d'origine végétale. Le chat en est incapable, et on ne le trouve que dans la graisse animale.",
+      "### La vitamine B12 et la niacine\nLe chat a des besoins élevés et une capacité limitée à produire de la niacine à partir du tryptophane. Les deux proviennent le plus sûrement de la viande.",
+      "### Des protéines de qualité, en continu\nLe foie du chat fait tourner ses enzymes de traitement des protéines à un **rythme constamment élevé**, au lieu de s'ajuster aux apports. Il continue à brûler des protéines même quand il en arrive peu, et c'est pourquoi le chat a besoin de plus de protéines alimentaires que le chien, et pourquoi le jeûne est dangereux pour lui.",
+      "> C'est aussi pourquoi un chat qui cesse de manger se met en danger si vite. En quelques jours, il peut développer une **lipidose hépatique**, une défaillance du foie qui met sa vie en jeu.",
+      "![Un chat qui attend près de sa gamelle](https://storage.googleapis.com/yucat-d8fb5.firebasestorage.app/articles/why-cats-cannot-be-vegetarian-b1.jpeg)\n*L'enthousiasme pour la viande n'est pas un caprice. C'est une exigence métabolique.*",
+      "---",
+      "## Et les compléments de synthèse ?",
+      "Il est chimiquement possible de synthétiser la taurine, le rétinol, l'acide arachidonique et la B12, et un petit nombre d'aliments végans pour chats font exactement cela. Il faut être honnête sur l'état des connaissances.",
+      "- La taurine de synthèse est réellement utilisée dans **tous** les aliments industriels pour chats, y compris ceux à base de viande, parce que la transformation en détruit une partie.\n- Les vrais problèmes sont ceux que personne ne mentionne : la digestibilité des protéines et l'équilibre en acides aminés, l'appétence, le pH urinaire, et des données à long terme qui n'existent pas encore à grande échelle.\n- Les carences rapportées chez des chats nourris végan concernaient historiquement des rations ménagères et une supplémentation insuffisante.",
+      "Si quelqu'un choisit cette voie pour des raisons éthiques, il doit s'agir d'un **aliment industriel complet et testé**, avec un suivi vétérinaire et des analyses sanguines régulières incluant le dosage de la taurine. La nourriture végétale maison pour chat n'est pas un projet sûr.",
+      "---",
+      "## Conséquences pratiques",
+      "- Cherchez dans la liste d'ingrédients des **protéines animales nommées en tête**\n- Méfiez-vous des aliments riches en glucides ; le chat dispose d'un outillage limité pour les traiter\n- Ne laissez pas un chat sans manger plus de 24 heures\n- N'appliquez jamais à un chat une philosophie alimentaire humaine ou canine",
+      "---",
+      "## En résumé",
+      "L'organisme du chat a délégué plusieurs fonctions essentielles aux animaux qu'il mange. On peut compléter sur les marges, mais la biologie de fond n'est pas négociable.",
+      "---",
+      "*Conseils généraux uniquement. Ne mettez jamais un chat à un régime végétal sans suivi vétérinaire et contrôles sanguins réguliers.*"
+    ]
+  }
+}
