@@ -258,6 +258,170 @@ class AppLocalizationsEs extends AppLocalizations {
   String get breedMixedUnknown => 'Mestizo / desconocida';
 
   @override
+  String get breedSearchHint => 'Buscar razas';
+
+  @override
+  String breedSearchNoResults(String query) {
+    return 'Ninguna raza coincide con «$query»';
+  }
+
+  @override
+  String get breedNameAbyssinian => 'Abisinio';
+
+  @override
+  String get breedNameAmericanBobtail => 'American Bobtail';
+
+  @override
+  String get breedNameAmericanCurl => 'American Curl';
+
+  @override
+  String get breedNameAmericanShorthair => 'American Shorthair';
+
+  @override
+  String get breedNameBalinese => 'Balinés';
+
+  @override
+  String get breedNameBengal => 'Bengalí';
+
+  @override
+  String get breedNameBirman => 'Sagrado de Birmania';
+
+  @override
+  String get breedNameBombay => 'Bombay';
+
+  @override
+  String get breedNameBritishShorthair => 'British Shorthair';
+
+  @override
+  String get breedNameBurmese => 'Burmés';
+
+  @override
+  String get breedNameBurmilla => 'Burmilla';
+
+  @override
+  String get breedNameChartreux => 'Cartujo';
+
+  @override
+  String get breedNameCornishRex => 'Cornish Rex';
+
+  @override
+  String get breedNameCymric => 'Cymric';
+
+  @override
+  String get breedNameDevonRex => 'Devon Rex';
+
+  @override
+  String get breedNameDomesticLonghair => 'Común de pelo largo';
+
+  @override
+  String get breedNameDomesticShorthair => 'Común de pelo corto';
+
+  @override
+  String get breedNameDonskoy => 'Donskoy';
+
+  @override
+  String get breedNameEgyptianMau => 'Mau egipcio';
+
+  @override
+  String get breedNameEuropeanShorthair => 'Europeo de pelo corto';
+
+  @override
+  String get breedNameExoticShorthair => 'Exotic Shorthair';
+
+  @override
+  String get breedNameHavanaBrown => 'Havana Brown';
+
+  @override
+  String get breedNameHimalayan => 'Himalayo';
+
+  @override
+  String get breedNameJapaneseBobtail => 'Bobtail japonés';
+
+  @override
+  String get breedNameKorat => 'Korat';
+
+  @override
+  String get breedNameLaPerm => 'LaPerm';
+
+  @override
+  String get breedNameMaineCoon => 'Maine Coon';
+
+  @override
+  String get breedNameManx => 'Manx';
+
+  @override
+  String get breedNameMunchkin => 'Munchkin';
+
+  @override
+  String get breedNameNebelung => 'Nebelung';
+
+  @override
+  String get breedNameNorwegianForestCat => 'Bosque de Noruega';
+
+  @override
+  String get breedNameOcicat => 'Ocicat';
+
+  @override
+  String get breedNameOrientalShorthair => 'Oriental de pelo corto';
+
+  @override
+  String get breedNamePersian => 'Persa';
+
+  @override
+  String get breedNamePeterbald => 'Peterbald';
+
+  @override
+  String get breedNameRagamuffin => 'Ragamuffin';
+
+  @override
+  String get breedNameRagdoll => 'Ragdoll';
+
+  @override
+  String get breedNameRussianBlue => 'Azul ruso';
+
+  @override
+  String get breedNameSavannah => 'Savannah';
+
+  @override
+  String get breedNameScottishFold => 'Scottish Fold';
+
+  @override
+  String get breedNameScottishStraight => 'Scottish Straight';
+
+  @override
+  String get breedNameSelkirkRex => 'Selkirk Rex';
+
+  @override
+  String get breedNameSiamese => 'Siamés';
+
+  @override
+  String get breedNameSiberian => 'Siberiano';
+
+  @override
+  String get breedNameSingapura => 'Singapura';
+
+  @override
+  String get breedNameSnowshoe => 'Snowshoe';
+
+  @override
+  String get breedNameSomali => 'Somalí';
+
+  @override
+  String get breedNameSphynx => 'Sphynx';
+
+  @override
+  String get breedNameTonkinese => 'Tonkinés';
+
+  @override
+  String get breedNameToyger => 'Toyger';
+
+  @override
+  String get breedNameTurkishAngora => 'Angora turco';
+
+  @override
+  String get breedNameTurkishVan => 'Van turco';
+
+  @override
   String get disclaimerTitle => 'Orientamos, no recetamos';
 
   @override

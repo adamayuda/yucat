@@ -288,7 +288,9 @@ class _RecapCard extends StatelessWidget {
       _SummaryCell(
         iconAsset: 'catwalk.svg',
         label: l10n.onboardingSuccessRowBreed,
-        value: summary.breed ?? notSet,
+        value: summary.breed == null
+            ? notSet
+            : catFormatBreed(summary.breed!, l10n),
         muted: summary.breed == null,
       ),
     ];

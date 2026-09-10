@@ -231,7 +231,7 @@ class _DetailsCard extends StatelessWidget {
     final tiles = <_TileSpec>[
       _TileSpec(
         l10n.catDetailBreedLabel,
-        cat.breed ?? notSet,
+        cat.breed == null ? notSet : catFormatBreed(cat.breed!, l10n),
         iconAsset: 'catwalk.svg',
       ),
       _TileSpec(

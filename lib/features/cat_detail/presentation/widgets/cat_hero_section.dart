@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/cat/presentation/utils/cat_labels.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/cat_avatar.dart';
@@ -41,7 +42,9 @@ class CatHeroSection extends StatelessWidget {
     final parts = <String>[];
     final ageGroup = _formatAgeGroup(cat.ageGroup, l10n);
     if (ageGroup != null) parts.add(ageGroup);
-    if (cat.breed != null && cat.breed!.isNotEmpty) parts.add(cat.breed!);
+    if (cat.breed != null && cat.breed!.isNotEmpty) {
+      parts.add(catFormatBreed(cat.breed!, l10n));
+    }
     if (parts.isEmpty) return null;
     return parts.join(' • ');
   }

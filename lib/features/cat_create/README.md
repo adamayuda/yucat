@@ -160,10 +160,23 @@ picked", not "the photo differs from the old one".
 
 ## 6. Odds and ends
 
-- **The breed list is 40 hard-coded strings** — `_breeds` in `create_cat_page.dart:70`, with
-  `'Other'` pinned first. Only **6** of them have specialised rules in
-  `cat_product_assessment.dart` (Maine Coon, Persian, Siamese, Sphynx, British Shorthair,
-  Bengal); a further ~19 are matched as archetypes. The rest are cosmetic.
+- **The breed list is 53 hard-coded strings** — `_breeds` in `create_cat_page.dart:70`,
+  with `'Other'` pinned first. They are **canonical English values, not display text**:
+  `BreedStep` renders them through `catFormatBreed` (`cat/presentation/utils/cat_labels.dart`)
+  against `breedName*` ARB keys, while Firestore, both rules engines and the Mixpanel
+  `cat_breed` property all keep the English string. Never write a localized label back.
+- **Every offered breed now scores.** 6 have named rules in `cat_product_assessment.dart`
+  (Maine Coon, Persian, Siamese, Sphynx, British Shorthair, Bengal); the other 46 are
+  matched as archetypes. ⚠️ `_breeds`, that engine's breed switch and the one in
+  `cat_diet_recommendations.dart` are three views of one set — neither switch has a
+  `default:`, so a breed missing from one scores neutral with no error. Add to all three.
+- **The breed step is the wizard's only searchable step.** It owns a `TextEditingController`
+  locally — the query must never reach `CatCreateBloc`, since every update event re-anchors
+  the Firestore id (§3) and `CatCreateModel` has no field for it. Matching is
+  diacritic-folded via `presentation/utils/search_fold.dart` so "norvegien" finds
+  "Norvégien", and the same fold drives the sort and the A–Z headers — a raw `compareTo`
+  files 'É' after 'Z'. Never `autofocus`: all 12 pages are eagerly built, so it would raise
+  the keyboard on step 0.
 - **Life-stage thresholds are duplicated.** `ageGroupFromMonths` (`cat_entity.dart:4`) returns
   lowercase `kitten` / `adult` / `senior` at `<12` / `<120` months;
   `CatSummary.fromModel:71` re-implements the identical thresholds with capitalised display

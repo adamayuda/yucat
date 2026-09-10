@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
+import 'package:yucat/features/cat/presentation/utils/cat_labels.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/utils/cat_product_assessment.dart';
 import 'package:yucat/features/product_detail/presentation/utils/per_cat_score.dart';
@@ -135,7 +136,9 @@ class CatVerdictCard extends StatelessWidget {
     final parts = <String>[];
     final age = _formatAgeGroup(cat.ageGroup, l10n);
     if (age != null) parts.add(age);
-    if (cat.breed != null && cat.breed!.isNotEmpty) parts.add(cat.breed!);
+    if (cat.breed != null && cat.breed!.isNotEmpty) {
+      parts.add(catFormatBreed(cat.breed!, l10n));
+    }
     if (parts.isEmpty) return null;
     return parts.join(' · ');
   }

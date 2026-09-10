@@ -67,9 +67,26 @@ class _CreateCatPageState extends State<CreateCatPage> {
 
   final ImagePicker _imagePicker = ImagePicker();
 
+  /// The breed **value** vocabulary — canonical English, never display text.
+  ///
+  /// ⚠️ These strings are persisted to Firestore and switched on by both rules
+  /// engines (`cat_product_assessment.dart`, `cat_diet_recommendations.dart`),
+  /// and they travel to Mixpanel as `cat_breed`. `BreedStep` renders them
+  /// through `catFormatBreed`, so localizing happens at the label, never here.
+  ///
+  /// `'Other'` is first but position is irrelevant — `BreedStep` filters it out
+  /// by value and pins it below the list as "Mixed / unknown".
+  ///
+  /// The coat patterns `'Tabby'` and `'Tuxedo'` were removed: a tabby can be a
+  /// Maine Coon, so offering them let a user pick a pattern *instead of* a
+  /// breed and silently lose the breed dimension in scoring. Coat has its own
+  /// step. Existing profiles holding them still render via `catFormatBreed`'s
+  /// raw-string fallback.
   static const List<String> _breeds = [
     'Other',
     'Abyssinian',
+    'American Bobtail',
+    'American Curl',
     'American Shorthair',
     'Balinese',
     'Bengal',
@@ -77,25 +94,37 @@ class _CreateCatPageState extends State<CreateCatPage> {
     'Bombay',
     'British Shorthair',
     'Burmese',
+    'Burmilla',
     'Chartreux',
     'Cornish Rex',
+    'Cymric',
     'Devon Rex',
     'Domestic Longhair',
     'Domestic Shorthair',
+    'Donskoy',
     'Egyptian Mau',
+    'European Shorthair',
     'Exotic Shorthair',
+    'Havana Brown',
     'Himalayan',
+    'Japanese Bobtail',
+    'Korat',
+    'LaPerm',
     'Maine Coon',
     'Manx',
+    'Munchkin',
+    'Nebelung',
     'Norwegian Forest Cat',
     'Ocicat',
     'Oriental Shorthair',
     'Persian',
+    'Peterbald',
     'Ragamuffin',
     'Ragdoll',
     'Russian Blue',
     'Savannah',
     'Scottish Fold',
+    'Scottish Straight',
     'Selkirk Rex',
     'Siamese',
     'Siberian',
@@ -103,11 +132,10 @@ class _CreateCatPageState extends State<CreateCatPage> {
     'Snowshoe',
     'Somali',
     'Sphynx',
-    'Tabby',
     'Tonkinese',
+    'Toyger',
     'Turkish Angora',
     'Turkish Van',
-    'Tuxedo',
   ];
 
   late CatCreateBloc _bloc;
@@ -192,6 +220,12 @@ class _CreateCatPageState extends State<CreateCatPage> {
   }
 
   void _goToPreviousStep(int currentStep) {
+    // Symmetric with _goToNextStep: never carry a raised keyboard into an
+    // adjacent step. Latent until the breed step gained a search field — it is
+    // the only input reachable by Back — and it also dismisses the keyboard
+    // before the pop transition on the _initialStep branch.
+    FocusScope.of(context).unfocus();
+
     if (currentStep > _initialStep) {
       _bloc.add(CatCreateStepChangedEvent(step: currentStep - 1));
     } else {

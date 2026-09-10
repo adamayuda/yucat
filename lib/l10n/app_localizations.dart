@@ -556,7 +556,7 @@ abstract class AppLocalizations {
   /// **'What breed is your cat?'**
   String get breedQuestion;
 
-  /// Leading text before the tappable 'Mixed / unknown' affordance
+  /// Caption above the tappable 'Mixed / unknown' option row; the trailing space is legacy and is trimmed at the call site
   ///
   /// In en, this message translates to:
   /// **'Don\'t know the breed? '**
@@ -567,6 +567,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mixed / unknown'**
   String get breedMixedUnknown;
+
+  /// Placeholder in the breed step's search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search breeds'**
+  String get breedSearchHint;
+
+  /// Replaces the A-Z breed list when the search matches nothing. The Mixed / unknown option stays visible below it, so this line needs no CTA of its own.
+  ///
+  /// In en, this message translates to:
+  /// **'No breed matches “{query}”'**
+  String breedSearchNoResults(String query);
+
+  /// No description provided for @breedNameAbyssinian.
+  ///
+  /// In en, this message translates to:
+  /// **'Abyssinian'**
+  String get breedNameAbyssinian;
+
+  /// No description provided for @breedNameAmericanBobtail.
+  ///
+  /// In en, this message translates to:
+  /// **'American Bobtail'**
+  String get breedNameAmericanBobtail;
+
+  /// No description provided for @breedNameAmericanCurl.
+  ///
+  /// In en, this message translates to:
+  /// **'American Curl'**
+  String get breedNameAmericanCurl;
+
+  /// No description provided for @breedNameAmericanShorthair.
+  ///
+  /// In en, this message translates to:
+  /// **'American Shorthair'**
+  String get breedNameAmericanShorthair;
+
+  /// No description provided for @breedNameBalinese.
+  ///
+  /// In en, this message translates to:
+  /// **'Balinese'**
+  String get breedNameBalinese;
+
+  /// No description provided for @breedNameBengal.
+  ///
+  /// In en, this message translates to:
+  /// **'Bengal'**
+  String get breedNameBengal;
+
+  /// No description provided for @breedNameBirman.
+  ///
+  /// In en, this message translates to:
+  /// **'Birman'**
+  String get breedNameBirman;
+
+  /// No description provided for @breedNameBombay.
+  ///
+  /// In en, this message translates to:
+  /// **'Bombay'**
+  String get breedNameBombay;
+
+  /// No description provided for @breedNameBritishShorthair.
+  ///
+  /// In en, this message translates to:
+  /// **'British Shorthair'**
+  String get breedNameBritishShorthair;
+
+  /// No description provided for @breedNameBurmese.
+  ///
+  /// In en, this message translates to:
+  /// **'Burmese'**
+  String get breedNameBurmese;
+
+  /// No description provided for @breedNameBurmilla.
+  ///
+  /// In en, this message translates to:
+  /// **'Burmilla'**
+  String get breedNameBurmilla;
+
+  /// No description provided for @breedNameChartreux.
+  ///
+  /// In en, this message translates to:
+  /// **'Chartreux'**
+  String get breedNameChartreux;
+
+  /// No description provided for @breedNameCornishRex.
+  ///
+  /// In en, this message translates to:
+  /// **'Cornish Rex'**
+  String get breedNameCornishRex;
+
+  /// No description provided for @breedNameCymric.
+  ///
+  /// In en, this message translates to:
+  /// **'Cymric'**
+  String get breedNameCymric;
+
+  /// No description provided for @breedNameDevonRex.
+  ///
+  /// In en, this message translates to:
+  /// **'Devon Rex'**
+  String get breedNameDevonRex;
+
+  /// No description provided for @breedNameDomesticLonghair.
+  ///
+  /// In en, this message translates to:
+  /// **'Domestic Longhair'**
+  String get breedNameDomesticLonghair;
+
+  /// No description provided for @breedNameDomesticShorthair.
+  ///
+  /// In en, this message translates to:
+  /// **'Domestic Shorthair'**
+  String get breedNameDomesticShorthair;
+
+  /// No description provided for @breedNameDonskoy.
+  ///
+  /// In en, this message translates to:
+  /// **'Donskoy'**
+  String get breedNameDonskoy;
+
+  /// No description provided for @breedNameEgyptianMau.
+  ///
+  /// In en, this message translates to:
+  /// **'Egyptian Mau'**
+  String get breedNameEgyptianMau;
+
+  /// No description provided for @breedNameEuropeanShorthair.
+  ///
+  /// In en, this message translates to:
+  /// **'European Shorthair'**
+  String get breedNameEuropeanShorthair;
+
+  /// No description provided for @breedNameExoticShorthair.
+  ///
+  /// In en, this message translates to:
+  /// **'Exotic Shorthair'**
+  String get breedNameExoticShorthair;
+
+  /// No description provided for @breedNameHavanaBrown.
+  ///
+  /// In en, this message translates to:
+  /// **'Havana Brown'**
+  String get breedNameHavanaBrown;
+
+  /// No description provided for @breedNameHimalayan.
+  ///
+  /// In en, this message translates to:
+  /// **'Himalayan'**
+  String get breedNameHimalayan;
+
+  /// No description provided for @breedNameJapaneseBobtail.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese Bobtail'**
+  String get breedNameJapaneseBobtail;
+
+  /// No description provided for @breedNameKorat.
+  ///
+  /// In en, this message translates to:
+  /// **'Korat'**
+  String get breedNameKorat;
+
+  /// No description provided for @breedNameLaPerm.
+  ///
+  /// In en, this message translates to:
+  /// **'LaPerm'**
+  String get breedNameLaPerm;
+
+  /// No description provided for @breedNameMaineCoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Maine Coon'**
+  String get breedNameMaineCoon;
+
+  /// No description provided for @breedNameManx.
+  ///
+  /// In en, this message translates to:
+  /// **'Manx'**
+  String get breedNameManx;
+
+  /// No description provided for @breedNameMunchkin.
+  ///
+  /// In en, this message translates to:
+  /// **'Munchkin'**
+  String get breedNameMunchkin;
+
+  /// No description provided for @breedNameNebelung.
+  ///
+  /// In en, this message translates to:
+  /// **'Nebelung'**
+  String get breedNameNebelung;
+
+  /// No description provided for @breedNameNorwegianForestCat.
+  ///
+  /// In en, this message translates to:
+  /// **'Norwegian Forest Cat'**
+  String get breedNameNorwegianForestCat;
+
+  /// No description provided for @breedNameOcicat.
+  ///
+  /// In en, this message translates to:
+  /// **'Ocicat'**
+  String get breedNameOcicat;
+
+  /// No description provided for @breedNameOrientalShorthair.
+  ///
+  /// In en, this message translates to:
+  /// **'Oriental Shorthair'**
+  String get breedNameOrientalShorthair;
+
+  /// No description provided for @breedNamePersian.
+  ///
+  /// In en, this message translates to:
+  /// **'Persian'**
+  String get breedNamePersian;
+
+  /// No description provided for @breedNamePeterbald.
+  ///
+  /// In en, this message translates to:
+  /// **'Peterbald'**
+  String get breedNamePeterbald;
+
+  /// No description provided for @breedNameRagamuffin.
+  ///
+  /// In en, this message translates to:
+  /// **'Ragamuffin'**
+  String get breedNameRagamuffin;
+
+  /// No description provided for @breedNameRagdoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Ragdoll'**
+  String get breedNameRagdoll;
+
+  /// No description provided for @breedNameRussianBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Russian Blue'**
+  String get breedNameRussianBlue;
+
+  /// No description provided for @breedNameSavannah.
+  ///
+  /// In en, this message translates to:
+  /// **'Savannah'**
+  String get breedNameSavannah;
+
+  /// No description provided for @breedNameScottishFold.
+  ///
+  /// In en, this message translates to:
+  /// **'Scottish Fold'**
+  String get breedNameScottishFold;
+
+  /// No description provided for @breedNameScottishStraight.
+  ///
+  /// In en, this message translates to:
+  /// **'Scottish Straight'**
+  String get breedNameScottishStraight;
+
+  /// No description provided for @breedNameSelkirkRex.
+  ///
+  /// In en, this message translates to:
+  /// **'Selkirk Rex'**
+  String get breedNameSelkirkRex;
+
+  /// No description provided for @breedNameSiamese.
+  ///
+  /// In en, this message translates to:
+  /// **'Siamese'**
+  String get breedNameSiamese;
+
+  /// No description provided for @breedNameSiberian.
+  ///
+  /// In en, this message translates to:
+  /// **'Siberian'**
+  String get breedNameSiberian;
+
+  /// No description provided for @breedNameSingapura.
+  ///
+  /// In en, this message translates to:
+  /// **'Singapura'**
+  String get breedNameSingapura;
+
+  /// No description provided for @breedNameSnowshoe.
+  ///
+  /// In en, this message translates to:
+  /// **'Snowshoe'**
+  String get breedNameSnowshoe;
+
+  /// No description provided for @breedNameSomali.
+  ///
+  /// In en, this message translates to:
+  /// **'Somali'**
+  String get breedNameSomali;
+
+  /// No description provided for @breedNameSphynx.
+  ///
+  /// In en, this message translates to:
+  /// **'Sphynx'**
+  String get breedNameSphynx;
+
+  /// No description provided for @breedNameTonkinese.
+  ///
+  /// In en, this message translates to:
+  /// **'Tonkinese'**
+  String get breedNameTonkinese;
+
+  /// No description provided for @breedNameToyger.
+  ///
+  /// In en, this message translates to:
+  /// **'Toyger'**
+  String get breedNameToyger;
+
+  /// No description provided for @breedNameTurkishAngora.
+  ///
+  /// In en, this message translates to:
+  /// **'Turkish Angora'**
+  String get breedNameTurkishAngora;
+
+  /// No description provided for @breedNameTurkishVan.
+  ///
+  /// In en, this message translates to:
+  /// **'Turkish Van'**
+  String get breedNameTurkishVan;
 
   /// No description provided for @disclaimerTitle.
   ///
@@ -1162,6 +1486,12 @@ abstract class AppLocalizations {
   /// **'what they can and can\'t eat.'**
   String get paywallFeatureFoodGuideBenefit;
 
+  /// No description provided for @paywallFeatureLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{title}: {benefit}'**
+  String paywallFeatureLine(String title, String benefit);
+
   /// No description provided for @paywallSuccessStoriesHeading.
   ///
   /// In en, this message translates to:
@@ -1486,12 +1816,6 @@ abstract class AppLocalizations {
   String get productDetailAddACat;
 
   /// No description provided for @productDetailForYourCats.
-  /// No description provided for @paywallFeatureLine.
-  ///
-  /// In en, this message translates to:
-  /// **'{title}: {benefit}'**
-  String paywallFeatureLine(String title, String benefit);
-
   ///
   /// In en, this message translates to:
   /// **'For your cats'**

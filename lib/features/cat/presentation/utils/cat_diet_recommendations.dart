@@ -206,6 +206,9 @@ List<DietRecommendation> recommendDiet(CatEntity cat, AppLocalizations l10n) {
     case 'siberian':
     case 'ragdoll':
     case 'savannah':
+    case 'ragamuffin':
+    case 'american bobtail':
+    case 'cymric':
       add(DietNutrient.protein, DietDirection.more, l10n.dietWhyBreedProtein,
           CatAssessmentDimension.breed, _wBreed);
       add(DietNutrient.omega3, DietDirection.more, l10n.dietWhyBreedOmega3,
@@ -214,6 +217,11 @@ List<DietRecommendation> recommendDiet(CatEntity cat, AppLocalizations l10n) {
     // --- Hairless / fine-coat ---
     case 'devon rex':
     case 'cornish rex':
+    case 'peterbald':
+    case 'donskoy':
+    case 'selkirk rex':
+    case 'laperm':
+    case 'american curl':
       add(DietNutrient.fat, DietDirection.more, l10n.dietWhyBreedFat,
           CatAssessmentDimension.breed, _wBreed);
       break;
@@ -231,6 +239,15 @@ List<DietRecommendation> recommendDiet(CatEntity cat, AppLocalizations l10n) {
     case 'oriental shorthair':
     case 'tonkinese':
     case 'balinese':
+    case 'siamese':
+    case 'egyptian mau':
+    case 'ocicat':
+    case 'singapura':
+    case 'korat':
+    case 'havana brown':
+    case 'toyger':
+    case 'japanese bobtail':
+    case 'munchkin':
       add(DietNutrient.protein, DietDirection.more, l10n.dietWhyBreedProtein,
           CatAssessmentDimension.breed, _wBreed);
       add(DietNutrient.digestibility, DietDirection.more,
@@ -240,6 +257,8 @@ List<DietRecommendation> recommendDiet(CatEntity cat, AppLocalizations l10n) {
     // --- Kidney-watch active ---
     case 'abyssinian':
     case 'somali':
+    case 'turkish angora':
+    case 'turkish van':
       add(DietNutrient.protein, DietDirection.more, l10n.dietWhyBreedProtein,
           CatAssessmentDimension.breed, _wBreed);
       add(DietNutrient.phosphorus, DietDirection.less,
@@ -249,6 +268,14 @@ List<DietRecommendation> recommendDiet(CatEntity cat, AppLocalizations l10n) {
     case 'russian blue':
     case 'bombay':
     case 'chartreux':
+    case 'american shorthair':
+    case 'domestic shorthair':
+    case 'domestic longhair':
+    case 'european shorthair':
+    case 'manx':
+    case 'nebelung':
+    case 'burmilla':
+    case 'snowshoe':
       add(DietNutrient.calories, DietDirection.less, l10n.dietWhyBreedCalories,
           CatAssessmentDimension.breed, _wBreed);
       break;
@@ -259,6 +286,7 @@ List<DietRecommendation> recommendDiet(CatEntity cat, AppLocalizations l10n) {
       break;
     // --- Joint / cartilage ---
     case 'scottish fold':
+    case 'scottish straight':
       add(DietNutrient.omega3, DietDirection.more, l10n.dietWhyBreedOmega3,
           CatAssessmentDimension.breed, _wBreed);
       break;

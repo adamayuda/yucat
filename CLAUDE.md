@@ -155,7 +155,7 @@ The core business logic is in `lib/features/product_detail/presentation/utils/ca
 - **Weight category** — underweight rewards higher kcal; overweight is *rewarded* for 280–320 kcal and penalised above 360 (obese above 330), and rewarded for fiber > 4 %
 - **Activity level** — low-activity cats penalised for kcal > 360; high-activity rewarded for kcal > 380 and protein > 35 %
 - **Neutered status** — neutered cats penalised for high kcal/fat; pregnant/lactating need protein > 35 %, fat > 20 %
-- **Breed-specific rules** — ~25 breeds: six named (Maine Coon, Persian, Siamese, Sphynx, British Shorthair, Bengal) plus ~19 more grouped into archetypes (large/muscular, hairless/fine-coat, brachycephalic/long-coat, lean/active, kidney-watch, obesity-prone, diabetes-prone, joint, coat)
+- **Breed-specific rules** — **all 52** breeds the picker offers: six named (Maine Coon, Persian, Siamese, Sphynx, British Shorthair, Bengal) plus the rest grouped into archetypes (large/muscular, hairless/fine-coat, brachycephalic/long-coat, lean/active, kidney-watch, obesity-prone, diabetes-prone, joint, coat). ⚠️ The picker's `_breeds` list, this switch and the one in `cat_diet_recommendations.dart` are **three views of one set** and must stay equal — there is no `default:` branch, so a breed missing from a switch scores neutral in silence. That drift is not hypothetical — it was found and fixed: 14 offered breeds had no rules at all, and `siamese` was in this engine but absent from the diet one entirely
 - **Health conditions** — 9: urinary, kidney, sensitive stomach, food allergy, skin allergy, diabetes, dental, hairball, heart condition
 
 **The mental model you can't get from skimming the file:**

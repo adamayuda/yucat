@@ -107,3 +107,77 @@ String catFormatHealthCondition(String condition, AppLocalizations l10n) {
     _ => catFormatSnakeCase(condition),
   };
 }
+
+/// Localized breed display name.
+///
+/// ⚠️ The argument stays the **canonical English** value persisted on the cat.
+/// `cat_product_assessment.dart` and `cat_diet_recommendations.dart` each switch
+/// on `breed.toLowerCase()` against English literals, Firestore stores that
+/// string, and Mixpanel carries it as `cat_breed` / `primary_cat_breed`. Only
+/// the rendering is localized — never write a localized label back to the model.
+///
+/// Unknown values fall through to the raw string rather than showing a key.
+/// That is what keeps older profiles holding the coat patterns `'Tabby'` and
+/// `'Tuxedo'` rendering after those left the picker. The fallback is the raw
+/// string and **not** [catFormatSnakeCase]: breeds are Title Case English, not
+/// snake_case keys like the other profile fields.
+String catFormatBreed(String breed, AppLocalizations l10n) {
+  return switch (breed.toLowerCase()) {
+    // Reuses the picker's existing "Mixed / unknown" copy rather than minting a
+    // second key, so a bare "Other" never reaches a screen.
+    'other' => l10n.breedMixedUnknown,
+    'abyssinian' => l10n.breedNameAbyssinian,
+    'american bobtail' => l10n.breedNameAmericanBobtail,
+    'american curl' => l10n.breedNameAmericanCurl,
+    'american shorthair' => l10n.breedNameAmericanShorthair,
+    'balinese' => l10n.breedNameBalinese,
+    'bengal' => l10n.breedNameBengal,
+    'birman' => l10n.breedNameBirman,
+    'bombay' => l10n.breedNameBombay,
+    'british shorthair' => l10n.breedNameBritishShorthair,
+    'burmese' => l10n.breedNameBurmese,
+    'burmilla' => l10n.breedNameBurmilla,
+    'chartreux' => l10n.breedNameChartreux,
+    'cornish rex' => l10n.breedNameCornishRex,
+    'cymric' => l10n.breedNameCymric,
+    'devon rex' => l10n.breedNameDevonRex,
+    'domestic longhair' => l10n.breedNameDomesticLonghair,
+    'domestic shorthair' => l10n.breedNameDomesticShorthair,
+    'donskoy' => l10n.breedNameDonskoy,
+    'egyptian mau' => l10n.breedNameEgyptianMau,
+    'european shorthair' => l10n.breedNameEuropeanShorthair,
+    'exotic shorthair' => l10n.breedNameExoticShorthair,
+    'havana brown' => l10n.breedNameHavanaBrown,
+    'himalayan' => l10n.breedNameHimalayan,
+    'japanese bobtail' => l10n.breedNameJapaneseBobtail,
+    'korat' => l10n.breedNameKorat,
+    'laperm' => l10n.breedNameLaPerm,
+    'maine coon' => l10n.breedNameMaineCoon,
+    'manx' => l10n.breedNameManx,
+    'munchkin' => l10n.breedNameMunchkin,
+    'nebelung' => l10n.breedNameNebelung,
+    'norwegian forest cat' => l10n.breedNameNorwegianForestCat,
+    'ocicat' => l10n.breedNameOcicat,
+    'oriental shorthair' => l10n.breedNameOrientalShorthair,
+    'persian' => l10n.breedNamePersian,
+    'peterbald' => l10n.breedNamePeterbald,
+    'ragamuffin' => l10n.breedNameRagamuffin,
+    'ragdoll' => l10n.breedNameRagdoll,
+    'russian blue' => l10n.breedNameRussianBlue,
+    'savannah' => l10n.breedNameSavannah,
+    'scottish fold' => l10n.breedNameScottishFold,
+    'scottish straight' => l10n.breedNameScottishStraight,
+    'selkirk rex' => l10n.breedNameSelkirkRex,
+    'siamese' => l10n.breedNameSiamese,
+    'siberian' => l10n.breedNameSiberian,
+    'singapura' => l10n.breedNameSingapura,
+    'snowshoe' => l10n.breedNameSnowshoe,
+    'somali' => l10n.breedNameSomali,
+    'sphynx' => l10n.breedNameSphynx,
+    'tonkinese' => l10n.breedNameTonkinese,
+    'toyger' => l10n.breedNameToyger,
+    'turkish angora' => l10n.breedNameTurkishAngora,
+    'turkish van' => l10n.breedNameTurkishVan,
+    _ => breed,
+  };
+}

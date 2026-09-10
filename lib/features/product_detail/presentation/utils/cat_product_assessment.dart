@@ -635,6 +635,9 @@ _DimensionResult _evaluateBreed(
     case 'siberian':
     case 'ragdoll':
     case 'savannah':
+    case 'ragamuffin':
+    case 'american bobtail':
+    case 'cymric':
       if (n.protein > _breedProteinHigh) {
         pros.add(_p(l10n.assessmentBreedHighProtein,
             CatAssessmentDimension.breed));
@@ -649,6 +652,11 @@ _DimensionResult _evaluateBreed(
     // --- Hairless / fine-coat: higher fat ---
     case 'devon rex':
     case 'cornish rex':
+    case 'peterbald':
+    case 'donskoy':
+    case 'selkirk rex':
+    case 'laperm':
+    case 'american curl':
       if (n.fat > _sphynxFatHigh) {
         pros.add(_p(l10n.assessmentBreedHighFat,
             CatAssessmentDimension.breed));
@@ -684,6 +692,14 @@ _DimensionResult _evaluateBreed(
     case 'oriental shorthair':
     case 'tonkinese':
     case 'balinese':
+    case 'egyptian mau':
+    case 'ocicat':
+    case 'singapura':
+    case 'korat':
+    case 'havana brown':
+    case 'toyger':
+    case 'japanese bobtail':
+    case 'munchkin':
       if (_containsAny(text, _kDigestible)) {
         pros.add(_p(l10n.assessmentBreedDigestible,
             CatAssessmentDimension.breed));
@@ -698,6 +714,8 @@ _DimensionResult _evaluateBreed(
     // --- Kidney-watch active: high protein but reward low phosphorus ---
     case 'abyssinian':
     case 'somali':
+    case 'turkish angora':
+    case 'turkish van':
       if (n.protein > _breedProteinHigh) {
         pros.add(_p(l10n.assessmentBreedHighProtein,
             CatAssessmentDimension.breed));
@@ -719,6 +737,14 @@ _DimensionResult _evaluateBreed(
     case 'russian blue':
     case 'bombay':
     case 'chartreux':
+    case 'american shorthair':
+    case 'domestic shorthair':
+    case 'domestic longhair':
+    case 'european shorthair':
+    case 'manx':
+    case 'nebelung':
+    case 'burmilla':
+    case 'snowshoe':
       if (n.calories > _britishCaloriesHigh) {
         cons.add(_p(l10n.assessmentBreedHighCalories,
             CatAssessmentDimension.breed));
@@ -740,6 +766,7 @@ _DimensionResult _evaluateBreed(
       break;
     // --- Joint / cartilage: joint support + omega-3 ---
     case 'scottish fold':
+    case 'scottish straight':
       if (_containsAny(text, _kJointSupport)) {
         pros.add(_p(l10n.assessmentBreedJointSupport,
             CatAssessmentDimension.breed));
