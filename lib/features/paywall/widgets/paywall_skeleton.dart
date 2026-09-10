@@ -3,7 +3,7 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/presentation/components/ds_shimmer.dart';
 
 /// Skeleton for the paywall load — mirrors `PaywallLoadedWidget` (full-bleed
-/// hero, the 2×3 value-prop card grid, laurel stats, fixed CTA) on the same white
+/// hero, the four value-prop rows, laurel stats, fixed CTA) on the same white
 /// surface so there's no color flash when offerings resolve. The white
 /// background paints immediately; only the bones are deferred.
 class PaywallSkeleton extends StatelessWidget {
@@ -42,28 +42,27 @@ class PaywallSkeleton extends StatelessWidget {
                           radius: DSRadii.sm,
                         ),
                         const SizedBox(height: DSDimens.size3xl),
-                        // Value props: a 2-column, 3-row card grid.
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            const gap = DSDimens.sizeS;
-                            final cardWidth =
-                                (constraints.maxWidth - gap) / 2;
-                            return Wrap(
-                              spacing: gap,
-                              runSpacing: gap,
-                              children: [
-                                for (var i = 0; i < 6; i++)
-                                  SizedBox(
-                                    width: cardWidth,
-                                    child: const ShimmerBone(
-                                      height: 148,
-                                      radius: DSRadii.lg,
-                                    ),
-                                  ),
-                              ],
-                            );
-                          },
-                        ),
+                        // Value props: four single-column rows, each an icon
+                        // slot beside two lines of text.
+                        for (var i = 0; i < 4; i++) ...[
+                          if (i > 0) const SizedBox(height: DSDimens.sizeL),
+                          Row(
+                            children: const [
+                              ShimmerBone(
+                                width: 48,
+                                height: 48,
+                                radius: DSRadii.lg,
+                              ),
+                              SizedBox(width: DSDimens.sizeS),
+                              Expanded(
+                                child: ShimmerBone(
+                                  height: 44,
+                                  radius: DSRadii.sm,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                         const SizedBox(height: DSDimens.size3xl),
                         // Laurel stats.
                         Row(

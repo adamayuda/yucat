@@ -168,18 +168,25 @@
   "paywallPlusBadge": "Plus",
   "paywallBadgeFreeTrial": "{days} TAGE GRATIS",
   "paywallEverythingYouGet": "Alles, was du bekommst",
-  "paywallFeaturePersonalizedVerdictsTitle": "Personalisierte Urteile",
-  "paywallFeaturePersonalizedVerdictsBenefit": "Nach Alter und Gesundheit",
   "paywallFeatureUnlimitedScansTitle": "Unbegrenzte Scans",
-  "paywallFeatureUnlimitedScansBenefit": "Kein Tageslimit",
-  "paywallFeatureMultiCatTitle": "Profile für mehrere Katzen",
-  "paywallFeatureMultiCatBenefit": "Ein Profil pro Katze",
-  "paywallFeatureRecipesTitle": "Alle Rezepte",
-  "paywallFeatureRecipesBenefit": "Passend zu ihrem Profil",
-  "paywallFeatureArticlesTitle": "Alle Artikel",
-  "paywallFeatureArticlesBenefit": "Ernährung, Gesundheit, Verhalten",
-  "paywallFeatureFoodGuideTitle": "Der Futter-Guide",
-  "paywallFeatureFoodGuideBenefit": "Was sie fressen darf und was nicht",
+  "paywallFeatureUnlimitedScansBenefit": "kein Tageslimit.",
+  "paywallFeaturePersonalizedVerdictsTitle": "Personalisierte Urteile",
+  "paywallFeaturePersonalizedVerdictsBenefit": "nach Alter, Gewicht und Gesundheit.",
+  "paywallFeatureRecipesArticlesTitle": "Hausgemachte Rezepte und Artikel",
+  "paywallFeatureRecipesArticlesBenefit": "um sie jeden Tag besser zu füttern.",
+  "paywallFeatureFoodGuideTitle": "Der komplette Futter-Guide",
+  "paywallFeatureFoodGuideBenefit": "was sie fressen darf und was nicht.",
+  "paywallFeatureLine": "{title}: {benefit}",
+  "@paywallFeatureLine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "benefit": {
+        "type": "String"
+      }
+    }
+  },
   "paywallSuccessStoriesHeading": "Erfolgsgeschichten\nvon Katzeneltern",
   "paywallTestimonial1Quote": "Ich habe jahrelang geraten. YuCat hat an einem Nachmittag ein Seniorenfutter gefunden, das Lulus Magen schont.",
   "paywallTestimonial1Name": "Sophie",

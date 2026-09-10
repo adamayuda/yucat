@@ -1114,18 +1114,6 @@ abstract class AppLocalizations {
   /// **'Everything you get'**
   String get paywallEverythingYouGet;
 
-  /// No description provided for @paywallFeaturePersonalizedVerdictsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Personalized verdicts'**
-  String get paywallFeaturePersonalizedVerdictsTitle;
-
-  /// No description provided for @paywallFeaturePersonalizedVerdictsBenefit.
-  ///
-  /// In en, this message translates to:
-  /// **'Based on their age and health'**
-  String get paywallFeaturePersonalizedVerdictsBenefit;
-
   /// No description provided for @paywallFeatureUnlimitedScansTitle.
   ///
   /// In en, this message translates to:
@@ -1135,55 +1123,43 @@ abstract class AppLocalizations {
   /// No description provided for @paywallFeatureUnlimitedScansBenefit.
   ///
   /// In en, this message translates to:
-  /// **'No daily limit'**
+  /// **'no daily limit.'**
   String get paywallFeatureUnlimitedScansBenefit;
 
-  /// No description provided for @paywallFeatureMultiCatTitle.
+  /// No description provided for @paywallFeaturePersonalizedVerdictsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Multi-cat profiles'**
-  String get paywallFeatureMultiCatTitle;
+  /// **'Personalized verdicts'**
+  String get paywallFeaturePersonalizedVerdictsTitle;
 
-  /// No description provided for @paywallFeatureMultiCatBenefit.
+  /// No description provided for @paywallFeaturePersonalizedVerdictsBenefit.
   ///
   /// In en, this message translates to:
-  /// **'One profile per cat'**
-  String get paywallFeatureMultiCatBenefit;
+  /// **'based on their age, weight and health.'**
+  String get paywallFeaturePersonalizedVerdictsBenefit;
 
-  /// No description provided for @paywallFeatureRecipesTitle.
+  /// No description provided for @paywallFeatureRecipesArticlesTitle.
   ///
   /// In en, this message translates to:
-  /// **'All the recipes'**
-  String get paywallFeatureRecipesTitle;
+  /// **'Home recipes and articles'**
+  String get paywallFeatureRecipesArticlesTitle;
 
-  /// No description provided for @paywallFeatureRecipesBenefit.
+  /// No description provided for @paywallFeatureRecipesArticlesBenefit.
   ///
   /// In en, this message translates to:
-  /// **'Filtered for their profile'**
-  String get paywallFeatureRecipesBenefit;
-
-  /// No description provided for @paywallFeatureArticlesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'All the articles'**
-  String get paywallFeatureArticlesTitle;
-
-  /// No description provided for @paywallFeatureArticlesBenefit.
-  ///
-  /// In en, this message translates to:
-  /// **'Nutrition, health, behaviour'**
-  String get paywallFeatureArticlesBenefit;
+  /// **'to feed them better every day.'**
+  String get paywallFeatureRecipesArticlesBenefit;
 
   /// No description provided for @paywallFeatureFoodGuideTitle.
   ///
   /// In en, this message translates to:
-  /// **'The food guide'**
+  /// **'The complete food guide'**
   String get paywallFeatureFoodGuideTitle;
 
   /// No description provided for @paywallFeatureFoodGuideBenefit.
   ///
   /// In en, this message translates to:
-  /// **'What they can and can\'t eat'**
+  /// **'what they can and can\'t eat.'**
   String get paywallFeatureFoodGuideBenefit;
 
   /// No description provided for @paywallSuccessStoriesHeading.
@@ -1510,6 +1486,12 @@ abstract class AppLocalizations {
   String get productDetailAddACat;
 
   /// No description provided for @productDetailForYourCats.
+  /// No description provided for @paywallFeatureLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{title}: {benefit}'**
+  String paywallFeatureLine(String title, String benefit);
+
   ///
   /// In en, this message translates to:
   /// **'For your cats'**

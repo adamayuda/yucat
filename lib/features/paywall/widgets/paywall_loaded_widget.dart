@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yucat/config/themes/theme.dart';
@@ -185,12 +186,34 @@ class _Hero extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final width = MediaQuery.sizeOf(context).width;
     final topInset = MediaQuery.viewPaddingOf(context).top;
-    // cat-cloud.svg is 391×378; rendered at full width its white cloud base
+    // cloud.svg is 391×378; rendered at full width its white cloud base
     // lands on the white content, hiding the gradient's bottom edge.
     final svgHeight = width * (378 / 391);
     final fullHeight = topInset + svgHeight;
     // Clip the empty white cloud below the cat so the branding sits close.
     final visibleHeight = topInset + svgHeight * 0.66;
+
+    // The animated cat is laid over `cloud.svg` — the original illustration
+    // with the cat cut out of it — rather than sized by eye. These ratios are
+    // measured from the two assets so it lands where the drawn cat was: in
+    // `cat-cloud.svg` the cat stood 212 tall and ended at y230 of the 378-tall
+    // viewBox, centred on x203.5 of 391; in the Lottie the artwork is 317 of
+    // the 395-tall canvas, ends at y384, and is centred on x159 of 304.
+    const catHeightInSvg = 212 / 378;
+    const catBottomInSvg = 230 / 378;
+    const catCentreInSvg = 203.5 / 391;
+    const catHeightInLottie = 317 / 395;
+    const catBottomInLottie = 384 / 395;
+    const catCentreInLottie = 159 / 304;
+    final catHeight = svgHeight * catHeightInSvg / catHeightInLottie;
+    // Derived from the height, so the canvas aspect is preserved exactly and
+    // BoxFit.fill cannot distort the drawing.
+    final catWidth = catHeight * (304 / 395);
+    final catTop = topInset +
+        svgHeight * catBottomInSvg -
+        catHeight * catBottomInLottie +
+        DSDimens.sizeL;
+    final catLeft = width * catCentreInSvg - catWidth * catCentreInLottie;
     return Column(
       children: [
         // Full-bleed cat-on-cloud hero (the ListView has no horizontal
@@ -219,14 +242,34 @@ class _Hero extends StatelessWidget {
                   const _HeroStar(size: 38, alignment: Alignment(0.8, -0.7)),
                   const _HeroStar(size: 22, alignment: Alignment(0.86, -0.05)),
                   const _HeroStar(size: 26, alignment: Alignment(-0.88, -0.1)),
-                  // Cat-on-cloud, pushed below the status bar.
+                  // The cloud, pushed below the status bar. Drawn before the
+                  // cat for the same reason the original illustration did: the
+                  // cat sits in front of it.
                   Positioned(
                     top: topInset,
                     left: 0,
                     right: 0,
                     child: SvgPicture.asset(
-                      'assets/images/cat-cloud.svg',
+                      'assets/images/cloud.svg',
                       width: width,
+                    ),
+                  ),
+                  // ⚠️ `frameRate: FrameRate.composition` is load-bearing, as
+                  // on `HomeMissionCard`: this loops forever near the top of a
+                  // `ListView`, so it keeps ticking inside the cache extent
+                  // once scrolled off, and the default would repaint at the
+                  // device refresh rate rather than the authored 30 fps.
+                  Positioned(
+                    top: catTop,
+                    left: catLeft,
+                    width: catWidth,
+                    height: catHeight,
+                    child: ExcludeSemantics(
+                      child: Lottie.asset(
+                        'assets/images/cat-voltige.json',
+                        fit: BoxFit.fill,
+                        frameRate: FrameRate.composition,
+                      ),
                     ),
                   ),
                   // Close chip — inside the hero so it scrolls away. Hidden

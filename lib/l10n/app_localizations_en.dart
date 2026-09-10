@@ -552,41 +552,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallEverythingYouGet => 'Everything you get';
 
   @override
+  String get paywallFeatureUnlimitedScansTitle => 'Unlimited scans';
+
+  @override
+  String get paywallFeatureUnlimitedScansBenefit => 'no daily limit.';
+
+  @override
   String get paywallFeaturePersonalizedVerdictsTitle => 'Personalized verdicts';
 
   @override
   String get paywallFeaturePersonalizedVerdictsBenefit =>
-      'Based on their age and health';
+      'based on their age, weight and health.';
 
   @override
-  String get paywallFeatureUnlimitedScansTitle => 'Unlimited scans';
+  String get paywallFeatureRecipesArticlesTitle => 'Home recipes and articles';
 
   @override
-  String get paywallFeatureUnlimitedScansBenefit => 'No daily limit';
+  String get paywallFeatureRecipesArticlesBenefit =>
+      'to feed them better every day.';
 
   @override
-  String get paywallFeatureMultiCatTitle => 'Multi-cat profiles';
+  String get paywallFeatureFoodGuideTitle => 'The complete food guide';
 
   @override
-  String get paywallFeatureMultiCatBenefit => 'One profile per cat';
+  String get paywallFeatureFoodGuideBenefit => 'what they can and can\'t eat.';
 
   @override
-  String get paywallFeatureRecipesTitle => 'All the recipes';
-
-  @override
-  String get paywallFeatureRecipesBenefit => 'Filtered for their profile';
-
-  @override
-  String get paywallFeatureArticlesTitle => 'All the articles';
-
-  @override
-  String get paywallFeatureArticlesBenefit => 'Nutrition, health, behaviour';
-
-  @override
-  String get paywallFeatureFoodGuideTitle => 'The food guide';
-
-  @override
-  String get paywallFeatureFoodGuideBenefit => 'What they can and can\'t eat';
+  String paywallFeatureLine(String title, String benefit) {
+    return '$title: $benefit';
+  }
 
   @override
   String get paywallSuccessStoriesHeading =>

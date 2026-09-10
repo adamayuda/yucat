@@ -89,9 +89,9 @@ lib/features/paywall/
 │   ├── trial_info.dart            cross-platform trial detection  ← the subtle bit
 │   └── paywall_format.dart        price/period/CTA string helpers
 └── widgets/
-    ├── paywall_loaded_widget.dart hero, value props, CTA, disclosures, legal links
+    ├── paywall_loaded_widget.dart hero, value props, cat animation, CTA, disclosures
     ├── paywall_package_row.dart   the plan card — **not rendered** (see §11)
-    ├── paywall_value_props.dart   6 feature cards in a 2×3 grid
+    ├── paywall_value_props.dart   4 feature rows, icon + one sentence
     ├── paywall_testimonials.dart  carousel (placeholder testimonials)
     ├── paywall_skeleton.dart      shimmer while offerings load
     └── paywall_error_widget.dart  fatal load error + Try again
@@ -106,39 +106,68 @@ Related, outside the feature:
 | `lib/main.dart` | `Purchases.configure`, app-level `BlocProvider(PaywallBloc)` |
 | ~~`test/features/paywall/trial_info_test.dart`~~ | **Removed.** There is no `test/` directory in the repo — see §9 |
 
-### The value-prop grid
+### The value-prop list
 
-`paywall_value_props.dart` renders **six cards as three `IntrinsicHeight` rows of two**. Not a
-`Wrap` and not a `GridView`: a `Wrap` lets each child keep its own height, so a two-line benefit
-beside a one-line one leaves the pair visibly ragged, and a `GridView`'s fixed `childAspectRatio`
-would clip the longer German and French strings. `IntrinsicHeight` + `CrossAxisAlignment.stretch`
-sizes both cards in a row to the taller one, with no fixed height anywhere. Two media treatments:
+`paywall_value_props.dart` renders **four single-column rows** — a tinted icon slot beside one
+sentence of text. It replaced a six-card, two-column `IntrinsicHeight` grid in YUC-27: with the
+recipes and articles cards merged and multi-cat dropped, four items no longer justified a grid,
+and a single column lets each benefit be a full sentence instead of a clipped fragment.
 
-| Card | Media |
-|---|---|
-| Unlimited scans | `camera.svg` on `tintSky` |
-| Personalized verdicts | `Health.svg` on `tintMint` |
-| All the recipes | `paywall-recipe-{1,2}.jpg` |
-| All the articles | `paywall-article-{1,2}.jpg` |
-| The food guide | `paywall-guide-{1,2}.jpg` |
-| Multi-cat profiles | `cat-paw.svg` on `tintSand` |
+| Row | Icon | Tint |
+|---|---|---|
+| Unlimited scans | `camera.svg` | `tintSky` |
+| Personalized verdicts | `Health.svg` | `tintCoral` |
+| Home recipes and articles | `Cake.svg` | `tintSand` |
+| The complete food guide | `apple.svg` | `tintLavender` |
 
-⚠️ **The six photos are bundled assets, not network images** — 168 px downscaled copies of the
-Storage originals under `recipes/`, `articles/` and `foodGuide/`, living in `assets/images/`
-(~72 KB total). The paywall makes **zero** network image requests and must render instantly, so
-don't "fix" this by pointing the cards at `imageUrl` from Firestore. The trade-off is that a
-re-shot recipe photo won't propagate here — re-download and re-commit when that happens.
+⚠️ **The title and the benefit are composed through `paywallFeatureLine`, not concatenated in
+code.** Each row reads as one sentence — "**Unlimited scans**: no daily limit." — and French puts
+a space before the colon (`{title} : {benefit}`) where the other five locales do not. The widget
+then bolds the title by locating it inside the composed string, the same trick `_Hero` uses for
+`paywallHeroHeadline` / `paywallHeroHighlight`, so a locale that moves the title within the
+pattern still bolds the right words. Benefit strings are lowercase and end in a period because
+they are the continuation of the clause, not standalone labels.
 
-The cards are white-on-white with **no border** — `DSShadows.e2` is the only thing separating
-them from the page, which is why they use e2 rather than the e1 `_TestimonialCard` uses.
+⚠️ **`paywall_skeleton.dart` mirrors this list** (four icon-plus-text row bones). Change the row
+count or shape and the skeleton drifts — it already carried a stale plan-card bone once, and a
+stale 2×3 card grid after that.
 
-⚠️ **`paywall_skeleton.dart` mirrors this grid** (six card bones in a 2-column `Wrap`; a fixed
-bone height is fine there since there's no text to size to). Change the card count or shape and
-the skeleton drifts — it already carried a stale plan-card bone once.
+The six bundled `paywall-{recipe,article,guide}-{1,2}.jpg` photos that the old grid used as
+overlapping thumbnails were **deleted with it** — nothing references them now. If a photo
+treatment ever comes back, pull them from git history rather than re-downscaling the Storage
+originals.
 
-The three benefits this replaced — **ingredient scanner**, **reformulation alerts** and
-**saved foods & history** — were dropped along with their ARB keys. Reformulation alerts in
+The three benefits an earlier revision replaced — **ingredient scanner**, **reformulation alerts**
+and **saved foods & history** — were dropped along with their ARB keys. Reformulation alerts in
 particular described a feature the app has never shipped.
+
+### The cat animation
+
+The hero cat is `cat-voltige.json` (304×395, 30 fps, 90 frames), added in YUC-27. It replaced the
+cat that used to be drawn into `cat-cloud.svg`.
+
+⚠️ **The cloud had to be split out of that illustration first.** `cat-cloud.svg` was a *single
+closed path* whose outline traced the cat's white sticker edge, the cloud puffs and the white fill
+below, all in one loop — the cat was not a separable group. `cloud.svg` is that path with the two
+cat-outline runs (its first ten and last nine commands) replaced by a straight line across the
+top, leaving the cloud and the white fill. That white fill is load-bearing:
+`DSGradients.paywallHero` fades blue into blue, so the cloud is the only thing carrying the
+gradient into the white content below it. The straight top edge sits behind the cat and is never
+seen.
+
+⚠️ **The Lottie is positioned from measurements, not by eye.** Six ratios in `_Hero` map the
+animation onto the space the drawn cat occupied — in the illustration the cat stood 212 tall,
+ended at y230 of the 378-tall viewBox and was centred on x203.5 of 391; in the Lottie the artwork
+is 317 of the 395-tall canvas, ends at y384 and is centred on x159 of 304. Width is derived from
+height through the canvas aspect, so `BoxFit.fill` cannot distort it. Re-export the animation with
+different padding and those ratios need re-measuring, not nudging.
+
+⚠️ **`frameRate: FrameRate.composition` is load-bearing**, exactly as on `HomeMissionCard`: this
+loops forever near the top of a `ListView`, so it keeps ticking inside the cache extent once
+scrolled off, and the default repaints at the device refresh rate rather than the authored 30 fps.
+
+`cat-cloud.svg` is kept in `assets/images/` as the provenance for `cloud.svg` and as the revert
+path, but nothing renders it any more.
 
 **Bloc lifetime gotcha:** `PaywallBloc` is registered as a *factory* in
 `service_locator.dart`, but `main.dart:140` wraps the app in a single

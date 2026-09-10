@@ -562,43 +562,38 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paywallEverythingYouGet => 'Todo lo que obtienes';
 
   @override
+  String get paywallFeatureUnlimitedScansTitle => 'Escaneos ilimitados';
+
+  @override
+  String get paywallFeatureUnlimitedScansBenefit => 'sin límite diario.';
+
+  @override
   String get paywallFeaturePersonalizedVerdictsTitle =>
       'Veredictos personalizados';
 
   @override
   String get paywallFeaturePersonalizedVerdictsBenefit =>
-      'Según su edad y su salud';
+      'según su edad, su peso y su salud.';
 
   @override
-  String get paywallFeatureUnlimitedScansTitle => 'Escaneos ilimitados';
+  String get paywallFeatureRecipesArticlesTitle =>
+      'Recetas caseras y artículos';
 
   @override
-  String get paywallFeatureUnlimitedScansBenefit => 'Sin límite diario';
+  String get paywallFeatureRecipesArticlesBenefit =>
+      'para alimentarlo mejor cada día.';
 
   @override
-  String get paywallFeatureMultiCatTitle => 'Perfiles para varios gatos';
+  String get paywallFeatureFoodGuideTitle => 'La guía de alimentos completa';
 
   @override
-  String get paywallFeatureMultiCatBenefit => 'Un perfil por gato';
+  String get paywallFeatureFoodGuideBenefit =>
+      'lo que puede comer y lo que no.';
 
   @override
-  String get paywallFeatureRecipesTitle => 'Todas las recetas';
-
-  @override
-  String get paywallFeatureRecipesBenefit => 'Filtradas para su perfil';
-
-  @override
-  String get paywallFeatureArticlesTitle => 'Todos los artículos';
-
-  @override
-  String get paywallFeatureArticlesBenefit =>
-      'Nutrición, salud, comportamiento';
-
-  @override
-  String get paywallFeatureFoodGuideTitle => 'La guía de alimentos';
-
-  @override
-  String get paywallFeatureFoodGuideBenefit => 'Lo que puede comer y lo que no';
+  String paywallFeatureLine(String title, String benefit) {
+    return '$title: $benefit';
+  }
 
   @override
   String get paywallSuccessStoriesHeading =>

@@ -168,18 +168,25 @@
   "paywallPlusBadge": "Plus",
   "paywallBadgeFreeTrial": "{days} NAP INGYEN",
   "paywallEverythingYouGet": "Mindent megkapsz",
-  "paywallFeaturePersonalizedVerdictsTitle": "Személyre szabott értékelések",
-  "paywallFeaturePersonalizedVerdictsBenefit": "Kora és egészsége szerint",
   "paywallFeatureUnlimitedScansTitle": "Korlátlan szkennelés",
-  "paywallFeatureUnlimitedScansBenefit": "Nincs napi limit",
-  "paywallFeatureMultiCatTitle": "Több macska profilja",
-  "paywallFeatureMultiCatBenefit": "Macskánként egy profil",
-  "paywallFeatureRecipesTitle": "Az összes recept",
-  "paywallFeatureRecipesBenefit": "A profiljára szűrve",
-  "paywallFeatureArticlesTitle": "Az összes cikk",
-  "paywallFeatureArticlesBenefit": "Táplálás, egészség, viselkedés",
-  "paywallFeatureFoodGuideTitle": "Az élelmiszer-útmutató",
-  "paywallFeatureFoodGuideBenefit": "Mit ehet és mit nem",
+  "paywallFeatureUnlimitedScansBenefit": "nincs napi limit.",
+  "paywallFeaturePersonalizedVerdictsTitle": "Személyre szabott értékelések",
+  "paywallFeaturePersonalizedVerdictsBenefit": "kora, súlya és egészsége szerint.",
+  "paywallFeatureRecipesArticlesTitle": "Házi receptek és cikkek",
+  "paywallFeatureRecipesArticlesBenefit": "hogy minden nap jobban etethesd.",
+  "paywallFeatureFoodGuideTitle": "A teljes élelmiszer-útmutató",
+  "paywallFeatureFoodGuideBenefit": "mit ehet és mit nem.",
+  "paywallFeatureLine": "{title}: {benefit}",
+  "@paywallFeatureLine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "benefit": {
+        "type": "String"
+      }
+    }
+  },
   "paywallSuccessStoriesHeading": "Sikertörténetek\nmacskaszülőktől",
   "paywallTestimonial1Quote": "Évekig csak találgattam. A YuCat egyetlen délután leszűkítette azokat az idős macskaeledel-opciókat, amelyek kímélők Lulu gyomrával.",
   "paywallTestimonial1Name": "Sophie",

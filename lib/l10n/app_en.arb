@@ -293,18 +293,25 @@
     }
   },
   "paywallEverythingYouGet": "Everything you get",
-  "paywallFeaturePersonalizedVerdictsTitle": "Personalized verdicts",
-  "paywallFeaturePersonalizedVerdictsBenefit": "Based on their age and health",
   "paywallFeatureUnlimitedScansTitle": "Unlimited scans",
-  "paywallFeatureUnlimitedScansBenefit": "No daily limit",
-  "paywallFeatureMultiCatTitle": "Multi-cat profiles",
-  "paywallFeatureMultiCatBenefit": "One profile per cat",
-  "paywallFeatureRecipesTitle": "All the recipes",
-  "paywallFeatureRecipesBenefit": "Filtered for their profile",
-  "paywallFeatureArticlesTitle": "All the articles",
-  "paywallFeatureArticlesBenefit": "Nutrition, health, behaviour",
-  "paywallFeatureFoodGuideTitle": "The food guide",
-  "paywallFeatureFoodGuideBenefit": "What they can and can't eat",
+  "paywallFeatureUnlimitedScansBenefit": "no daily limit.",
+  "paywallFeaturePersonalizedVerdictsTitle": "Personalized verdicts",
+  "paywallFeaturePersonalizedVerdictsBenefit": "based on their age, weight and health.",
+  "paywallFeatureRecipesArticlesTitle": "Home recipes and articles",
+  "paywallFeatureRecipesArticlesBenefit": "to feed them better every day.",
+  "paywallFeatureFoodGuideTitle": "The complete food guide",
+  "paywallFeatureFoodGuideBenefit": "what they can and can't eat.",
+  "paywallFeatureLine": "{title}: {benefit}",
+  "@paywallFeatureLine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "benefit": {
+        "type": "String"
+      }
+    }
+  },
   "paywallSuccessStoriesHeading": "Success stories\nfrom cat parents",
   "paywallTestimonial1Quote": "I'd been guessing for years. YuCat narrowed down a senior food that's gentle on Lulu's stomach in one afternoon.",
   "paywallTestimonial1Name": "Sophie",

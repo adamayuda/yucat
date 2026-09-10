@@ -168,18 +168,25 @@
   "paywallPlusBadge": "Plus",
   "paywallBadgeFreeTrial": "{days} DÍAS GRATIS",
   "paywallEverythingYouGet": "Todo lo que obtienes",
-  "paywallFeaturePersonalizedVerdictsTitle": "Veredictos personalizados",
-  "paywallFeaturePersonalizedVerdictsBenefit": "Según su edad y su salud",
   "paywallFeatureUnlimitedScansTitle": "Escaneos ilimitados",
-  "paywallFeatureUnlimitedScansBenefit": "Sin límite diario",
-  "paywallFeatureMultiCatTitle": "Perfiles para varios gatos",
-  "paywallFeatureMultiCatBenefit": "Un perfil por gato",
-  "paywallFeatureRecipesTitle": "Todas las recetas",
-  "paywallFeatureRecipesBenefit": "Filtradas para su perfil",
-  "paywallFeatureArticlesTitle": "Todos los artículos",
-  "paywallFeatureArticlesBenefit": "Nutrición, salud, comportamiento",
-  "paywallFeatureFoodGuideTitle": "La guía de alimentos",
-  "paywallFeatureFoodGuideBenefit": "Lo que puede comer y lo que no",
+  "paywallFeatureUnlimitedScansBenefit": "sin límite diario.",
+  "paywallFeaturePersonalizedVerdictsTitle": "Veredictos personalizados",
+  "paywallFeaturePersonalizedVerdictsBenefit": "según su edad, su peso y su salud.",
+  "paywallFeatureRecipesArticlesTitle": "Recetas caseras y artículos",
+  "paywallFeatureRecipesArticlesBenefit": "para alimentarlo mejor cada día.",
+  "paywallFeatureFoodGuideTitle": "La guía de alimentos completa",
+  "paywallFeatureFoodGuideBenefit": "lo que puede comer y lo que no.",
+  "paywallFeatureLine": "{title}: {benefit}",
+  "@paywallFeatureLine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "benefit": {
+        "type": "String"
+      }
+    }
+  },
   "paywallSuccessStoriesHeading": "Historias de éxito\nde dueños de gatos",
   "paywallTestimonial1Quote": "Llevaba años adivinando. YuCat encontró un alimento para gatos senior suave para el estómago de Lulu en una tarde.",
   "paywallTestimonial1Name": "Sophie",

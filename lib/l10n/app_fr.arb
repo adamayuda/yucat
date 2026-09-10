@@ -168,18 +168,25 @@
   "paywallPlusBadge": "Plus",
   "paywallBadgeFreeTrial": "{days} JOURS OFFERTS",
   "paywallEverythingYouGet": "Tout ce que tu obtiens",
-  "paywallFeaturePersonalizedVerdictsTitle": "Verdicts personnalisés",
-  "paywallFeaturePersonalizedVerdictsBenefit": "Selon son âge et sa santé",
   "paywallFeatureUnlimitedScansTitle": "Scans illimités",
-  "paywallFeatureUnlimitedScansBenefit": "Aucune limite quotidienne",
-  "paywallFeatureMultiCatTitle": "Profils multi-chats",
-  "paywallFeatureMultiCatBenefit": "Un profil par chat",
-  "paywallFeatureRecipesTitle": "Toutes les recettes",
-  "paywallFeatureRecipesBenefit": "Filtrées pour son profil",
-  "paywallFeatureArticlesTitle": "Tous les articles",
-  "paywallFeatureArticlesBenefit": "Nutrition, santé, comportement",
-  "paywallFeatureFoodGuideTitle": "Le guide alimentaire",
-  "paywallFeatureFoodGuideBenefit": "Ce qu'il peut manger ou non",
+  "paywallFeatureUnlimitedScansBenefit": "aucune limite quotidienne.",
+  "paywallFeaturePersonalizedVerdictsTitle": "Verdicts personnalisés",
+  "paywallFeaturePersonalizedVerdictsBenefit": "selon son âge, son poids et sa santé.",
+  "paywallFeatureRecipesArticlesTitle": "Recettes maison et articles",
+  "paywallFeatureRecipesArticlesBenefit": "pour mieux le nourrir au quotidien.",
+  "paywallFeatureFoodGuideTitle": "Le guide alimentaire complet",
+  "paywallFeatureFoodGuideBenefit": "ce qu'il peut manger ou non.",
+  "paywallFeatureLine": "{title} : {benefit}",
+  "@paywallFeatureLine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "benefit": {
+        "type": "String"
+      }
+    }
+  },
   "paywallSuccessStoriesHeading": "Témoignages\nde propriétaires de chats",
   "paywallTestimonial1Quote": "J'avais deviné pendant des années. YuCat a trouvé une nourriture senior douce pour l'estomac de Lulu en une après-midi.",
   "paywallTestimonial1Name": "Sophie",

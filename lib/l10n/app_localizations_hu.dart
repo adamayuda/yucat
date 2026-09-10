@@ -559,42 +559,36 @@ class AppLocalizationsHu extends AppLocalizations {
   String get paywallEverythingYouGet => 'Mindent megkapsz';
 
   @override
+  String get paywallFeatureUnlimitedScansTitle => 'Korlátlan szkennelés';
+
+  @override
+  String get paywallFeatureUnlimitedScansBenefit => 'nincs napi limit.';
+
+  @override
   String get paywallFeaturePersonalizedVerdictsTitle =>
       'Személyre szabott értékelések';
 
   @override
   String get paywallFeaturePersonalizedVerdictsBenefit =>
-      'Kora és egészsége szerint';
+      'kora, súlya és egészsége szerint.';
 
   @override
-  String get paywallFeatureUnlimitedScansTitle => 'Korlátlan szkennelés';
+  String get paywallFeatureRecipesArticlesTitle => 'Házi receptek és cikkek';
 
   @override
-  String get paywallFeatureUnlimitedScansBenefit => 'Nincs napi limit';
+  String get paywallFeatureRecipesArticlesBenefit =>
+      'hogy minden nap jobban etethesd.';
 
   @override
-  String get paywallFeatureMultiCatTitle => 'Több macska profilja';
+  String get paywallFeatureFoodGuideTitle => 'A teljes élelmiszer-útmutató';
 
   @override
-  String get paywallFeatureMultiCatBenefit => 'Macskánként egy profil';
+  String get paywallFeatureFoodGuideBenefit => 'mit ehet és mit nem.';
 
   @override
-  String get paywallFeatureRecipesTitle => 'Az összes recept';
-
-  @override
-  String get paywallFeatureRecipesBenefit => 'A profiljára szűrve';
-
-  @override
-  String get paywallFeatureArticlesTitle => 'Az összes cikk';
-
-  @override
-  String get paywallFeatureArticlesBenefit => 'Táplálás, egészség, viselkedés';
-
-  @override
-  String get paywallFeatureFoodGuideTitle => 'Az élelmiszer-útmutató';
-
-  @override
-  String get paywallFeatureFoodGuideBenefit => 'Mit ehet és mit nem';
+  String paywallFeatureLine(String title, String benefit) {
+    return '$title: $benefit';
+  }
 
   @override
   String get paywallSuccessStoriesHeading => 'Sikertörténetek\nmacskaszülőktől';
