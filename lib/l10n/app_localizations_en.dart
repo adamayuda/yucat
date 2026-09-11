@@ -1781,7 +1781,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileResetOnboarding => 'Reset onboarding';
 
   @override
-  String get profileDebugOnly => 'Debug only';
+  String get profileDebugOnly => 'Test builds only';
 
   @override
   String get profileRestoreNotAvailable => 'Restore is only available on iOS.';

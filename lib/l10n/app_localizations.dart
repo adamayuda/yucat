@@ -3216,7 +3216,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileDebugOnly.
   ///
   /// In en, this message translates to:
-  /// **'Debug only'**
+  /// **'Test builds only'**
   String get profileDebugOnly;
 
   /// No description provided for @profileRestoreNotAvailable.

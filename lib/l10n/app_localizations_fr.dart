@@ -1801,7 +1801,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get profileResetOnboarding => 'Réinitialiser l\'introduction';
 
   @override
-  String get profileDebugOnly => 'Débogage uniquement';
+  String get profileDebugOnly => 'Versions de test uniquement';
 
   @override
   String get profileRestoreNotAvailable =>

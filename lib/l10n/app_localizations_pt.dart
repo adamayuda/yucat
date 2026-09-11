@@ -1799,7 +1799,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get profileResetOnboarding => 'Repor introdução';
 
   @override
-  String get profileDebugOnly => 'Apenas depuração';
+  String get profileDebugOnly => 'Apenas versões de teste';
 
   @override
   String get profileRestoreNotAvailable =>

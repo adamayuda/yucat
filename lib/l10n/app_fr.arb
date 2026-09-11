@@ -555,7 +555,7 @@
   "profilePrivacyPolicy": "Politique de confidentialité",
   "profileTermsAndConditions": "Conditions générales",
   "profileResetOnboarding": "Réinitialiser l'introduction",
-  "profileDebugOnly": "Débogage uniquement",
+  "profileDebugOnly": "Versions de test uniquement",
   "profileRestoreNotAvailable": "La restauration est disponible uniquement sur iOS.",
   "profileRestoreSuccess": "Abonnement restauré avec succès !",
   "profileNoSubscriptionFound": "Aucun abonnement actif trouvé.",

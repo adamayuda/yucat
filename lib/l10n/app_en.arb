@@ -852,7 +852,7 @@
   "profilePrivacyPolicy": "Privacy Policy",
   "profileTermsAndConditions": "Terms & Conditions",
   "profileResetOnboarding": "Reset onboarding",
-  "profileDebugOnly": "Debug only",
+  "profileDebugOnly": "Test builds only",
   "profileRestoreNotAvailable": "Restore is only available on iOS.",
   "profileRestoreSuccess": "Subscription restored successfully!",
   "profileNoSubscriptionFound": "No active subscription found.",

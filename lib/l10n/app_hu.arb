@@ -555,7 +555,7 @@
   "profilePrivacyPolicy": "Adatvédelmi szabályzat",
   "profileTermsAndConditions": "Általános szerződési feltételek",
   "profileResetOnboarding": "Bemutató visszaállítása",
-  "profileDebugOnly": "Csak debug",
+  "profileDebugOnly": "Csak tesztverziókban",
   "profileRestoreNotAvailable": "A visszaállítás csak iOS-en érhető el.",
   "profileRestoreSuccess": "Az előfizetés sikeresen visszaállítva!",
   "profileNoSubscriptionFound": "Nem található aktív előfizetés.",

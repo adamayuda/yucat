@@ -1,5 +1,5 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/foundation.dart';
+import 'package:yucat/config/build_env.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -258,8 +258,10 @@ class _ProfileHub extends StatelessWidget {
                     label: l10n.profileTermsAndConditions,
                     onTap: onTermsTap,
                   ),
-                  // Debug-only: compiled out of release builds via kDebugMode.
-                  if (kDebugMode) ...[
+                  // Debug builds and TestFlight, never the App Store.
+                  // ⚠️ NOT `kDebugMode`: TestFlight ships a *release* build, so
+                  // that stripped this row out of the one build it existed for.
+                  if (kQaToolsEnabled) ...[
                     const _MenuDivider(),
                     _ProfileMenuItem(
                       icon: Icons.refresh_rounded,

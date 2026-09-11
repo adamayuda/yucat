@@ -37,6 +37,7 @@ import 'package:yucat/services/user_analytics_service.dart';
 import 'package:mixpanel_flutter_session_replay/mixpanel_flutter_session_replay.dart'
     show MixpanelSessionReplay, MixpanelSessionReplayWidget;
 
+import 'config/build_env.dart';
 import 'config/routes/analytics_route_observer.dart';
 import 'config/routes/router.dart';
 import 'package:yucat/features/litter_detail/presentation/bloc/litter_detail_bloc.dart';
@@ -45,6 +46,11 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   _installErrorHandlers();
+
+  // Resolved before runApp so `kQaToolsEnabled` is final by the first build.
+  // It gates the Profile reset-onboarding row and the paywall escape hatch,
+  // both of which must reach TestFlight but not the App Store.
+  await resolveBuildEnvironment();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 

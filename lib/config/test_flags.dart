@@ -1,6 +1,13 @@
 /// Build-time toggles for QA / TestFlight builds.
 ///
 /// IMPORTANT: all three MUST be `false` for any production App Store release.
+///
+/// ⚠️ These are **compile-time** switches, so flipping one means shipping a
+/// binary nobody tested — the TestFlight build is the build submitted for
+/// review. For anything a tester needs to reach *on TestFlight*, use
+/// `kQaToolsEnabled` (`config/build_env.dart`) instead: it detects TestFlight at
+/// runtime from the sandbox receipt, so one binary serves both and production
+/// users never see the affordance.
 /// They exist so testers can repeatedly walk the onboarding funnel without
 /// being stopped by the hard paywall, and so replay can be eyeballed locally.
 library;

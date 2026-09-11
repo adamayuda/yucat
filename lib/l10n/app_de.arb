@@ -555,7 +555,7 @@
   "profilePrivacyPolicy": "Datenschutzrichtlinie",
   "profileTermsAndConditions": "Allgemeine Geschäftsbedingungen",
   "profileResetOnboarding": "Einführung zurücksetzen",
-  "profileDebugOnly": "Nur Debug",
+  "profileDebugOnly": "Nur Testversionen",
   "profileRestoreNotAvailable": "Die Wiederherstellung ist nur auf iOS verfügbar.",
   "profileRestoreSuccess": "Abo erfolgreich wiederhergestellt!",
   "profileNoSubscriptionFound": "Kein aktives Abo gefunden.",

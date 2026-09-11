@@ -66,7 +66,10 @@ Three mechanisms, all keyed off `dismissible: false`:
 3. The only exits are `PaywallSuccessState` / `PaywallAlreadySubscribedState`,
    both of which pop.
 
-Escape hatches: a `kDebugMode`-only skip button, and `kTestBuildSkipPaywall` in
+Escape hatches: a skip button gated on `kPaywallEscapeHatchEnabled`
+(`config/build_env.dart`) — **`kDebugMode` alone, deliberately not `kQaToolsEnabled`**,
+since App Review installs carry a `sandboxReceipt` and would show a reviewer a button
+that bypasses the purchase flow they are assessing (Guideline 2.2) — and `kTestBuildSkipPaywall` in
 `lib/config/test_flags.dart` (currently `false`) which bypasses both gates.
 
 > **Note:** both call sites `await` the `push` but **ignore its return value**,

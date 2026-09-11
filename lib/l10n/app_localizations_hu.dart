@@ -1790,7 +1790,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get profileResetOnboarding => 'Bemutató visszaállítása';
 
   @override
-  String get profileDebugOnly => 'Csak debug';
+  String get profileDebugOnly => 'Csak tesztverziókban';
 
   @override
   String get profileRestoreNotAvailable =>

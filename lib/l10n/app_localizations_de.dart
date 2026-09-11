@@ -1805,7 +1805,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get profileResetOnboarding => 'Einführung zurücksetzen';
 
   @override
-  String get profileDebugOnly => 'Nur Debug';
+  String get profileDebugOnly => 'Nur Testversionen';
 
   @override
   String get profileRestoreNotAvailable =>

@@ -1800,7 +1800,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileResetOnboarding => 'Restablecer introducción';
 
   @override
-  String get profileDebugOnly => 'Solo depuración';
+  String get profileDebugOnly => 'Solo versiones de prueba';
 
   @override
   String get profileRestoreNotAvailable =>

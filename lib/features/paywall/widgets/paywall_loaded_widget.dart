@@ -1,6 +1,6 @@
 import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart';
+import 'package:yucat/config/build_env.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
@@ -149,10 +149,14 @@ class PaywallLoadedWidget extends StatelessWidget {
                       package: state.selectedPackage,
                       trial: trial,
                     ),
-                    // Debug-only escape hatch so the hard gate can be skipped
-                    // while testing the rest of the app. Stripped from release
-                    // builds (kDebugMode is a const false there).
-                    if (kDebugMode && !dismissible)
+                    // QA escape hatch so the hard gate can be skipped while
+                    // testing the rest of the app. ⚠️ **Debug only** — not
+                    // `kQaToolsEnabled`, which is also true on TestFlight and
+                    // therefore true for an App Review reviewer, who would see
+                    // a button that skips the purchase flow they are there to
+                    // assess (Guideline 2.2). On TestFlight, pair Profile's
+                    // "Reset onboarding" with a sandbox purchase instead.
+                    if (kPaywallEscapeHatchEnabled && !dismissible)
                       TextButton(
                         onPressed: () =>
                             bloc.add(const PaywallDismissEvent()),
