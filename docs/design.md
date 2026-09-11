@@ -151,11 +151,14 @@ wires some of it (`scaffoldBackgroundColor: white`, bottom-nav `primary`, input
 
 ## 3. Typography
 
-Two-typeface system, but **only body ships via `google_fonts`**.
+Two-typeface system, **both bundled** — nothing is fetched at runtime.
 
 - **Display** — **Bricolage Grotesque**, a **bundled variable font** (declared under `fonts:`
   in `pubspec.yaml`, family `BricolageGrotesque`). Not a `google_fonts` lookup.
-- **Body** — **DM Sans**, via `GoogleFonts.dmSans()`.
+- **Body** — **DM Sans**, bundled (`assets/fonts/DMSans-{Regular,Medium,SemiBold,Bold}.ttf`,
+  family `DMSans` = `DSTextStyles.bodyFamily`). Static instances at 400/500/600/700,
+  latin + latin-ext so `hu`/`pt` keep their diacritics. A body weight outside those
+  four snaps to the nearest bundled face rather than being downloaded.
 
 > An earlier revision of this doc specified Sora + Poppins. Both typefaces were replaced;
 > the doc wasn't. Bricolage + DM Sans is what ships.
@@ -480,7 +483,7 @@ Chrome rules that belong to the design system:
 
 ### Shipped
 
-1. ✅ **Token foundation** — `lib/config/themes/theme.dart` carries sections 2–7 above; Bricolage Grotesque bundled, DM Sans via `google_fonts`.
+1. ✅ **Token foundation** — `lib/config/themes/theme.dart` carries sections 2–7 above; Bricolage Grotesque and DM Sans both bundled.
 2. ✅ **Component library** — see §8 for shipped components.
 3. ✅ **`WizardStepShell` extraction** — the 12 cat-create step widgets render inside the shell; standalone "add cat" flow + onboarding flow share the same widgets.
 4. ✅ **Onboarding rebuild** — the 12-phase flow plus the post-wizard cascade (§9).
@@ -503,7 +506,10 @@ Chrome rules that belong to the design system:
 ### Resolved
 
 1. ~~**Display typeface**~~ — **Bricolage Grotesque** (bundled variable font, wght 800 / wdth 75). Sora was the original pick and was replaced before launch.
-2. ~~**Body typeface**~~ — **DM Sans** via `google_fonts`. Poppins was the original pick and was replaced.
+2. ~~**Body typeface**~~ — **DM Sans**, bundled. Poppins was the original pick and was replaced.
+   `google_fonts` was dropped entirely: its runtime fetch accounted for 84% of `App Error`
+   volume in Mixpanel, and a failed fetch silently downgraded all body copy to the platform
+   fallback face.
 3. ~~**Selection accent**~~ — **Green** (`accentSuccess #00A12E`) for selection ✓; coral (`coralAccent #FF7A59`) reserved for emphasis (chips, slider, "BEST VALUE" tag).
 4. ~~**Social-proof stat (C0)**~~ — **APOP** (Association for Pet Obesity Prevention) — "61% of US cats are overweight or obese". Sourced + linked to `petobesityprevention.org`.
 5. ~~**Domain pitch source (C2)**~~ — **WSAVA Global Nutrition Guidelines** — linked to `wsava.org/global-guidelines/global-nutrition-guidelines/`. Editorial copy points at the guidelines rather than fabricating a direct quote.

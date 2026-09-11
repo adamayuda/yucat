@@ -3,7 +3,7 @@ description: "A new Flutter project."
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 2.3.0+1
+version: 2.3.0+2
 
 environment:
   sdk: ^3.8.1
@@ -30,7 +30,6 @@ dependencies:
   easy_debounce: ^2.0.3
   shared_preferences: ^2.5.3
   modal_progress_hud_nsn: ^0.5.1
-  google_fonts: ^8.1.0
   firebase_auth: ^5.7.0
   firebase_core: ^3.15.2
   cloud_firestore: ^5.6.12
@@ -71,3 +70,18 @@ flutter:
     - family: BricolageGrotesque
       fonts:
         - asset: assets/fonts/BricolageGrotesque-Variable.ttf
+    # DM Sans is bundled rather than fetched by `google_fonts` at runtime: the
+    # runtime fetch was 84% of all `App Error` volume (`fonts.gstatic.com`
+    # host-lookup failures), and every one of those left body text in the
+    # platform fallback face. Static instances, latin + latin-ext, so the `hu`
+    # and `pt` locales keep their diacritics.
+    - family: DMSans
+      fonts:
+        - asset: assets/fonts/DMSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/DMSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/DMSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/DMSans-Bold.ttf
+          weight: 700

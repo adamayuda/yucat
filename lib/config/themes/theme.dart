@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class DSColors {
   // Primary & Brand (legacy — kept for back-compat; prefer ink/tint tokens below)
@@ -251,6 +250,10 @@ class DSTextStyles {
   /// Bundled variable font (see `pubspec.yaml` `fonts:`).
   static const String _titleFamily = 'BricolageGrotesque';
 
+  /// Bundled body font (see `pubspec.yaml` `fonts:`), shipped at 400/500/600/700.
+  /// Public because [AppTheme] sets it as the app-wide default family.
+  static const String bodyFamily = 'DMSans';
+
   /// Shared title/display style — Bricolage Grotesque, heavy + condensed.
   /// All headings use this; only the [size] varies.
   static TextStyle title(double size, {Color color = DSColors.inkPrimary}) =>
@@ -272,35 +275,40 @@ class DSTextStyles {
 
   static TextStyle get headlineMd => title(24);
 
-  static TextStyle get titleMd => GoogleFonts.dmSans(
+  static TextStyle get titleMd => TextStyle(
+    fontFamily: bodyFamily,
     fontSize: 18,
     height: 24 / 18,
     fontWeight: FontWeight.w700,
     color: DSColors.inkPrimary,
   );
 
-  static TextStyle get bodyLg => GoogleFonts.dmSans(
+  static TextStyle get bodyLg => TextStyle(
+    fontFamily: bodyFamily,
     fontSize: 16,
     height: 24 / 16,
     fontWeight: FontWeight.w500,
     color: DSColors.inkPrimary,
   );
 
-  static TextStyle get bodyMd => GoogleFonts.dmSans(
+  static TextStyle get bodyMd => TextStyle(
+    fontFamily: bodyFamily,
     fontSize: 14,
     height: 20 / 14,
     fontWeight: FontWeight.w400,
     color: DSColors.inkSecondary,
   );
 
-  static TextStyle get label => GoogleFonts.dmSans(
+  static TextStyle get label => TextStyle(
+    fontFamily: bodyFamily,
     fontSize: 13,
     height: 16 / 13,
     fontWeight: FontWeight.w600,
     color: DSColors.inkPrimary,
   );
 
-  static TextStyle get caption => GoogleFonts.dmSans(
+  static TextStyle get caption => TextStyle(
+    fontFamily: bodyFamily,
     fontSize: 11,
     height: 14 / 11,
     fontWeight: FontWeight.w500,
@@ -313,10 +321,10 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: DSColors.white,
-      fontFamily: GoogleFonts.dmSans().fontFamily,
-      textTheme: TextTheme(
-        displaySmall: TextStyle(fontFamily: GoogleFonts.satisfy().fontFamily),
-      ).apply(bodyColor: DSColors.black),
+      fontFamily: DSTextStyles.bodyFamily,
+      // `displaySmall` used to be overridden with Satisfy, which nothing
+      // rendered — it only cost a second runtime font download on every launch.
+      textTheme: const TextTheme().apply(bodyColor: DSColors.black),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         selectedItemColor: DSColors.primary,
         unselectedItemColor: DSColors.darkGrey,
