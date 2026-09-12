@@ -3,10 +3,11 @@
 Everything about subscription gating in YuCat: the UI, the bloc, trial detection,
 store configuration, and how to change any of it.
 
-> **Status:** the app code is trial-ready and shipped-ready. The **App Store
-> configuration is not done yet** — the annual product still carries the old
-> pay-up-front intro offer, not a free trial. See [Store configuration](#store-configuration)
-> for the migration and why the ordering matters.
+> **Status (2026-09-12):** the 3-day free trial is **live on both stores** (94 % of recent
+> subscriptions start as trials). The second-chance product
+> `com.adam.yucat.app.pro.yearly.offer` (pay-up-front first year at €19.99) was created the
+> same day, is attached to the RevenueCat offering as `annual_offer`, and goes through App
+> Review with the 2.4.0 binary. See [Store configuration](#store-configuration).
 
 ---
 
@@ -308,8 +309,8 @@ uses its own `PaywallSecondChanceAcceptedEvent` / `PaywallSecondChanceDismissedE
 
 ⚠️ **`copyWith` cannot change the selection.** `eligibleTrial` is resolved per
 package, so switching plans goes through `withSelection(package:, eligibleTrial:)`,
-which re-resolves it. A `copyWith(selectedPackage:)` would let a monthly purchase
-inherit the annual plan's trial and log `is_trial: true` for a plan that bills today.
+which re-resolves it. A `copyWith(selectedPackage:)` would let the offer purchase
+inherit the standard plan's trial and log `is_trial: true` for a plan that bills today.
 
 ---
 
@@ -400,17 +401,23 @@ All three products live in it:
 Only **yearly** is surfaced by the app. Monthly and weekly remain published and
 continue to bill existing subscribers; they're filtered out client-side.
 
-**Current offer on yearly** (pre-migration): *Pay up front for the first year*,
-Jun 12 2026 → No End Date, 175 regions.
+**Current offer on yearly:** *Free trial, 3 days*, live. The earlier pay-up-front
+first-year offer it replaced ran Jun 12 2026 → the trial's start date.
 
 #### Eligibility is per *group*, not per product
 
 Apple grants one introductory offer per customer **per subscription group**,
-permanently. Because all three products share group `21827689`, anyone who has
-consumed *any* intro offer on *any* of them can never receive the 3-day trial.
-The trial-eligible pool is effectively "has never subscribed to YuCat at all".
+permanently. Because all four products share group `21827689`, anyone who has
+consumed *any* intro offer on *any* of them can never receive the 3-day trial —
+**nor the second-chance discount**, which is why the bloc checks the offer product's
+eligibility at load and hides the sheet for lapsed subscribers. The eligible pool
+is effectively "has never subscribed to YuCat at all".
 
-#### The migration, and why order matters
+#### The migration, and why order mattered (historical)
+
+> Done. Kept because the build-compatibility reasoning applies to any future intro-offer
+> change: an offer goes live server-side for **every** installed build, including ones
+> whose paywall code predates it.
 
 Apple permits only one *active* intro offer per product per territory, so the
 trial can't coexist with the pay-up-front offer. But they don't need to overlap —
