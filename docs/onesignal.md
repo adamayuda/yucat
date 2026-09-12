@@ -46,8 +46,11 @@ The app never touches the OneSignal SDK directly. Everything goes through
 | `logout()` | Detaches it. Unused while auth is anonymous-only | — |
 | `setTags(map)` | `OneSignal.User.addTags`. Fire-and-forget | The funnel checkpoints in §5 |
 | `setFunnelStage(stage)` | Monotonic `funnel_stage` write | ditto |
-| `setSubscriber(bool)` | `is_subscriber` | Paywall success, splash gate |
+| `setSubscriber(bool, {isTrial})` | `is_subscriber`, and `is_trial` when the entitlement was read | Paywall success, splash gate |
+| `markTrialStarted()` | `is_trial = true`, `trial_started_at` | Paywall success when the purchase opened a trial |
 | `setLastActive()` | `last_active_at`, date-only | `splash_bloc.dart` every launch |
+| `setLastScan()` | `last_scan_at`, date-only | `home_bloc.dart` on every successful scan, food or litter |
+| `setReminderPreferences(...)` | `reminder_food_change` / `reminder_better_fit` / `reminder_monthly` | `reminders_screen.dart` "Done" |
 
 All of them no-op off iOS or before `initialize()`, and swallow errors with a
 `debugPrint` — **tagging must never be able to break a user flow.**
@@ -116,7 +119,16 @@ them as strings — hence `NotificationTags.boolValue()` rather than raw bools.
 | `has_cat` | `"true"` / `"false"` | Cat created; re-synced on every Home load | `cat_create_bloc.dart`, `home_bloc.dart` |
 | `paywall_seen` | `"true"` | `Paywall Shown` | `paywall_bloc.dart` |
 | `is_subscriber` | `"true"` / `"false"` | Purchase/restore success **and every splash gate** | `paywall_bloc.dart`, `splash_bloc.dart` |
+| `is_trial` | `"true"` / `"false"` | Purchase success, **and every splash gate** from the entitlement's period type — so it turns itself off when the trial converts or lapses | `paywall_bloc.dart`, `splash_bloc.dart` |
+| `trial_started_at` | `YYYY-MM-DD` | Once, on the purchase that opened a trial | `paywall_bloc.dart` |
 | `last_active_at` | `YYYY-MM-DD` | Every launch | `splash_bloc.dart` |
+| `last_scan_at` | `YYYY-MM-DD` | Every successful scan, food or litter | `home_bloc.dart` |
+| `reminder_food_change` / `reminder_better_fit` / `reminder_monthly` | `"true"` / `"false"` | Reminders screen "Done" — all three written every time, so "opted out" is distinguishable from "never saw the screen" | `reminders_screen.dart` |
+
+**The trial Journey** is the reason `is_trial`, `trial_started_at` and `last_scan_at` exist:
+enter on `is_trial = "true"`, push at +24 h and +48 h (skip the +24 h nudge when
+`last_scan_at` is today), exit when `is_trial` ≠ `"true"`. The Journey itself is built in the
+OneSignal dashboard, not in code — nothing in the app schedules a notification.
 
 ### Four rules that keep the segments honest
 
@@ -206,7 +218,7 @@ Finally, build each segment in §6 and confirm the test user lands in exactly on
 | **No `OneSignalNotificationServiceExtension` target** | `ios/Runner.xcodeproj` has only `Runner` and `RunnerTests`, and the `Podfile` has no extension block. Consequence: **no confirmed-delivery stats, no rich media (images) in notifications, no `mutable-content` badge processing.** Doesn't block tags or segments, but caps what campaigns can do |
 | **Dashboard/APNs config unverified** | `aps-environment` = `production` (`Runner.entitlements`) and `UIBackgroundModes` = `[remote-notification]` (`Info.plist:93-96`) are set. Whether the OneSignal dashboard app exists and the APNs `.p8` is uploaded **cannot be checked from the repo** — if it isn't, permission never resolves and no tag ever arrives |
 | **Permission asked very late** | Phase 10 of 12 (§3). Moving it earlier would make most of the funnel reachable, but it changes onboarding conversion — a product decision wanting an A/B test, not a code edit |
-| **Reminder-type selections are not persisted** | The `reminders` screen lets the user pick reminder kinds; nothing is stored and **no local notifications are ever scheduled**. The screen's only real effect is the permission prompt |
+| **No local notification scheduling** | The reminders-screen toggles are persisted as tags (§5) but **delivery depends entirely on a OneSignal Journey existing in the dashboard**. Until one is built, a user who picked "Monthly check-in" receives nothing — exactly as before, just now measurable |
 | **No Android push** | Nothing wired at all |
 | **No click / foreground listeners** | `Notifications.addClickListener` and `addForegroundWillDisplayListener` are never registered, so a push cannot deep-link into a screen and there's no in-app handling of a notification arriving while the app is open |
 | **No In-App Messages** | The SDK subspec is present but unused |

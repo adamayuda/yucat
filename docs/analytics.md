@@ -43,6 +43,8 @@ Set on the user's People profile (keyed by Firebase UID). Use these to **segment
 | `is_subscriber` | bool | paywall purchase/restore; splash gate on every cold launch |
 | `subscription_plan` | string (`weekly`/`annual`) | paywall purchase |
 | `subscription_price` / `subscription_currency` | number / string | paywall purchase |
+| `is_trial` | bool | paywall purchase; **refreshed on every splash gate** from the entitlement's period type, so it turns false by itself when the trial converts or lapses |
+| `trial_started_at` | ISO8601 string | paywall purchase, only when the purchase opened a trial — the cohort key for "what did trialists do on day 1 / 2 / 3". Trial→paid itself lives in RevenueCat; see the note below |
 | `cats_count` | int | HomeBloc after cats load (authoritative) |
 | `has_cat` | bool | derived from `cats_count > 0` |
 | `primary_cat_age_group` | string | HomeBloc |
@@ -59,7 +61,17 @@ Set on the user's People profile (keyed by Firebase UID). Use these to **segment
 | `onboarding_completed_at` | ISO8601 string | onboarding finalized |
 | `notifications_enabled` | bool | reminders permission prompt |
 
-**Suggested cohorts:** Subscribers (`is_subscriber = true`), Activated (`has_cat = true` AND
+> **RevenueCat is linked to the same uid.** `SplashBloc._ensureSignedIn` calls
+> `Purchases.logIn(uid)` and `Purchases.setMixpanelDistinctID(uid)` (via
+> `LinkSubscriptionUserUsecase`), so the RevenueCat customer, the Mixpanel profile and the
+> OneSignal user share the Firebase UID. With the **RevenueCat → Mixpanel integration**
+> switched on in the RevenueCat dashboard, `rc_trial_started_event`, `rc_trial_converted_event`,
+> `rc_trial_cancelled_event`, `rc_renewal_event` and `rc_cancellation_event` land on that same
+> profile — which is the only way trial→paid becomes a Mixpanel funnel. Those events carry no
+> `tracking_version` super property (they don't come from the SDK), so don't filter on it
+> when you include them.
+
+**Suggested cohorts:** Subscribers (`is_subscriber = true`), Trialists (`is_trial = true`), Activated (`has_cat = true` AND
 `total_scans ≥ 1`), Power users (`total_scans ≥ 10`), By channel (`attribution_source` — ⚠️ historical users only),
 Stalled (`onboarding_completed = true` AND `is_subscriber = false`).
 
@@ -95,16 +107,10 @@ Stalled (`onboarding_completed = true` AND `is_subscriber = false`).
 | `Onboarding Completed` | `total_time_seconds`, `steps_viewed`, `attribution_source` (⚠️ now always null), `timestamp` |
 | `Screen View` | `screen_name`, `index`, `name` — per onboarding phase |
 
-**Onboarding scan** — a separate namespace from Home's scan, for the same user action.
-Gated by RemoteConfig `onboarding_scan_enabled`; currently near-zero volume, so check the
-flag before reading anything into these.
-
-| Event | Properties |
-|---|---|
-| `Onboarding Scan Captured` | `timestamp` |
-| `Onboarding Scan Succeeded` | `product`, `score`, `timestamp` — renamed from `Onboarding Scan Verdict`, which survives in the Lexicon with historical data only |
-| `Onboarding Scan Failed` | `error_type` (`not_found`/`timeout`/`no_internet`/other), `error_message?`, `timestamp` |
-| `Onboarding Scan Skipped` | `phase` (`error`/`intro`), `timestamp` |
+> **Removed 2026-09-12:** the `Onboarding Scan Captured / Succeeded / Failed / Skipped`
+> namespace. The onboarding scan beat it described was deleted (it had been off in Remote
+> Config for months); historical rows remain in the Lexicon. `Onboarding Scan Verdict` is the
+> even older name of `Succeeded`.
 
 ⚠️ **`step_index` is a position, not an identity.** It is reused whenever a screen is
 swapped: `attribution` held index 2 for 485 events before `recipesArticles` took the slot,
@@ -138,6 +144,8 @@ Use `step_name` or `step_id` as the funnel key and `step_index` only for orderin
 | `Search Results Viewed` | `query`, `results_count`, `has_results` |
 | `Product Detail Viewed` | `product_name`, `product_brand` |
 | `Product Saved` / `Product Unsaved` | `product_name`, `product_brand` |
+| `Alternatives Shown` | `product_name`, `product_brand`, `product_score`, `current_fit`, `cat_age_group`, `cat_has_health_conditions`, `count` — fires **only when at least one** "Better for {cat}" row rendered under the verdict, once per cat per page. A great product ends at its verdict and is not an ignored list |
+| `Alternative Tapped` | the same product/cat props plus `alternative_name`, `alternative_brand`, `alternative_score`, `alternative_fit`, `position`, `source` (`product_detail`) — the scan → verdict → better food → open loop; compare against `Product Detail Viewed` to see how much browsing the list drives |
 
 ### Cat litter
 | Event | Key properties |
@@ -218,8 +226,11 @@ litter scans too; segment on the outcome event to separate them.
 | `Paywall Shown` | `trigger`, `offering`, `trial_eligible`, `trial_days`, `timestamp` | `trigger` is `onboarding_complete` / `returning_user` / `manual` (no live call site passes `manual` — seeing it means a new entry point forgot to pass a trigger) |
 | `Paywall CTA Tapped` | `package_id`, `package_type`, `price`, `currency`, `trigger`, `is_trial`, `trial_days`, `timestamp` | **NEW** — fires *before* the store sheet opens, so a sheet that never presents or never resolves is still counted. Same property set as `Subscription Completed` so the funnel segments identically |
 | `Paywall Restore Tapped` | `trigger`, `timestamp` | **NEW** — fires before `Purchases.restorePurchases()` |
-| `Plan Selected` | `package_id`, `package_type`, `trigger`, `timestamp` | Fires when the user switches the highlighted plan — *currently unreachable*: the paywall shows a single annual plan and no plan-picker widget is rendered |
-| `Subscription Completed` | `package_id`, `package_type`, `price`, `currency`, `trigger`, `is_trial`, `trial_days`, `timestamp` | `is_trial: true` means **no money moved today** — revenue reporting must exclude these |
+| `Plan Selected` | `package_id`, `package_type`, `trigger`, `timestamp` | Fires when the selected plan changes. The paywall still renders a single annual plan with no picker, so today this fires on **one** path only: accepting the second-chance sheet (`package_id = annual_offer`, `package_type = custom`) |
+| `Paywall Second Chance Shown` | `package_id` (`annual_offer`), `package_type` (`custom`), `price`, `intro_price`, `currency`, `trigger`, `timestamp` | The discounted-first-year sheet, offered **once per paywall session** after the first cancel of the annual store sheet. Never fires when the offering has no `annual_offer` package **or the user is ineligible for its introductory offer** (Apple: one per subscription group, ever — lapsed subscribers never see it) |
+| `Paywall Second Chance Tapped` | same | Leads to `Plan Selected`, `Paywall CTA Tapped` and then `Subscription Completed { package_id: annual_offer, is_trial: false, is_intro_offer: true, intro_price }` — or `Paywall Purchase Cancelled { package_type: custom }` |
+| `Paywall Second Chance Dismissed` | same | Swipe-down, tap-outside and the "keep the free trial" link all count here |
+| `Subscription Completed` | `package_id`, `package_type`, `price`, `currency`, `trigger`, `is_trial`, `trial_days`, `is_intro_offer`, `intro_price`, `timestamp` | `is_trial: true` means **no money moved today** — revenue reporting must exclude these. `is_intro_offer: true` means the user paid `intro_price` today, not `price` |
 | `Subscription Restored` | `trigger`, `timestamp` | Carries no package/price/currency, unlike `Subscription Completed` |
 | `Subscription Purchase Failed` | `reason` (`platform_error`/`not_active`/`unknown`), `error_code` (RevenueCat), `error_message?`, `package_type`, `trigger`, `timestamp` | Genuine store errors only. `error_code` is what separates a payment decline from a network drop from a store misconfiguration — `reason` alone cannot |
 | `Paywall Purchase Cancelled` | `package_type`, `trigger`, `timestamp` | The user backed out of the store sheet. Split out of `Subscription Purchase Failed`, where it was ~6x the volume of real errors and made the event unreadable. ⚠️ Historical `Subscription Purchase Failed` rows with `reason = cancelled` predate the split |
@@ -281,6 +292,21 @@ account for every tap:
 Any residual gap is taps whose sheet never resolved at all (failed to present, hung, or
 the app was killed mid-purchase). That population was invisible before `Paywall CTA
 Tapped` existed.
+
+**The second-chance branch.** A cancel of the *annual* sheet now opens the monthly downsell
+once, so the micro-funnel has a side path:
+
+```
+Paywall Purchase Cancelled (package_type = annual)
+  → Paywall Second Chance Shown
+  → Paywall Second Chance Tapped
+  → Subscription Completed (package_id = annual_offer)
+```
+
+Read `Shown → Tapped` as whether price is what those users balked at, and
+`Tapped → Completed` as the offer sheet's own abandonment. Break `Subscription Completed`
+down by `package_id` before comparing revenue: the standard annual starts a trial and bills
+nothing on day 0, the offer bills `intro_price` immediately.
 
 Segment by `is_trial` to compare trial-eligible against ineligible users — they see a
 materially different CTA and price line.

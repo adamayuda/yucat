@@ -5,7 +5,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/test_flags.dart';
-import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
+import 'package:yucat/core/subscription/domain/usecases/get_subscription_status_usecase.dart';
+import 'package:yucat/core/subscription/domain/usecases/link_subscription_user_usecase.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/ensure_signed_in_usecase.dart';
@@ -19,7 +20,8 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   static const String _onboardingCompletedKey = 'onboarding_completed';
 
   final SharedPreferences _prefs;
-  final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
+  final GetSubscriptionStatusUseCase _getSubscriptionStatusUseCase;
+  final LinkSubscriptionUserUsecase _linkSubscriptionUserUsecase;
   final UserAnalyticsService _userAnalyticsService;
   final EnsureSignedInUsecase _ensureSignedInUsecase;
   final LogEventUsecase _logEventUsecase;
@@ -27,13 +29,15 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
   SplashBloc({
     required SharedPreferences prefs,
-    required HasActiveSubscriptionUseCase hasActiveSubscriptionUseCase,
+    required GetSubscriptionStatusUseCase getSubscriptionStatusUseCase,
+    required LinkSubscriptionUserUsecase linkSubscriptionUserUsecase,
     required UserAnalyticsService userAnalyticsService,
     required EnsureSignedInUsecase ensureSignedInUsecase,
     required LogEventUsecase logEventUsecase,
     required NotificationService notificationService,
   })  : _prefs = prefs,
-        _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
+        _getSubscriptionStatusUseCase = getSubscriptionStatusUseCase,
+        _linkSubscriptionUserUsecase = linkSubscriptionUserUsecase,
         _userAnalyticsService = userAnalyticsService,
         _ensureSignedInUsecase = ensureSignedInUsecase,
         _logEventUsecase = logEventUsecase,
@@ -73,16 +77,20 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     // (lapsed, force-quit at the paywall, reinstalled) is held at the hard
     // paywall until they subscribe or restore. RevenueCat caches the last
     // known entitlements, so existing subscribers launching offline still pass.
-    final hasSubscription =
-        await _hasActiveSubscriptionUseCase(forceRefresh: true);
+    final status = await _getSubscriptionStatusUseCase(forceRefresh: true);
+    final hasSubscription = status.isActive;
 
     // Keep the People profile's subscription state fresh on every cold launch
     // of a returning user (handles lapses/renewals between sessions). The
     // OneSignal tag has to be refreshed here too, not just on purchase — a
     // churned subscriber would otherwise keep is_subscriber = true for ever and
-    // never enter a win-back segment.
-    _userAnalyticsService.syncSubscription(isSubscriber: hasSubscription);
-    _notificationService.setSubscriber(hasSubscription);
+    // never enter a win-back segment. `is_trial` rides along for the same
+    // reason: it is what ends the trial Journey once the trial converts.
+    _userAnalyticsService.syncSubscription(
+      isSubscriber: hasSubscription,
+      isTrial: status.isTrial,
+    );
+    _notificationService.setSubscriber(hasSubscription, isTrial: status.isTrial);
 
     if (hasSubscription || kTestBuildSkipPaywall) {
       router.replace(const HomeRoute());
@@ -97,9 +105,11 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     }
   }
 
-  /// Ensures an anonymous Firebase session exists and binds the Mixpanel profile
-  /// and the OneSignal user to its uid. Awaited at boot so the uid is ready for
-  /// every route. Safe to call repeatedly; never throws to the caller.
+  /// Ensures an anonymous Firebase session exists and binds the Mixpanel
+  /// profile, the OneSignal user and the RevenueCat customer to its uid.
+  /// Awaited at boot so the uid is ready for every route — and so the
+  /// RevenueCat link lands *before* the entitlement check below reads it.
+  /// Safe to call repeatedly; never throws to the caller.
   ///
   /// OneSignal is identified *here* rather than at Home because Home is only
   /// reached after onboarding, cat creation and the paywall all succeed — i.e.
@@ -126,6 +136,10 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
       await _userAnalyticsService.identify(user.uid);
       await _notificationService.login(user.uid);
+      // One key across the three systems: RevenueCat's Mixpanel integration
+      // posts trial/renewal/churn events onto whatever distinct id it holds,
+      // and that has to be the same uid the app's own events use.
+      await _linkSubscriptionUserUsecase(user.uid);
       // Every launch passes through here, including new users who return
       // early below — so this is the one place recency is guaranteed to be
       // stamped for everyone.

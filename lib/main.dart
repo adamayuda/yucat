@@ -186,6 +186,10 @@ Future<void> _configureRevenueCat() async {
 
   final apiKey = Platform.isIOS ? appleApiKey : googleApiKey;
 
+  // Anonymous at configure time on purpose: the Firebase uid doesn't exist yet.
+  // `SplashBloc._ensureSignedIn` calls `Purchases.logIn(uid)` right after
+  // sign-in (via `LinkSubscriptionUserUsecase`), which aliases this anonymous
+  // customer into the uid before the first entitlement check.
   final configuration = PurchasesConfiguration(apiKey)
     ..appUserID = null
     ..purchasesAreCompletedBy = const PurchasesAreCompletedByRevenueCat();

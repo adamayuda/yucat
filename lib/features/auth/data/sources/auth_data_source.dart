@@ -13,4 +13,8 @@ class AuthFirebaseDataSource {
   }
 
   User? currentUser() => FirebaseAuth.instance.currentUser;
+
+  /// Anonymous sessions live in the iOS Keychain and survive an uninstall, so
+  /// this is the only way to become a genuinely new user on a test device.
+  Future<void> signOut() => FirebaseAuth.instance.signOut();
 }

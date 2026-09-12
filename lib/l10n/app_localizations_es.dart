@@ -675,33 +675,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboardingStartScanning => 'Empezar a escanear';
 
   @override
-  String get onboardingSuccessNotSet => 'No establecido';
-
-  @override
-  String get onboardingSuccessNone => 'Ninguno';
-
-  @override
-  String get onboardingSuccessRowAge => 'Edad';
-
-  @override
-  String get onboardingSuccessRowActivity => 'Actividad';
-
-  @override
-  String get onboardingSuccessRowBodyCondition => 'Condición corporal';
-
-  @override
-  String get onboardingSuccessRowCoat => 'Pelaje';
-
-  @override
-  String get onboardingSuccessRowNeuterStatus => 'Estado de esterilización';
-
-  @override
-  String get onboardingSuccessRowBreed => 'Raza';
-
-  @override
-  String get onboardingSuccessRowHealthConditions => 'Condiciones de salud';
-
-  @override
   String get onboardingSuccessProfileReadyTitle => 'Perfil listo';
 
   @override
@@ -889,6 +862,51 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get paywallNoPaymentDue => 'No se cobra nada ahora';
+
+  @override
+  String get paywallSecondChanceTitle => '¿Todavía lo estás pensando?';
+
+  @override
+  String paywallSecondChanceBody(String introPrice, String price) {
+    return 'Consigue tu primer año por $introPrice en lugar de $price.';
+  }
+
+  @override
+  String paywallSecondChanceFirstYear(String price) {
+    return '$price el primer año';
+  }
+
+  @override
+  String paywallSecondChanceCta(String price) {
+    return 'Conseguir el primer año por $price';
+  }
+
+  @override
+  String paywallSecondChanceKeepTrial(int days) {
+    return 'Mantener la prueba gratis de $days días';
+  }
+
+  @override
+  String get paywallSecondChanceNoThanks => 'No, gracias';
+
+  @override
+  String paywallIntroDisclosure(
+    String introPrice,
+    String price,
+    String period,
+  ) {
+    return '$introPrice el primer año, luego $price/$period. Cancela cuando quieras.';
+  }
+
+  @override
+  String paywallAutoRenewDisclosureIntro(
+    String introPrice,
+    String price,
+    String period,
+    String store,
+  ) {
+    return 'Tu primer año de Yucat Plus cuesta $introPrice; después se renueva automáticamente a $price/$period salvo que canceles al menos 24 horas antes del final del periodo en curso. Gestiona o cancela cuando quieras en los ajustes de tu cuenta de $store.';
+  }
 
   @override
   String get paywallRetry => 'Reintentar';
@@ -1800,6 +1818,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileResetOnboarding => 'Restablecer introducción';
 
   @override
+  String get profileResetTestUser => 'Restablecer usuario de prueba';
+
+  @override
+  String get profileResetTestUserConfirmTitle => '¿Empezar como usuario nuevo?';
+
+  @override
+  String get profileResetTestUserConfirmBody =>
+      'Cierra sesión en Firebase, RevenueCat y OneSignal, borra los datos locales y reinicia desde la pantalla de inicio. Los gatos se conservan en Firestore bajo el usuario anterior.';
+
+  @override
+  String get profileResetTestUserConfirm => 'Restablecer';
+
+  @override
   String get profileDebugOnly => 'Solo versiones de prueba';
 
   @override
@@ -2277,13 +2308,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboardingAnalyzeStep4 => 'Personalizando las recomendaciones';
 
   @override
-  String onboardingResultTitle(String name) {
-    return 'El plan de $name está listo';
+  String productPicksTitle(String name) {
+    return 'Mejores opciones para $name';
   }
 
   @override
-  String productPicksTitle(String name) {
-    return 'Mejores opciones para $name';
+  String productDetailBetterForCat(String name) {
+    return 'Mejor para $name';
   }
 
   @override
@@ -2319,22 +2350,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String onboardingBrandUnlockCta(String name) {
-    return 'Descubre las mejores opciones de $name';
-  }
-
-  @override
-  String brandTeaserFound(num count, String name) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count comidas mejores',
-      one: '1 comida mejor',
-    );
-    return 'Encontramos $_temp0 para $name';
-  }
-
-  @override
   String get brandTeaserLockedHint =>
       'Suscríbete para verlas, adaptadas a las necesidades de tu gato.';
 
@@ -2342,27 +2357,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get brandTeaserRowLocked => 'Desbloquea para ver';
 
   @override
-  String get onboardingScanTitle => 'Escaneemos su\nprimer paquete';
-
-  @override
   String get onboardingScanSubtitle =>
       'Escanea el paquete y lo evaluaremos para tu gato.';
 
   @override
-  String get onboardingScanCta => 'Vamos a escanear';
-
-  @override
-  String get onboardingScanSkip => 'Omitir por ahora';
-
-  @override
   String get onboardingScanVerdictIntro => 'Así puntúa esa comida:';
-
-  @override
-  String get onboardingScanFailed =>
-      'No pudimos identificar ese producto. Inténtalo de nuevo con la parte frontal del paquete a la vista.';
-
-  @override
-  String get onboardingScanRetry => 'Escanear de nuevo';
 
   @override
   String onboardingScanPersonalCon(String name, String con) {
@@ -2372,11 +2371,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String onboardingResultWhyTitle(String name) {
     return 'Por qué no es lo ideal para $name';
-  }
-
-  @override
-  String onboardingResultProfileTitle(String name) {
-    return 'Perfil de $name';
   }
 
   @override

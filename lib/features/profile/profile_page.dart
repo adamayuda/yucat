@@ -19,6 +19,7 @@ import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
+import 'package:yucat/presentation/components/ds_confirm_dialog.dart';
 import 'package:yucat/service_locator.dart';
 import 'package:yucat/features/litter_detail/presentation/models/litter_display_model.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
@@ -96,6 +97,21 @@ class _ProfilePage extends State<ProfilePage> {
     context.router.push(const ScanHistoryRoute());
   }
 
+  Future<void> _confirmResetTestUser(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDSConfirmDialog(
+      context,
+      title: l10n.profileResetTestUserConfirmTitle,
+      body: l10n.profileResetTestUserConfirmBody,
+      confirmLabel: l10n.profileResetTestUserConfirm,
+      cancelLabel: l10n.commonGoBack,
+      icon: Icons.person_off_outlined,
+    );
+    if (ok == true && context.mounted) {
+      _bloc.add(ResetTestUserTapEvent(context: context));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -137,6 +153,7 @@ class _ProfilePage extends State<ProfilePage> {
             ),
             onResetOnboardingTap: () =>
                 _bloc.add(ResetOnboardingTapEvent(context: context)),
+            onResetTestUserTap: () => _confirmResetTestUser(context),
           ),
         _ => const Scaffold(
             backgroundColor: DSColors.pageBackground,
@@ -162,6 +179,7 @@ class _ProfileHub extends StatelessWidget {
   final VoidCallback onPrivacyTap;
   final VoidCallback onTermsTap;
   final VoidCallback onResetOnboardingTap;
+  final VoidCallback onResetTestUserTap;
 
   const _ProfileHub({
     required this.cats,
@@ -178,6 +196,7 @@ class _ProfileHub extends StatelessWidget {
     required this.onPrivacyTap,
     required this.onTermsTap,
     required this.onResetOnboardingTap,
+    required this.onResetTestUserTap,
   });
 
   @override
@@ -268,6 +287,15 @@ class _ProfileHub extends StatelessWidget {
                       label: l10n.profileResetOnboarding,
                       sublabel: l10n.profileDebugOnly,
                       onTap: onResetOnboardingTap,
+                    ),
+                    const _MenuDivider(),
+                    // Deleting the app keeps the Keychain-persisted Firebase
+                    // session, so it is *not* a fresh user — this is.
+                    _ProfileMenuItem(
+                      icon: Icons.person_off_outlined,
+                      label: l10n.profileResetTestUser,
+                      sublabel: l10n.profileDebugOnly,
+                      onTap: onResetTestUserTap,
                     ),
                   ],
                 ],

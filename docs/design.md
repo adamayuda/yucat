@@ -411,30 +411,27 @@ Triggered when `SharedPreferences['onboarding_completed'] != true`.
 
 ### After `healthIntro` — the cascade leaves the bloc
 
-The last four beats are a **router push-chain with callbacks**, not bloc phases. This is the
-most expensive part of the flow to reconstruct from code, because no single file shows it:
+The last two beats are a **router push-chain with callbacks**, not bloc phases:
 
 ```
 healthIntro CTA → OnBoardingCompletedEvent
   └─ push CreateCatRoute(seededName, onCreated:)      ← the 12-step wizard (§10)
        └─ onCreated: sets onboarding_completed = true  ← NOTE: here, not at the end
-            ├─ if !RemoteConfigService.onboardingScanEnabled → OnBoardingFinalizedEvent
-            └─ else push CurrentFoodRoute(summary, onStart:)   ← scan your current food
-                 └─ replace(ResultRoute)                        ← verdict + locked picks
-                      └─ onStart: OnBoardingFinalizedEvent
-                           └─ paywall (non-dismissible) → replaceAll(MainRoute → HomeRoute)
+            └─ OnBoardingFinalizedEvent
+                 └─ paywall (non-dismissible) → replaceAll(MainRoute → HomeRoute)
 ```
 
-Three consequences worth knowing:
+Two consequences worth knowing:
 
-1. **`onboarding_completed` is written when the cat is created**, before the scan, result
-   screen and paywall. A user who quits on the result screen is "onboarded" and meets the
-   *splash* paywall gate on next launch instead of resuming onboarding.
-2. **`onboarding_scan_enabled` is a live Remote Config kill switch** (default `true`,
-   fail-open). Flipping it in the Firebase console skips the scan + result beats entirely for
-   new sessions, with no build.
-3. `replaceAll` — not `replace` — with the **Home** tab explicitly activated, because the
-   stack still holds onboarding → wizard → result underneath.
+1. **`onboarding_completed` is written when the cat is created**, before the paywall. A
+   user who kills the app at the paywall is "onboarded" and meets the *splash* paywall gate
+   on next launch instead of resuming onboarding.
+2. `replaceAll` — not `replace` — with the **Home** tab explicitly activated, because the
+   stack still holds onboarding → wizard underneath.
+
+The current-food scan and result beats (and their `onboarding_scan_enabled` kill switch)
+were removed on 2026-09-12. `DSGradients.onboardingCurrentFood` / `onboardingSuccess` are
+now unused tokens.
 
 ### Backgrounds
 

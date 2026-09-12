@@ -7,6 +7,7 @@ import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
 import 'package:yucat/features/paywall/widgets/paywall_error_widget.dart';
 import 'package:yucat/features/paywall/widgets/paywall_loaded_widget.dart';
+import 'package:yucat/features/paywall/widgets/paywall_second_chance_sheet.dart';
 import 'package:yucat/features/paywall/widgets/paywall_skeleton.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 
@@ -33,6 +34,11 @@ class PaywallPage extends StatefulWidget {
 
 class _PaywallPage extends State<PaywallPage> {
   late PaywallBloc _bloc;
+
+  /// Last `secondChanceTick` this page acted on. The bloc outlives the page
+  /// (one instance serves both gates), so the tick is compared against what
+  /// *this* presentation has seen, not against zero.
+  int _seenSecondChanceTick = 0;
 
   @override
   void initState() {
@@ -67,8 +73,11 @@ class _PaywallPage extends State<PaywallPage> {
     if (current is PaywallSuccessState) return true;
     if (current is PaywallAlreadySubscribedState) return true;
     if (previous is PaywallLoadedState && current is PaywallLoadedState) {
-      return current.transientError != null &&
+      final errorFired = current.transientError != null &&
           current.errorTick != previous.errorTick;
+      final secondChanceFired =
+          current.secondChanceTick != previous.secondChanceTick;
+      return errorFired || secondChanceFired;
     }
     return false;
   }
@@ -81,6 +90,24 @@ class _PaywallPage extends State<PaywallPage> {
         break;
       case PaywallAlreadySubscribedState():
         Navigator.of(context).pop(true);
+        break;
+      case PaywallLoadedState(
+            :final secondChanceTick,
+            :final secondChancePackage,
+            :final secondChanceIntro,
+            :final eligibleTrial,
+          )
+          when secondChanceTick != _seenSecondChanceTick &&
+              secondChancePackage != null &&
+              secondChanceIntro != null:
+        _seenSecondChanceTick = secondChanceTick;
+        showPaywallSecondChanceSheet(
+          context,
+          bloc: _bloc,
+          package: secondChancePackage,
+          intro: secondChanceIntro,
+          trialOnMainPlan: eligibleTrial,
+        );
         break;
       case PaywallLoadedState(:final transientError) when transientError != null:
         final l10n = AppLocalizations.of(context);

@@ -7,8 +7,8 @@ This is the source of truth for `lib/features/onboarding/`. It deliberately does
 describe individual screens — those churn weekly and the code makes them obvious. What's
 here is the stuff that spans files.
 
-> **Why this feature has a doc and others don't:** onboarding's last four beats aren't in
-> `OnBoardingBloc` at all. They're a router push-chain through three other features, wired
+> **Why this feature has a doc and others don't:** onboarding's last two beats aren't in
+> `OnBoardingBloc` at all. They're a router push-chain through two other features, wired
 > by callbacks. No single file shows the flow.
 
 ---
@@ -49,9 +49,9 @@ page order and the analytics index** — `OnBoardingPage` pages via
 | 5 | `nutritionFact` | advance |
 | 6 | `profileIntro` | advance |
 | 7 | `profileName` | `NameSeededEvent` + advance — **seeds the wizard** |
-| 8 | `rating` | advance (fires the App Store review modal — §5) |
-| 9 | `notifPrimer` | advance (**mock**, requests nothing — §5) |
-| 10 | `reminders` | advance (**real** OS push prompt, iOS only — §5) |
+| 8 | `rating` | advance (fires the App Store review modal — §4) |
+| 9 | `notifPrimer` | advance (**mock**, requests nothing — §4) |
+| 10 | `reminders` | advance (**real** OS push prompt, iOS only — §4) |
 | 11 | `healthIntro` | `OnBoardingCompletedEvent` → §3 |
 
 > ### ⚠️ The enum ordinal is a Mixpanel funnel contract
@@ -83,67 +83,50 @@ page order and the analytics index** — `OnBoardingPage` pages via
 
 ## 3. The cascade — after `healthIntro` the flow leaves the bloc
 
-This is the expensive part to reconstruct. Four beats, three callback hops, four files:
+Two beats, one callback hop, three files:
 
 ```
 healthIntro "Add my cat"
   └─► OnBoardingCompletedEvent
         └─► router.push CreateCatRoute(seededName, seededPhotoPath, onCreated:)
               │                                          [features/cat_create]
-              └─► onCreated(wizardContext, summary):
-                    ├─ _prefs.setBool('onboarding_completed', true)   ◄── HERE, not at the end
-                    │
-                    ├─ if !RemoteConfigService.onboardingScanEnabled
-                    │     └─► OnBoardingFinalizedEvent            (skip scan + result)
-                    │
-                    └─ else router.push CurrentFoodRoute(summary, onStart:)
-                          │                    [onboarding/widgets/current_food_screen]
-                          └─► scan or skip → router.replace ResultRoute(...)
-                                │                  [onboarding/widgets/result_screen]
-                                └─► "Start scanning" → onStart(resultContext)
-                                      └─► OnBoardingFinalizedEvent
-                                            ├─ 'Onboarding Completed' + markOnboardingComplete()
-                                            ├─ await push PaywallRoute(dismissible: false)
-                                            │     ↑ blocks until subscribed/restored
-                                            └─ replaceAll([MainRoute(children: [HomeRoute()])])
+              └─► onCreated(wizardContext, _):
+                    ├─ _prefs.setBool('onboarding_completed', true)   ◄── HERE
+                    └─► OnBoardingFinalizedEvent
+                          ├─ 'Onboarding Completed' + markOnboardingComplete()
+                          ├─ await push PaywallRoute(dismissible: false)
+                          │     ↑ blocks until subscribed/restored
+                          └─ replaceAll([MainRoute(children: [HomeRoute()])])
 ```
 
-Three consequences that bite:
+Two consequences that bite:
 
-1. **`onboarding_completed` is written when the cat is created** — before the scan, the
-   result screen and the paywall. A user who quits on the result screen is "onboarded", so
-   next launch they hit the **splash** paywall gate instead of resuming onboarding. That is
-   intentional (the cat is the asset worth keeping) but it means "completed onboarding" in
-   SharedPreferences ≠ "saw the whole funnel", and the `Onboarding Completed` *event* fires
-   at a different moment than the *flag*.
+1. **`onboarding_completed` is written when the cat is created** — before the paywall. A
+   user who kills the app at the paywall is "onboarded", so next launch they hit the
+   **splash** paywall gate instead of resuming onboarding. That is intentional (the cat is
+   the asset worth keeping) but it means "completed onboarding" in SharedPreferences ≠
+   "saw the whole funnel", and the `Onboarding Completed` *event* fires at a different
+   moment than the *flag*.
 2. **`replaceAll`, not `replace`, with Home explicitly activated.** By the time we finalize,
-   the stack holds onboarding → wizard → result. `replaceAll` clears all of it; passing
+   the stack holds onboarding → wizard. `replaceAll` clears both; passing
    `children: [HomeRoute()]` picks the Home tab rather than the default first tab (Search),
    matching the splash flow.
-3. **`CurrentFoodScreen` uses `replace`, not `push`,** to reach the result screen — so the
-   scan screen is gone from the stack and the result screen's back gesture doesn't return
-   to a dead scanner.
 
 `kTestBuildSkipPaywall` (`lib/config/test_flags.dart`) skips the paywall push entirely.
 
----
+### The scan + result beats are gone
 
-## 4. The remote kill switch
-
-`RemoteConfigService.onboardingScanEnabled` — Firebase Remote Config key
-**`onboarding_scan_enabled`**, default `true`, **fail-open** (a fetch failure leaves the scan
-enabled), 1 h minimum fetch interval.
-
-Flipping it to `false` in the Firebase console drops the `CurrentFoodRoute` → `ResultRoute`
-beats for **new onboarding sessions**, finalizing straight from the wizard to the paywall —
-no build, no review. It exists so the Anthropic-backed scan can be switched off if the
-backend degrades or gets expensive.
-
-This is the **only** consumer of the flag in the app.
+Until 2026-09-12 two more beats sat between the wizard and the paywall: `CurrentFoodRoute`
+(scan the cat's current food) → `ResultRoute` (verdict + locked picks teaser), gated by the
+Remote Config key `onboarding_scan_enabled`. The flag had been off in production for months
+(131 users ever reached the scan against 1,300 onboarding starts in the same window) while
+the fail-open debug default kept showing the beat on every test build. The screens, routes,
+the flag, the `Onboarding Scan …` events and the 18 ARB keys were all deleted; historical
+event rows remain in Mixpanel. The Remote Config key can be removed from the console.
 
 ---
 
-## 5. Screen-level traps
+## 4. Screen-level traps
 
 ### `recipesArticles` (phase 2) — the app's only perpetual animation on a long-lived page
 
@@ -193,9 +176,12 @@ never depend on the prompt.
   → `OneSignal.Notifications.requestPermission(true)`, which is **iOS-only**
   (`if (!Platform.isIOS) return false`). Emits `Notifications Opted In` / `Opted Out` with
   `source: 'onboarding_reminders'`.
-- ⚠️ **The reminder-type selections are never persisted.** They're a local
-  `Set<int> _selected` used only to style the rows. Nothing reads them, and no reminder is
-  ever scheduled — the app has no local-notification scheduling at all.
+- **The reminder-type selections are persisted as OneSignal tags only.** "Done" writes
+  `reminder_food_change` / `reminder_better_fit` / `reminder_monthly` (all three, as
+  `"true"`/`"false"`) before the permission prompt. Nothing in the app reads them back and
+  no reminder is ever scheduled locally — delivery is a OneSignal Journey keyed on those tags
+  (`docs/onesignal.md` §5), which has to exist in the dashboard for the toggles to mean
+  anything.
 - ⚠️ **This screen's position bounds all push reach.** Permission is asked at phase 10 of
   12, so anyone abandoning in phases 0–9 has no push subscription and cannot be messaged —
   including by the OneSignal drop-off segments. `_trackPhaseView` still writes a
@@ -208,30 +194,15 @@ its progress bar to 11 steps instead of 12. See `lib/features/cat_create/README.
 
 ---
 
-## 6. The onboarding scan is a separate analytics namespace
+## 5. Analytics
 
-Same user action as Home's scan, different event names by surface. Both sets are live; don't
-merge them without checking the funnels.
+`Onboarding Started` (`source: 'first_launch'`), `Onboarding Get Started Tapped`,
+`Onboarding Step Viewed`, `Onboarding Step Back` (`from_phase`, `to_phase`),
+`Onboarding Completed` (`total_time_seconds`, `steps_viewed`, `attribution_source`).
 
-| Onboarding (`current_food_screen.dart`) | Home (`home_bloc.dart`) |
-|---|---|
-| `Onboarding Scan Captured` | `Product Image Captured` |
-| `Onboarding Scan Succeeded` (`product`, `score`) | `Product Selected` |
-| `Onboarding Scan Failed` (`error_type`, `error_message`) | `Product Image Scan Failed` |
-| `Onboarding Scan Skipped` (`phase`: `intro` \| `error`) | — |
-
-⚠️ **The error classifier is duplicated.** `CurrentFoodScreen._errorType` returns a
-`String`; `HomeBloc._toErrorType` returns a `HomeErrorType` enum and additionally checks
-`e is FirebaseFunctionsException`. The onboarding copy is deliberately string-based so the
-screen needs no `cloud_functions` import. Both must classify identically or the `error_type`
-dimension splits across surfaces.
-
-Other onboarding events: `Onboarding Started` (`source: 'first_launch'`),
-`Onboarding Get Started Tapped`, `Onboarding Step Viewed`, `Onboarding Step Back`
-(`from_phase`, `to_phase`), `Onboarding Completed` (`total_time_seconds`, `steps_viewed`,
-`attribution_source`).
-
-`Onboarding Skipped` **does not exist** despite appearing in older docs.
+`Onboarding Skipped` **does not exist** despite appearing in older docs. The
+`Onboarding Scan Captured / Succeeded / Failed / Skipped` namespace was deleted with the
+scan beat (§3) — historical rows only.
 
 ⚠️ **`Onboarding Attribution Selected` / `Skipped` are now unreachable**, and with them
 `UserAnalyticsService.setAttribution(source)` — the Mixpanel **People property** that made
@@ -241,41 +212,13 @@ data is being collected in the meantime.
 
 ---
 
-## 7. Recommendations warm-up
-
-`CurrentFoodScreen._runScan` fires `unawaited(recommendProductsForCat(...))` on scan success —
-one screen *before* the result screen needs it — so the locked-picks teaser is instant.
-
-That cache is a **module-level `Map<String, List<ProductPick>>` keyed by cat id** in
-`lib/features/cat/presentation/utils/cat_product_recommendations.dart`. Process-global and
-session-lived: it is invalidated only by `invalidateProductPicksCache(catId)`, which
-`CatCreateBloc` calls after an edit. Nothing else refreshes it, so picks otherwise persist
-until app restart.
-
-Thresholds worth knowing before you tune them (comments in that file explain the rationale —
-therapeutic/vet diets land at 72+, while cheap foods with good-looking macros sit ~52 and are
-correctly excluded):
-
-| Constant | Value | Meaning |
-|---|---|---|
-| `_minBaseScore` | 70 | Product must be a decent food in general |
-| `_minFit` | 68 | Per-cat fit floor — "not wrong for this cat" |
-| `_poolPerQuery` | 40 | Algolia candidates per query |
-| `_poolCacheSize` | 10 | Picks retained per cat |
-
----
-
-## 8. Gotchas in the page itself
+## 6. Gotchas in the page itself
 
 - **Never `close()` the bloc.** `OnBoardingBloc` is owned by the root `MultiBlocProvider` in
   `main.dart`. `OnBoardingPage.dispose()` disposes only the `PageController` — closing the
   bloc would make re-mounting the page add events to a closed bloc.
 - **The proof-chart Lottie is pre-warmed** in `didChangeDependencies` (guarded by
   `_assetsWarmed`) because decoding it on the frame the page slides in caused visible jank.
-- **`countryCode` is the device region, not the app locale** —
-  `platformDispatcher.locale.countryCode`, passed to the backend to bias `web_search` to the
-  user's market. Same source as `scanner_page.dart`. A user with a Spanish phone reading
-  English still gets ES-biased results, which is what we want.
 
 ### Dead code — registered but never dispatched
 
@@ -291,7 +234,7 @@ Don't hunt for the dispatcher; there isn't one.
 
 ---
 
-## 9. Where the flow is documented elsewhere
+## 7. Where the flow is documented elsewhere
 
 - **`docs/design.md` §9** — the same flow from the design side, with the gradient tokens
   per beat. §10 covers the cat-create wizard's two contexts.

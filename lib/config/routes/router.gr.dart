@@ -183,58 +183,6 @@ class CreateCatRouteArgs {
 }
 
 /// generated route for
-/// [CurrentFoodPage]
-class CurrentFoodRoute extends PageRouteInfo<CurrentFoodRouteArgs> {
-  CurrentFoodRoute({
-    Key? key,
-    required CatSummary summary,
-    required void Function(BuildContext) onStart,
-    List<PageRouteInfo>? children,
-  }) : super(
-         CurrentFoodRoute.name,
-         args: CurrentFoodRouteArgs(
-           key: key,
-           summary: summary,
-           onStart: onStart,
-         ),
-         initialChildren: children,
-       );
-
-  static const String name = 'CurrentFoodRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      final args = data.argsAs<CurrentFoodRouteArgs>();
-      return CurrentFoodPage(
-        key: args.key,
-        summary: args.summary,
-        onStart: args.onStart,
-      );
-    },
-  );
-}
-
-class CurrentFoodRouteArgs {
-  const CurrentFoodRouteArgs({
-    this.key,
-    required this.summary,
-    required this.onStart,
-  });
-
-  final Key? key;
-
-  final CatSummary summary;
-
-  final void Function(BuildContext) onStart;
-
-  @override
-  String toString() {
-    return 'CurrentFoodRouteArgs{key: $key, summary: $summary, onStart: $onStart}';
-  }
-}
-
-/// generated route for
 /// [FoodGuideDetailPage]
 class FoodGuideDetailRoute extends PageRouteInfo<FoodGuideDetailRouteArgs> {
   FoodGuideDetailRoute({
@@ -571,64 +519,6 @@ class RecipesRoute extends PageRouteInfo<void> {
       return const RecipesPage();
     },
   );
-}
-
-/// generated route for
-/// [ResultPage]
-class ResultRoute extends PageRouteInfo<ResultRouteArgs> {
-  ResultRoute({
-    Key? key,
-    required CatSummary summary,
-    ProductDisplayModel? scannedProduct,
-    required void Function(BuildContext) onStart,
-    List<PageRouteInfo>? children,
-  }) : super(
-         ResultRoute.name,
-         args: ResultRouteArgs(
-           key: key,
-           summary: summary,
-           scannedProduct: scannedProduct,
-           onStart: onStart,
-         ),
-         initialChildren: children,
-       );
-
-  static const String name = 'ResultRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      final args = data.argsAs<ResultRouteArgs>();
-      return ResultPage(
-        key: args.key,
-        summary: args.summary,
-        scannedProduct: args.scannedProduct,
-        onStart: args.onStart,
-      );
-    },
-  );
-}
-
-class ResultRouteArgs {
-  const ResultRouteArgs({
-    this.key,
-    required this.summary,
-    this.scannedProduct,
-    required this.onStart,
-  });
-
-  final Key? key;
-
-  final CatSummary summary;
-
-  final ProductDisplayModel? scannedProduct;
-
-  final void Function(BuildContext) onStart;
-
-  @override
-  String toString() {
-    return 'ResultRouteArgs{key: $key, summary: $summary, scannedProduct: $scannedProduct, onStart: $onStart}';
-  }
 }
 
 /// generated route for

@@ -180,7 +180,11 @@
   "breedSearchNoResults": "No breed matches “{query}”",
   "@breedSearchNoResults": {
     "description": "Replaces the A-Z breed list when the search matches nothing. The Mixed / unknown option stays visible below it, so this line needs no CTA of its own.",
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "@_breedNames": {
     "description": "Breed display names. The ENGLISH value is also the canonical value persisted on the cat and switched on by cat_product_assessment.dart and cat_diet_recommendations.dart - only the label is localized. Rendered via catFormatBreed() in cat_labels.dart."
@@ -334,15 +338,6 @@
   },
   "onboardingSuccessNoName": "You're all\nset!",
   "onboardingStartScanning": "Start scanning",
-  "onboardingSuccessNotSet": "Not set",
-  "onboardingSuccessNone": "None",
-  "onboardingSuccessRowAge": "Age",
-  "onboardingSuccessRowActivity": "Activity",
-  "onboardingSuccessRowBodyCondition": "Body condition",
-  "onboardingSuccessRowCoat": "Coat",
-  "onboardingSuccessRowNeuterStatus": "Neuter status",
-  "onboardingSuccessRowBreed": "Breed",
-  "onboardingSuccessRowHealthConditions": "Health conditions",
   "onboardingSuccessProfileReadyTitle": "Profile ready",
   "onboardingSuccessProfileReadyBody": "You can edit these details anytime in your cat's profile.",
   "paywallHeroHeadline": "Know exactly\nwhat's in the bowl",
@@ -491,6 +486,79 @@
     }
   },
   "paywallNoPaymentDue": "No payment due now",
+  "paywallSecondChanceTitle": "Still thinking it over?",
+  "@paywallSecondChanceTitle": {
+    "description": "Bottom sheet shown once after the user backs out of the store's annual purchase sheet; offers the same yearly plan with a discounted first year."
+  },
+  "paywallSecondChanceBody": "Get your first year for {introPrice} instead of {price}.",
+  "@paywallSecondChanceBody": {
+    "placeholders": {
+      "introPrice": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallSecondChanceFirstYear": "{price} for your first year",
+  "@paywallSecondChanceFirstYear": {
+    "description": "Big price line on the second-chance sheet. Says 'year' outright: the offer product is the yearly plan.",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallSecondChanceCta": "Get the first year for {price}",
+  "@paywallSecondChanceCta": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallSecondChanceKeepTrial": "Keep the {days}-day free trial",
+  "@paywallSecondChanceKeepTrial": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallSecondChanceNoThanks": "No thanks",
+  "paywallIntroDisclosure": "{introPrice} for the first year, then {price}/{period}. Cancel anytime.",
+  "@paywallIntroDisclosure": {
+    "description": "Footer line under the CTA when the selected plan carries a paid pay-up-front introductory offer. 'year' is literal: the only such product is the yearly plan; {period} is the renewal period from the store.",
+    "placeholders": {
+      "introPrice": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallAutoRenewDisclosureIntro": "Your first year of Yucat Plus costs {introPrice}, then it renews automatically at {price}/{period} unless you cancel at least 24 hours before the end of the current period. Manage or cancel anytime in your {store} account settings.",
+  "@paywallAutoRenewDisclosureIntro": {
+    "placeholders": {
+      "introPrice": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      },
+      "store": {
+        "type": "String"
+      }
+    }
+  },
   "paywallRetry": "Try again",
   "paywallSkipDebug": "Skip paywall (debug)",
   "paywallErroriOSOnly": "Subscriptions are only available on iOS.",
@@ -852,6 +920,13 @@
   "profilePrivacyPolicy": "Privacy Policy",
   "profileTermsAndConditions": "Terms & Conditions",
   "profileResetOnboarding": "Reset onboarding",
+  "profileResetTestUser": "Reset test user",
+  "profileResetTestUserConfirmTitle": "Start as a new user?",
+  "profileResetTestUserConfirmBody": "Signs out of Firebase, RevenueCat and OneSignal and clears local data, then restarts from the splash screen. Cats stay in Firestore under the old user.",
+  "profileResetTestUserConfirm": "Reset",
+  "@profileResetTestUser": {
+    "description": "QA-only Profile row (kQaToolsEnabled): sign out of every identity provider and restart as a new user. Deleting the app is not enough on iOS because the anonymous Firebase session survives in the Keychain."
+  },
   "profileDebugOnly": "Test builds only",
   "profileRestoreNotAvailable": "Restore is only available on iOS.",
   "profileRestoreSuccess": "Subscription restored successfully!",
@@ -1036,16 +1111,17 @@
   "onboardingAnalyzeStep2": "Checking health needs",
   "onboardingAnalyzeStep3": "Matching nutrition guidance",
   "onboardingAnalyzeStep4": "Personalizing recommendations",
-  "onboardingResultTitle": "{name}'s plan is ready",
-  "@onboardingResultTitle": {
+  "productPicksTitle": "Top picks for {name}",
+  "@productPicksTitle": {
     "placeholders": {
       "name": {
         "type": "String"
       }
     }
   },
-  "productPicksTitle": "Top picks for {name}",
-  "@productPicksTitle": {
+  "productDetailBetterForCat": "Better for {name}",
+  "@productDetailBetterForCat": {
+    "description": "Heading of the list of catalogue foods that suit the selected cat better than the product on screen.",
     "placeholders": {
       "name": {
         "type": "String"
@@ -1081,34 +1157,10 @@
       }
     }
   },
-  "onboardingBrandUnlockCta": "Discover {name}'s top picks",
-  "@onboardingBrandUnlockCta": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "brandTeaserFound": "We found {count, plural, =1{1 better food} other{{count} better foods}} for {name}",
-  "@brandTeaserFound": {
-    "placeholders": {
-      "count": {
-        "type": "num"
-      },
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "brandTeaserLockedHint": "Subscribe to see them — matched to your cat's needs.",
   "brandTeaserRowLocked": "Unlock to see",
-  "onboardingScanTitle": "Let's scan your\nfirst package",
   "onboardingScanSubtitle": "Scan the package and we'll grade it for your cat.",
-  "onboardingScanCta": "Let's scan",
-  "onboardingScanSkip": "Skip for now",
   "onboardingScanVerdictIntro": "Here's how that food scores:",
-  "onboardingScanFailed": "We couldn't identify that product. Try again with the front of the package in frame.",
-  "onboardingScanRetry": "Scan again",
   "onboardingScanPersonalCon": "For {name}: {con}",
   "@onboardingScanPersonalCon": {
     "placeholders": {
@@ -1122,14 +1174,6 @@
   },
   "onboardingResultWhyTitle": "Why this isn't ideal for {name}",
   "@onboardingResultWhyTitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "onboardingResultProfileTitle": "{name}'s profile",
-  "@onboardingResultProfileTitle": {
     "placeholders": {
       "name": {
         "type": "String"

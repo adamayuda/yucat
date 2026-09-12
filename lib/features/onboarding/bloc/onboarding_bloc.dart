@@ -10,7 +10,6 @@ import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
 import 'package:yucat/services/notification_service.dart';
-import 'package:yucat/services/remote_config_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 
 part 'onboarding_event.dart';
@@ -22,7 +21,6 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
   final LogScreenViewUsecase _logScreenViewUsecase;
   final LogEventUsecase _logEventUsecase;
   final UserAnalyticsService _userAnalyticsService;
-  final RemoteConfigService _remoteConfigService;
   final NotificationService _notificationService;
 
   DateTime? _onboardingStartTime;
@@ -33,13 +31,11 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     required LogScreenViewUsecase logScreenViewUsecase,
     required LogEventUsecase logEventUsecase,
     required UserAnalyticsService userAnalyticsService,
-    required RemoteConfigService remoteConfigService,
     required NotificationService notificationService,
   }) : _prefs = prefs,
        _logScreenViewUsecase = logScreenViewUsecase,
        _logEventUsecase = logEventUsecase,
        _userAnalyticsService = userAnalyticsService,
-       _remoteConfigService = remoteConfigService,
        _notificationService = notificationService,
        super(OnBoardingLoadingState()) {
     on<OnBoardingInitialEvent>(_onOnBoardingInitialEvent);
@@ -252,38 +248,22 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     Emitter<OnBoardingState> emit,
   ) {
     // D0 "Add my cat" → push the wizard. On success the wizard invokes
-    // [onCreated] (below), which pushes the success screen *over* the wizard so
-    // it slides in forward (from the right) like any step. On cancel the wizard
-    // just pops back to the health-intro screen, so there's nothing to do here.
-    // The final analytics + paywall hand-off fire when the user taps "Start
-    // scanning" on the success screen (see _onOnBoardingFinalizedEvent).
+    // [onCreated] (below) finalizes onboarding straight from the wizard — the
+    // analytics + paywall hand-off in _onOnBoardingFinalizedEvent. The
+    // current-food scan and result beats that used to sit between the two were
+    // removed on 2026-09-12: they had been switched off in Remote Config for
+    // months, and the debug default still showed them.
     final current = _readyState();
 
     event.context.router.push(
       CreateCatRoute(
         seededName: current.seededName,
         seededPhotoPath: current.seededPhotoPath,
-        onCreated: (wizardContext, summary) {
-          // A cat was created — mark onboarding complete.
+        onCreated: (wizardContext, _) {
+          // A cat was created — mark onboarding complete, then straight to the
+          // paywall.
           _prefs.setBool(_onboardingCompletedKey, true);
-
-          // Remote kill switch: when disabled, skip the scan + recommendation
-          // cascade entirely and finalize straight from the wizard (→ paywall).
-          if (!_remoteConfigService.onboardingScanEnabled) {
-            add(OnBoardingFinalizedEvent(context: wizardContext));
-            return;
-          }
-
-          // Otherwise slide in the scan step (→ success screen). The success
-          // screen's CTA finalizes (paywall) via the same onStart callback.
-          wizardContext.router.push(
-            CurrentFoodRoute(
-              summary: summary,
-              onStart: (resultContext) => add(
-                OnBoardingFinalizedEvent(context: resultContext),
-              ),
-            ),
-          );
+          add(OnBoardingFinalizedEvent(context: wizardContext));
         },
       ),
     );
@@ -308,9 +288,9 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
     );
     _userAnalyticsService.markOnboardingComplete();
     // Tagged here, not where the `onboarding_completed` pref is written (that
-    // happens on cat creation, before the scan and paywall). This means the tag
-    // does NOT imply the user got past the paywall — `is_subscriber` is what
-    // says that.
+    // happens on cat creation, before the paywall). This means the tag does
+    // NOT imply the user got past the paywall — `is_subscriber` is what says
+    // that.
     _notificationService.setTags({
       NotificationTags.onboardingCompleted: NotificationTags.boolValue(true),
     });
@@ -328,8 +308,8 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       );
     }
     // replaceAll (not replace) because the stack now holds onboarding → wizard
-    // → success underneath; clear them all so Main is the sole route. Activate
-    // the Home tab (not the default first/Search tab) to match the splash flow.
+    // underneath; clear them all so Main is the sole route. Activate the Home
+    // tab (not the default first/Search tab) to match the splash flow.
     await router.replaceAll([
       MainRoute(children: [const HomeRoute()]),
     ]);

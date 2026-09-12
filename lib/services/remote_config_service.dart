@@ -3,13 +3,10 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 /// Thin wrapper around Firebase Remote Config exposing the app's runtime kill
 /// switches. Fail-open by design: in-app defaults keep every feature enabled, so
 /// a fetch failure, throttle, or first cold launch never breaks a flow.
+///
+/// `onboarding_scan_enabled` used to live here too; the onboarding scan it
+/// gated was removed on 2026-09-12, so the console key is now inert.
 class RemoteConfigService {
-  /// When `false`, the post-cat-creation onboarding cascade (food scan +
-  /// recommendation reveal) is skipped and the user goes straight to the
-  /// paywall. Flip in the Firebase console to disable the Anthropic-backed scan
-  /// for new onboarding sessions without shipping a build.
-  static const String onboardingScanEnabledKey = 'onboarding_scan_enabled';
-
   /// When `false`, Mixpanel Session Replay never starts, whatever the build
   /// type. Lets us stop recording from the Firebase console without shipping a
   /// build — e.g. if replay quota runs low or a privacy question comes up.
@@ -31,7 +28,6 @@ class RemoteConfigService {
   Future<void> initialize() async {
     try {
       await _remoteConfig.setDefaults(const {
-        onboardingScanEnabledKey: true,
         sessionReplayEnabledKey: true,
         sessionReplaySamplePercentKey: 100.0,
       });
@@ -46,9 +42,6 @@ class RemoteConfigService {
       // Fail open: defaults already registered, so the app keeps working.
     }
   }
-
-  bool get onboardingScanEnabled =>
-      _remoteConfig.getBool(onboardingScanEnabledKey);
 
   bool get sessionReplayEnabled =>
       _remoteConfig.getBool(sessionReplayEnabledKey);

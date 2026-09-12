@@ -17,15 +17,34 @@ String periodTitleFor(Package pkg, AppLocalizations l10n) {
 }
 
 /// Localized billing-period noun ("week" / "month" / "year") for price lines.
-/// Null for package types with no natural suffix (e.g. lifetime), which callers
+/// Null for packages with no natural suffix (e.g. lifetime), which callers
 /// treat as "fall back to generic copy".
+///
+/// The reserved `$rc_*` package types answer directly. A **custom** package —
+/// the second-chance `annual_offer` — carries no type, so it falls through to
+/// the store product's own ISO-8601 period (`P1Y`, `P1M`, `P1W`); without that
+/// the offer's disclosure lines silently lost their "then €29.99/year".
 String? periodSuffixFor(Package pkg, AppLocalizations l10n) {
   return switch (pkg.packageType) {
     PackageType.annual => l10n.paywallPeriodSuffixAnnual,
     PackageType.monthly => l10n.paywallPeriodSuffixMonthly,
     PackageType.weekly => l10n.paywallPeriodSuffixWeekly,
-    _ => null,
+    _ => switch (_isoPeriodUnit(pkg.storeProduct.subscriptionPeriod)) {
+        'Y' => l10n.paywallPeriodSuffixAnnual,
+        'M' => l10n.paywallPeriodSuffixMonthly,
+        'W' => l10n.paywallPeriodSuffixWeekly,
+        _ => null,
+      },
   };
+}
+
+/// Unit letter of a single-unit ISO-8601 period ("P1Y" → "Y"); null for
+/// anything else, including multi-unit periods like "P3M", which have no
+/// one-word suffix.
+String? _isoPeriodUnit(String? iso) {
+  if (iso == null) return null;
+  final m = RegExp(r'^P1([YMWD])$').firstMatch(iso);
+  return m?.group(1);
 }
 
 /// Per-month breakdown for annual plans (e.g. "$4.17/month"). Null otherwise.

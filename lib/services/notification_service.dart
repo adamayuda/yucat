@@ -39,8 +39,29 @@ class NotificationTags {
   static const isSubscriber = 'is_subscriber';
   static const lastActiveAt = 'last_active_at';
 
+  /// Trial state, refreshed with [isSubscriber] on every splash gate so it
+  /// flips to `"false"` by itself when the trial converts or lapses — the exit
+  /// condition for a trial Journey.
+  static const isTrial = 'is_trial';
+  static const trialStartedAt = 'trial_started_at';
+
+  /// Date of the last successful scan (food or litter). The trial Journey
+  /// branches on this: a day-2 nudge to someone who scanned today is noise.
+  static const lastScanAt = 'last_scan_at';
+
+  /// The three toggles on the onboarding reminders screen. They were purely
+  /// presentational before; persisting them as tags is what lets a Journey
+  /// honour what the user actually asked for.
+  static const reminderFoodChange = 'reminder_food_change';
+  static const reminderBetterFit = 'reminder_better_fit';
+  static const reminderMonthly = 'reminder_monthly';
+
   /// OneSignal has no booleans; these are the only two values a bool tag takes.
   static String boolValue(bool v) => v ? 'true' : 'false';
+
+  /// Date-only stamp (`YYYY-MM-DD`): changes at most once a day, which keeps
+  /// tag writes cheap and is the right resolution for a recency segment.
+  static String dateValue(DateTime d) => d.toIso8601String().split('T').first;
 }
 
 /// Thin wrapper around the OneSignal SDK so the rest of the app never touches
@@ -170,18 +191,44 @@ class NotificationService {
   /// Must be called on **every** splash gate, not only on purchase — otherwise a
   /// churned subscriber keeps `is_subscriber = true` for ever and silently falls
   /// out of every win-back segment.
-  Future<void> setSubscriber(bool isSubscriber) => setTags({
+  ///
+  /// Pass [isTrial] whenever the entitlement was actually read, so the trial
+  /// tag is refreshed in the same breath and can't outlive the trial.
+  Future<void> setSubscriber(bool isSubscriber, {bool? isTrial}) => setTags({
         NotificationTags.isSubscriber: NotificationTags.boolValue(isSubscriber),
+        if (isTrial != null)
+          NotificationTags.isTrial: NotificationTags.boolValue(isTrial),
+      });
+
+  /// Called once, on the purchase that opened a free trial. Entry point for
+  /// the trial Journey (`is_trial = true`, then +24 h / +48 h pushes).
+  Future<void> markTrialStarted() => setTags({
+        NotificationTags.isTrial: NotificationTags.boolValue(true),
+        NotificationTags.trialStartedAt: NotificationTags.dateValue(DateTime.now()),
       });
 
   /// Stamp today's date, for "dormant for N days" segments.
-  ///
-  /// Date-only on purpose: it changes at most once a day, which keeps tag writes
-  /// cheap and is the right resolution for a recency segment.
-  Future<void> setLastActive() {
-    final today = DateTime.now().toIso8601String().split('T').first;
-    return setTags({NotificationTags.lastActiveAt: today});
-  }
+  Future<void> setLastActive() => setTags({
+        NotificationTags.lastActiveAt: NotificationTags.dateValue(DateTime.now()),
+      });
+
+  /// Stamp today's date on every successful scan, food or litter.
+  Future<void> setLastScan() => setTags({
+        NotificationTags.lastScanAt: NotificationTags.dateValue(DateTime.now()),
+      });
+
+  /// Persist the reminders-screen toggles. All three are written every time,
+  /// including `"false"`, so a Segment can distinguish "opted out of monthly"
+  /// from "never saw the screen".
+  Future<void> setReminderPreferences({
+    required bool foodChange,
+    required bool betterFit,
+    required bool monthly,
+  }) => setTags({
+        NotificationTags.reminderFoodChange: NotificationTags.boolValue(foodChange),
+        NotificationTags.reminderBetterFit: NotificationTags.boolValue(betterFit),
+        NotificationTags.reminderMonthly: NotificationTags.boolValue(monthly),
+      });
 
   /// Detach the external id. Kept for completeness; unused while auth is
   /// anonymous-only.

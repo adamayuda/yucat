@@ -10,10 +10,11 @@ import 'package:yucat/services/notification_service.dart';
 
 /// Reminder-preferences screen.
 ///
-/// The reminder-type selections are presentational only (not persisted). Tapping
-/// "Done" triggers the OS push-permission prompt via OneSignal before advancing;
-/// "Set up later" advances without prompting.
-// TODO(feature): persist reminder-type preferences for segmentation.
+/// Tapping "Done" writes the three toggles as OneSignal tags
+/// (`reminder_food_change` / `reminder_better_fit` / `reminder_monthly`) and
+/// then triggers the OS push-permission prompt before advancing. Delivery is
+/// a OneSignal Journey keyed on those tags — the app schedules nothing locally.
+/// "Set up later" advances without writing or prompting.
 class RemindersScreen extends StatefulWidget {
   final VoidCallback onNext;
 
@@ -42,10 +43,20 @@ List<_ReminderOption> _buildReminderOptions(AppLocalizations l10n) => [
 class _RemindersScreenState extends State<RemindersScreen> {
   final Set<int> _selected = {};
 
-  /// Prompt for push permission, then advance regardless of the user's choice
-  /// so onboarding never blocks on the OS dialog.
+  /// Persist the toggles, prompt for push permission, then advance regardless
+  /// of the user's choice so onboarding never blocks on the OS dialog.
+  ///
+  /// Tags are written *before* the prompt: they need the SDK initialised, not
+  /// permission granted, and a user who declines today can still be reached
+  /// with the right reminders if they enable notifications in Settings later.
   Future<void> _onDone() async {
-    await sl<NotificationService>().requestPermission();
+    final notifications = sl<NotificationService>();
+    await notifications.setReminderPreferences(
+      foodChange: _selected.contains(0),
+      betterFit: _selected.contains(1),
+      monthly: _selected.contains(2),
+    );
+    await notifications.requestPermission();
     widget.onNext();
   }
 

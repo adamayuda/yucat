@@ -17,4 +17,7 @@ class AuthRepositoryImpl extends AuthRepository {
   User? currentUser() {
     return _dataSource.currentUser();
   }
+
+  @override
+  Future<void> signOut() => _dataSource.signOut();
 }

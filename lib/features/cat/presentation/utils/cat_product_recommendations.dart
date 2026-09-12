@@ -174,3 +174,32 @@ List<String> _needTerms(CatEntity cat) {
 
   return terms;
 }
+
+/// Picks that beat [product] *for this cat* — the "Better for {name}" list
+/// under a verdict.
+///
+/// "Better" is per-cat fit first, then quality on a tie, so a food is never
+/// suggested over one that already suits the cat as well. The scanned product
+/// itself is dropped by the same `brand__name` identity the saved-products and
+/// scan-history stores use. Rides on [recommendProductsForCat]'s per-cat cache,
+/// so on a page the cat has already been ranked for this costs no network.
+Future<List<ProductPick>> betterAlternativesFor(
+  CatEntity cat,
+  ProductDisplayModel product,
+  AppLocalizations l10n, {
+  int limit = 3,
+}) async {
+  final current = evaluateCatProduct(cat, product, l10n);
+  final selfKey = '${product.brand}__${product.name}'.trim().toLowerCase();
+
+  final picks = await recommendProductsForCat(cat, l10n, limit: _poolCacheSize);
+  return picks
+      .where((p) {
+        final key = '${p.product.brand}__${p.product.name}'.trim().toLowerCase();
+        if (key == selfKey) return false;
+        if (p.fit != current.score) return p.fit > current.score;
+        return p.product.score > product.score;
+      })
+      .take(limit)
+      .toList();
+}

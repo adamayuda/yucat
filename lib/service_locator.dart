@@ -10,7 +10,9 @@ import 'package:mixpanel_flutter/mixpanel_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/core/subscription/data/repositories/subscription_repository_impl.dart';
 import 'package:yucat/core/subscription/domain/repositories/subscription_repository.dart';
+import 'package:yucat/core/subscription/domain/usecases/get_subscription_status_usecase.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
+import 'package:yucat/core/subscription/domain/usecases/link_subscription_user_usecase.dart';
 import 'package:yucat/features/analytics/data/repository/analytics_repository_impl.dart';
 import 'package:yucat/features/analytics/domain/repository/analytics_repository.dart';
 import 'package:yucat/features/analytics/domain/usecase/identify_user_usecase.dart';
@@ -90,6 +92,7 @@ import 'package:yucat/features/search_products/presentation/mappers/product_to_m
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
 import 'package:yucat/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:yucat/services/notification_service.dart';
+import 'package:yucat/services/qa_reset_service.dart';
 import 'package:yucat/services/remote_config_service.dart';
 import 'package:yucat/services/review_prompt_service.dart';
 import 'package:yucat/services/session_replay_service.dart';
@@ -405,6 +408,12 @@ Future<void> _registerUseCases() async {
   sl.registerSingleton<HasActiveSubscriptionUseCase>(
     HasActiveSubscriptionUseCase(repository: sl<SubscriptionRepository>()),
   );
+  sl.registerSingleton<GetSubscriptionStatusUseCase>(
+    GetSubscriptionStatusUseCase(repository: sl<SubscriptionRepository>()),
+  );
+  sl.registerSingleton<LinkSubscriptionUserUsecase>(
+    LinkSubscriptionUserUsecase(repository: sl<SubscriptionRepository>()),
+  );
   sl.registerSingleton<GetSavedProductsUsecase>(
     GetSavedProductsUsecase(repository: sl<SavedProductsRepository>()),
   );
@@ -502,6 +511,16 @@ Future<void> _registerServices() async {
       prefs: sl<SharedPreferences>(),
     ),
   );
+  sl.registerSingleton<QaResetService>(
+    QaResetService(
+      auth: sl<AuthRepository>(),
+      subscription: sl<SubscriptionRepository>(),
+      analytics: sl<AnalyticsRepository>(),
+      userAnalytics: sl<UserAnalyticsService>(),
+      notifications: sl<NotificationService>(),
+      prefs: sl<SharedPreferences>(),
+    ),
+  );
 }
 
 extension BlocProviderRegistration on GetIt {
@@ -517,7 +536,8 @@ Future<void> _registerBlocs() async {
   sl.registerBloc<SplashBloc>(
     () => SplashBloc(
       prefs: sl<SharedPreferences>(),
-      hasActiveSubscriptionUseCase: sl<HasActiveSubscriptionUseCase>(),
+      getSubscriptionStatusUseCase: sl<GetSubscriptionStatusUseCase>(),
+      linkSubscriptionUserUsecase: sl<LinkSubscriptionUserUsecase>(),
       userAnalyticsService: sl<UserAnalyticsService>(),
       ensureSignedInUsecase: sl<EnsureSignedInUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
@@ -536,7 +556,6 @@ Future<void> _registerBlocs() async {
       logScreenViewUsecase: sl<LogScreenViewUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
       userAnalyticsService: sl<UserAnalyticsService>(),
-      remoteConfigService: sl<RemoteConfigService>(),
       notificationService: sl<NotificationService>(),
     ),
   );
@@ -577,6 +596,7 @@ Future<void> _registerBlocs() async {
       getScanHistoryUsecase: sl<GetScanHistoryUsecase>(),
       getLitterHistoryUsecase: sl<GetLitterHistoryUsecase>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
+      qaResetService: sl<QaResetService>(),
     ),
   );
   sl.registerBloc<ProductDetailBloc>(

@@ -29,4 +29,8 @@ abstract class AnalyticsRepository {
 
   /// Increment a numeric People property (e.g. a lifetime scan counter).
   Future<void> incrementUserProperty(String propertyName, double by);
+
+  /// Forget the current distinct id and super properties so the next
+  /// [identify] binds a fresh profile. QA only.
+  Future<void> reset();
 }

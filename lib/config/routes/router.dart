@@ -4,9 +4,7 @@ import 'package:yucat/features/cat_listing/models/cat_model.dart';
 import 'package:yucat/features/cat_create/create_cat_page.dart';
 import 'package:yucat/features/cat_create/presentation/models/cat_summary.dart';
 import 'package:yucat/features/cat_detail/presentation/cat_detail_page.dart';
-import 'package:yucat/features/onboarding/current_food_page.dart';
 import 'package:yucat/features/onboarding/onboarding_page.dart';
-import 'package:yucat/features/onboarding/result_page.dart';
 import 'package:yucat/features/litter_detail/presentation/litter_detail_page.dart';
 import 'package:yucat/features/litter_detail/presentation/models/litter_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
@@ -127,22 +125,6 @@ class AppRouter extends RootStackRouter {
     CustomRoute(
       page: CreateCatRoute.page,
       path: '/cats/create',
-      durationInMilliseconds: 280,
-      reverseDurationInMilliseconds: 280,
-      transitionsBuilder: _slideLeftCubic,
-    ),
-    // Onboarding scan → success screens. Pushed over the wizard when a cat is
-    // created, so they slide in forward (from the right) like the wizard itself.
-    CustomRoute(
-      page: CurrentFoodRoute.page,
-      path: '/onboarding/current-food',
-      durationInMilliseconds: 280,
-      reverseDurationInMilliseconds: 280,
-      transitionsBuilder: _slideLeftCubic,
-    ),
-    CustomRoute(
-      page: ResultRoute.page,
-      path: '/onboarding/result',
       durationInMilliseconds: 280,
       reverseDurationInMilliseconds: 280,
       transitionsBuilder: _slideLeftCubic,

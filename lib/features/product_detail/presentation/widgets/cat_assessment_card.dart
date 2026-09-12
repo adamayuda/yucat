@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
+import 'package:yucat/features/product_detail/presentation/widgets/better_alternatives_section.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/cat_verdict_card.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/cat_avatar.dart';
@@ -122,6 +123,17 @@ class _CatAssessmentSectionState extends State<CatAssessmentSection> {
           child: CatVerdictCard(
             // Rebuild the card when the selection changes.
             key: ValueKey(selectedCat.id ?? selectedCat.name),
+            cat: selectedCat,
+            product: widget.product,
+          ),
+        ),
+        // Lives inside this section rather than beside it so it always reads
+        // the same cat as the verdict above — the selection is local state
+        // here, and a sibling would need it lifted just to stay in sync.
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+          child: BetterAlternativesSection(
+            key: ValueKey('alt-${selectedCat.id ?? selectedCat.name}'),
             cat: selectedCat,
             product: widget.product,
           ),

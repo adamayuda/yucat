@@ -38,8 +38,8 @@ class AnalyticsEvents {
   // Means "closed without converting" — it is deliberately NOT fired on
   // purchase/restore success. See the note in PaywallBloc._logPaywallDismissed.
   static const paywallDismissed = 'Paywall Dismissed';
-  // Unreachable while the paywall offers a single plan; kept for when a second
-  // plan comes back.
+  // Fires on one path only: accepting the second-chance sheet switches the
+  // selection to the `annual_offer` package. No plan picker is rendered.
   static const planSelected = 'Plan Selected';
   static const subscriptionCompleted = 'Subscription Completed';
   static const subscriptionRestored = 'Subscription Restored';
@@ -50,6 +50,13 @@ class AnalyticsEvents {
   static const subscriptionPurchaseFailed = 'Subscription Purchase Failed';
   // Not an error: the user backed out of the store sheet.
   static const paywallPurchaseCancelled = 'Paywall Purchase Cancelled';
+  // The discounted-first-year sheet (`annual_offer` package) offered once after
+  // the first store-sheet cancel, only to users still eligible for an intro
+  // offer. `Shown` is the denominator; `Tapped` leads to `Plan Selected`,
+  // `Paywall CTA Tapped` and `Subscription Completed { is_intro_offer: true }`.
+  static const paywallSecondChanceShown = 'Paywall Second Chance Shown';
+  static const paywallSecondChanceTapped = 'Paywall Second Chance Tapped';
+  static const paywallSecondChanceDismissed = 'Paywall Second Chance Dismissed';
   static const subscriptionRestoreFailed = 'Subscription Restore Failed';
   // Restore ran and found nothing to restore — the expected outcome for a
   // first-time user, and previously reported as `Subscription Restore Failed`
@@ -69,12 +76,9 @@ class AnalyticsEvents {
       'Onboarding Attribution Selected';
   static const onboardingAttributionSkipped = 'Onboarding Attribution Skipped';
 
-  // Onboarding scan funnel
-  static const onboardingScanCaptured = 'Onboarding Scan Captured';
-  static const onboardingScanSucceeded =
-      'Onboarding Scan Succeeded'; // was 'Onboarding Scan Verdict'
-  static const onboardingScanFailed = 'Onboarding Scan Failed';
-  static const onboardingScanSkipped = 'Onboarding Scan Skipped';
+  // The `Onboarding Scan Captured / Succeeded / Failed / Skipped` namespace
+  // was deleted with the onboarding scan beat (2026-09-12); historical rows
+  // remain in Mixpanel.
 
   // Cat-create wizard
   static const catWizardStepViewed = 'Cat Wizard Step Viewed';
@@ -119,6 +123,12 @@ class AnalyticsEvents {
   static const searchResultsViewed = 'Search Results Viewed';
   static const productSaved = 'Product Saved';
   static const productUnsaved = 'Product Unsaved';
+  // The "Better for {cat}" list under a verdict. `Shown` fires only when at
+  // least one better food rendered — a great product ends at its verdict and
+  // must not count as an ignored list. Emitted from the widget, which is the
+  // only layer that knows the selected cat.
+  static const alternativesShown = 'Alternatives Shown';
+  static const alternativeTapped = 'Alternative Tapped';
 
   // Profile & misc
   static const profileCatTapped = 'Profile Cat Tapped';
@@ -222,6 +232,15 @@ class UserProps {
   static const subscriptionPlan = 'subscription_plan';
   static const subscriptionPrice = 'subscription_price';
   static const subscriptionCurrency = 'subscription_currency';
+
+  /// Whether the active entitlement is in its free-trial period. Written on
+  /// purchase and refreshed on every splash gate from the entitlement itself,
+  /// so it turns false on its own when the trial converts or lapses.
+  static const isTrial = 'is_trial';
+
+  /// When the trial began. Trial→paid lives in RevenueCat, not here; this is
+  /// the cohort key for "what did trialists do on day 1 / 2 / 3".
+  static const trialStartedAt = 'trial_started_at';
   static const catsCount = 'cats_count';
   static const hasCat = 'has_cat';
   static const primaryCatAgeGroup = 'primary_cat_age_group';

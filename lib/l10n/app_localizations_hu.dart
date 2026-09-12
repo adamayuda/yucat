@@ -672,33 +672,6 @@ class AppLocalizationsHu extends AppLocalizations {
   String get onboardingStartScanning => 'Szkennelés megkezdése';
 
   @override
-  String get onboardingSuccessNotSet => 'Nincs beállítva';
-
-  @override
-  String get onboardingSuccessNone => 'Nincs';
-
-  @override
-  String get onboardingSuccessRowAge => 'Kor';
-
-  @override
-  String get onboardingSuccessRowActivity => 'Aktivitás';
-
-  @override
-  String get onboardingSuccessRowBodyCondition => 'Testalkat';
-
-  @override
-  String get onboardingSuccessRowCoat => 'Szőrzet';
-
-  @override
-  String get onboardingSuccessRowNeuterStatus => 'Ivartalanítás állapota';
-
-  @override
-  String get onboardingSuccessRowBreed => 'Fajta';
-
-  @override
-  String get onboardingSuccessRowHealthConditions => 'Egészségi állapot';
-
-  @override
   String get onboardingSuccessProfileReadyTitle => 'Profil kész';
 
   @override
@@ -883,6 +856,51 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get paywallNoPaymentDue => 'Most nem kell fizetned';
+
+  @override
+  String get paywallSecondChanceTitle => 'Még gondolkodsz?';
+
+  @override
+  String paywallSecondChanceBody(String introPrice, String price) {
+    return 'Az első éved $introPrice a(z) $price helyett.';
+  }
+
+  @override
+  String paywallSecondChanceFirstYear(String price) {
+    return '$price az első évben';
+  }
+
+  @override
+  String paywallSecondChanceCta(String price) {
+    return 'Első év megszerzése: $price';
+  }
+
+  @override
+  String paywallSecondChanceKeepTrial(int days) {
+    return 'A $days napos ingyenes próba megtartása';
+  }
+
+  @override
+  String get paywallSecondChanceNoThanks => 'Köszönöm, nem';
+
+  @override
+  String paywallIntroDisclosure(
+    String introPrice,
+    String price,
+    String period,
+  ) {
+    return '$introPrice az első évben, utána $price/$period. Bármikor lemondható.';
+  }
+
+  @override
+  String paywallAutoRenewDisclosureIntro(
+    String introPrice,
+    String price,
+    String period,
+    String store,
+  ) {
+    return 'A Yucat Plus első éve $introPrice, utána automatikusan megújul $price/$period áron, hacsak nem mondod le legalább 24 órával az aktuális időszak vége előtt. Bármikor kezelheted vagy lemondhatod a(z) $store fiókbeállításaiban.';
+  }
 
   @override
   String get paywallRetry => 'Újra';
@@ -1790,6 +1808,19 @@ class AppLocalizationsHu extends AppLocalizations {
   String get profileResetOnboarding => 'Bemutató visszaállítása';
 
   @override
+  String get profileResetTestUser => 'Tesztfelhasználó visszaállítása';
+
+  @override
+  String get profileResetTestUserConfirmTitle => 'Új felhasználóként kezded?';
+
+  @override
+  String get profileResetTestUserConfirmBody =>
+      'Kijelentkezik a Firebase-ből, a RevenueCatből és a OneSignalból, törli a helyi adatokat, majd újraindul az indítóképernyőről. A macskák a régi felhasználó alatt maradnak a Firestore-ban.';
+
+  @override
+  String get profileResetTestUserConfirm => 'Visszaállítás';
+
+  @override
   String get profileDebugOnly => 'Csak tesztverziókban';
 
   @override
@@ -2265,13 +2296,13 @@ class AppLocalizationsHu extends AppLocalizations {
   String get onboardingAnalyzeStep4 => 'Ajánlások személyre szabása';
 
   @override
-  String onboardingResultTitle(String name) {
-    return '$name terve elkészült';
+  String productPicksTitle(String name) {
+    return 'Legjobb választások $name számára';
   }
 
   @override
-  String productPicksTitle(String name) {
-    return 'Legjobb választások $name számára';
+  String productDetailBetterForCat(String name) {
+    return 'Jobb $name számára';
   }
 
   @override
@@ -2307,22 +2338,6 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
-  String onboardingBrandUnlockCta(String name) {
-    return '$name legjobb választásainak felfedezése';
-  }
-
-  @override
-  String brandTeaserFound(num count, String name) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count jobb táplálékot',
-      one: '1 jobb táplálékot',
-    );
-    return '$_temp0 találtunk $name számára';
-  }
-
-  @override
   String get brandTeaserLockedHint =>
       'Fizess elő, hogy lásd őket – a macskád igényeihez igazítva.';
 
@@ -2330,27 +2345,11 @@ class AppLocalizationsHu extends AppLocalizations {
   String get brandTeaserRowLocked => 'Feloldás a megtekintéshez';
 
   @override
-  String get onboardingScanTitle => 'Olvassuk be az\nelső csomagot';
-
-  @override
   String get onboardingScanSubtitle =>
       'Szkenneld be a csomagolást, és értékeljük a macskád számára.';
 
   @override
-  String get onboardingScanCta => 'Olvassuk be';
-
-  @override
-  String get onboardingScanSkip => 'Most kihagyom';
-
-  @override
   String get onboardingScanVerdictIntro => 'Így pontozott ez a táplálék:';
-
-  @override
-  String get onboardingScanFailed =>
-      'Nem tudtuk azonosítani a terméket. Próbáld újra úgy, hogy a csomagolás eleje jól látszódjon.';
-
-  @override
-  String get onboardingScanRetry => 'Újra beolvasás';
 
   @override
   String onboardingScanPersonalCon(String name, String con) {
@@ -2360,11 +2359,6 @@ class AppLocalizationsHu extends AppLocalizations {
   @override
   String onboardingResultWhyTitle(String name) {
     return 'Miért nem ideális $name számára';
-  }
-
-  @override
-  String onboardingResultProfileTitle(String name) {
-    return '$name profilja';
   }
 
   @override

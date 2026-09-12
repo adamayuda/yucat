@@ -11,6 +11,7 @@ import 'package:yucat/core/legal_urls.dart';
 import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
+import 'package:yucat/features/paywall/utils/intro_offer_info.dart';
 import 'package:yucat/features/paywall/utils/paywall_format.dart';
 import 'package:yucat/features/paywall/utils/trial_info.dart';
 import 'package:yucat/features/paywall/widgets/paywall_testimonials.dart';
@@ -73,6 +74,7 @@ class PaywallLoadedWidget extends StatelessWidget {
                     _AutoRenewDisclosure(
                       package: state.selectedPackage,
                       trial: trial,
+                      intro: state.eligibleIntro,
                     ),
                     const SizedBox(height: DSDimens.sizeS),
                     _LegalLinks(
@@ -148,6 +150,7 @@ class PaywallLoadedWidget extends StatelessWidget {
                     _Reassurance(
                       package: state.selectedPackage,
                       trial: trial,
+                      intro: state.eligibleIntro,
                     ),
                     // QA escape hatch so the hard gate can be skipped while
                     // testing the rest of the app. ⚠️ **Debug only** — not
@@ -499,8 +502,13 @@ class _NoPaymentDue extends StatelessWidget {
 class _Reassurance extends StatelessWidget {
   final Package package;
   final TrialInfo? trial;
+  final IntroOfferInfo? intro;
 
-  const _Reassurance({required this.package, required this.trial});
+  const _Reassurance({
+    required this.package,
+    required this.trial,
+    required this.intro,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -513,7 +521,9 @@ class _Reassurance extends StatelessWidget {
         ? l10n.paywallCancelAnytime
         : trial != null
             ? l10n.paywallTrialDisclosure(trial!.days, price, period)
-            : l10n.paywallPriceDisclosure(price, period);
+            : intro != null
+                ? l10n.paywallIntroDisclosure(intro!.priceString, price, period)
+                : l10n.paywallPriceDisclosure(price, period);
     // No icon: _NoPaymentDue sits directly above with a check mark, and two
     // stacked icons in a three-line footer reads cluttered.
     return Text(
@@ -529,8 +539,13 @@ class _Reassurance extends StatelessWidget {
 class _AutoRenewDisclosure extends StatelessWidget {
   final Package package;
   final TrialInfo? trial;
+  final IntroOfferInfo? intro;
 
-  const _AutoRenewDisclosure({required this.package, required this.trial});
+  const _AutoRenewDisclosure({
+    required this.package,
+    required this.trial,
+    required this.intro,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -543,7 +558,10 @@ class _AutoRenewDisclosure extends StatelessWidget {
       trial != null
           ? l10n.paywallAutoRenewDisclosureTrial(
               trial!.days, price, period, store)
-          : l10n.paywallAutoRenewDisclosure(price, period, store),
+          : intro != null
+              ? l10n.paywallAutoRenewDisclosureIntro(
+                  intro!.priceString, price, period, store)
+              : l10n.paywallAutoRenewDisclosure(price, period, store),
       textAlign: TextAlign.center,
       style: DSTextStyles.caption.copyWith(color: DSColors.inkTertiary),
     );

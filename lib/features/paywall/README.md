@@ -37,6 +37,49 @@ being offered.
 A user who isn't trial-eligible (they've used one before) sees no "No payment due
 now" line, the CTA "Let's get started", and "$24.99/year. Cancel anytime."
 
+### The second-chance sheet
+
+Three in four users who tap the CTA back out of Apple's sheet — the first place they
+see the annual price beside the €0.00 trial. On that **first** cancel, and only then,
+a bottom sheet (`widgets/paywall_second_chance_sheet.dart`) offers the **same yearly
+plan with a discounted first year**:
+
+```
+       Still thinking it over?
+  Get your first year for €19.99 instead of €29.99.
+         €19.99 for your first year
+      then €29.99/year · Cancel anytime.
+   [ Get the first year for €19.99 ]
+       Keep the 3-day free trial
+```
+
+- The discount is a second App Store product in the same group —
+  `com.adam.yucat.app.pro.yearly.offer`, €29.99/year with a **pay-up-front
+  introductory offer** of 1 year at €19.99 — attached to the offering as the custom
+  package **`annual_offer`** (`PaywallBloc.secondChancePackageId`). No package → no
+  sheet, nothing else changes. Android has no such product, so the sheet never shows
+  there.
+- Offered **once per paywall session** (`_secondChanceShownThisSession`), never after
+  cancelling the offer's own sheet, and never when the paywall already fell back to a
+  non-annual plan.
+- **Eligibility is checked at load**, in parallel with the main plan's: Apple grants
+  one introductory offer per subscription group per customer, so a lapsed subscriber
+  who already used the trial is ineligible for the discount too — the store would
+  charge them the full €29.99 — and `secondChancePackage` resolves to null for them.
+- Accepting dispatches a single `PaywallSecondChanceAcceptedEvent`, which selects the
+  offer package (re-resolving its offers — see `withSelection`) and then runs the
+  normal purchase. One event, not select-then-purchase, because bloc handlers run
+  concurrently by default and a purchase must never race the selection it depends on.
+  Once selected, the footer (`_Reassurance`) and the long disclosure read
+  "€19.99 for the first year, then €29.99/year" via `paywallIntroDisclosure` /
+  `paywallAutoRenewDisclosureIntro`, and `Subscription Completed` carries
+  `is_intro_offer: true`, `intro_price`.
+- The way back is worded from the main plan's trial ("Keep the 3-day free trial")
+  and falls back to "No thanks" for ineligible users.
+- Detection lives in `utils/intro_offer_info.dart` (`introOfferFor`), the paid
+  sibling of `trialInfoFor`: on StoreKit a **non-zero** `introductoryPrice` is a
+  discount, a zero one is the trial.
+
 ---
 
 ## 2. Where it's enforced
@@ -86,13 +129,15 @@ lib/features/paywall/
 ├── paywall_page.dart              @RoutePage; PopScope, BlocConsumer, SnackBars
 ├── bloc/
 │   ├── paywall_bloc.dart          offerings, eligibility, purchase, restore
-│   ├── paywall_event.dart         5 events
+│   ├── paywall_event.dart         7 events
 │   └── paywall_state.dart         6 states
 ├── utils/
 │   ├── trial_info.dart            cross-platform trial detection  ← the subtle bit
+│   ├── intro_offer_info.dart      paid intro-offer detection (the second-chance discount)
 │   └── paywall_format.dart        price/period/CTA string helpers
 └── widgets/
     ├── paywall_loaded_widget.dart hero, value props, cat animation, CTA, disclosures
+    ├── paywall_second_chance_sheet.dart  the discounted-first-year bottom sheet (§1)
     ├── paywall_package_row.dart   the plan card — **not rendered** (see §11)
     ├── paywall_value_props.dart   4 feature rows, icon + one sentence
     ├── paywall_testimonials.dart  carousel (placeholder testimonials)
@@ -231,7 +276,14 @@ PaywallInitialEvent(trigger)
 `PaywallPurchaseEvent` · `PaywallRestoreEvent` · `PaywallDismissEvent`
 
 `PaywallPackageSelectedEvent` is unreachable with a single plan, but is kept
-wired so restoring a second plan needs no bloc changes.
+wired so restoring a second plan needs no bloc changes. The second-chance sheet
+uses its own `PaywallSecondChanceAcceptedEvent` / `PaywallSecondChanceDismissedEvent`
+(§1) rather than this one.
+
+⚠️ **`copyWith` cannot change the selection.** `eligibleTrial` is resolved per
+package, so switching plans goes through `withSelection(package:, eligibleTrial:)`,
+which re-resolves it. A `copyWith(selectedPackage:)` would let a monthly purchase
+inherit the annual plan's trial and log `is_trial: true` for a plan that bills today.
 
 ---
 
@@ -317,6 +369,7 @@ All three products live in it:
 | 1 | Yucat Premium Yearly | `com.adam.yucat.app.pro.yearly` | 1 year |
 | 2 | Yucat Premium Monthly | `com.adam.yucat.app.pro.monthly` | 1 month |
 | 3 | Yucat Premium Weekly | `com.adam.yucat.app.pro.weekly` | 1 week |
+| 1 | Yucat Premium Yearly Offer | `com.adam.yucat.app.pro.yearly.offer` | 1 year — €29.99 with a **pay-up-front intro offer, 1 year at €19.99** (created 2026-09-12, reviewed with the next binary). The second-chance sheet's product |
 
 Only **yearly** is surfaced by the app. Monthly and weekly remain published and
 continue to bill existing subscribers; they're filtered out client-side.
@@ -379,7 +432,7 @@ object in RevenueCat. Everything below is a *check*.
 | What | Value |
 |---|---|
 | Entitlement | **`yucat pro`** — note the space; hardcoded in `subscription_repository_impl.dart:5` |
-| Package | Must use the reserved identifier **`$rc_annual`** |
+| Package | Must use the reserved identifier **`$rc_annual`**; the second-chance sheet additionally looks for the custom package **`annual_offer`** (→ `com.adam.yucat.app.pro.yearly.offer`) and stays hidden without it |
 | Offering | Read as `offerings.current`; its own identifier is never checked |
 | iOS SDK key | `appl_RLrrtMqNXWlaNlEXzZQxUcxkJxw` |
 | Android SDK key | `goog_RiTqfgyAOTSPvSLQjnBszSTXAKK` |
@@ -446,11 +499,12 @@ Events in `lib/features/analytics/analytics_events.dart`:
 | `Paywall CTA Tapped` | `package_id`, `package_type`, `price`, `currency`, `trigger`, `is_trial`, `trial_days` |
 | `Paywall Restore Tapped` | `trigger` |
 | `Paywall Dismissed` | `cta_tapped`, `time_viewed_seconds` |
-| `Subscription Completed` | `package_id`, `package_type`, `price`, `currency`, `trigger`, **`is_trial`**, **`trial_days`** |
+| `Paywall Second Chance Shown` / `Tapped` / `Dismissed` | `package_id` (`annual_offer`), `package_type` (`custom`), `price`, `intro_price`, `currency`, `trigger` — the downsell sheet; `Tapped` is followed by `Plan Selected`, `Paywall CTA Tapped` and the normal purchase outcome |
+| `Subscription Completed` | `package_id`, `package_type`, `price`, `currency`, `trigger`, **`is_trial`**, **`trial_days`**, `is_intro_offer`, `intro_price` |
 | `Subscription Restored` | `trigger` |
 | `Subscription Purchase Failed` | `reason`, `error_message?`, `package_type`, `trigger` |
 | `Subscription Restore Failed` | `reason`, `error_message?` — note: **no `trigger`** |
-| `Plan Selected` | unreachable with a single plan; kept for a future second plan |
+| `Plan Selected` | fires on one path only — accepting the second-chance sheet switches the selection to `annual_offer` |
 
 `PaywallTrigger` values: `onboarding_complete`, `returning_user`.
 
@@ -519,6 +573,13 @@ renewals run at accelerated rates (minutes, not days).
 > group and cannot be reset.** Each tester is one use of the eligible path —
 > create several up front.
 
+> **A fresh tester is not a fresh user.** Deleting the app keeps the anonymous
+> Firebase session (iOS Keychain), so a reinstall is the same uid, the same
+> RevenueCat customer and the same sandbox entitlement — the paywall skips itself
+> and you never reach the sheet. Use Profile → **Reset test user** (`kQaToolsEnabled`)
+> to sign out of everything and restart as a new uid, then switch the sandbox
+> account in Settings → Developer → Sandbox Apple Account.
+
 **iOS StoreKit config file** — fastest loop for *rendering* work: Xcode → New File
 → StoreKit Configuration File, then Scheme → Run → Options. *Debug → StoreKit →
 Manage Transactions* resets eligibility instantly. RevenueCat entitlements may
@@ -540,7 +601,7 @@ prints to the console on `getOfferings()`.
 | Gap | Detail |
 |---|---|
 | No `CustomerInfo` listener | `Purchases.addCustomerInfoUpdateListener` is never registered, and `didChangeAppLifecycleState` doesn't re-check entitlements. A trial expiring mid-session isn't observed until cold launch. |
-| RevenueCat identity is unlinked | `appUserID = null` and `Purchases.logIn` is never called, so the RC anonymous ID is never tied to the Firebase UID. Entitlements follow the store account; a reinstalling user must tap **Restore purchases**. Trial abuse via reinstall is *not* possible — Apple/Play enforce eligibility per store account. |
+| Reinstall still needs **Restore purchases** | `SplashBloc` now links RevenueCat to the Firebase UID (`LinkSubscriptionUserUsecase` → `Purchases.logIn(uid)` + `setMixpanelDistinctID(uid)`), but anonymous Firebase auth mints a *new* uid on reinstall, so entitlements still follow the store account and a reinstalling user must tap Restore. Trial abuse via reinstall is *not* possible — Apple/Play enforce eligibility per store account. |
 | `SubscriptionRepositoryImpl` fails closed | `getCustomerInfo()` has a 5s timeout and returns `false` on any error, so a paying user offline at boot is held at the paywall. |
 | Dead free-tier code | `ScanTrackingService.canPerformScan` and `CatTrackingService.canCreateCat` are never called. Both classes now have **zero live callers** — `ScanTrackingService`'s last one was the scan streak, since removed. Kept so a free tier can be re-enabled. |
 | `PaywallError.iosOnly` never emitted | Vestigial; `paywall_error_widget.dart` still maps it. |

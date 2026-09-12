@@ -1342,60 +1342,6 @@ abstract class AppLocalizations {
   /// **'Start scanning'**
   String get onboardingStartScanning;
 
-  /// No description provided for @onboardingSuccessNotSet.
-  ///
-  /// In en, this message translates to:
-  /// **'Not set'**
-  String get onboardingSuccessNotSet;
-
-  /// No description provided for @onboardingSuccessNone.
-  ///
-  /// In en, this message translates to:
-  /// **'None'**
-  String get onboardingSuccessNone;
-
-  /// No description provided for @onboardingSuccessRowAge.
-  ///
-  /// In en, this message translates to:
-  /// **'Age'**
-  String get onboardingSuccessRowAge;
-
-  /// No description provided for @onboardingSuccessRowActivity.
-  ///
-  /// In en, this message translates to:
-  /// **'Activity'**
-  String get onboardingSuccessRowActivity;
-
-  /// No description provided for @onboardingSuccessRowBodyCondition.
-  ///
-  /// In en, this message translates to:
-  /// **'Body condition'**
-  String get onboardingSuccessRowBodyCondition;
-
-  /// No description provided for @onboardingSuccessRowCoat.
-  ///
-  /// In en, this message translates to:
-  /// **'Coat'**
-  String get onboardingSuccessRowCoat;
-
-  /// No description provided for @onboardingSuccessRowNeuterStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'Neuter status'**
-  String get onboardingSuccessRowNeuterStatus;
-
-  /// No description provided for @onboardingSuccessRowBreed.
-  ///
-  /// In en, this message translates to:
-  /// **'Breed'**
-  String get onboardingSuccessRowBreed;
-
-  /// No description provided for @onboardingSuccessRowHealthConditions.
-  ///
-  /// In en, this message translates to:
-  /// **'Health conditions'**
-  String get onboardingSuccessRowHealthConditions;
-
   /// No description provided for @onboardingSuccessProfileReadyTitle.
   ///
   /// In en, this message translates to:
@@ -1712,6 +1658,59 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No payment due now'**
   String get paywallNoPaymentDue;
+
+  /// Bottom sheet shown once after the user backs out of the store's annual purchase sheet; offers the same yearly plan with a discounted first year.
+  ///
+  /// In en, this message translates to:
+  /// **'Still thinking it over?'**
+  String get paywallSecondChanceTitle;
+
+  /// No description provided for @paywallSecondChanceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Get your first year for {introPrice} instead of {price}.'**
+  String paywallSecondChanceBody(String introPrice, String price);
+
+  /// Big price line on the second-chance sheet. Says 'year' outright: the offer product is the yearly plan.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} for your first year'**
+  String paywallSecondChanceFirstYear(String price);
+
+  /// No description provided for @paywallSecondChanceCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the first year for {price}'**
+  String paywallSecondChanceCta(String price);
+
+  /// No description provided for @paywallSecondChanceKeepTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the {days}-day free trial'**
+  String paywallSecondChanceKeepTrial(int days);
+
+  /// No description provided for @paywallSecondChanceNoThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'No thanks'**
+  String get paywallSecondChanceNoThanks;
+
+  /// Footer line under the CTA when the selected plan carries a paid pay-up-front introductory offer. 'year' is literal: the only such product is the yearly plan; {period} is the renewal period from the store.
+  ///
+  /// In en, this message translates to:
+  /// **'{introPrice} for the first year, then {price}/{period}. Cancel anytime.'**
+  String paywallIntroDisclosure(String introPrice, String price, String period);
+
+  /// No description provided for @paywallAutoRenewDisclosureIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first year of Yucat Plus costs {introPrice}, then it renews automatically at {price}/{period} unless you cancel at least 24 hours before the end of the current period. Manage or cancel anytime in your {store} account settings.'**
+  String paywallAutoRenewDisclosureIntro(
+    String introPrice,
+    String price,
+    String period,
+    String store,
+  );
 
   /// No description provided for @paywallRetry.
   ///
@@ -3213,6 +3212,30 @@ abstract class AppLocalizations {
   /// **'Reset onboarding'**
   String get profileResetOnboarding;
 
+  /// QA-only Profile row (kQaToolsEnabled): sign out of every identity provider and restart as a new user. Deleting the app is not enough on iOS because the anonymous Firebase session survives in the Keychain.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset test user'**
+  String get profileResetTestUser;
+
+  /// No description provided for @profileResetTestUserConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start as a new user?'**
+  String get profileResetTestUserConfirmTitle;
+
+  /// No description provided for @profileResetTestUserConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Signs out of Firebase, RevenueCat and OneSignal and clears local data, then restarts from the splash screen. Cats stay in Firestore under the old user.'**
+  String get profileResetTestUserConfirmBody;
+
+  /// No description provided for @profileResetTestUserConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get profileResetTestUserConfirm;
+
   /// No description provided for @profileDebugOnly.
   ///
   /// In en, this message translates to:
@@ -3981,17 +4004,17 @@ abstract class AppLocalizations {
   /// **'Personalizing recommendations'**
   String get onboardingAnalyzeStep4;
 
-  /// No description provided for @onboardingResultTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{name}\'s plan is ready'**
-  String onboardingResultTitle(String name);
-
   /// No description provided for @productPicksTitle.
   ///
   /// In en, this message translates to:
   /// **'Top picks for {name}'**
   String productPicksTitle(String name);
+
+  /// Heading of the list of catalogue foods that suit the selected cat better than the product on screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Better for {name}'**
+  String productDetailBetterForCat(String name);
 
   /// No description provided for @onboardingResultContinue.
   ///
@@ -4041,18 +4064,6 @@ abstract class AppLocalizations {
   /// **'We couldn\'t analyze {brand} right now — but here\'s what we\'d recommend instead.'**
   String onboardingBrandUnavailable(String brand);
 
-  /// No description provided for @onboardingBrandUnlockCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Discover {name}\'s top picks'**
-  String onboardingBrandUnlockCta(String name);
-
-  /// No description provided for @brandTeaserFound.
-  ///
-  /// In en, this message translates to:
-  /// **'We found {count, plural, =1{1 better food} other{{count} better foods}} for {name}'**
-  String brandTeaserFound(num count, String name);
-
   /// No description provided for @brandTeaserLockedHint.
   ///
   /// In en, this message translates to:
@@ -4065,47 +4076,17 @@ abstract class AppLocalizations {
   /// **'Unlock to see'**
   String get brandTeaserRowLocked;
 
-  /// No description provided for @onboardingScanTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Let\'s scan your\nfirst package'**
-  String get onboardingScanTitle;
-
   /// No description provided for @onboardingScanSubtitle.
   ///
   /// In en, this message translates to:
   /// **'Scan the package and we\'ll grade it for your cat.'**
   String get onboardingScanSubtitle;
 
-  /// No description provided for @onboardingScanCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Let\'s scan'**
-  String get onboardingScanCta;
-
-  /// No description provided for @onboardingScanSkip.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip for now'**
-  String get onboardingScanSkip;
-
   /// No description provided for @onboardingScanVerdictIntro.
   ///
   /// In en, this message translates to:
   /// **'Here\'s how that food scores:'**
   String get onboardingScanVerdictIntro;
-
-  /// No description provided for @onboardingScanFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'We couldn\'t identify that product. Try again with the front of the package in frame.'**
-  String get onboardingScanFailed;
-
-  /// No description provided for @onboardingScanRetry.
-  ///
-  /// In en, this message translates to:
-  /// **'Scan again'**
-  String get onboardingScanRetry;
 
   /// No description provided for @onboardingScanPersonalCon.
   ///
@@ -4118,12 +4099,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Why this isn\'t ideal for {name}'**
   String onboardingResultWhyTitle(String name);
-
-  /// No description provided for @onboardingResultProfileTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{name}\'s profile'**
-  String onboardingResultProfileTitle(String name);
 
   /// No description provided for @ratingLabelExcellent.
   ///

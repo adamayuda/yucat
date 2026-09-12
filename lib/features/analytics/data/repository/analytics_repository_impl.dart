@@ -81,4 +81,7 @@ class AnalyticsRepositoryImpl extends AnalyticsRepository {
   Future<void> incrementUserProperty(String propertyName, double by) async {
     _mixpanel.getPeople().increment(propertyName, by);
   }
+
+  @override
+  Future<void> reset() => _mixpanel.reset();
 }

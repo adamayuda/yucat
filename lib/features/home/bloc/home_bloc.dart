@@ -181,6 +181,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       );
 
       unawaited(_userAnalyticsService.recordScan());
+      unawaited(_notificationService.setLastScan());
       await _reviewPromptService.recordScan();
       // Fire-and-forget; the service applies its own gating.
       unawaited(
@@ -233,6 +234,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     );
 
     unawaited(_userAnalyticsService.recordScan());
+    unawaited(_notificationService.setLastScan());
     await _reviewPromptService.recordScan();
     unawaited(_reviewPromptService.maybePrompt(trigger: 'post_scan'));
 

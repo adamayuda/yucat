@@ -13,6 +13,7 @@ import 'package:yucat/features/scan_history/domain/usecases/get_scan_history_use
 import 'package:yucat/features/litter_detail/presentation/models/litter_display_model.dart';
 import 'package:yucat/features/saved_products/domain/usecases/get_saved_litters_usecase.dart';
 import 'package:yucat/features/scan_history/domain/usecases/get_litter_history_usecase.dart';
+import 'package:yucat/services/qa_reset_service.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   static const String _onboardingCompletedKey = 'onboarding_completed';
@@ -24,6 +25,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final GetSavedLittersUsecase _getSavedLittersUsecase;
   final GetLitterHistoryUsecase _getLitterHistoryUsecase;
   final CurrentUserUsecase _currentUserUsecase;
+  final QaResetService _qaResetService;
 
   ProfileBloc({
     required SharedPreferences prefs,
@@ -33,6 +35,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     required GetSavedLittersUsecase getSavedLittersUsecase,
     required GetLitterHistoryUsecase getLitterHistoryUsecase,
     required CurrentUserUsecase currentUserUsecase,
+    required QaResetService qaResetService,
   })  : _prefs = prefs,
         _getCatsUsecase = getCatsUsecase,
         _getSavedProductsUsecase = getSavedProductsUsecase,
@@ -40,9 +43,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         _getSavedLittersUsecase = getSavedLittersUsecase,
         _getLitterHistoryUsecase = getLitterHistoryUsecase,
         _currentUserUsecase = currentUserUsecase,
+        _qaResetService = qaResetService,
         super(ProfileHiddenState()) {
     on<ProfileInitialEvent>(_onProfileInitialEvent);
     on<ResetOnboardingTapEvent>(_onResetOnboardingTapEvent);
+    on<ResetTestUserTapEvent>(_onResetTestUserTapEvent);
   }
 
   Future<void> _onProfileInitialEvent(
@@ -107,6 +112,21 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     await _prefs.remove(_onboardingCompletedKey);
     if (event.context.mounted) {
       event.context.router.replaceAll([const OnBoardingRoute()]);
+    }
+  }
+
+  /// Back through splash rather than straight to onboarding: splash is where
+  /// the new anonymous uid is minted and linked to Mixpanel, OneSignal and
+  /// RevenueCat, and prefs are empty so it routes to onboarding by itself.
+  /// Root blocs keep the old user's in-memory state until the next cold
+  /// launch; good enough for a QA tool.
+  Future<void> _onResetTestUserTapEvent(
+    ResetTestUserTapEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    await _qaResetService.resetTestUser();
+    if (event.context.mounted) {
+      event.context.router.replaceAll([const SplashRoute()]);
     }
   }
 }

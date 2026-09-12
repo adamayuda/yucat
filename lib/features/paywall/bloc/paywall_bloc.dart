@@ -9,11 +9,22 @@ import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/paywall/bloc/paywall_event.dart';
 import 'package:yucat/features/paywall/bloc/paywall_state.dart';
+import 'package:yucat/features/paywall/utils/intro_offer_info.dart';
 import 'package:yucat/features/paywall/utils/trial_info.dart';
 import 'package:yucat/services/notification_service.dart';
 import 'package:yucat/services/user_analytics_service.dart';
 
+/// What a package will actually grant *this* user, after the store's
+/// eligibility check. Both null when the user qualifies for neither.
+typedef _Offers = ({TrialInfo? trial, IntroOfferInfo? intro});
+
 class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
+  /// Custom package identifier of the second-chance plan in the RevenueCat
+  /// offering: the same yearly plan sold with a pay-up-front first year
+  /// (`com.adam.yucat.app.pro.yearly.offer`). Not a reserved `$rc_` id because
+  /// `$rc_annual` is taken by the standard yearly. Absent → no sheet.
+  static const secondChancePackageId = 'annual_offer';
+
   final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
   final LogEventUsecase _logEventUsecase;
   final UserAnalyticsService _userAnalyticsService;
@@ -24,6 +35,9 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   /// Separates "looked and left" from "tried to buy and backed out" on
   /// `Paywall Dismissed` — two very different abandonment stories.
   bool _ctaTappedThisSession = false;
+  /// The second-chance sheet is offered once per paywall session. A user who
+  /// backs out of the monthly sheet too has answered; asking again is nagging.
+  bool _secondChanceShownThisSession = false;
   String _trigger = 'manual';
 
   PaywallBloc({
@@ -39,6 +53,8 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     on<PaywallInitialEvent>(_onInitial);
     on<PaywallPackageSelectedEvent>(_onPackageSelected);
     on<PaywallPurchaseEvent>(_onPurchase);
+    on<PaywallSecondChanceAcceptedEvent>(_onSecondChanceAccepted);
+    on<PaywallSecondChanceDismissedEvent>(_onSecondChanceDismissed);
     on<PaywallRestoreEvent>(_onRestore);
     on<PaywallDismissEvent>(_onDismiss);
   }
@@ -81,12 +97,39 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
         annualOnly.isNotEmpty ? annualOnly : [current.availablePackages.first];
     final selected = packages.first;
 
-    // The trial this user will actually receive — null when the product has no
-    // trial configured or the store says they've already used one.
-    final eligibleTrial = await _eligibleTrialFor(selected);
+    // The downsell for people who back out of the store sheet — 3 in 4 CTA
+    // tappers, per Mixpanel: the same yearly plan with a discounted first year.
+    // Only worth offering if this user is actually eligible for that intro
+    // offer (Apple: one per subscription group, ever), so its eligibility is
+    // resolved here, in parallel with the main plan's. Missing package,
+    // ineligible user, or the paywall already fell back to a non-annual plan:
+    // no sheet, nothing else changes.
+    Package? secondChanceCandidate;
+    if (selected.packageType == PackageType.annual) {
+      for (final p in current.availablePackages) {
+        if (p.identifier == secondChancePackageId) {
+          secondChanceCandidate = p;
+          break;
+        }
+      }
+    }
+
+    // The offers this user will actually receive — null when the product has
+    // none configured or the store says they've already used one.
+    final resolved = await Future.wait([
+      _eligibleOffersFor(selected),
+      if (secondChanceCandidate != null)
+        _eligibleOffersFor(secondChanceCandidate),
+    ]);
+    final eligibleTrial = resolved[0].trial;
+    final eligibleIntro = resolved[0].intro;
+    final secondChanceIntro =
+        resolved.length > 1 ? resolved[1].intro : null;
+    final secondChance = secondChanceIntro != null ? secondChanceCandidate : null;
 
     _paywallShownTime = DateTime.now();
     _ctaTappedThisSession = false;
+    _secondChanceShownThisSession = false;
     _logEventUsecase.call(
       eventName: AnalyticsEvents.paywallShown,
       properties: {
@@ -109,11 +152,15 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       currentOffering: current,
       packages: packages,
       selectedPackage: selected,
+      secondChancePackage: secondChance,
+      secondChanceIntro: secondChanceIntro,
       eligibleTrial: eligibleTrial,
+      eligibleIntro: eligibleIntro,
     ));
   }
 
-  /// The free trial [pkg] will actually grant this user, or null.
+  /// The free trial and/or paid introductory offer [pkg] will actually grant
+  /// this user; both null when it offers neither or the user is ineligible.
   ///
   /// The two stores need different eligibility signals:
   ///
@@ -127,11 +174,12 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   ///   a `freePhase` on the product IS the eligibility signal. This depends on
   ///   the Play offer being configured "new customers only" — see the store
   ///   setup notes in CLAUDE.md.
-  Future<TrialInfo?> _eligibleTrialFor(Package pkg) async {
-    final trial = trialInfoFor(pkg);
-    if (trial == null) return null;
+  Future<_Offers> _eligibleOffersFor(Package pkg) async {
+    const none = (trial: null, intro: null);
+    final offers = (trial: trialInfoFor(pkg), intro: introOfferFor(pkg));
+    if (offers.trial == null && offers.intro == null) return none;
 
-    if (Platform.isAndroid) return trial;
+    if (Platform.isAndroid) return offers;
 
     try {
       final result = await Purchases.checkTrialOrIntroductoryPriceEligibility(
@@ -139,38 +187,100 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       ).timeout(const Duration(seconds: 5));
       final status = result[pkg.storeProduct.identifier]?.status;
       return status == IntroEligibilityStatus.introEligibilityStatusEligible
-          ? trial
-          : null;
+          ? offers
+          : none;
     } catch (e) {
-      debugPrint('PaywallBloc.trialEligibility error: $e');
-      return null;
+      debugPrint('PaywallBloc.offerEligibility error: $e');
+      return none;
     }
   }
 
-  void _onPackageSelected(
+  Future<void> _onPackageSelected(
     PaywallPackageSelectedEvent event,
+    Emitter<PaywallState> emit,
+  ) async {
+    final current = state;
+    if (current is! PaywallLoadedState || current.isPurchasing) return;
+    if (current.selectedPackage.identifier == event.package.identifier) return;
+    await _select(event.package, current, emit);
+  }
+
+  /// Switch plans, re-resolving the trial for the new package so the CTA, the
+  /// disclosure and `is_trial` on the purchase event all describe the plan
+  /// actually being bought.
+  Future<void> _select(
+    Package package,
+    PaywallLoadedState current,
+    Emitter<PaywallState> emit,
+  ) async {
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.planSelected,
+      properties: {
+        'package_id': package.identifier,
+        'package_type': package.packageType.name,
+        'trigger': _trigger,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+    final offers = await _eligibleOffersFor(package);
+    emit(current.withSelection(
+      package: package,
+      eligibleTrial: offers.trial,
+      eligibleIntro: offers.intro,
+    ));
+  }
+
+  Future<void> _onSecondChanceAccepted(
+    PaywallSecondChanceAcceptedEvent event,
+    Emitter<PaywallState> emit,
+  ) async {
+    final current = state;
+    if (current is! PaywallLoadedState || current.isPurchasing) return;
+    final offer = current.secondChancePackage;
+    if (offer == null) return;
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.paywallSecondChanceTapped,
+      properties: _secondChanceProps(current),
+    );
+    await _select(offer, current, emit);
+    await _purchaseSelected(emit);
+  }
+
+  void _onSecondChanceDismissed(
+    PaywallSecondChanceDismissedEvent event,
     Emitter<PaywallState> emit,
   ) {
     final current = state;
     if (current is! PaywallLoadedState) return;
-    if (current.selectedPackage.identifier != event.package.identifier) {
-      _logEventUsecase.call(
-        eventName: AnalyticsEvents.planSelected,
-        properties: {
-          'package_id': event.package.identifier,
-          'package_type': event.package.packageType.name,
-          'trigger': _trigger,
-          'timestamp': DateTime.now().toIso8601String(),
-        },
-      );
-    }
-    emit(current.copyWith(selectedPackage: event.package));
+    if (current.secondChancePackage == null) return;
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.paywallSecondChanceDismissed,
+      properties: _secondChanceProps(current),
+    );
+  }
+
+  Map<String, Object?> _secondChanceProps(PaywallLoadedState s) {
+    final pkg = s.secondChancePackage!;
+    return {
+      'package_id': pkg.identifier,
+      'package_type': pkg.packageType.name,
+      'price': pkg.storeProduct.price,
+      'intro_price': s.secondChanceIntro?.price,
+      'currency': pkg.storeProduct.currencyCode,
+      'trigger': _trigger,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
   }
 
   Future<void> _onPurchase(
     PaywallPurchaseEvent event,
     Emitter<PaywallState> emit,
-  ) async {
+  ) =>
+      _purchaseSelected(emit);
+
+  /// Buy whatever [PaywallLoadedState.selectedPackage] is. Shared by the main
+  /// CTA and the second-chance sheet so both paths log and gate identically.
+  Future<void> _purchaseSelected(Emitter<PaywallState> emit) async {
     final current = state;
     if (current is! PaywallLoadedState || current.isPurchasing) return;
 
@@ -219,17 +329,29 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
             // needs to tell them apart from immediate purchases.
             'is_trial': current.eligibleTrial != null,
             'trial_days': current.eligibleTrial?.days,
+            // A discounted first year bills today, at this price rather than
+            // `price` — the second-chance path's signature on this event.
+            'is_intro_offer': current.eligibleIntro != null,
+            'intro_price': current.eligibleIntro?.price,
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
+        final isTrial = current.eligibleTrial != null;
         _userAnalyticsService.syncSubscription(
           isSubscriber: true,
+          isTrial: isTrial,
+          trialStartedAt: isTrial ? DateTime.now() : null,
           plan: current.selectedPackage.packageType.name,
           price: current.selectedPackage.storeProduct.price,
           currency: current.selectedPackage.storeProduct.currencyCode,
         );
         _notificationService.setFunnelStage(FunnelStage.subscribed);
-        _notificationService.setSubscriber(true);
+        _notificationService.setSubscriber(true, isTrial: isTrial);
+        if (isTrial) {
+          // Opens the trial Journey (+24 h / +48 h pushes). The splash gate
+          // flips `is_trial` back off once the trial converts or lapses.
+          _notificationService.markTrialStarted();
+        }
         emit(const PaywallSuccessState(purchasedSubscription: true));
       } else {
         _logPurchaseFailed(reason: 'not_active', packageType: current.selectedPackage.packageType.name);
@@ -253,6 +375,25 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
+        // First back-out of the *main* plan's sheet: offer the discounted
+        // first year once. Cancelling the offer's own sheet, or a second
+        // cancel, gets nothing more.
+        final offer = current.secondChancePackage;
+        final offerSecondChance = offer != null &&
+            !_secondChanceShownThisSession &&
+            current.selectedPackage.identifier != offer.identifier;
+        if (offerSecondChance) {
+          _secondChanceShownThisSession = true;
+          _logEventUsecase.call(
+            eventName: AnalyticsEvents.paywallSecondChanceShown,
+            properties: _secondChanceProps(current),
+          );
+          emit(current.copyWith(
+            isPurchasing: false,
+            secondChanceTick: current.secondChanceTick + 1,
+          ));
+          return;
+        }
         emit(current.copyWith(isPurchasing: false));
         return;
       }

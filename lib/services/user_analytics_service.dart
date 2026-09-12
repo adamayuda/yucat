@@ -59,6 +59,11 @@ class UserAnalyticsService {
     }
   }
 
+  /// QA reset: allow the next [identify] to run again in this same process.
+  /// The Mixpanel-side reset happens in `QaResetService`, which holds the
+  /// repository; this only clears the per-session guard.
+  void forgetIdentity() => _identified = false;
+
   /// App language and device country, stamped once the app has resolved its
   /// locale. Two properties, not one: [UserProps.language] is what the user
   /// reads (one of the six shipped locales, English for anything unsupported)
@@ -75,8 +80,14 @@ class UserAnalyticsService {
     }
   }
 
+  /// [isTrial] is passed wherever the entitlement was actually read (purchase
+  /// success, every splash gate) so the profile flag tracks the store, not the
+  /// paywall's eligibility guess. [trialStartedAt] is only ever passed on the
+  /// purchase that opened the trial.
   Future<void> syncSubscription({
     required bool isSubscriber,
+    bool? isTrial,
+    DateTime? trialStartedAt,
     String? plan,
     double? price,
     String? currency,
@@ -84,6 +95,9 @@ class UserAnalyticsService {
     try {
       await _setUserPropertiesUsecase({
         UserProps.isSubscriber: isSubscriber,
+        if (isTrial != null) UserProps.isTrial: isTrial,
+        if (trialStartedAt != null)
+          UserProps.trialStartedAt: trialStartedAt.toIso8601String(),
         if (plan != null) UserProps.subscriptionPlan: plan,
         if (price != null) UserProps.subscriptionPrice: price,
         if (currency != null) UserProps.subscriptionCurrency: currency,

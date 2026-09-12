@@ -37,3 +37,14 @@ class ResetOnboardingTapEvent extends ProfileEvent {
   @override
   List<Object?> get props => [context];
 }
+
+/// QA: sign out of Firebase, RevenueCat and OneSignal, clear local data and
+/// restart from splash as a brand-new user. See `QaResetService`.
+class ResetTestUserTapEvent extends ProfileEvent {
+  final BuildContext context;
+
+  const ResetTestUserTapEvent({required this.context});
+
+  @override
+  List<Object?> get props => [context];
+}
