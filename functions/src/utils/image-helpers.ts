@@ -44,11 +44,11 @@ export async function uploadUserPhoto(
 }
 
 /**
- * Validates and uploads the LLM-supplied product image URL to Firebase Storage.
- * Returns the public Storage URL, or empty string if no valid image is found.
+ * Validates and uploads a product image URL (today always a SerpAPI candidate,
+ * see `findProductImageUrl`) to Firebase Storage. Returns the public Storage
+ * URL, or empty string if no valid image is found.
  *
- * The Flutter UI tolerates an empty `imageUrl` (renders a placeholder), so
- * unlike the Gemini-era pipeline, there is no SerpAPI/search fallback here.
+ * The Flutter UI tolerates an empty `imageUrl` (renders a placeholder).
  */
 export async function processProductImage(
   imageUrl: string,

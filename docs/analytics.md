@@ -134,12 +134,16 @@ Use `step_name` or `step_id` as the funnel key and `step_index` only for orderin
 ### Product & search
 | Event | Key properties |
 |---|---|
-| `Scan Started` | `source` (`home_header` / `bottom_nav`), `timestamp` |
+| `Scan Started` | `source` (`home_header` / `bottom_nav` / `scan_error_retry`), `timestamp` |
 | `Camera Access Result` | `granted`, `error_code` (`no_camera`, or the plugin's `CameraAccess*` code) |
 | `Scan Cancelled` | `camera_ready`, `camera_error` |
-| `Product Image Captured` | `mime_type` |
-| `Product Image Scan Failed` | `error_type` (`not_found`/`error`), `error_message?`, `duration_ms` |
-| `Product Selected` | `product_name`, `product_brand`, `source` (`image`/`search`), `duration_ms` (image scans only) |
+| `Product Image Captured` | `mime_type` (always `image/jpeg` now — the client transcodes), `capture_source` (`camera`/`gallery`), `has_barcode` (an EAN/UPC was read off the still on-device), `barcode_format?` (`ean13`/`ean8`/`upcA`/`upcE`), `image_bytes` (encoded upload size), `prep_ms` (client-side barcode read + downscale time) |
+| `Product Image Scan Failed` | `error_type` — a **scan outcome** (`not_cat_product`, `unreadable`, `analysis_failed`, `litter_analysis_failed`; `not_found` on rows from a pre-Phase-1 backend) or the **callable's error code** (`deadline-exceeded`, `unavailable`, `unauthenticated`, `resource-exhausted`, `invalid-argument`, `internal`, `unknown`); rows before 2026-09-12 carry the old flat `error`. Outcomes also carry `reason?` (identify's finer enum: `dog_food`/`human_food`/`other_item`/`no_product`/`unreadable`/`no_tool`), `path`, `has_barcode`; codes carry `error_message?`. All carry `duration_ms`. Break down by `error_type`: `unreadable` is a UX/camera problem, `not_cat_product` is scope, `analysis_failed` is data coverage |
+| `Product Selected` | `product_name`, `product_brand`, `source` (`image`/`search`); image scans also carry `path` (the backend exit: `gtin-hit` / `cache-hit` / `full-analysis` / `label`), `has_barcode`, `data_unavailable` (score 0 — the no-data card, not a verdict) and `duration_ms`. `path` by week is the scorecard for the barcode fast path and the label rescue. `identify_model?` / `label_model?` carry the backend's model for the Phase 3 A/B — break `Product Image Scan Failed { error_type: unreadable }` down by `identify_model` to read the experiment |
+| `Label Scan Started` | `source` (`product_detail` — the no-data card's CTA; `scan_error` — the error view's exit), `has_product_key`, `has_gtin`, `outcome?` (the scan outcome the error view was showing) |
+| `Label Scan Completed` | `outcome` (`product` / `label_no_data` / `label_unreadable` / a callable error code), `has_product_key`, `has_gtin`, `label_model?` (the backend's extraction model — the Phase 3 A/B dimension), `duration_ms`, `error_message?`. Pair with `Started` for the rescue's conversion; a `product` outcome is also a `Product Selected { path: label }` |
+| `Scan Abandoned` | `kind` (`pack`/`label`), `elapsed_ms` — Cancel on the loading screen. ⚠️ Not `Scan Cancelled` (closing the camera before a photo). The backend still finishes and caches; no `Product Selected` follows, so `path` shares undercount abandoned full analyses slightly |
+| `Scan Error Exit Tapped` | `outcome` (the error view shown), `exit` (`scan_again` / `scan_label` / `search`). `scan_again` also fires `Scan Started { source: scan_error_retry }` |
 | `Product Searched` | `query`, `query_length`, `results_count` |
 | `Search Results Viewed` | `query`, `results_count`, `has_results` |
 | `Product Detail Viewed` | `product_name`, `product_brand` |
@@ -150,7 +154,7 @@ Use `step_name` or `step_id` as the funnel key and `step_index` only for orderin
 ### Cat litter
 | Event | Key properties |
 |---|---|
-| `Litter Selected` | `litter_name`, `litter_brand`, `litter_material`, `source` (`image`), `duration_ms` |
+| `Litter Selected` | `litter_name`, `litter_brand`, `litter_material`, `source` (`image`), `path` (`litter-gtin-hit` / `litter-cache-hit` / `litter-full-analysis`), `has_barcode`, `duration_ms` |
 | `Litter Detail Viewed` | `litter_name`, `litter_brand`, `litter_material` |
 | `Litter Saved` / `Litter Unsaved` | `litter_name`, `litter_brand` |
 

@@ -4,7 +4,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/product/domain/entities/label_target.dart';
 import 'package:yucat/l10n/app_localizations.dart';
+import 'package:yucat/presentation/components/ds_pill_button.dart';
 
 /// Post-scan analysis screen shown while `fetchProductByImageV2` runs.
 ///
@@ -17,7 +19,19 @@ class HomeLoadingWidget extends StatefulWidget {
   /// The just-captured photo (base64), shown under the sweeping scan line.
   final String imageBase64;
 
-  const HomeLoadingWidget({super.key, required this.imageBase64});
+  /// `pack` or `label` — the status lines and the time hint differ.
+  final ScanMode mode;
+
+  /// Cancel: leaves the theater without waiting. The backend keeps running
+  /// (and still caches its result); only this session's wait is abandoned.
+  final VoidCallback? onCancel;
+
+  const HomeLoadingWidget({
+    super.key,
+    required this.imageBase64,
+    this.mode = ScanMode.pack,
+    this.onCancel,
+  });
 
   @override
   State<HomeLoadingWidget> createState() => _HomeLoadingWidgetState();
@@ -79,13 +93,22 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
     super.dispose();
   }
 
-  List<String> _messages(AppLocalizations l10n) => [
-        l10n.homeLoadingMsgReading,
-        l10n.homeLoadingMsgSniffing,
-        l10n.homeLoadingMsgMatching,
-        l10n.homeLoadingMsgCrunching,
-        l10n.homeLoadingMsgAlmost,
-      ];
+  // Honest copy: the pack scan really does search retailer pages, and it
+  // really takes tens of seconds — "Almost there…" looping for 30 s read as
+  // frozen. The label read is one vision call, so its lines are shorter.
+  List<String> _messages(AppLocalizations l10n) => switch (widget.mode) {
+        ScanMode.pack => [
+            l10n.homeLoadingMsgReading,
+            l10n.homeLoadingMsgSniffing,
+            l10n.homeLoadingMsgMatching,
+            l10n.homeLoadingMsgSearching,
+            l10n.homeLoadingMsgCrunching,
+          ],
+        ScanMode.label => [
+            l10n.homeLoadingMsgReadingLabel,
+            l10n.homeLoadingMsgScoring,
+          ],
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +134,9 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
               ),
               const SizedBox(height: DSDimens.size3xl),
               Text(
-                l10n.homeLoadingEyebrow,
+                widget.mode == ScanMode.label
+                    ? l10n.homeLoadingLabelEyebrow
+                    : l10n.homeLoadingEyebrow,
                 textAlign: TextAlign.center,
                 style: DSTextStyles.label.copyWith(color: DSColors.inkSecondary),
               ),
@@ -138,6 +163,21 @@ class _HomeLoadingWidgetState extends State<HomeLoadingWidget>
                   style: DSTextStyles.displayLg,
                 ),
               ),
+              const SizedBox(height: DSDimens.sizeS),
+              Text(
+                widget.mode == ScanMode.label
+                    ? l10n.homeLoadingLabelHint
+                    : l10n.homeLoadingHint,
+                textAlign: TextAlign.center,
+                style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkSecondary),
+              ),
+              if (widget.onCancel != null) ...[
+                const SizedBox(height: DSDimens.sizeL),
+                DSTextLink(
+                  label: l10n.homeLoadingCancel,
+                  onPressed: widget.onCancel,
+                ),
+              ],
             ],
           ),
         ),

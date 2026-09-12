@@ -1538,6 +1538,88 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeErrorGeneric => 'Algo correu mal. Tente novamente.';
 
   @override
+  String get homeErrorServiceBusy =>
+      'O nosso serviço de análise está ocupado neste momento. Tente novamente dentro de alguns minutos.';
+
+  @override
+  String get homeScannerLabelTitle => 'Fotografe o rótulo de trás';
+
+  @override
+  String get homeScannerLabelHint =>
+      'Enquadre a composição e os constituintes analíticos';
+
+  @override
+  String get homeErrorNotCatProductTitle =>
+      'Isso não parece um produto para gatos';
+
+  @override
+  String get homeErrorNotCatProductBody =>
+      'O YuCat lê comida e areia para gatos. Tente outra embalagem ou pesquise por nome.';
+
+  @override
+  String get homeErrorUnreadableTitle => 'Não conseguimos ler essa embalagem';
+
+  @override
+  String get homeErrorUnreadableBody =>
+      'Tente de novo com a frente da embalagem e boa luz, ou fotografe o rótulo de trás e lemos a análise diretamente.';
+
+  @override
+  String homeErrorAnalysisFailedTitle(String name) {
+    return 'Encontrámos $name, mas não a sua análise';
+  }
+
+  @override
+  String get homeErrorAnalysisFailedBody =>
+      'A análise não está online em lado nenhum onde procurámos. Fotografe o rótulo de trás e lemos da embalagem.';
+
+  @override
+  String get homeErrorLabelUnreadableTitle => 'Não conseguimos ler esse rótulo';
+
+  @override
+  String get homeErrorLabelUnreadableBody =>
+      'Preencha o enquadramento com a tabela de análise e os ingredientes, com boa luz, e tente mais uma vez.';
+
+  @override
+  String get homeErrorLabelNoDataTitle => 'Sem análise nesse painel';
+
+  @override
+  String get homeErrorLabelNoDataBody =>
+      'A foto estava nítida, mas não tinha tabela nutricional. Tente o lado ou a parte de trás com «Constituintes analíticos».';
+
+  @override
+  String get homeErrorExitScanAgain => 'Digitalizar de novo';
+
+  @override
+  String get homeErrorExitScanLabel => 'Fotografar o rótulo de trás';
+
+  @override
+  String get homeErrorExitSearch => 'Pesquisar por nome';
+
+  @override
+  String get productDetailScanLabelCta => 'Fotografar o rótulo de trás';
+
+  @override
+  String get homeLoadingLabelEyebrow => 'A ler o rótulo';
+
+  @override
+  String get homeLoadingMsgReadingLabel => 'A ler a tabela de análise…';
+
+  @override
+  String get homeLoadingMsgScoring => 'A pontuar os ingredientes…';
+
+  @override
+  String get homeLoadingMsgSearching => 'A procurar em páginas de lojas…';
+
+  @override
+  String get homeLoadingHint => 'Normalmente 20–40 segundos';
+
+  @override
+  String get homeLoadingLabelHint => 'Normalmente menos de 15 segundos';
+
+  @override
+  String get homeLoadingCancel => 'Cancelar';
+
+  @override
   String get homeCatKitten => 'Gatinho';
 
   @override
@@ -1591,6 +1673,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get commonTryAgain => 'Tentar novamente';
+
+  @override
+  String get productRowNoData => 'Ainda sem dados';
 
   @override
   String get searchTabTitle => 'Pesquisar';

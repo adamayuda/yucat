@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
+import 'package:yucat/features/product/domain/entities/label_target.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
 import 'package:yucat/features/product_detail/presentation/bloc/product_detail_bloc.dart';
@@ -108,6 +111,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       product: product,
                       catsFuture: _catsFuture,
                       onCreateCat: _onCreateCat,
+                      onScanLabel: () => _onScanLabel(product),
                     ),
                   ProductDetailErrorState() => const _ErrorBody(),
                   _ => const SizedBox.shrink(),
@@ -124,6 +128,37 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     await context.router.push(CreateCatRoute());
     _refreshCats();
   }
+
+  /// The back-label rescue from the no-data card. HomeBloc owns the scan
+  /// theater and the result push, and it only paints on the Home tab — so
+  /// this does the same "switch to Home, then push the scanner" dance the
+  /// nav's Scan slot does: unwind to the tab shell (the root of the stack
+  /// after onboarding's `replaceAll`), activate Home, push the scanner in
+  /// label mode carrying everything the label's data should attach to.
+  Future<void> _onScanLabel(ProductDisplayModel product) async {
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.labelScanStarted,
+      properties: {
+        'source': ScanSource.productDetail,
+        'has_product_key': product.cacheKey != null,
+        'has_gtin': product.gtin != null,
+        'product_name': product.name,
+        'product_brand': product.brand,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+    final target = LabelTarget(
+      productKey: product.cacheKey,
+      gtin: product.gtin,
+      brand: product.brand,
+      name: product.name,
+    );
+    // Captured before the pops unmount this page.
+    final router = context.router;
+    router.popUntilRoot();
+    await router.navigate(const MainRoute(children: [HomeRoute()]));
+    await router.push(ScannerRoute(mode: ScanMode.label, labelTarget: target));
+  }
 }
 
 
@@ -131,11 +166,13 @@ class _LoadedBody extends StatelessWidget {
   final ProductDisplayModel product;
   final Future<List<CatEntity>>? catsFuture;
   final Future<void> Function() onCreateCat;
+  final VoidCallback onScanLabel;
 
   const _LoadedBody({
     required this.product,
     required this.catsFuture,
     required this.onCreateCat,
+    required this.onScanLabel,
   });
 
   @override
@@ -163,6 +200,7 @@ class _LoadedBody extends StatelessWidget {
           child: AnalysisCard(
             product: product,
             description: product.displayDescription,
+            onScanLabel: onScanLabel,
           ),
         ),
         const SizedBox(height: DSDimens.sizeL),

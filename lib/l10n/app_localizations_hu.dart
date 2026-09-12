@@ -1530,6 +1530,90 @@ class AppLocalizationsHu extends AppLocalizations {
   String get homeErrorGeneric => 'Valami hiba történt. Kérjük, próbáld újra.';
 
   @override
+  String get homeErrorServiceBusy =>
+      'Az elemző szolgáltatásunk jelenleg túlterhelt. Kérjük, próbáld újra néhány perc múlva.';
+
+  @override
+  String get homeScannerLabelTitle => 'Fotózd le a hátoldali címkét';
+
+  @override
+  String get homeScannerLabelHint =>
+      'Az összetétel és az analitikai összetevők legyenek a képen';
+
+  @override
+  String get homeErrorNotCatProductTitle =>
+      'Ez nem tűnik macskáknak szánt terméknek';
+
+  @override
+  String get homeErrorNotCatProductBody =>
+      'A YuCat macskaeledelt és macskaalmot olvas. Próbálj egy másik csomagolást, vagy keress név szerint.';
+
+  @override
+  String get homeErrorUnreadableTitle =>
+      'Ezt a csomagolást nem tudtuk elolvasni';
+
+  @override
+  String get homeErrorUnreadableBody =>
+      'Próbáld újra a csomag elejével, jó fényben – vagy fotózd le a hátoldali címkét, és közvetlenül onnan olvassuk ki az elemzést.';
+
+  @override
+  String homeErrorAnalysisFailedTitle(String name) {
+    return 'Megtaláltuk: $name, de a tápértékeit nem';
+  }
+
+  @override
+  String get homeErrorAnalysisFailedBody =>
+      'Az elemzés sehol sincs fent, ahol kerestük. Fotózd le a hátoldali címkét, és a csomagolásról olvassuk ki.';
+
+  @override
+  String get homeErrorLabelUnreadableTitle =>
+      'Ezt a címkét nem tudtuk elolvasni';
+
+  @override
+  String get homeErrorLabelUnreadableBody =>
+      'Töltsd ki a képet az analitikai táblázattal és az összetevőkkel, jó fényben, és próbáld újra.';
+
+  @override
+  String get homeErrorLabelNoDataTitle => 'Ezen az oldalon nincs elemzés';
+
+  @override
+  String get homeErrorLabelNoDataBody =>
+      'A fotó éles volt, de nem volt rajta tápértéktáblázat. Próbáld az oldalát vagy a hátulját, ahol az „Analitikai összetevők” szerepel.';
+
+  @override
+  String get homeErrorExitScanAgain => 'Szkennelés újra';
+
+  @override
+  String get homeErrorExitScanLabel => 'Hátoldali címke fotózása';
+
+  @override
+  String get homeErrorExitSearch => 'Keresés név szerint';
+
+  @override
+  String get productDetailScanLabelCta => 'Hátoldali címke fotózása';
+
+  @override
+  String get homeLoadingLabelEyebrow => 'Címke olvasása';
+
+  @override
+  String get homeLoadingMsgReadingLabel => 'Analitikai táblázat olvasása…';
+
+  @override
+  String get homeLoadingMsgScoring => 'Összetevők pontozása…';
+
+  @override
+  String get homeLoadingMsgSearching => 'Keresés a kereskedők oldalain…';
+
+  @override
+  String get homeLoadingHint => 'Általában 20–40 másodperc';
+
+  @override
+  String get homeLoadingLabelHint => 'Általában 15 másodpercen belül';
+
+  @override
+  String get homeLoadingCancel => 'Mégse';
+
+  @override
   String get homeCatKitten => 'Kölyök';
 
   @override
@@ -1583,6 +1667,9 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get commonTryAgain => 'Próbáld újra';
+
+  @override
+  String get productRowNoData => 'Még nincs adat';
 
   @override
   String get searchTabTitle => 'Keresés';

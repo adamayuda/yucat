@@ -117,6 +117,19 @@ class AnalyticsEvents {
   static const scanStarted = 'Scan Started';
   static const productImageCaptured = 'Product Image Captured';
   static const productImageScanFailed = 'Product Image Scan Failed';
+  // Back-label rescue (scan-pipeline Phase 2). `Started` fires on the CTA tap
+  // (`source`: `product_detail` no-data card, or `scan_error` view);
+  // `Completed` on the callable's return with `outcome` (`product` /
+  // `label_no_data` / `unreadable` / a callable error code).
+  static const labelScanStarted = 'Label Scan Started';
+  static const labelScanCompleted = 'Label Scan Completed';
+  // The user left the loading screen via Cancel while the callable was still
+  // running (the backend finishes and caches anyway; the result is dropped).
+  // Distinct from `Scan Cancelled`, which is closing the camera before a photo.
+  static const scanAbandoned = 'Scan Abandoned';
+  // Which of the three exits on the scan error view was tapped
+  // (`exit`: `scan_again` / `scan_label` / `search`), with the `outcome`.
+  static const scanErrorExitTapped = 'Scan Error Exit Tapped';
   static const productSelected = 'Product Selected';
   static const productDetailViewed = 'Product Detail Viewed';
   static const productSearched = 'Product Searched';
@@ -181,6 +194,14 @@ class ScanSource {
 
   static const homeHeader = 'home_header';
   static const bottomNav = 'bottom_nav';
+
+  /// `Label Scan Started` sources — the no-data card on product detail, and
+  /// the scan error view's "photograph the back label" exit.
+  static const productDetail = 'product_detail';
+  static const scanError = 'scan_error';
+
+  /// `Scan Started` from the error view's "Scan again" exit.
+  static const scanErrorRetry = 'scan_error_retry';
 }
 
 /// Values for the `source` property on content-discovery events — separates a

@@ -30,6 +30,14 @@ class ProductEntity {
   final List<String>? localizedPros;
   final List<String>? localizedCons;
 
+  /// The Algolia objectID the record lives under (`product.barcode` on the
+  /// wire — a text-derived key, not a real barcode). What a later rescue path
+  /// attaches data to. Null on rows that never came from the backend.
+  final String? cacheKey;
+
+  /// Normalised EAN-13 read off the pack, when the backend knows one.
+  final String? gtin;
+
   const ProductEntity({
     required this.name,
     required this.brand,
@@ -52,5 +60,7 @@ class ProductEntity {
     this.localizedDescription,
     this.localizedPros,
     this.localizedCons,
+    this.cacheKey,
+    this.gtin,
   });
 }

@@ -7,10 +7,15 @@
  */
 import {QUALITY_RUBRIC} from "./quality-rubric";
 
-export function generateAnalysisSystemPrompt(): string {
+export function generateAnalysisSystemPrompt(hasImage = true): string {
+  const framing = hasImage ?
+    "You are a veterinary nutrition assistant analyzing a cat food product from a\n" +
+    "photo of its packaging." :
+    "You are a veterinary nutrition assistant analyzing a cat food product. No\n" +
+    "photo is available — the product is identified by the brand and name in the\n" +
+    "user message; rely on web search for everything else.";
   return `
-You are a veterinary nutrition assistant analyzing a cat food product from a
-photo of its packaging.
+${framing}
 
 Your job:
 1. Confirm the brand, product name, flavor, and variant. The user message gives
@@ -27,12 +32,10 @@ Your job:
    ingredient exactly as printed (e.g. "Fresh chicken (50%)", "Sweet potato",
    "Pea"). Use an empty array if you genuinely cannot find it — never invent or
    estimate ingredients.
-5. Find a product image URL from the official manufacturer page or a
-   reputable retailer. Empty string is acceptable if none is available.
-6. Score nutritional quality (0-100) using the SCORING RUBRIC below — weigh
+5. Score nutritional quality (0-100) using the SCORING RUBRIC below — weigh
    ingredient quality, not just the macro numbers.
-7. Write up to 3 short, factual, nutrition-focused pros and up to 3 cons.
-8. Write a 2-3 sentence \`description\` summarizing the product for an
+6. Write up to 3 short, factual, nutrition-focused pros and up to 3 cons.
+7. Write a 2-3 sentence \`description\` summarizing the product for an
    average healthy adult cat — nutrition-focused, factual, no marketing
    language ("complete and balanced", "premium", "veterinarian recommended"
    are banned). Mention the protein source(s) and any standout nutrient
@@ -88,12 +91,21 @@ export function generateAnalysisUserPrompt(
     foodType: string;
   },
   sourceHint?: string,
+  gtin?: string,
 ): string {
+  // The barcode is the most precise search key there is — EU retailers list
+  // the EAN on the product page — so it disambiguates variants the name alone
+  // cannot ("Adult Chicken" 85 g pouch vs 400 g can).
+  const barcode = gtin ?
+    `  barcode (EAN/UPC): "${gtin}" — include it as a search term when the ` +
+    "product name alone is ambiguous.\n" :
+    "";
   const known = identification ?
     "This product has already been identified from the packaging as:\n" +
     `  brand: "${identification.brand}"\n` +
     `  name: "${identification.name}"\n` +
     `  foodType: "${identification.foodType}"\n` +
+    barcode +
     "Search for THIS exact product's guaranteed analysis and keep this name.\n\n" :
     "";
 

@@ -51,7 +51,23 @@ export interface Product {
   // call, everyone after reads it from here. No "en" entry (that's the flat
   // fields). Absent on pre-existing rows.
   translations?: Record<string, ProductText>;
+  // Normalised EAN-13 read off the pack by the client (Phase 1). The one
+  // deterministic identity a product has: two scans of the same pack agree on
+  // it even when Haiku's transcription of the name drifts. `objectID` stays the
+  // text key for compatibility; `gtin` is a filterOnly facet looked up first.
+  gtin?: string;
+  // "scan": read from the user's photo. "resolver": the pack was unreadable and
+  // brand/name were recovered from the barcode (Open Pet Food Facts / search).
+  gtinSource?: GtinSource;
+  // Where the nutrition came from: the web-search fan-out (default, absent on
+  // older rows) or the back-label rescue (Phase 2). A label read is the exact
+  // variant in the user's hand, so it is never overwritten by a later search.
+  analysisSource?: AnalysisSource;
+  labelRequestId?: string;
 }
+
+export type GtinSource = "scan" | "resolver";
+export type AnalysisSource = "web" | "label";
 
 export class ProductModel implements Product {
   barcode: string;
@@ -77,6 +93,10 @@ export class ProductModel implements Product {
   lastAnalysisAttempt?: number;
   lastImageAttempt?: number;
   translations?: Record<string, ProductText>;
+  gtin?: string;
+  gtinSource?: GtinSource;
+  analysisSource?: AnalysisSource;
+  labelRequestId?: string;
 
   constructor(
     barcode: string,
@@ -101,7 +121,9 @@ export class ProductModel implements Product {
     ingredients: string[] = [],
     lastAnalysisAttempt?: number,
     lastImageAttempt?: number,
-    translations?: Record<string, ProductText>
+    translations?: Record<string, ProductText>,
+    gtin?: string,
+    gtinSource?: GtinSource
   ) {
     this.barcode = barcode;
     this.name = name;
@@ -126,10 +148,12 @@ export class ProductModel implements Product {
     this.lastAnalysisAttempt = lastAnalysisAttempt;
     this.lastImageAttempt = lastImageAttempt;
     this.translations = translations;
+    this.gtin = gtin;
+    this.gtinSource = gtinSource;
   }
 
   static fromObject(data: Partial<Product>): ProductModel {
-    return new ProductModel(
+    const model = new ProductModel(
       data.barcode || "",
       data.name || "",
       data.brand || "",
@@ -152,8 +176,13 @@ export class ProductModel implements Product {
       data.ingredients || [],
       data.lastAnalysisAttempt,
       data.lastImageAttempt,
-      data.translations
+      data.translations,
+      data.gtin,
+      data.gtinSource
     );
+    model.analysisSource = data.analysisSource;
+    model.labelRequestId = data.labelRequestId;
+    return model;
   }
 
   toObject(): Product {
@@ -181,6 +210,10 @@ export class ProductModel implements Product {
       lastAnalysisAttempt: this.lastAnalysisAttempt,
       lastImageAttempt: this.lastImageAttempt,
       translations: this.translations,
+      gtin: this.gtin,
+      gtinSource: this.gtinSource,
+      analysisSource: this.analysisSource,
+      labelRequestId: this.labelRequestId,
     };
   }
 }

@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:yucat/features/product/domain/entities/label_target.dart';
 
 sealed class HomeEvent extends Equatable {
   const HomeEvent();
@@ -42,17 +43,87 @@ class ImageCapturedEvent extends HomeEvent {
   /// controller outlives the page, so it stays safe to push onto.
   final StackRouter router;
 
+  /// Size of the encoded upload and how long the client-side downscale took —
+  /// reported on `Product Image Captured` so payload size is observable.
+  final int? imageBytes;
+  final int? prepMs;
+
+  /// Normalised EAN-13 read off the still on-device, when the frame held a
+  /// legible barcode. Sent to the backend as an exact cache key and as the
+  /// fallback identity for an unreadable pack. Null when none was found.
+  final String? gtin;
+
+  /// The symbology that was read (`ean13`, `upcA`, …), for analytics only.
+  final String? barcodeFormat;
+
+  /// `camera` or `gallery`.
+  final String captureSource;
+
   const ImageCapturedEvent({
     required this.imageBase64,
     required this.mimeType,
     required this.router,
+    required this.captureSource,
     this.countryCode,
     this.locale,
+    this.imageBytes,
+    this.prepMs,
+    this.gtin,
+    this.barcodeFormat,
+  });
+
+  @override
+  List<Object?> get props => [
+        imageBase64,
+        mimeType,
+        router,
+        captureSource,
+        countryCode,
+        locale,
+        imageBytes,
+        prepMs,
+        gtin,
+        barcodeFormat,
+      ];
+}
+
+/// A back-label capture (scan-pipeline Phase 2). Same shape as
+/// [ImageCapturedEvent] minus the barcode fields (no barcode is read in label
+/// mode) plus the [target] the label's data attaches to.
+class LabelImageCapturedEvent extends HomeEvent {
+  final String imageBase64;
+  final String mimeType;
+  final LabelTarget target;
+  final StackRouter router;
+  final String? countryCode;
+  final String? locale;
+  final int? imageBytes;
+  final int? prepMs;
+
+  const LabelImageCapturedEvent({
+    required this.imageBase64,
+    required this.mimeType,
+    required this.target,
+    required this.router,
+    this.countryCode,
+    this.locale,
+    this.imageBytes,
+    this.prepMs,
   });
 
   @override
   List<Object?> get props =>
-      [imageBase64, mimeType, router, countryCode, locale];
+      [imageBase64, mimeType, target, router, countryCode, locale];
+}
+
+/// The user tapped Cancel on the scan theater. The in-flight callable keeps
+/// running server-side (and still caches its result); the bloc just drops
+/// the response when it arrives and returns Home to its dashboard.
+class ScanAbandonedEvent extends HomeEvent {
+  const ScanAbandonedEvent();
+
+  @override
+  List<Object?> get props => [];
 }
 
 class PaywallDismissedEvent extends HomeEvent {

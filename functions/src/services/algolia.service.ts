@@ -79,6 +79,180 @@ function wordOverlap(queryTokens: string[], hitTokens: string[]): number {
 }
 
 /**
+ * Algolia's search response decorates every hit with `objectID`,
+ * `_highlightResult`, `_snippetResult`, `_rankingInfo`… — and a cache-hit row
+ * flows straight back into `cacheProduct` on an image backfill or translation
+ * fill. Without this, each write-back re-embedded the previous response's
+ * highlight envelope (and then highlighted the highlight), bloating records
+ * toward Algolia's per-record limit. Strip it before every write.
+ */
+const ALGOLIA_ENVELOPE_KEYS = [
+  "objectID", "_highlightResult", "_snippetResult", "_rankingInfo",
+  "_distinctSeqID",
+];
+
+function sanitizeForIndex<T extends object>(record: T): T {
+  const clean = {...(record as Record<string, unknown>)};
+  for (const key of ALGOLIA_ENVELOPE_KEYS) delete clean[key];
+  return clean as T;
+}
+
+/**
+ * Brand values carry spaces and apostrophes ("Royal Canin", "Hill's Science
+ * Diet"). Unquoted, Algolia parses `brand:Royal Canin` as `brand:Royal` plus a
+ * stray token, so the soft boost never fired for any multi-word brand.
+ */
+function brandFilter(brand: string): string[] | undefined {
+  const trimmed = brand.trim();
+  if (!trimmed) return undefined;
+  return [`brand:"${trimmed.replace(/"/g, "\\\"")}"`];
+}
+
+// --- GTIN identity ---------------------------------------------------------
+// The barcode is the one deterministic identity a pack has. Rows are still
+// keyed by the text-derived objectID for compatibility; `gtin` is a filterOnly
+// facet (see scripts/configure-*.ts) that is looked up before identify and
+// attached to existing rows as scans encounter them, so the catalogue converges
+// on barcode identity without a migration.
+
+async function findByGtin<T>(indexName: string, gtin: string): Promise<T | null> {
+  if (!config.algolia.enabled) return null;
+  try {
+    const result = await algoliaClient.search({
+      requests: [{
+        indexName,
+        query: "",
+        hitsPerPage: 1,
+        filters: `gtin:"${gtin}"`,
+      }],
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const hits = ((result.results[0] as any)?.hits || []) as any[];
+    logger.info("Algolia gtin lookup", {
+      indexName,
+      gtin,
+      hit: hits.length > 0,
+      structuredData: true,
+    });
+    return hits.length > 0 ? (hits[0] as T) : null;
+  } catch (error) {
+    // ⚠️ An undeclared facet does NOT reach here: verified against the live
+    // index, a `filters` clause on an unknown attribute returns 0 hits with no
+    // error. Until `configure-*.ts` declares `filterOnly(gtin)`, every gtin
+    // lookup is a silent miss and the pipeline takes the text path.
+    logger.warn("Algolia gtin lookup failed", {
+      indexName,
+      gtin,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return null;
+  }
+}
+
+export function findProductByGtin(gtin: string): Promise<Product | null> {
+  return findByGtin<Product>(config.algolia.indexName, gtin);
+}
+
+export function findLitterByGtin(gtin: string): Promise<Litter | null> {
+  return findByGtin<Litter>(config.algolia.litterIndexName, gtin);
+}
+
+/**
+ * Stamps a GTIN onto an existing row that was matched by name. Fire-and-forget
+ * at the call site: the scan's result does not depend on it, and the next scan
+ * of the same pack then takes the gtin fast path.
+ */
+export async function attachGtin(
+  indexName: string,
+  objectID: string,
+  gtin: string
+): Promise<void> {
+  if (!config.algolia.enabled || !objectID) return;
+  try {
+    await algoliaClient.partialUpdateObject({
+      indexName,
+      objectID,
+      attributesToUpdate: {gtin, gtinSource: "scan"},
+      createIfNotExists: false,
+    });
+    logger.info("Algolia gtin attached", {
+      indexName, objectID, gtin, structuredData: true,
+    });
+  } catch (error) {
+    logger.warn("Algolia gtin attach failed", {
+      indexName,
+      objectID,
+      gtin,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+  }
+}
+
+// --- Nightly self-heal support (jobs/self-heal.ts) --------------------------
+
+/**
+ * Every row matching an Algolia `filters` expression, with only the listed
+ * attributes. Paginated search rather than `browse`: it needs only the
+ * `search` ACL the runtime key certainly has, and the catalogue (~3.4k rows)
+ * fits in a handful of 1,000-hit pages. Stops at `maxRows`.
+ */
+export async function fetchRowsByFilter<T>(
+  indexName: string,
+  filters: string,
+  attributesToRetrieve: string[],
+  maxRows = 5000
+): Promise<T[]> {
+  if (!config.algolia.enabled) return [];
+  const rows: T[] = [];
+  for (let page = 0; rows.length < maxRows; page++) {
+    const result = await algoliaClient.search({
+      requests: [{
+        indexName,
+        query: "",
+        filters,
+        hitsPerPage: 1000,
+        page,
+        attributesToRetrieve,
+      }],
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = result.results[0] as any;
+    const hits = (res?.hits || []) as T[];
+    rows.push(...hits);
+    if (hits.length === 0 || page + 1 >= (res?.nbPages ?? 1)) break;
+  }
+  return rows.slice(0, maxRows);
+}
+
+/** Partial update of one row; never creates. Failures are logged, not thrown. */
+export async function partialUpdateRecord(
+  indexName: string,
+  objectID: string,
+  attributes: Record<string, unknown>
+): Promise<boolean> {
+  if (!config.algolia.enabled || !objectID) return false;
+  try {
+    await algoliaClient.partialUpdateObject({
+      indexName,
+      objectID,
+      attributesToUpdate: attributes,
+      createIfNotExists: false,
+    });
+    return true;
+  } catch (error) {
+    logger.warn("Algolia partial update failed", {
+      indexName,
+      objectID,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return false;
+  }
+}
+
+/**
  * Retrieves a product from Algolia cache by objectID (barcode or cache key)
  */
 export async function getCachedProduct(
@@ -136,7 +310,7 @@ export async function cacheProduct(
   try {
     const productData = {
       objectID: barcode,
-      ...product,
+      ...sanitizeForIndex(product),
     };
 
     logger.info("Attempting to save product to Algolia", {
@@ -239,6 +413,16 @@ export async function searchProductByName(
 }
 
 /**
+ * What a cache lookup yields: the confident match (if any) plus the raw
+ * candidate pool the query returned, so the caller's LLM verifier can pick
+ * from the same hits instead of re-running the identical query.
+ */
+export interface CacheLookup<T> {
+  match: T | null;
+  hits: T[];
+}
+
+/**
  * Phase-3 replacement for {@link searchProductByName}.
  *
  * Differences vs V1:
@@ -253,27 +437,36 @@ export async function searchProductByName(
  *   so multi-punctuation product names match correctly.
  * - Lowers the relevance threshold from 0.8 to 0.6, requiring brand
  *   equality as a hard filter.
+ *
+ * Returns `{match, hits}` — see {@link CacheLookup}. `match` is null when no
+ * hit clears the threshold OR when the top two are a near-tie (the caller
+ * then hands `hits` to the LLM verifier rather than us guessing).
  */
-export async function searchProductByNameV2(
+export async function lookupProductByNameV2(
   brand: string,
   name: string,
   foodType?: string
-): Promise<Product | null> {
+): Promise<CacheLookup<Product>> {
   if (!config.algolia.enabled) {
-    return null;
+    return {match: null, hits: []};
   }
 
   try {
     const queryTokens = tokenize(normalize(name));
     const expectedBrand = normalize(brand);
 
+    // `foodType` is a soft boost, not a hard filter: identify's treat-vs-dry or
+    // topper-vs-wet call disagreeing with the cached row used to turn a would-be
+    // hit into a full $0.085 re-analysis. Brand equality is still enforced below.
     const result = await algoliaClient.search({
       requests: [{
         indexName: config.algolia.indexName,
         query: name,
         hitsPerPage: HITS_PER_PAGE_V2,
-        optionalFilters: brand ? [`brand:${brand}`] : undefined,
-        ...(foodType ? {filters: `foodType:${foodType}`} : {}),
+        optionalFilters: [
+          ...(brandFilter(brand) ?? []),
+          ...(foodType ? [`foodType:${foodType}`] : []),
+        ],
       }],
     });
 
@@ -283,7 +476,7 @@ export async function searchProductByNameV2(
       logger.info("Algolia v2: no hits", {
         brand, name, foodType: foodType || "none", structuredData: true,
       });
-      return null;
+      return {match: null, hits: []};
     }
 
     const scored = hits.map((hit) => {
@@ -310,6 +503,7 @@ export async function searchProductByNameV2(
       structuredData: true,
     });
 
+    const pool = hits as Product[];
     const best = scored[0];
     if (!best || best.score < NAME_MATCH_THRESHOLD || best.brandMatch === 0) {
       logger.info("Algolia v2: no match passes threshold", {
@@ -318,7 +512,7 @@ export async function searchProductByNameV2(
         topBrandMatch: best?.brandMatch ?? "n/a",
         structuredData: true,
       });
-      return null;
+      return {match: null, hits: pool};
     }
 
     // Ambiguity guard: a short/generic scanned name matches many distinct
@@ -336,10 +530,10 @@ export async function searchProductByNameV2(
           .map((s) => s.hit.name),
         structuredData: true,
       });
-      return null;
+      return {match: null, hits: pool};
     }
 
-    return best.hit as Product;
+    return {match: best.hit as Product, hits: pool};
   } catch (error) {
     logger.warn("Algolia v2 name search failed", {
       brand,
@@ -347,47 +541,7 @@ export async function searchProductByNameV2(
       error: error instanceof Error ? error.message : String(error),
       structuredData: true,
     });
-    return null;
-  }
-}
-
-/**
- * Returns the top {@link HITS_PER_PAGE_V2} candidates for a query without
- * applying the V2 relevance threshold. Used by the optional LLM-verified
- * matching path so the model can pick from a wider candidate pool than the
- * string-matching threshold allows.
- */
-export async function fetchCandidatesByName(
-  brand: string,
-  name: string,
-  foodType?: string
-): Promise<Product[]> {
-  if (!config.algolia.enabled) {
-    return [];
-  }
-
-  try {
-    const result = await algoliaClient.search({
-      requests: [{
-        indexName: config.algolia.indexName,
-        query: name,
-        hitsPerPage: HITS_PER_PAGE_V2,
-        optionalFilters: brand ? [`brand:${brand}`] : undefined,
-        ...(foodType ? {filters: `foodType:${foodType}`} : {}),
-      }],
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const hits = ((result.results[0] as any)?.hits || []) as any[];
-    return hits as Product[];
-  } catch (error) {
-    logger.warn("Algolia candidate fetch failed", {
-      brand,
-      name,
-      error: error instanceof Error ? error.message : String(error),
-      structuredData: true,
-    });
-    return [];
+    return {match: null, hits: []};
   }
 }
 
@@ -411,7 +565,7 @@ export async function cacheLitter(id: string, litter: Litter): Promise<void> {
   try {
     await algoliaClient.saveObject({
       indexName: config.algolia.litterIndexName,
-      body: {objectID: id, ...litter},
+      body: {objectID: id, ...sanitizeForIndex(litter)},
     });
 
     logger.info("Litter successfully saved to Algolia", {
@@ -432,16 +586,17 @@ export async function cacheLitter(id: string, litter: Litter): Promise<void> {
 }
 
 /**
- * Litter counterpart to {@link searchProductByNameV2} — same scoring, same
- * threshold, same ambiguity guard (a near-tie returns null so the caller's LLM
- * verifier disambiguates instead of us picking the first hit).
+ * Litter counterpart to {@link lookupProductByNameV2} — same scoring, same
+ * threshold, same ambiguity guard (a near-tie returns a null `match` so the
+ * caller's LLM verifier disambiguates over `hits` instead of us picking the
+ * first one).
  */
-export async function searchLitterByNameV2(
+export async function lookupLitterByNameV2(
   brand: string,
   name: string
-): Promise<Litter | null> {
+): Promise<CacheLookup<Litter>> {
   if (!config.algolia.enabled) {
-    return null;
+    return {match: null, hits: []};
   }
 
   try {
@@ -453,7 +608,7 @@ export async function searchLitterByNameV2(
         indexName: config.algolia.litterIndexName,
         query: name,
         hitsPerPage: HITS_PER_PAGE_V2,
-        optionalFilters: brand ? [`brand:${brand}`] : undefined,
+        optionalFilters: brandFilter(brand),
       }],
     });
 
@@ -463,7 +618,7 @@ export async function searchLitterByNameV2(
       logger.info("Algolia litter: no hits", {
         brand, name, structuredData: true,
       });
-      return null;
+      return {match: null, hits: []};
     }
 
     const scored = hits.map((hit) => {
@@ -487,9 +642,10 @@ export async function searchLitterByNameV2(
       structuredData: true,
     });
 
+    const pool = hits as Litter[];
     const best = scored[0];
     if (!best || best.score < NAME_MATCH_THRESHOLD || best.brandMatch === 0) {
-      return null;
+      return {match: null, hits: pool};
     }
 
     const second = scored[1];
@@ -499,10 +655,10 @@ export async function searchLitterByNameV2(
         runnerUpScore: second.score.toFixed(2),
         structuredData: true,
       });
-      return null;
+      return {match: null, hits: pool};
     }
 
-    return best.hit as Litter;
+    return {match: best.hit as Litter, hits: pool};
   } catch (error) {
     logger.warn("Algolia litter name search failed", {
       brand,
@@ -510,42 +666,6 @@ export async function searchLitterByNameV2(
       error: error instanceof Error ? error.message : String(error),
       structuredData: true,
     });
-    return null;
-  }
-}
-
-/**
- * Litter counterpart to {@link fetchCandidatesByName} — the unfiltered
- * candidate pool the LLM verifier picks from.
- */
-export async function fetchLitterCandidatesByName(
-  brand: string,
-  name: string
-): Promise<Litter[]> {
-  if (!config.algolia.enabled) {
-    return [];
-  }
-
-  try {
-    const result = await algoliaClient.search({
-      requests: [{
-        indexName: config.algolia.litterIndexName,
-        query: name,
-        hitsPerPage: HITS_PER_PAGE_V2,
-        optionalFilters: brand ? [`brand:${brand}`] : undefined,
-      }],
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const hits = ((result.results[0] as any)?.hits || []) as any[];
-    return hits as Litter[];
-  } catch (error) {
-    logger.warn("Algolia litter candidate fetch failed", {
-      brand,
-      name,
-      error: error instanceof Error ? error.message : String(error),
-      structuredData: true,
-    });
-    return [];
+    return {match: null, hits: []};
   }
 }

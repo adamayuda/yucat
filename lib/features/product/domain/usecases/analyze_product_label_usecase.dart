@@ -1,27 +1,27 @@
+import 'package:yucat/features/product/domain/entities/label_target.dart';
 import 'package:yucat/features/product/domain/entities/scan_result_entity.dart';
 import 'package:yucat/features/product/domain/repositories/product_repository.dart';
 
-class FetchProductByImageUsecase {
+/// The back-label rescue path — see [ProductRepository.analyzeProductLabel].
+class AnalyzeProductLabelUsecase {
   final ProductRepository _productRepository;
 
-  FetchProductByImageUsecase({required ProductRepository productRepository})
+  AnalyzeProductLabelUsecase({required ProductRepository productRepository})
     : _productRepository = productRepository;
 
-  /// Returns a [ScanFoodResult] or a [ScanLitterResult] — the camera is one
-  /// entry point for both categories — or a typed failure variant.
   Future<ScanResultEntity> call({
     required String imageBase64,
     required String mimeType,
+    required LabelTarget target,
     String? countryCode,
     String? locale,
-    String? gtin,
-  }) async {
-    return _productRepository.fetchProductByImage(
+  }) {
+    return _productRepository.analyzeProductLabel(
       imageBase64: imageBase64,
       mimeType: mimeType,
+      target: target,
       countryCode: countryCode,
       locale: locale,
-      gtin: gtin,
     );
   }
 }

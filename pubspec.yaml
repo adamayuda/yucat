@@ -48,6 +48,8 @@ dependencies:
   in_app_review: ^2.0.10
   onesignal_flutter: ^5.5.8
   shimmer: ^3.0.0
+  flutter_image_compress: ^2.5.1
+  mobile_scanner: ^7.4.1
 
 dev_dependencies:
   flutter_test:

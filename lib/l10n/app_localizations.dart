@@ -2762,6 +2762,150 @@ abstract class AppLocalizations {
   /// **'Something went wrong. Please try again.'**
   String get homeErrorGeneric;
 
+  /// No description provided for @homeErrorServiceBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Our analysis service is busy right now. Please try again in a few minutes.'**
+  String get homeErrorServiceBusy;
+
+  /// No description provided for @homeScannerLabelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph the back label'**
+  String get homeScannerLabelTitle;
+
+  /// No description provided for @homeScannerLabelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Frame the ingredients & analysis panel'**
+  String get homeScannerLabelHint;
+
+  /// No description provided for @homeErrorNotCatProductTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That doesn\'t look like a cat product'**
+  String get homeErrorNotCatProductTitle;
+
+  /// No description provided for @homeErrorNotCatProductBody.
+  ///
+  /// In en, this message translates to:
+  /// **'YuCat reads cat food and cat litter. Try a different pack, or search by name.'**
+  String get homeErrorNotCatProductBody;
+
+  /// No description provided for @homeErrorUnreadableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t read that pack'**
+  String get homeErrorUnreadableTitle;
+
+  /// No description provided for @homeErrorUnreadableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again with the front of the pack in good light — or photograph the back label and we\'ll read the analysis straight off it.'**
+  String get homeErrorUnreadableBody;
+
+  /// No description provided for @homeErrorAnalysisFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We found {name} but not its nutrition'**
+  String homeErrorAnalysisFailedTitle(String name);
+
+  /// No description provided for @homeErrorAnalysisFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The analysis isn\'t online anywhere we looked. Photograph the back label and we\'ll read it from the pack.'**
+  String get homeErrorAnalysisFailedBody;
+
+  /// No description provided for @homeErrorLabelUnreadableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t read that label'**
+  String get homeErrorLabelUnreadableTitle;
+
+  /// No description provided for @homeErrorLabelUnreadableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill the frame with the analysis table and ingredients, in good light, and try once more.'**
+  String get homeErrorLabelUnreadableBody;
+
+  /// No description provided for @homeErrorLabelNoDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No analysis on that panel'**
+  String get homeErrorLabelNoDataTitle;
+
+  /// No description provided for @homeErrorLabelNoDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The photo was clear but there was no nutrition table in it. Try the side or back with \"Analytical constituents\".'**
+  String get homeErrorLabelNoDataBody;
+
+  /// No description provided for @homeErrorExitScanAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan again'**
+  String get homeErrorExitScanAgain;
+
+  /// No description provided for @homeErrorExitScanLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph the back label'**
+  String get homeErrorExitScanLabel;
+
+  /// No description provided for @homeErrorExitSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name'**
+  String get homeErrorExitSearch;
+
+  /// No description provided for @productDetailScanLabelCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph the back label'**
+  String get productDetailScanLabelCta;
+
+  /// No description provided for @homeLoadingLabelEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the label'**
+  String get homeLoadingLabelEyebrow;
+
+  /// No description provided for @homeLoadingMsgReadingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the analysis table…'**
+  String get homeLoadingMsgReadingLabel;
+
+  /// No description provided for @homeLoadingMsgScoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Scoring the ingredients…'**
+  String get homeLoadingMsgScoring;
+
+  /// No description provided for @homeLoadingMsgSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching retailer pages…'**
+  String get homeLoadingMsgSearching;
+
+  /// No description provided for @homeLoadingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Usually 20–40 seconds'**
+  String get homeLoadingHint;
+
+  /// No description provided for @homeLoadingLabelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Usually under 15 seconds'**
+  String get homeLoadingLabelHint;
+
+  /// No description provided for @homeLoadingCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get homeLoadingCancel;
+
   /// No description provided for @homeCatKitten.
   ///
   /// In en, this message translates to:
@@ -2839,6 +2983,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again'**
   String get commonTryAgain;
+
+  /// No description provided for @productRowNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get productRowNoData;
 
   /// No description provided for @searchTabTitle.
   ///

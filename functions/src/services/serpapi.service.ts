@@ -10,6 +10,9 @@ import * as logger from "firebase-functions/logger";
 import {config} from "../config";
 
 const SERPAPI_ENDPOINT = "https://serpapi.com/search.json";
+// SerpAPI normally answers in 1-3 s. Unbounded, a slow upstream Google query
+// could hold the scan for the function's whole timeout.
+const FETCH_TIMEOUT_MS = 6000;
 const MAX_CANDIDATES = 6;
 /** How many organic page URLs to return for the nutrition-page fallback. */
 const MAX_PAGE_CANDIDATES = 4;
@@ -44,7 +47,9 @@ export async function searchProductImageUrls(
   });
 
   try {
-    const response = await fetch(`${SERPAPI_ENDPOINT}?${params.toString()}`);
+    const response = await fetch(`${SERPAPI_ENDPOINT}?${params.toString()}`, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
     if (!response.ok) {
       logger.warn("SerpAPI request failed", {
         status: response.status,
@@ -106,7 +111,9 @@ export async function searchProductPageUrls(
   });
 
   try {
-    const response = await fetch(`${SERPAPI_ENDPOINT}?${params.toString()}`);
+    const response = await fetch(`${SERPAPI_ENDPOINT}?${params.toString()}`, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
     if (!response.ok) {
       logger.warn("SerpAPI page request failed", {
         status: response.status,

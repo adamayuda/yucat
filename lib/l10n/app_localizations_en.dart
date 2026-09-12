@@ -1523,6 +1523,87 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeErrorGeneric => 'Something went wrong. Please try again.';
 
   @override
+  String get homeErrorServiceBusy =>
+      'Our analysis service is busy right now. Please try again in a few minutes.';
+
+  @override
+  String get homeScannerLabelTitle => 'Photograph the back label';
+
+  @override
+  String get homeScannerLabelHint => 'Frame the ingredients & analysis panel';
+
+  @override
+  String get homeErrorNotCatProductTitle =>
+      'That doesn\'t look like a cat product';
+
+  @override
+  String get homeErrorNotCatProductBody =>
+      'YuCat reads cat food and cat litter. Try a different pack, or search by name.';
+
+  @override
+  String get homeErrorUnreadableTitle => 'We couldn\'t read that pack';
+
+  @override
+  String get homeErrorUnreadableBody =>
+      'Try again with the front of the pack in good light — or photograph the back label and we\'ll read the analysis straight off it.';
+
+  @override
+  String homeErrorAnalysisFailedTitle(String name) {
+    return 'We found $name but not its nutrition';
+  }
+
+  @override
+  String get homeErrorAnalysisFailedBody =>
+      'The analysis isn\'t online anywhere we looked. Photograph the back label and we\'ll read it from the pack.';
+
+  @override
+  String get homeErrorLabelUnreadableTitle => 'We couldn\'t read that label';
+
+  @override
+  String get homeErrorLabelUnreadableBody =>
+      'Fill the frame with the analysis table and ingredients, in good light, and try once more.';
+
+  @override
+  String get homeErrorLabelNoDataTitle => 'No analysis on that panel';
+
+  @override
+  String get homeErrorLabelNoDataBody =>
+      'The photo was clear but there was no nutrition table in it. Try the side or back with \"Analytical constituents\".';
+
+  @override
+  String get homeErrorExitScanAgain => 'Scan again';
+
+  @override
+  String get homeErrorExitScanLabel => 'Photograph the back label';
+
+  @override
+  String get homeErrorExitSearch => 'Search by name';
+
+  @override
+  String get productDetailScanLabelCta => 'Photograph the back label';
+
+  @override
+  String get homeLoadingLabelEyebrow => 'Reading the label';
+
+  @override
+  String get homeLoadingMsgReadingLabel => 'Reading the analysis table…';
+
+  @override
+  String get homeLoadingMsgScoring => 'Scoring the ingredients…';
+
+  @override
+  String get homeLoadingMsgSearching => 'Searching retailer pages…';
+
+  @override
+  String get homeLoadingHint => 'Usually 20–40 seconds';
+
+  @override
+  String get homeLoadingLabelHint => 'Usually under 15 seconds';
+
+  @override
+  String get homeLoadingCancel => 'Cancel';
+
+  @override
   String get homeCatKitten => 'Kitten';
 
   @override
@@ -1576,6 +1657,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonTryAgain => 'Try again';
+
+  @override
+  String get productRowNoData => 'No data yet';
 
   @override
   String get searchTabTitle => 'Search';

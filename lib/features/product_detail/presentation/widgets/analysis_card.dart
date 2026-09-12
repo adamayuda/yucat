@@ -6,12 +6,22 @@ import 'package:yucat/features/product_detail/presentation/widgets/analysis_chip
 import 'package:yucat/features/product_detail/presentation/widgets/ring_score.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
+import 'package:yucat/presentation/components/ds_pill_button.dart';
 
 class AnalysisCard extends StatelessWidget {
   final ProductDisplayModel product;
   final String? description;
 
-  const AnalysisCard({super.key, required this.product, this.description});
+  /// The back-label rescue CTA, shown only on the no-data card. Null hides it
+  /// (e.g. a caller with no router to push the scanner from).
+  final VoidCallback? onScanLabel;
+
+  const AnalysisCard({
+    super.key,
+    required this.product,
+    this.description,
+    this.onScanLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +73,17 @@ class AnalysisCard extends StatelessWidget {
           if (body != null && body.isNotEmpty) ...[
             const SizedBox(height: DSDimens.sizeS),
             Text(body, style: DSTextStyles.bodyMd),
+          ],
+          // The data is on the pack in the user's hand: one photo of the
+          // analysis panel fills in what the web search could not find.
+          if (noData && onScanLabel != null) ...[
+            const SizedBox(height: DSDimens.sizeM),
+            DSPillButton(
+              label: l10n.productDetailScanLabelCta,
+              onPressed: onScanLabel,
+              showChevron: false,
+              leadingIcon: Icons.photo_camera_outlined,
+            ),
           ],
           if (!noData &&
               (product.displayPros.isNotEmpty ||

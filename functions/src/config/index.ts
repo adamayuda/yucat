@@ -7,6 +7,34 @@
  *   onCall({secrets: ["ANTHROPIC_API_KEY"], ...}, ...)
  */
 
+import {defineInt, defineString, defineBoolean} from "firebase-functions/params";
+
+// --- Deploy-time parameters (Phase 3 A/B plumbing) -------------------------
+// `firebase-functions/params`: values come from `functions/.env*` or the
+// deploy prompt, and a change is a redeploy, not a code edit. ⚠️ `.value()`
+// must be read inside a function body, never at module load — the CLI
+// evaluates this module to discover functions and params.
+//
+// The identify and label steps are single vision calls where model quality
+// shows up directly in the not-identified rate and in the label figures, so
+// they are the ones switchable; the analyze fan-out stays on the base model.
+export const identifyModelParam = defineString("IDENTIFY_MODEL", {
+  default: "claude-haiku-4-5-20251001",
+  description: "Model for the identify step when a request lands in the A/B bucket",
+});
+export const labelModelParam = defineString("LABEL_MODEL", {
+  default: "claude-haiku-4-5-20251001",
+  description: "Model for the back-label extraction",
+});
+export const identifyRolloutPctParam = defineInt("IDENTIFY_MODEL_ROLLOUT_PCT", {
+  default: 0,
+  description: "0-100: share of scans whose identify step uses IDENTIFY_MODEL",
+});
+export const selfHealDryRunParam = defineBoolean("SELF_HEAL_DRY_RUN", {
+  default: false,
+  description: "Nightly self-heal logs its candidates and writes nothing",
+});
+
 export const config = {
   // Anthropic / Claude Haiku Configuration
   anthropic: {
@@ -72,5 +100,32 @@ export const config = {
   functions: {
     timeoutSeconds: 300,
     corsEnabled: true,
+    // Scan instances: sharp decodes multi-MB photos and every in-flight request
+    // holds a base64 copy, so the 256 MiB / 80-concurrency default was being
+    // OOM-killed (5 times in 14 days). Memory-bound work wants fewer, larger
+    // instances. Traffic is ~15 scans/day, so cost is negligible either way.
+    memory: "1GiB" as const,
+    concurrency: 10,
+    // The back-label rescue is one vision call, no web search: ~5-12 s.
+    labelTimeoutSeconds: 90,
+  },
+
+  // Nightly self-heal (jobs/self-heal.ts). Caps bound the model spend per
+  // night (≈ 15 × $0.06 ≈ $1) and keep the run inside its 9-minute budget.
+  selfHeal: {
+    // A row is re-attempted at most once per window — shared with the scan
+    // pipeline's "stale junk" predicate in index.ts.
+    reanalyzeAfterMs: 14 * 24 * 60 * 60 * 1000,
+    schedule: "every day 03:30",
+    timeZone: "Europe/Madrid",
+    timeoutSeconds: 540,
+    // Stop starting new work after this; in-flight items still finish.
+    budgetMs: 480_000,
+    reanalyzePerRun: 15,
+    reanalyzeConcurrency: 3,
+    imageBackfillPerRun: 40,
+    imageBackfillConcurrency: 5,
+    litterReanalyzePerRun: 5,
+    litterImageBackfillPerRun: 10,
   },
 } as const;

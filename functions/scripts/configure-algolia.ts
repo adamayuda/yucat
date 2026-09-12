@@ -4,8 +4,8 @@
  *
  *   cd functions && npx ts-node scripts/configure-algolia.ts
  *
- * Requires ALGOLIA_APP_ID and ALGOLIA_API_KEY in env (the API key must be
- * an admin key, not the search-only key).
+ * Requires ALGOLIA_APP_ID and ALGOLIA_ADMIN_API_KEY in env (the admin key,
+ * not the committed search-only key — search-only keys cannot mutate settings).
  */
 import {algoliasearch} from "algoliasearch";
 
@@ -38,6 +38,12 @@ async function main() {
         "filterOnly(foodType)",
         "searchable(brand)",
         "filterOnly(barcode)",
+        // Phase 1: the normalised EAN-13 read off the pack. Looked up with an
+        // exact filter before the identify step (see index.ts). ⚠️ Until this
+        // facet is declared the gtin filter silently returns 0 hits (no error —
+        // verified on the live index), so every scan falls through to the text
+        // lookup and the fast path never fires. Run this script BEFORE deploying.
+        "filterOnly(gtin)",
       ],
       customRanking: [
         "desc(score)",

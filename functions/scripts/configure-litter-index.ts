@@ -4,10 +4,11 @@
  *   cd functions && npx ts-node scripts/configure-litter-index.ts
  *
  * ⚠️ **This must be run once before the litter scan path can hit its cache.**
- * `searchLitterByNameV2` passes `optionalFilters: ["brand:…"]`, and Algolia
- * rejects a filter on an attribute that is not declared for faceting. Until
- * that declaration exists every lookup errors, is swallowed, and every scan
- * falls through to a full (paid) analysis instead of a cache hit.
+ * `lookupLitterByNameV2` soft-boosts on `brand` and the Phase-1 fast path
+ * filters on `gtin`; on this index neither attribute is declared for faceting
+ * (verified 2026-09-12: `attributesForFaceting` is empty), and a filter on an
+ * undeclared attribute silently matches nothing rather than erroring. So the
+ * brand boost has never fired and the gtin lookup cannot until this runs.
  *
  * Requires ALGOLIA_APP_ID and ALGOLIA_ADMIN_API_KEY in env — the admin key,
  * not the committed search-only key, which cannot mutate settings.
@@ -48,6 +49,8 @@ async function main() {
         "filterOnly(material)",
         "filterOnly(clumping)",
         "filterOnly(scented)",
+        // Phase 1: exact barcode lookup, same contract as products2.
+        "filterOnly(gtin)",
       ],
       customRanking: [
         "desc(score)",

@@ -41,14 +41,20 @@ class ProductRowCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: DSDimens.sizeXxs),
-                _ScorePill(
-                  score: product.scoreDisplay,
-                  rating: ratingLabelFor(
-                    product.ratingText,
-                    AppLocalizations.of(context),
+                // Score 0 is the "no analysis" sentinel, not a grade. The
+                // detail page already renders it neutrally; list rows used to
+                // show a red "0/100 • Poor" for the same product.
+                if (product.dataUnavailable)
+                  const _NoDataPill()
+                else
+                  _ScorePill(
+                    score: product.scoreDisplay,
+                    rating: ratingLabelFor(
+                      product.ratingText,
+                      AppLocalizations.of(context),
+                    ),
+                    color: product.ratingColor,
                   ),
-                  color: product.ratingColor,
-                ),
               ],
             ),
           ),
@@ -87,6 +93,31 @@ class _ProductThumb extends StatelessWidget {
               errorBuilder: (_, __, ___) => const HatchedPlaceholder(),
             )
           : const HatchedPlaceholder(),
+    );
+  }
+}
+
+class _NoDataPill extends StatelessWidget {
+  const _NoDataPill();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: DSDimens.sizeXs,
+        vertical: DSDimens.sizeXxxs,
+      ),
+      decoration: BoxDecoration(
+        color: DSColors.tintAsh,
+        borderRadius: BorderRadius.circular(DSRadii.pill),
+      ),
+      child: Text(
+        AppLocalizations.of(context).productRowNoData,
+        style: DSTextStyles.caption.copyWith(
+          color: DSColors.inkSecondary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

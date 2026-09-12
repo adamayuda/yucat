@@ -36,6 +36,14 @@ class ProductDisplayModel {
   /// misleading red score-0 "Best to skip this one" verdict.
   final bool dataUnavailable;
 
+  /// Backend record identity — the Algolia objectID and the pack's EAN-13 when
+  /// known. ⚠️ Deliberately **not** serialised by the saved-products and
+  /// scan-history codecs: a rehydrated row has neither, which is fine because
+  /// they exist only to let a fresh scan result be rescued (Phase 2) and for
+  /// analytics. Null on every locally-persisted product.
+  final String? cacheKey;
+  final String? gtin;
+
   const ProductDisplayModel({
     required this.name,
     required this.brand,
@@ -61,6 +69,8 @@ class ProductDisplayModel {
     this.localizedPros,
     this.localizedCons,
     this.dataUnavailable = false,
+    this.cacheKey,
+    this.gtin,
   });
 
   // --- Display accessors -------------------------------------------------

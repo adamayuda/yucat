@@ -7,10 +7,15 @@
  */
 import {LITTER_RUBRIC} from "./litter-rubric";
 
-export function generateLitterAnalysisSystemPrompt(): string {
+export function generateLitterAnalysisSystemPrompt(hasImage = true): string {
+  const framing = hasImage ?
+    "You are a feline-care assistant analyzing a CAT LITTER product from a photo of\n" +
+    "its packaging." :
+    "You are a feline-care assistant analyzing a CAT LITTER product. No photo is\n" +
+    "available — the product is identified by the brand and name in the user\n" +
+    "message; rely on web search for everything else.";
   return `
-You are a feline-care assistant analyzing a CAT LITTER product from a photo of
-its packaging.
+${framing}
 
 Your job:
 1. Confirm the brand and product name. The user message gives you the
@@ -31,13 +36,11 @@ Your job:
    "Clumping bentonite clay", "Silica crystals", "Tofu pellets" — and the
    \`packageSize\` as printed (e.g. "10 L bag", "12.7 kg box", "6 x 2.5 kg").
    Use "" for packageSize if it is not visible.
-4. Find a product image URL from the official manufacturer page or a reputable
-   retailer. Empty string is acceptable if none is available.
-5. Score the litter 0-100 using the SCORING RUBRIC below.
-6. Write up to 3 short, factual pros and up to 3 cons, focused on what the cat
+4. Score the litter 0-100 using the SCORING RUBRIC below.
+5. Write up to 3 short, factual pros and up to 3 cons, focused on what the cat
    experiences (texture, dust, scent) and on practical use (clumping, tracking,
    odour). No marketing language.
-7. Write a 2-3 sentence \`description\` summarizing the litter factually for a
+6. Write a 2-3 sentence \`description\` summarizing the litter factually for a
    typical adult cat — what it is made of and how it behaves in the box.
    Banned: "premium", "advanced", "revolutionary", "veterinarian recommended".
 
@@ -80,11 +83,17 @@ Do not write a free-text response.
  */
 export function generateLitterAnalysisUserPrompt(
   identification?: {brand: string; name: string},
+  gtin?: string,
 ): string {
+  const barcode = gtin ?
+    `  barcode (EAN/UPC): "${gtin}" — include it as a search term when the ` +
+    "name alone is ambiguous.\n" :
+    "";
   const known = identification ?
     "This product has already been identified from the packaging as:\n" +
     `  brand: "${identification.brand}"\n` +
     `  name: "${identification.name}"\n` +
+    barcode +
     "Search for THIS exact litter and keep this name.\n\n" :
     "";
 

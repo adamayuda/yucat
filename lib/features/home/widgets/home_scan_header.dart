@@ -18,10 +18,12 @@ import 'package:yucat/presentation/components/ds_pill_button.dart';
 ///   rather than sitting inside a `SafeArea`, which is what lets the blue bleed
 ///   under the status bar — so [HomeDashboardPage] passes `top: false` to its
 ///   `SafeArea` and zero top padding to the list.
-/// - **No barcode iconography.** YuCat does not read barcodes — the backend
-///   scan pipeline identifies a *photograph of the package*, and the barcode
-///   flow was deleted from both client and functions. Anything that looks like
-///   a barcode teaches the wrong gesture, so the affordance is a viewfinder
+/// - **No barcode iconography.** The gesture is still "photograph the
+///   package": the backend identifies a *photo of the pack*. Since Phase 1 the
+///   scanner also reads any barcode that happens to be in the still, silently,
+///   as an extra identity — but there is no barcode *mode* and no barcode
+///   *glyph*. Anything that looks like a barcode teaches the wrong gesture
+///   (aim at the EAN, crop out the pack), so the affordance stays a viewfinder
 ///   framing a pack ([_PackViewfinder]), and the eyebrow glyph is
 ///   `Icons.crop_free` — the same frame the nav's Scan slot uses.
 class HomeScanHeader extends StatefulWidget {

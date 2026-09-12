@@ -1540,6 +1540,89 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeErrorGeneric => 'Une erreur est survenue. Réessaie.';
 
   @override
+  String get homeErrorServiceBusy =>
+      'Notre service d\'analyse est occupé pour le moment. Réessaie dans quelques minutes.';
+
+  @override
+  String get homeScannerLabelTitle => 'Photographie l\'étiquette au dos';
+
+  @override
+  String get homeScannerLabelHint =>
+      'Cadre la composition et les constituants analytiques';
+
+  @override
+  String get homeErrorNotCatProductTitle =>
+      'Ça ne ressemble pas à un produit pour chat';
+
+  @override
+  String get homeErrorNotCatProductBody =>
+      'YuCat lit les aliments et les litières pour chat. Essaie un autre emballage ou cherche par nom.';
+
+  @override
+  String get homeErrorUnreadableTitle => 'Impossible de lire cet emballage';
+
+  @override
+  String get homeErrorUnreadableBody =>
+      'Réessaie avec le devant de l\'emballage bien éclairé, ou photographie l\'étiquette au dos et on lira l\'analyse directement dessus.';
+
+  @override
+  String homeErrorAnalysisFailedTitle(String name) {
+    return '$name trouvé, mais pas ses valeurs nutritionnelles';
+  }
+
+  @override
+  String get homeErrorAnalysisFailedBody =>
+      'L\'analyse n\'est en ligne nulle part où on a cherché. Photographie l\'étiquette au dos et on la lira sur l\'emballage.';
+
+  @override
+  String get homeErrorLabelUnreadableTitle =>
+      'Impossible de lire cette étiquette';
+
+  @override
+  String get homeErrorLabelUnreadableBody =>
+      'Remplis le cadre avec le tableau d\'analyse et la composition, bien éclairés, et réessaie.';
+
+  @override
+  String get homeErrorLabelNoDataTitle => 'Pas d\'analyse sur cette face';
+
+  @override
+  String get homeErrorLabelNoDataBody =>
+      'La photo était nette mais sans tableau nutritionnel. Essaie le côté ou le dos avec « Constituants analytiques ».';
+
+  @override
+  String get homeErrorExitScanAgain => 'Scanner à nouveau';
+
+  @override
+  String get homeErrorExitScanLabel => 'Photographier l\'étiquette au dos';
+
+  @override
+  String get homeErrorExitSearch => 'Chercher par nom';
+
+  @override
+  String get productDetailScanLabelCta => 'Photographier l\'étiquette au dos';
+
+  @override
+  String get homeLoadingLabelEyebrow => 'Lecture de l\'étiquette';
+
+  @override
+  String get homeLoadingMsgReadingLabel => 'Lecture du tableau d\'analyse…';
+
+  @override
+  String get homeLoadingMsgScoring => 'Notation des ingrédients…';
+
+  @override
+  String get homeLoadingMsgSearching => 'Recherche sur les sites marchands…';
+
+  @override
+  String get homeLoadingHint => 'En général 20 à 40 secondes';
+
+  @override
+  String get homeLoadingLabelHint => 'En général moins de 15 secondes';
+
+  @override
+  String get homeLoadingCancel => 'Annuler';
+
+  @override
   String get homeCatKitten => 'Chaton';
 
   @override
@@ -1593,6 +1676,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get commonTryAgain => 'Réessayer';
+
+  @override
+  String get productRowNoData => 'Pas encore de données';
 
   @override
   String get searchTabTitle => 'Recherche';

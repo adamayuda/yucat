@@ -558,11 +558,12 @@ class ScanHistoryRoute extends PageRouteInfo<void> {
 class ScannerRoute extends PageRouteInfo<ScannerRouteArgs> {
   ScannerRoute({
     Key? key,
-    void Function(String, String)? onCaptured,
+    ScanMode mode = ScanMode.pack,
+    LabelTarget? labelTarget,
     List<PageRouteInfo>? children,
   }) : super(
          ScannerRoute.name,
-         args: ScannerRouteArgs(key: key, onCaptured: onCaptured),
+         args: ScannerRouteArgs(key: key, mode: mode, labelTarget: labelTarget),
          initialChildren: children,
        );
 
@@ -574,21 +575,31 @@ class ScannerRoute extends PageRouteInfo<ScannerRouteArgs> {
       final args = data.argsAs<ScannerRouteArgs>(
         orElse: () => const ScannerRouteArgs(),
       );
-      return ScannerPage(key: args.key, onCaptured: args.onCaptured);
+      return ScannerPage(
+        key: args.key,
+        mode: args.mode,
+        labelTarget: args.labelTarget,
+      );
     },
   );
 }
 
 class ScannerRouteArgs {
-  const ScannerRouteArgs({this.key, this.onCaptured});
+  const ScannerRouteArgs({
+    this.key,
+    this.mode = ScanMode.pack,
+    this.labelTarget,
+  });
 
   final Key? key;
 
-  final void Function(String, String)? onCaptured;
+  final ScanMode mode;
+
+  final LabelTarget? labelTarget;
 
   @override
   String toString() {
-    return 'ScannerRouteArgs{key: $key, onCaptured: $onCaptured}';
+    return 'ScannerRouteArgs{key: $key, mode: $mode, labelTarget: $labelTarget}';
   }
 }
 

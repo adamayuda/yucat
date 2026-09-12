@@ -23,6 +23,7 @@ import 'package:yucat/features/scan_history/presentation/scan_history_page.dart'
 import 'package:yucat/features/search_products/presentation/search_page.dart';
 import 'package:yucat/features/home/home_page.dart';
 import 'package:yucat/features/home/scanner_page.dart';
+import 'package:yucat/features/product/domain/entities/label_target.dart';
 import 'package:yucat/features/product_detail/presentation/product_detail_page.dart';
 import 'package:yucat/features/product_listing/presentation/product_listing_page.dart';
 import 'package:yucat/features/paywall/paywall_page.dart';

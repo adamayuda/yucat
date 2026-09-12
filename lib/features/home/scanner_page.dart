@@ -1,27 +1,33 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/home/bloc/home_bloc.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
+import 'package:yucat/features/product/domain/entities/label_target.dart';
+import 'package:yucat/features/product/domain/utils/gtin.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/service_locator.dart';
 
 @RoutePage()
 class ScannerPage extends StatefulWidget {
-  /// When provided, the captured image is handed back to the caller (and the
-  /// page pops) instead of dispatching a Home scan. Used by the onboarding
-  /// current-food step so the same camera UI works outside the Home tab.
-  final void Function(String imageBase64, String mimeType)? onCaptured;
+  /// `pack` (default): photograph the front, dispatch a Home scan. `label`:
+  /// the back-label rescue — a larger capture, no barcode read, and the photo
+  /// goes to `analyzeProductLabel` with [labelTarget] as what it attaches to.
+  final ScanMode mode;
+  final LabelTarget? labelTarget;
 
-  const ScannerPage({super.key, this.onCaptured});
+  const ScannerPage({super.key, this.mode = ScanMode.pack, this.labelTarget});
 
   @override
   State<ScannerPage> createState() => _ScannerPageState();
@@ -43,6 +49,11 @@ class _ScannerPageState extends State<ScannerPage>
   /// Set when a photo is handed onward. Its absence at dispose is what makes
   /// the visit a cancellation.
   bool _captured = false;
+
+  /// Reads barcodes off a captured *file* — never started, so it holds no
+  /// camera session next to the `camera` plugin's. Apple Vision on iOS, ML Kit
+  /// on Android. Created lazily: most scans never need it.
+  MobileScannerController? _barcodeReader;
 
   @override
   void initState() {
@@ -69,6 +80,7 @@ class _ScannerPageState extends State<ScannerPage>
       );
     }
     _cameraController?.dispose();
+    _barcodeReader?.dispose();
     super.dispose();
   }
 
@@ -156,18 +168,97 @@ class _ScannerPageState extends State<ScannerPage>
     }
   }
 
-  void _onImageCaptured(String imageBase64, String mimeType) {
+  /// The upload is always a real JPEG with a 1280 px long edge.
+  ///
+  /// The camera path used to send the raw `ResolutionPreset.veryHigh` file —
+  /// up to ~3 MB of base64 on cellular for a backend that downsizes to 800 px
+  /// anyway, and enough to OOM the 256 MiB function. Transcoding also fixes the
+  /// mislabeled uploads: iOS `image_picker` reports no mime for a PNG or HEIC,
+  /// everything was sent as `image/jpeg`, and the model API 400'd on it.
+  ///
+  /// `minWidth`/`minHeight` are the floor the *shorter* side keeps, so 960/960
+  /// yields a 1280 px long edge for a 4:3 photo in either orientation. Falls
+  /// back to the raw bytes if the native compressor fails. Label mode keeps
+  /// more — ingredient text is small — at 1600 px.
+  static const _uploadMinSide = 960;
+  static const _labelUploadMinSide = 1200;
+  static const _uploadQuality = 85;
+
+  bool get _isLabel => widget.mode == ScanMode.label;
+
+  /// A barcode read must never delay the scan noticeably; Vision/ML Kit on a
+  /// 12 MP still is typically 100-400 ms, so this only trips on a hung decoder.
+  static const _barcodeTimeout = Duration(milliseconds: 1500);
+
+  /// Reads a retail barcode (EAN-13 / EAN-8 / UPC) off the *original* capture,
+  /// before the downscale blurs the bars. Returns null when none is legible,
+  /// on timeout, and on every error — the barcode is a bonus identity, never a
+  /// gate. The value is normalised to EAN-13 and check-digit validated, so a
+  /// misread digit is dropped here rather than sent.
+  Future<_BarcodeRead?> _readBarcode(String path) async {
+    try {
+      final reader = _barcodeReader ??= MobileScannerController();
+      final capture = await reader
+          .analyzeImage(
+            path,
+            formats: const [
+              BarcodeFormat.ean13,
+              BarcodeFormat.ean8,
+              BarcodeFormat.upcA,
+              BarcodeFormat.upcE,
+            ],
+          )
+          .timeout(_barcodeTimeout);
+      for (final barcode in capture?.barcodes ?? const <Barcode>[]) {
+        final gtin = normalizeGtin(barcode.rawValue);
+        if (gtin != null) {
+          return _BarcodeRead(gtin: gtin, format: barcode.format.name);
+        }
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Barcode read skipped: $e');
+      return null;
+    }
+  }
+
+  Future<_PreparedUpload> _prepareUpload(
+    String path, {
+    required String source,
+  }) async {
+    final started = DateTime.now();
+    // Read the barcode off the full-resolution file first: the downscale
+    // below is what would make the bars illegible. Not in label mode — the
+    // back panel's identity comes from the target, not from a barcode.
+    final barcode = _isLabel ? null : await _readBarcode(path);
+    final minSide = _isLabel ? _labelUploadMinSide : _uploadMinSide;
+    Uint8List? bytes;
+    try {
+      bytes = await FlutterImageCompress.compressWithFile(
+        path,
+        minWidth: minSide,
+        minHeight: minSide,
+        quality: _uploadQuality,
+        format: CompressFormat.jpeg,
+        autoCorrectionAngle: true,
+        keepExif: false,
+      );
+    } catch (e) {
+      debugPrint('Image compress error: $e');
+    }
+    bytes ??= await File(path).readAsBytes();
+    return _PreparedUpload(
+      base64: base64Encode(bytes),
+      bytes: bytes.length,
+      prepMs: DateTime.now().difference(started).inMilliseconds,
+      source: source,
+      barcode: barcode,
+    );
+  }
+
+  void _onImageCaptured(_PreparedUpload upload) {
     _captured = true;
     final router = context.router;
-
-    // Caller-handled mode (e.g. onboarding): hand the image back and pop.
-    final onCaptured = widget.onCaptured;
-    if (onCaptured != null) {
-      onCaptured(imageBase64, mimeType);
-      router.maybePop();
-      return;
-    }
-
     final bloc = context.read<HomeBloc>();
     // Device region (e.g. "ES") from the OS locale — biases backend web_search
     // to the user's market. Uses platformDispatcher (the device locale), not
@@ -182,12 +273,31 @@ class _ScannerPageState extends State<ScannerPage>
     // Capture the router controller while still mounted — the scan resolves
     // after this page pops, so navigating via this page's context later would
     // throw. The controller persists past the pop.
+    if (_isLabel) {
+      bloc.add(LabelImageCapturedEvent(
+        imageBase64: upload.base64,
+        mimeType: _PreparedUpload.mimeType,
+        target: widget.labelTarget ?? const LabelTarget(),
+        router: router,
+        countryCode: countryCode,
+        locale: locale,
+        imageBytes: upload.bytes,
+        prepMs: upload.prepMs,
+      ));
+      router.maybePop();
+      return;
+    }
     bloc.add(ImageCapturedEvent(
-      imageBase64: imageBase64,
-      mimeType: mimeType,
+      imageBase64: upload.base64,
+      mimeType: _PreparedUpload.mimeType,
       router: router,
       countryCode: countryCode,
       locale: locale,
+      imageBytes: upload.bytes,
+      prepMs: upload.prepMs,
+      captureSource: upload.source,
+      gtin: upload.barcode?.gtin,
+      barcodeFormat: upload.barcode?.format,
     ));
     router.maybePop();
   }
@@ -203,10 +313,9 @@ class _ScannerPageState extends State<ScannerPage>
 
     try {
       final xFile = await _cameraController!.takePicture();
-      final bytes = await File(xFile.path).readAsBytes();
-      final base64Image = base64Encode(bytes);
-      final mimeType = xFile.mimeType ?? 'image/jpeg';
-      _onImageCaptured(base64Image, mimeType);
+      final upload = await _prepareUpload(xFile.path, source: 'camera');
+      if (!mounted) return;
+      _onImageCaptured(upload);
     } catch (e) {
       debugPrint('Take picture error: $e');
     } finally {
@@ -227,10 +336,12 @@ class _ScannerPageState extends State<ScannerPage>
 
     if (pickedFile == null) return;
 
-    final bytes = await File(pickedFile.path).readAsBytes();
-    final base64Image = base64Encode(bytes);
-    final mimeType = pickedFile.mimeType ?? 'image/jpeg';
-    _onImageCaptured(base64Image, mimeType);
+    // Already resized by the picker; still transcoded so a PNG screenshot or
+    // a HEIC export cannot reach the backend labelled as JPEG. (The barcode
+    // read runs on this 1024 px file — usually still legible.)
+    final upload = await _prepareUpload(pickedFile.path, source: 'gallery');
+    if (!mounted) return;
+    _onImageCaptured(upload);
   }
 
   @override
@@ -258,8 +369,8 @@ class _ScannerPageState extends State<ScannerPage>
           // live preview is up; hidden on the error path. IgnorePointer lets
           // the shutter/gallery taps fall through to the controls below.
           if (_isCameraInitialized && !_hasCameraError)
-            const Positioned.fill(
-              child: IgnorePointer(child: _ScanOverlay()),
+            Positioned.fill(
+              child: IgnorePointer(child: _ScanOverlay(label: _isLabel)),
             ),
 
           if (_hasCameraError) Positioned.fill(child: _CameraErrorView(
@@ -331,12 +442,44 @@ class _ScannerPageState extends State<ScannerPage>
   }
 }
 
+/// A barcode read off the still: the normalised EAN-13 and the symbology.
+class _BarcodeRead {
+  final String gtin;
+  final String format;
+
+  const _BarcodeRead({required this.gtin, required this.format});
+}
+
+/// A capture ready to send: always JPEG (see `_prepareUpload`), the barcode
+/// found in it (if any), and what `Product Image Captured` reports.
+class _PreparedUpload {
+  static const mimeType = 'image/jpeg';
+
+  final String base64;
+  final int bytes;
+  final int prepMs;
+  final String source;
+  final _BarcodeRead? barcode;
+
+  const _PreparedUpload({
+    required this.base64,
+    required this.bytes,
+    required this.prepMs,
+    required this.source,
+    this.barcode,
+  });
+}
+
 /// Live-camera scanning effect: a centered reticle (corner brackets) over a
 /// gently dimmed surround, with a glowing coral line sweeping inside it.
 /// Mirrors the scan-line idiom from `home_loading_page.dart` (`_ScanCard`) so
 /// the live scanner and the post-capture loading screen feel like one motion.
 class _ScanOverlay extends StatefulWidget {
-  const _ScanOverlay();
+  /// Label mode: a wider, shorter window (analysis panels run landscape) and
+  /// a title + hint that say what to frame.
+  final bool label;
+
+  const _ScanOverlay({this.label = false});
 
   @override
   State<_ScanOverlay> createState() => _ScanOverlayState();
@@ -351,6 +494,8 @@ class _ScanOverlayState extends State<_ScanOverlay>
   // frame is still captured, so loose framing never clips the label.
   static const double _windowWidthFactor = 0.74; // fraction of screen width
   static const double _windowAspect = 1.3; // height / width — taller than wide
+  static const double _labelWindowWidthFactor = 0.88;
+  static const double _labelWindowAspect = 0.75; // wider than tall
   static const double _lineHeight = 3;
 
   @override
@@ -372,8 +517,9 @@ class _ScanOverlayState extends State<_ScanOverlay>
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final size = media.size;
-    final w = size.width * _windowWidthFactor;
-    final h = w * _windowAspect;
+    final w = size.width *
+        (widget.label ? _labelWindowWidthFactor : _windowWidthFactor);
+    final h = w * (widget.label ? _labelWindowAspect : _windowAspect);
     // Sit the window slightly above centre so the bottom shutter row and the
     // hint caption have room beneath it.
     final left = (size.width - w) / 2;
@@ -427,13 +573,33 @@ class _ScanOverlayState extends State<_ScanOverlay>
           ),
         ),
 
+        // Label mode: a title above the window saying what this capture is.
+        if (widget.label)
+          Positioned(
+            left: DSDimens.sizeL,
+            right: DSDimens.sizeL,
+            bottom: size.height - window.top + DSDimens.sizeL,
+            child: Text(
+              AppLocalizations.of(context).homeScannerLabelTitle,
+              textAlign: TextAlign.center,
+              style: DSTextStyles.headlineMd.copyWith(
+                color: DSColors.inkInverse,
+                shadows: const [
+                  Shadow(color: Color(0x99000000), blurRadius: 8),
+                ],
+              ),
+            ),
+          ),
+
         // Hint caption below the window.
         Positioned(
           left: DSDimens.sizeL,
           right: DSDimens.sizeL,
           top: window.bottom + DSDimens.sizeL,
           child: Text(
-            AppLocalizations.of(context).homeScannerHint,
+            widget.label
+                ? AppLocalizations.of(context).homeScannerLabelHint
+                : AppLocalizations.of(context).homeScannerHint,
             textAlign: TextAlign.center,
             style: DSTextStyles.label.copyWith(
               color: DSColors.inkInverse,

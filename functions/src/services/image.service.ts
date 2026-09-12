@@ -23,6 +23,15 @@ async function loadSharp() {
   return sharpModule;
 }
 
+// Every outbound fetch here is bounded. A single hanging CDN used to eat the
+// whole request: production saw a 128 s `imageHost` step and a 150 s scan, long
+// after the client had given up at 120 s.
+const HEAD_TIMEOUT_MS = 3000;
+const DOWNLOAD_TIMEOUT_MS = 8000;
+// Anything larger is not a product shot; refusing it early also keeps sharp's
+// decode (and the request's memory) bounded.
+const MAX_DOWNLOAD_BYTES = 8 * 1024 * 1024;
+
 /**
  * Tests if an image URL is accessible and has an image content-type.
  */
@@ -31,6 +40,7 @@ export async function isImageUrlValid(imageUrl: string): Promise<boolean> {
     const response = await fetch(imageUrl, {
       method: "HEAD",
       headers: IMAGE_VALIDATION.HEADERS,
+      signal: AbortSignal.timeout(HEAD_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -63,13 +73,22 @@ async function downloadImage(
 ): Promise<{buffer: Buffer; contentType: string}> {
   const imageResponse = await fetch(imageUrl, {
     headers: IMAGE_VALIDATION.HEADERS,
+    signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
   });
 
   if (!imageResponse.ok) {
     throw new Error(`Failed to download image: ${imageResponse.statusText}`);
   }
 
+  const declaredLength = Number(imageResponse.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_DOWNLOAD_BYTES) {
+    throw new Error(`Image too large: ${declaredLength} bytes`);
+  }
+
   const imageBuffer = await imageResponse.arrayBuffer();
+  if (imageBuffer.byteLength > MAX_DOWNLOAD_BYTES) {
+    throw new Error(`Image too large: ${imageBuffer.byteLength} bytes`);
+  }
   const imageData = Buffer.from(imageBuffer);
   const contentType = imageResponse.headers.get("content-type") || "image/jpeg";
 

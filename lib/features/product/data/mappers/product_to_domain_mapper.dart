@@ -73,6 +73,10 @@ class ProductToDomainMapperImpl extends ProductToDomainMapper {
         localizedDescription: localizedString('description'),
         localizedPros: localizedList('pros'),
         localizedCons: localizedList('cons'),
+        // `barcode` on the wire is the Algolia objectID, not a real barcode
+        // (a legacy field name); `gtin` is the real one when known.
+        cacheKey: _nonEmpty(product['barcode']),
+        gtin: _nonEmpty(product['gtin']),
       );
     } catch (e) {
       // Return a default entity if mapping fails to prevent app crash
@@ -85,6 +89,12 @@ class ProductToDomainMapperImpl extends ProductToDomainMapper {
         cons: const [],
       );
     }
+  }
+
+  String? _nonEmpty(dynamic raw) {
+    if (raw == null) return null;
+    final value = raw.toString();
+    return value.isEmpty ? null : value;
   }
 
   String _resolveImageUrl(String? imageUrl, String? userPhotoFallbackUrl) {

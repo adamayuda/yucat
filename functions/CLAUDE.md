@@ -25,20 +25,30 @@ been removed from both backend and client.
 
 ---
 
-## 2. The three callables
+## 2. The three callables and the nightly job
 
-All in `src/index.ts`, all `onCall` (firebase-functions/v2/https). **No region, memory, cpu,
-minInstances or concurrency is set anywhere** — everything runs on defaults (us-central1,
-256 MiB). `admin.initializeApp()` runs at module load.
+All in `src/index.ts`, all `onCall` (firebase-functions/v2/https). No region or minInstances
+is set (us-central1). `admin.initializeApp()` runs at module load, followed by
+`firestore().settings({ignoreUndefinedProperties: true})` — a fresh analysis has
+`translations: undefined`, which Firestore otherwise rejects, and that silently dropped 16% of
+`scans` docs.
 
-| Function | Timeout | Secrets | Purpose |
-|---|---|---|---|
-| `fetchProductByImageV2` | 300s | `ANTHROPIC_API_KEY`, `ALGOLIA_API_KEY`, `SERPAPI_API_KEY` | The scan pipeline — food (§3) and cat litter (§3b) |
-| `generateCatNarrative` (`index.ts:845`) | 60s | `ANTHROPIC_API_KEY` | Onboarding personalized note |
-| `analyzeBrand` (`index.ts:887`) | 60s | `ANTHROPIC_API_KEY` | Onboarding brand critique |
+| Function | Timeout | Runtime | Secrets | Purpose |
+|---|---|---|---|---|
+| `fetchProductByImageV2` | 300s | **1 GiB, 1 cpu, concurrency 10** (`config.functions`) | `ANTHROPIC_API_KEY`, `ALGOLIA_API_KEY`, `SERPAPI_API_KEY` | The scan pipeline — food (§3) and cat litter (§3b) |
+| `analyzeProductLabel` | 90s | same | `ANTHROPIC_API_KEY`, `ALGOLIA_API_KEY` | The back-label rescue (§3c) — one vision read, no web search |
+| `nightlySelfHeal` (`jobs/self-heal.ts`) | 540s | 1 GiB, `onSchedule` 03:30 Europe/Madrid | all three | Re-analyses score-0 rows and backfills images off the request path (§3d) |
+| `generateCatNarrative` | 60s | defaults (256 MiB) | `ANTHROPIC_API_KEY` | Onboarding personalized note |
+| `analyzeBrand` | 60s | defaults (256 MiB) | `ANTHROPIC_API_KEY` | Onboarding brand critique |
 
-**None of them inspects `request.auth`** — the Flutter client checks
-`FirebaseAuth.currentUser` itself before calling. See §13.
+The scan runtime is sized deliberately: sharp decodes multi-MB photos and every in-flight
+request holds a base64 copy, so the 256 MiB / concurrency-80 default was OOM-killed five
+times in two weeks. Memory-bound work wants fewer, larger instances.
+
+**`fetchProductByImageV2` requires `request.auth`** and throws `unauthenticated` otherwise —
+the client signs in anonymously at splash before it can reach the scanner, so a real user
+never hits it. `userId` in the scan log is `request.auth.uid`, not a request field. The two
+onboarding callables still do not check auth (they are dormant, see below).
 
 > ⚠️ **Only `fetchProductByImageV2` is actually called by the app.**
 > `generateCatNarrative` and `analyzeBrand` are deployed and reachable, but the client-side
@@ -52,17 +62,36 @@ minInstances or concurrency is set anywhere** — everything runs on defaults (u
 
 ```ts
 // fetchProductByImageV2
-in:  {image: string /* base64, required */, mimeType?: string,
-      userId?: string, countryCode?: string /* ISO 3166-1 alpha-2 */,
-      locale?: string /* app language, e.g. "fr" — see prompts/languages.ts */}
-out: {message: string, userId: string | null,
+in:  {image: string /* base64, required */, mimeType?: string /* advisory — bytes are sniffed */,
+      countryCode?: string /* ISO 3166-1 alpha-2 */,
+      locale?: string /* app language, e.g. "fr" — see prompts/languages.ts */,
+      gtin?: string /* barcode read off the still; re-validated by normalizeGtin */}
+out: {message: string, userId: string | null /* request.auth.uid */,
       geminiResponse: string,
       category: "food" | "litter" | null,   // what the photo turned out to be
       product: Product | null,              // food scans only
       localizedText: ProductText | null,
       litter: Litter | null,                // litter scans only (§3b)
       litterLocalizedText: LitterText | null,
-      userPhotoFallbackUrl: string | null}
+      userPhotoFallbackUrl: string | null,
+      // --- Phase 1 (additive; older clients ignore them) ---
+      outcome: "product" | "litter" | "not_cat_product" | "unreadable"
+             | "analysis_failed" | "litter_analysis_failed",
+      reason: string | null,      // identify's rejection enum on the two not-identified outcomes
+      path: string,               // the "scan timings" path: gtin-hit | cache-hit | full-analysis | …
+      requestId: string,
+      gtin: string | null,        // normalised, when the client sent a valid one
+      identification: {brand, name, foodType?} | null,
+      productKey: string | null,  // Algolia objectID (== product.barcode / litter.id)
+      models: {identify: string, analyze: string}}
+
+// analyzeProductLabel — the back-label rescue (§3c)
+in:  {labelImage: string /* base64, required */, mimeType?: string,
+      productKey?: string /* Algolia objectID from a scan result */,
+      gtin?: string, identification?: {brand, name, foodType?},
+      countryCode?: string, locale?: string}
+out: ScanResponse with outcome: "product" | "unreadable" | "label_no_data", path: "label",
+     productKey: the row the label was merged into
 
 // generateCatNarrative — in: CatNarrativeInput (requires `name`)
 out: {narrative: string | null, outlook: string | null}
@@ -103,32 +132,68 @@ than throwing when the model call fails, so the client falls back to its local t
 `timer.mark(<label>)`; those labels are exactly what appears in the `"scan timings"` log
 line, so use them when reading logs.
 
+0. **Media sniff** — `sniffMediaType` (`utils/media-type.ts`) reads the magic bytes and
+   overrides whatever `mimeType` the client declared (clients label everything
+   `image/jpeg`; a mislabeled PNG 400s at the model API). HEIC is refused with
+   `invalid-argument` rather than failing mid-pipeline.
+0b. **Barcode fast path** *(`gtinLookup`)* — when the client sent a valid `gtin`, both
+   indexes are queried by the exact `gtin` facet **before identify**. A `products2` hit
+   enters the cache-hit branch with the identification synthesised from the row and
+   `path: "gtin-hit"` (no vision call at all); a `litters` hit goes to §3b with
+   `preMatched`, `path: "litter-gtin-hit"`. Self-heal predicates still apply, so a score-0
+   gtin row falls through to re-analysis like any other stale-junk hit.
 1. `uploadUserPhoto(...)` — **started but not awaited**, uploads the scan to
    `scans/{requestId}.{ext}`.
-2. `identifyScanSubject(image, mime)` → `ScanIdentification | null` — Haiku vision, no
-   web search. Classifies **food / litter / neither** and transcribes brand + name; the
-   discriminated `category` is what the whole pipeline branches on. *(`identify`)*
+2. `identifyScanSubject(image, mime, requestId)` → `ScanSubject` — Haiku vision, no web
+   search. Classifies **food / litter / none** and transcribes brand + name; the
+   discriminated `category` is what the whole pipeline branches on. A `none` result carries
+   a `reason` (`dog_food | human_food | other_item | no_product | unreadable`, or `no_tool`
+   when the model returned no tool call) — the split between "not a cat product" and
+   "couldn't read the pack" that the not-identified 20% needed. *(`identify`)*
+2b. **GTIN resolver** *(`gtinResolve`)* — a `none` result **with** a gtin goes to
+   `resolveIdentityFromGtin` (`services/gtin-resolver.service.ts`): Open Pet Food Facts
+   first (free, 3 s timeout, 404 = miss, accepted only with a `cat` category tag), then
+   `identifyByGtinSearch` — one Haiku call with a single `web_search` for the EAN, using
+   the same identify tools. A hit replaces `scanSubject` and the pipeline continues as if
+   the pack had been read; `identitySource` (`photo | gtin-cache | gtin-opff | gtin-search`)
+   is logged on every "scan timings" line so the barcode paths are measurable.
 3. `await userPhotoPromise` *(`userPhotoUpload`)*
-4. **Not identified** → `logScanRequest` *(`scanLog`)*, log `path: "not-identified"`,
-   return `product: null`. ⟵ exit 1
+4. **Not identified** → `logScanRequest` *(`scanLog`)*, log `path: "not-identified"` with
+   `identifyReason`, return `product: null` with `outcome: not_cat_product | unreadable`
+   (`unreadable` covers the `unreadable`, `no_product` and `no_tool` reasons). ⟵ exit 1
 4b. **Litter** → hand off to `handleLitterScan` (§3b). ⟵ exits 4-6
-5. `searchProductByNameV2(brand, name, foodType)` — Algolia cache lookup *(`cacheLookup`)*
-6. On a miss, if `config.algolia.useLLMVerification`: `fetchCandidatesByName(...)` →
-   `verifyMatchWithLLM(...)` *(`llmVerify`)*
+5. `lookupProductByNameV2(brand, name, foodType)` → `{match, hits}` — Algolia cache lookup
+   *(`cacheLookup`)*. Brand goes in `optionalFilters` **quoted** (`brand:"Royal Canin"`;
+   unquoted, multi-word brands were never boosted).
+6. On a miss, if `config.algolia.useLLMVerification` and `hits` is non-empty:
+   `verifyMatchWithLLM(identification, hits)` *(`llmVerify`)* — it picks from the hits the
+   lookup already returned; there is no second Algolia query. `foodType` is a soft boost
+   in `optionalFilters`, not a hard filter — identify's treat-vs-dry disagreement with the
+   row used to force a full re-analysis. A name hit with a gtin in hand and none on the row
+   gets `attachGtin` (fire-and-forget `partialUpdateObject`), so the next scan of that pack
+   takes the fast path.
 7. **Cache-hit branching** — see below. Plain hit → `logScanRequest` *(`scanLog`)*,
    `path: "cache-hit"`. ⟵ exit 2
 8. **Full analysis.** Two things start concurrently:
    - `serpApiHostedPromise` = `findProductImageUrl` → `processProductImage`, under a
-     *provisional* key, `.catch(() => "")`. Claude almost never returns a hostable image
-     URL, so SerpAPI is needed on essentially every miss — doing it concurrently keeps it
-     off the critical path.
+     *provisional* key, `.catch(() => "")`. SerpAPI is the **only** image source: the
+     model's own `imageUrl` was unusable in about half of scans (page URLs, dead links)
+     while SerpAPI won 134 of 135 times, so the field is no longer requested or hosted.
    - `analyzeProductImageParallel(...)` (default) or `analyzeProductImage(...)` when
-     `useParallelAnalysis` is false. *(`analyze`)*
+     `useParallelAnalysis` is false. *(`analyze`)* The gtin, when present, rides in the user
+     prompt as a search anchor (`generateAnalysisUserPrompt(identification, hint, gtin)`).
 9. On a product: set `isAiIdentified = true`, compute `cacheKey`, set `product.barcode`,
-   host the analyze-provided image, and fall back to `await serpApiHostedPromise` if that
-   yields nothing *(`imageHost`)*. Stamp `lastAnalysisAttempt` + `lastImageAttempt`.
+   set `product.gtin` / `gtinSource` (`scan` when identify read the pack, `resolver` when
+   the barcode recovered the identity),
+   **start `ensureTranslation` immediately**, then `product.imageUrl = await
+   serpApiHostedPromise` *(`imageHost`)*, stamp `lastAnalysisAttempt` + `lastImageAttempt`,
+   then await the translation *(`translate`)*. Translation used to run serially after image
+   hosting (~2.3 s on the critical path); it only needs the analysed text, so it overlaps.
 10. `Promise.all([cacheProduct, logScanRequest])` *(`finalize`)*, log
-    `path: "full-analysis"`. ⟵ exit 3
+    `path: "full-analysis"`, `outcome: "product"`, `productKey: cacheKey`. ⟵ exit 3
+11. **Analysis failed** (no `submit_product` even after the force-submit) → log
+    `path: "analysis-failed"`, return `product: null` with `outcome: "analysis_failed"` and
+    the `identification` — the client can now tell this apart from not-identified. ⟵ exit 4
 
 ### Self-healing cache — the least obvious logic in the file
 
@@ -146,7 +211,7 @@ isStale         = (ts) => !ts || Date.now() - ts > REANALYZE_AFTER_MS
 | Cached entry | Action |
 |---|---|
 | No nutrition **and** stale `lastAnalysisAttempt` ("stale junk") | Fall through to full re-analysis, setting `overwriteKey = cachedProduct.barcode` so the row is **overwritten in place** rather than duplicated |
-| Nutrition but no image, stale `lastImageAttempt` | Image-only backfill (`findProductImageUrl` → `processProductImage` → `cacheProduct`) *(`imageBackfill`)*, then return the hit — much cheaper than re-analyzing |
+| Nutrition but no image | **Served as-is** (the client falls back to the user's own photo). Image backfill left the request path in Phase 3 — `nightlySelfHeal` (§3d) does it; inline it turned a 4 s hit into a 30 s one |
 | Otherwise | Plain cache hit |
 
 `lastAnalysisAttempt` and `lastImageAttempt` are **separate stamps** precisely so an entry
@@ -154,6 +219,57 @@ with nutrition but no image can retry the image without paying for a full re-ana
 Both are absent on pre-V2 rows, which reads as "never attempted".
 
 ---
+
+## 3c. The back-label rescue (`analyzeProductLabel`)
+
+The data is on the pack: analytical constituents and the composition are printed on every
+cat food by law. When the search found nothing (a score-0 row → the detail page's no-data
+card) or the pack was unreadable / identified-but-empty (the scan error view), the client
+offers "Photograph the back label" and this callable reads the nutrition straight off it —
+one forced `submit_product` vision call (`analyzeProductLabelImage`, `prompts/analyze-label.ts`,
+rubric first, multilingual label vocabulary, no `web_search`), ~5-12 s, under a cent.
+
+1. Auth, `labelImage` validation, media sniff, `normalizeGtin`. A `productKey` starting
+   `lit-` is refused (`invalid-argument`) — litter has no analysis panel.
+2. **Target resolution** *(`targetLookup`)*: `getCachedProduct(productKey)` → `findProductByGtin`
+   → `lookupProductByNameV2(identification)` (match only) → none (a new row). An existing
+   row's identity overrides whatever the client sent.
+3. `analyzeProductLabelImage` *(`labelExtract`)*, with the identification pinning name/brand.
+4. **Exits**: no `submit_product` → `outcome: "unreadable"`; a read with `score <= 0` →
+   `outcome: "label_no_data"` — and in both cases **nothing is written**, so a bad photo can
+   never erase real data. Otherwise `mergeLabelIntoProduct` (`utils/merge-label.ts`):
+   macros / score / pros / cons / ingredients / description from the label; name, brand,
+   foodType, format, packageSize, imageUrl, key from the existing row (falling back to the
+   extraction); `translations` **dropped** (they described the empty analysis) and refilled
+   lazily; `analysisSource: "label"`, `labelRequestId`. The label photo is never the product
+   image — it may come back as `userPhotoFallbackUrl` for this user only.
+5. `cacheProduct` + `logScanRequest({kind: "label"})` *(`finalize`)*, `path: "label"` on
+   the timings line. The client treats the result exactly like a scanned product (history,
+   `Product Selected { path: label }`, detail page).
+
+## 3d. Nightly self-heal (`nightlySelfHeal`, `jobs/self-heal.ts`)
+
+`onSchedule("every day 03:30", Europe/Madrid, 540 s, 1 GiB, retryCount 0)`, all tunables in
+`config.selfHeal`. It exists because the inline self-heal never really ran: a row could
+only be retried when a user happened to rescan it ≥ 14 days later, so 225 score-0 rows sat
+in the catalogue and the stale-junk branch fired once in two weeks.
+
+| Pass | Selection | Cap / concurrency | Action |
+|---|---|---|---|
+| 1 | `products2`, `score = 0`, stale `lastAnalysisAttempt`, oldest first | 15 / 3 | `analyzeProductImageParallel(null, …)` — **no photo**; the prompts take `hasImage=false` and lean on brand/name + gtin. Recovered → `cacheProduct` under the **same objectID** (image, gtin kept; `translations` cleared). Miss/error → stamp `lastAnalysisAttempt` |
+| 2 | `products2`, `score > 0`, empty `imageUrl`, stale `lastImageAttempt` | 40 / 5 | `findProductImageUrl` → `processProductImage` → `partialUpdateRecord({imageUrl, lastImageAttempt})` |
+| 3–4 | the same two passes on `litters` | 5 / 2 and 10 / 3 | `analyzeLitterImage(null, …)` / image backfill |
+
+Selection uses paginated `search` with a numeric filter (`fetchRowsByFilter`), not
+`browse` — it needs only the `search` ACL and the catalogue fits in a few 1,000-hit pages.
+A `budgetMs` (480 s) guard stops *starting* new items; in-flight ones finish. One
+`"self-heal summary"` line per run: `reanalyzeCandidates / reanalyzed / recovered`,
+`imageCandidates / imagesAttempted / imagesFound`, the litter equivalents,
+`budgetExhausted`, `ms`. Cost ceiling ≈ 15 × $0.05 ≈ $1/night.
+
+**`SELF_HEAL_DRY_RUN=true`** (a `defineBoolean` param) logs the candidates and writes
+nothing — run one dry night after deploying. `scripts/backfill-images.ts` remains as the
+manual escape hatch and shares `utils/map-pool.ts`.
 
 ## 3b. The litter path (`handleLitterScan`)
 
@@ -191,19 +307,24 @@ not a keyword scan of the prose.
 
 ## 4. Parallel analysis
 
-`analyzeProductImageParallel` (`anthropic.service.ts:549`) is the default
-(`config.anthropic.useParallelAnalysis: true`). It fans out to **4 concurrent sources** and
-keeps the most complete result:
+`analyzeProductImageParallel` is the default (`config.anthropic.useParallelAnalysis: true`).
+It fans out to **3 concurrent sources** and keeps the most complete result:
 
 | Source | What it does |
 |---|---|
 | `manufacturer` | `analyzeOneSource` hinted at the brand's own domain (makers often host the guaranteed analysis when retailers don't) |
-| `retailer-a` | `analyzeOneSource` hinted at Chewy / Amazon |
-| `retailer-b` | `analyzeOneSource` hinted at zooplus / Petco / Pets at Home |
+| one **country-aware retailer** (`prompts/retailers.ts`, `retailerFor(countryCode)`) | `analyzeOneSource` hinted at zooplus + local Amazon for EU countries (`retailer-eu`), Chewy/Amazon for US/CA (`retailer-na`), Pets at Home for GB/IE (`retailer-uk`), Petbarn for AU/NZ, Amazon elsewhere. The hint label is logged as `retailerHint` |
 | manufacturer **pages** | `analyzeFromManufacturerPages` — SerpAPI organic results → `fetchPage` → follow `/product(s)/` links scoring ≥2 slug-token matches → best 2 → `fetchPageText` → `analyzeFromProductPages` extraction call. Location-independent; catches niche/non-US brands that Claude's search index misses |
 
-The three `analyzeOneSource` instances each get `parallelMaxUses: 2` web searches. An
-instance that throws is caught and becomes `null` rather than failing the fan-out.
+Phase 3 cut the fan-out from three web-search instances to two: the third cost two searches
+per scan (6 → 4, and web search was 70% of a cache miss's cost) while finishing within a
+second of the others and adding no measurable recall. **Guardrail:** `chosenHasNutrition` in
+`"analyzeProductImageParallel complete"` must stay near its 70% baseline over a week; if it
+drops, restore the second retailer. Each `analyzeOneSource` instance gets
+`parallelMaxUses: 2` web searches. An instance that throws is caught and becomes `null`
+rather than failing the fan-out. Every analyze path accepts `imageBase64: null` (the image
+block is simply omitted and the system prompt says no photo is available) — that is how the
+nightly job re-analyses rows from their brand/name alone.
 
 `pickBestProduct` (`anthropic.service.ts:613`) scores completeness as
 `2×(score > 0) + 1×(ingredients.length > 0)` and keeps the first strict maximum — so
@@ -230,19 +351,27 @@ functions/
 │   ├── models/recipe.ts          Recipe + RecipeText + canonicalRecipeText
 │   ├── models/food-guide.ts      FoodGuideItem + FoodGuideText + canonicalFoodGuideText
 │   ├── models/article.ts         Article + ArticleText + canonicalArticleText
+│   ├── jobs/self-heal.ts         nightlySelfHeal — scheduled re-analysis + image backfill (§3d)
 │   ├── prompts/                  (§6)
 │   │   ├── identify-product.ts   analyze-product.ts    quality-rubric.ts
+│   │   ├── analyze-label.ts      back-label extraction (§3c)
+│   │   ├── retailers.ts          retailerFor(countryCode) — the fan-out's second source (§4)
 │   │   ├── analyze-litter.ts     litter-rubric.ts
 │   │   ├── translate-recipe.ts   translate-food-guide.ts
 │   │   ├── translate-article.ts
 │   │   └── cat-narrative.ts      brand-verdict.ts      rescore-product.ts
 │   ├── services/
-│   │   ├── anthropic.service.ts  ~1250 lines — every model call + all tool schemas
-│   │   ├── algolia.service.ts    V2 fuzzy search, candidates, cache R/W
+│   │   ├── anthropic.service.ts  ~2400 lines — every model call + all tool schemas
+│   │   ├── algolia.service.ts    V2 fuzzy lookup, gtin lookup/attach, cache R/W
+│   │   ├── gtin-resolver.service.ts  barcode → identity (OPFF, then one web search)
 │   │   ├── image.service.ts      URL validation, download, sharp optimize, Storage upload
 │   │   └── serpapi.service.ts    Google Images + Google organic lookups
 │   └── utils/
+│       ├── gtin.ts               normalizeGtin — check digit + EAN-13 form (mirrored in Dart)
 │       ├── image-helpers.ts      uploadUserPhoto, processProductImage
+│       ├── map-pool.ts           bounded-concurrency map (job + backfill script)
+│       ├── media-type.ts         sniffMediaType — magic-byte image type detection
+│       ├── merge-label.ts        mergeLabelIntoProduct — label data into the target row (§3c)
 │       ├── page-fetch.ts         fetchPage, fetchPageText, extractProductLinks, htmlToText
 │       ├── scan-log.ts           logScanRequest → Firestore /scans
 │       ├── timing.ts             createTimer / mark / summary
@@ -265,7 +394,8 @@ functions/
 | `identify-product.ts` | `generateIdentificationPrompt()` | `identifyScanSubject` |
 | `analyze-litter.ts` | `generateLitterAnalysisSystemPrompt/UserPrompt()` | `analyzeLitterImage` |
 | `litter-rubric.ts` | `LITTER_RUBRIC` | Embedded in the litter analysis system prompt |
-| `analyze-product.ts` | `generateAnalysisSystemPrompt()`, `generateAnalysisUserPrompt(identification?, sourceHint?)` | `analyzeOneSource`, `analyzeFromProductPages` |
+| `analyze-product.ts` | `generateAnalysisSystemPrompt()`, `generateAnalysisUserPrompt(identification?, sourceHint?, gtin?)` | `analyzeOneSource`, `analyzeFromProductPages` |
+| `analyze-label.ts` | `generateLabelSystemPrompt()` (rubric **first** — the stable prefix), `generateLabelUserPrompt(identification?)` | `analyzeProductLabelImage` |
 | `quality-rubric.ts` | `QUALITY_RUBRIC` | Embedded verbatim in **both** the analyze and regrade system prompts |
 | `cat-narrative.ts` | `generateCatNarrativeSystemPrompt/UserPrompt`, `CatNarrativeInput`, `DietTip`; internal `CARE_NOTES` (10 conditions), `deriveCombos()`, `LANGUAGE_NAMES` (en/es/fr/hu) | `generateCatNarrative` |
 | `brand-verdict.ts` | `generateBrandVerdictSystemPrompt/UserPrompt`, `BrandVerdictInput`, `BrandCatalogContext` | `analyzeBrand` |
@@ -297,17 +427,32 @@ index carries two incompatible score generations.
 
 ## 7. Model and inference parameters
 
-One model everywhere — `config.anthropic.model` = **`claude-haiku-4-5-20251001`**. No other
-model string is hardcoded anywhere in `functions/`.
+One base model — `config.anthropic.model` = **`claude-haiku-4-5-20251001`** — plus two
+deploy-time params for the Phase 3 A/B (`firebase-functions/params`, set in `functions/.env`
+or at the deploy prompt; a change is a redeploy): `IDENTIFY_MODEL` + `IDENTIFY_MODEL_ROLLOUT_PCT`
+(the share of scans whose identify step uses it, bucketed by a hash of `requestId`) and
+`LABEL_MODEL` (every label extraction). Both default to the base model. The analyze fan-out
+is not switchable. ⚠️ `.value()` on a param is read inside the handler, never at module load.
+
+**Per-model request shapes** (`modelParams`, `webSearchTool` in `anthropic.service.ts`):
+Sonnet 5 / Opus 5 reject `temperature` (400) and run adaptive thinking unless
+`thinking: {type: "disabled"}` is sent — identify and label are extraction tasks, so it is;
+they also take `web_search_20260209`. Haiku 4.5 keeps `temperature: 0.1` and
+`web_search_20250305`. **Any model-switchable call must go through `modelParams`** — a call
+site that hardcodes `temperature` 400s the moment the param names Sonnet. The wire `models`
+field and the `"anthropic usage"` / `"scan timings"` lines carry the model actually used, and
+the client reports it as `identify_model` / `label_model` on the outcome events.
 
 | Call site | max_tokens | temp | tool_choice | prompt cache |
 |---|---|---|---|---|
-| `identifyScanSubject` | 256 | 0.1 | `{type: "any"}` | — |
+| `identifyScanSubject` | 256 | 0.1 (Haiku) / thinking off (Sonnet) | `{type: "any"}` | — |
 | `analyzeLitterImage` | 8192 | 0.1 | `{type: "auto"}` | ephemeral (system) |
 | ↳ force-submit fallback | 4096 | 0.1 | `{type: "tool", name: "submit_litter"}` | ephemeral |
 | `analyzeOneSource` | 8192 | 0.1 | `{type: "auto"}` | ephemeral (system) |
 | ↳ force-submit fallback | 4096 | 0.1 | `{type: "tool", name: "submit_product"}` | ephemeral |
 | `analyzeFromProductPages` | 4096 | 0.1 | `{type: "tool", name: "submit_product"}` | ephemeral |
+| `analyzeProductLabelImage` | 4096 | 0.1 (Haiku) / thinking off (Sonnet) | `{type: "tool", name: "submit_product"}` | ephemeral (system, rubric first — crosses Sonnet's 1,024-token minimum, so on Sonnet expect `cacheReadInputTokens > 0` from the second call) |
+| `identifyByGtinSearch` | 1024 | 0.1 | `{type: "auto"}` + `web_search` `max_uses: 1` | — |
 | `generateCatNarrative` | 400 | **0.7** | `submit_narrative` | ephemeral |
 | `analyzeBrand` | 600 | **0.4** | `submit_brand_verdict` | ephemeral |
 | `regradeProductQuality` | 128 | **0** | `submit_score` | ephemeral |
@@ -354,6 +499,9 @@ fallbacks when the env var is absent:
 | `storage.productsFolder` | `products/` |
 | `functions.timeoutSeconds` / `corsEnabled` | `300` / `true` |
 | `anthropic.*` | model, `temperature: 0.1`, `maxWebSearches: 3`, `useParallelAnalysis: true`, `parallelMaxUses: 2`, `useManufacturerPageFallback: true`, `pageFallbackMaxPages: 3` |
+| `functions.*` | `timeoutSeconds: 300`, `labelTimeoutSeconds: 90`, `memory: "1GiB"`, `concurrency: 10` |
+| `selfHeal.*` | `reanalyzeAfterMs` (14 d), `schedule`, `timeZone`, `timeoutSeconds: 540`, `budgetMs: 480000`, `reanalyzePerRun: 15`, `imageBackfillPerRun: 40`, litter caps (§3d) |
+| params | `IDENTIFY_MODEL`, `LABEL_MODEL`, `IDENTIFY_MODEL_ROLLOUT_PCT`, `SELF_HEAL_DRY_RUN` (§7, §3d) |
 
 **Secrets** (Firebase Secret Manager, declared in the `onCall` `secrets` array so the
 runtime injects them into `process.env`):
@@ -386,6 +534,8 @@ required: barcode name brand foodType protein fat moisture carbs fiber ash
           imageUrl score pros[] cons[] version
 V2 optional: isAiIdentified format packageSize description ingredients[]
              lastAnalysisAttempt lastImageAttempt translations
+Phase 1/2:   gtin gtinSource ("scan" | "resolver")
+             analysisSource ("web" | "label") labelRequestId
 ```
 
 **`translations`** is `Record<lang, ProductText>` — cached translations of the five
@@ -419,6 +569,18 @@ the food display model — a litter row in there would render as a food with no 
 row — which is exactly why `identify-product.ts` insists on transcribing only printed text
 and no marketing taglines. Those identification strings are used verbatim for both the web
 search and the cache identity.
+
+**`gtin` is the real barcode** (Phase 1): the normalised EAN-13 the client read off the
+still, stored as an optional field with `gtinSource: "scan" | "resolver"`, declared as a
+`filterOnly(gtin)` facet on both indexes (`scripts/configure-algolia.ts`,
+`configure-litter-index.ts`) and looked up with `filters: 'gtin:"…"'` before identify.
+`objectID` stays the text key so nothing needs migrating; rows converge on barcode identity
+as scans hit them (`attachGtin`). ⚠️ **Run both configure scripts before deploying Phase 1**
+— with the facet undeclared a `filters: 'gtin:"…"'` query returns **0 hits with no error**
+(verified against the live index, and the same for any unknown attribute), so every scan
+silently takes the old path and `"Algolia gtin lookup"` logs `hit: false` forever. The only
+way to confirm the facet is the index settings (admin key or the Algolia MCP), not a query. Two text-keyed rows can still describe one gtin (transcription drift
+before the barcode was known); the nightly job (Phase 3) is where those get merged.
 
 **Firebase Storage** (`yucat-d8fb5.firebasestorage.app`) — `scans/{requestId}.{ext}` for
 raw user photos, `products/{cacheKey}.jpeg` for hosted product images. Everything is
@@ -482,7 +644,7 @@ itself is not a declared dependency (`npx` fetches it).
 |---|---|
 | `configure-algolia.ts` | Applies `products2` index settings (searchable attributes, faceting, `customRanking: desc(score)`, typo tolerance) + replaces 7 synonym sets. Run after any relevant settings change. |
 | `rescore-products.ts` | Batch re-grades `score` against `QUALITY_RUBRIC`, keeping the old value in `scoreLegacy` for rollback. Skips `score === 0`. Flags: `--dry-run`, `--limit=N`, `--concurrency=N` (10), `--query=`. |
-| `backfill-images.ts` | Finds + hosts images for products with `score > 0` and empty `imageUrl`, reusing the live self-heal path. Stamps `lastImageAttempt` even on failure, matching live throttling. Flags: `--dry-run`, `--limit=N`, `--concurrency=N` (5). |
+| `backfill-images.ts` | Manual escape hatch for what `nightlySelfHeal` (§3d) now does every night: finds + hosts images for products with `score > 0` and empty `imageUrl`. Stamps `lastImageAttempt` even on failure. Flags: `--dry-run`, `--limit=N`, `--concurrency=N` (5). |
 | `configure-litter-index.ts` | Applies `litters` index settings + litter synonyms. ⚠️ **Must be run once before the litter cache can work** — `searchLitterByNameV2` soft-filters on `brand`, and Algolia rejects a filter on an undeclared facet, so until then every lookup errors silently and every litter scan pays for a full analysis. |
 | `convert-markdown.ts` | Converts authored Markdown (`<dir>/articles/*.md`, `<dir>/recipes/*.md`, YAML front matter) into `scripts/data/<kind>.json`. Splits the body on blank lines into the block array, and **drops the leading `# H1`** — the detail screen already renders the title. ⚠️ Use **`--replace`** when the authored folder *is* the catalogue: the default merges by id, which would keep superseded entries alive *and* pay to re-translate them, since the seeders' `--prune` only unpublishes what is absent from the JSON. `--order-base=N` offsets `order` when appending instead. Flags: `--source=<dir>` (required), `--kind=`, `--only=`, `--replace`, `--order-base=`, `--dry-run`. Not compiled, not linted. |
 | `apply-translations.ts` | Applies hand-authored translations from `scripts/data/translations/<kind>/<id>.json` when the API path is unavailable (no credit, an outage). ⚠️ A substitute for the **model**, not for the **guards**: it runs the same count / `markupSignature` / empty-block checks, because a hand-written translation drops a bullet just as easily. Writes the identical `translationsSourceHash`, so the two paths interleave freely — a later `seed-*.ts` run reuses whatever this wrote instead of re-translating it. `--languages=fr,es` narrows a run to the languages actually supplied; ⚠️ the hash is then **withheld** until the document carries all five, because writing it early would freeze the item with a hole in it. Flags: `--kind=`, `--only=`, `--languages=`, `--dry-run`. |
@@ -680,21 +842,41 @@ client reads Firestore directly.
 
 ## 12. Errors and logging
 
-**There is no `HttpsError` anywhere.** Every failure throws a plain `Error`, which the
-Functions SDK surfaces to the client as `INTERNAL` with the message masked — so
-client-side, "missing image" and "analysis crashed" are indistinguishable. Validation
-messages are `Missing required field: image (base64-encoded string) | name | brand`; the
-catch-all rethrows as `` `Error processing product image: ${msg}` ``.
+**The scan callable throws typed `HttpsError`s** (`toHttpsError` in `index.ts`), which the
+client reads as `ScanException.code`:
+
+| Code | When |
+|---|---|
+| `unauthenticated` | no `request.auth` |
+| `invalid-argument` | missing `image`, or a HEIC payload (sniffed, not declared) |
+| `resource-exhausted` | the Anthropic error message matches `/credit balance/i` — the one outage mode with no fallback. Also logs `"anthropic credit exhausted"` at `error` level, which is what the GCP alert keys on (below) |
+| `internal` | everything else, message `Error processing product image: …` |
+
+The two onboarding callables still throw plain `Error`s (surfaced as `INTERNAL`).
 
 Retry exists **only** for Anthropic calls (`withRetry`). SerpAPI, page fetch, Algolia and
-Storage have no retry — they degrade to `[]` / `""` / a swallowed `logger.warn`.
+Storage have no retry — they degrade to `[]` / `""` / a swallowed `logger.warn`. Every
+outbound fetch is now **bounded**: SerpAPI 6 s, image HEAD 3 s, image download 8 s (and
+≤ 8 MB), page fetch 8 s. A hanging CDN used to produce a 128 s `imageHost` step.
+
+**Alerting** (console steps, not in the repo): Anthropic Console → Billing → enable
+auto-reload and the low-balance email. In GCP, a log-based metric on
+`jsonPayload.message="anthropic credit exhausted"` and one on `"Memory limit"`, each with an
+alerting policy (> 0 in 5 min) to the owner's email.
 
 Logging uses `firebase-functions/logger` with a structured object always ending
 `structuredData: true`. `logger.info` for milestones and timing, `logger.warn` for
 degraded-but-recovered paths, `logger.error` only in the top-level scan catch. Searchable
 messages worth knowing:
 
+- `"anthropic usage"` — **one line per model call**, joinable to a scan by `requestId`:
+  `label` (`identify`, `analyze:manufacturer|retailer-a|retailer-b|pages|litter`,
+  `…:forceSubmit`, `verifyMatch`, `translate`), `model`, `inputTokens`, `outputTokens`,
+  `cacheCreationInputTokens`, `cacheReadInputTokens`, `webSearchRequests`, `stopReason`.
+  Sum per `requestId` for cost per scan. Expect the cache counters to be **0** on Haiku 4.5
+  (see §7) — that is the measurement, not a bug in the logging.
 - `"scan timings"` — per-step breakdown + `path: not-identified | cache-hit | full-analysis`
+  (+ `identifyReason` on `not-identified`)
 - `"analyzeProductImageParallel complete"` — instances, succeeded, `parallelMs`, `chosenHasNutrition`
 - `"analyzeProductImage web_search timing"`
 - `"Algolia v2: ranked candidates"`
@@ -707,16 +889,18 @@ messages worth knowing:
 
 Accepted behavior, documented so it isn't rediscovered as a surprise:
 
-- **`userId` is always `null` in practice.** `index.ts` reads `request.data.userId`, but
-  `product_remote_datasource.dart` sends only `image`, `mimeType`, `countryCode` — it
-  reads the uid purely to assert the user is signed in. Every `scans` doc is therefore
-  unattributed.
-- **No auth check on any callable.** Anyone with the project id can call them.
+- **No auth check on the two onboarding callables.** The scan callable requires
+  `request.auth` (§2); `generateCatNarrative` and `analyzeBrand` still accept anonymous
+  calls — acceptable while nothing calls them.
 - **Client gives up before the server does.** Scan: client 120s vs server 300s. Narrative
   and brand: client 30s vs server 60s.
-- **`image/heic` is accepted at the boundary but not supported downstream** —
-  `normalizeMediaType` silently relabels it `image/jpeg`, which will fail or mis-decode for
-  a genuine HEIC payload.
+- **HEIC is refused, not converted.** `sniffMediaType` returns `invalid-argument` for a
+  genuine HEIC payload. Current clients transcode to JPEG before upload, so only
+  pre-compression builds can hit it.
+- **Prompt caching is a no-op on Haiku 4.5.** Its minimum cacheable prefix is 4,096 tokens
+  and the analyze system prompt (+ tool schema) is ~2,000, so every `cache_control` marker
+  silently creates nothing (`cacheCreationInputTokens: 0` in `"anthropic usage"`). Sonnet 5
+  caches from 1,024. The markers are left in place for the day the prompt or model changes.
 - **Score 0 is a sentinel, not a grade.** `score > 0` is what `hasAnalysisData`,
   `pickBestProduct`, `rescore-products.ts` and `backfill-images.ts` all test. A rubric
   change that lets a real product legitimately score 0 breaks the self-heal logic.
@@ -724,19 +908,22 @@ Accepted behavior, documented so it isn't rediscovered as a surprise:
   file from the *identification* brand/name; the final cache key uses the *analyzed* ones.
   When they differ the URL still works, but `products/{barcode}.jpeg` is not a reliable
   lookup convention.
-- **The ambiguity guard couples two files.** `searchProductByNameV2` returns `null` on a
-  near-tie *expecting* `index.ts` to call `verifyMatchWithLLM`. Turning off
-  `useLLMVerification` converts those near-ties into full, expensive re-analyses rather
-  than falling back to the top hit.
+- **The ambiguity guard couples two files.** `lookupProductByNameV2` returns
+  `match: null` on a near-tie *expecting* `index.ts` to call `verifyMatchWithLLM` over its
+  `hits`. Turning off `useLLMVerification` converts those near-ties into full, expensive
+  re-analyses rather than falling back to the top hit.
+- **Write-backs are sanitized.** A cache-hit row is the raw Algolia hit (with `objectID`,
+  `_highlightResult`, …); `cacheProduct`/`cacheLitter` strip that envelope before writing.
+  Rows written before this carry one or more nested `_highlightResult` copies — harmless,
+  cleaned up on their next write.
 - **`sharp` failure is silent** — the dynamic import is caught, and the original
   unoptimized buffer is stored. It shows up only as unusually large images plus a
   `"Sharp not available"` warning.
 - **Dead code**: `getCachedProduct` and the V1 `searchProductByName` are unexercised;
   `mime` is a declared but never-imported dependency.
-- **The `litters` index has no maintenance scripts.** `rescore-products.ts` and
-  `backfill-images.ts` both target `products2` only, so a change to `LITTER_RUBRIC`
-  cannot be back-applied to cached litter rows, and an imageless litter row only heals
-  when someone rescans it. `configure-litter-index.ts` is the only litter script.
+- **`rescore-products.ts` targets `products2` only**, so a change to `LITTER_RUBRIC` cannot
+  be back-applied to cached litter rows. (Imageless and score-0 litter rows *are* healed by
+  the nightly job since Phase 3.)
 - **Litter images are hosted under `products/`**, keyed `lit-{brand}-{name}`. They do not
   collide with food keys, but `products/` is not a category-scoped folder — do not treat
   the prefix as a namespace guarantee.

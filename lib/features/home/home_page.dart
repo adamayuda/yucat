@@ -15,7 +15,9 @@ import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
 import 'package:yucat/features/home/widgets/home_dashboard_page.dart';
 import 'package:yucat/features/home/widgets/home_loading_page.dart';
+import 'package:yucat/features/home/widgets/home_scan_error_view.dart';
 import 'package:yucat/features/home/widgets/home_skeleton.dart';
+import 'package:yucat/features/product/domain/entities/label_target.dart';
 import 'package:yucat/features/recipes/presentation/models/recipe_display_model.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
 import 'package:yucat/service_locator.dart';
@@ -126,10 +128,14 @@ class _HomePage extends State<HomePage> {
           backgroundColor: DSColors.pageBackground,
           body: const HomeSkeleton(),
         );
-      case HomeScanningState(:final imageBase64):
+      case HomeScanningState(:final imageBase64, :final mode):
         return Scaffold(
           backgroundColor: DSColors.pageBackground,
-          body: HomeLoadingWidget(imageBase64: imageBase64),
+          body: HomeLoadingWidget(
+            imageBase64: imageBase64,
+            mode: mode,
+            onCancel: () => _bloc.add(const ScanAbandonedEvent()),
+          ),
         );
       // `cats` is still loaded by HomeBloc — it drives the People-profile sync
       // and the OneSignal `has_cat` tag — but nothing on the page renders it
@@ -147,11 +153,29 @@ class _HomePage extends State<HomePage> {
         );
       case HomeErrorState():
         final l10n = AppLocalizations.of(context);
+        // A classified scan outcome gets the per-outcome view with its exits;
+        // transport errors (timeout, offline, busy) keep the plain retry.
+        if (state.outcome != null) {
+          return Scaffold(
+            backgroundColor: DSColors.pageBackground,
+            body: SafeArea(
+              child: HomeScanErrorView(
+                state: state,
+                onScanAgain: () => _onScanErrorExit(state, 'scan_again'),
+                onScanLabel: () => _onScanErrorExit(state, 'scan_label'),
+                onSearch: () => _onScanErrorExit(state, 'search'),
+              ),
+            ),
+          );
+        }
         return Scaffold(
           backgroundColor: DSColors.pageBackground,
           body: SafeArea(
             child: DSStateView.error(
               body: _localizeError(state.errorType, l10n),
+              // Without this the widget's hard-coded English default shipped
+              // in all six locales.
+              ctaLabel: l10n.commonTryAgain,
               onCtaPressed: () => _bloc.add(HomeInitialEvent()),
             ),
           ),
@@ -161,11 +185,64 @@ class _HomePage extends State<HomePage> {
     }
   }
 
+  /// One of the three exits on the scan error view. Home goes back to its
+  /// dashboard first, so the error is not still waiting when the user returns
+  /// from the pushed screen.
+  void _onScanErrorExit(HomeErrorState state, String exit) {
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.scanErrorExitTapped,
+      properties: {
+        'outcome': state.outcome,
+        'exit': exit,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+    _bloc.add(HomeInitialEvent());
+    switch (exit) {
+      case 'scan_again':
+        sl<LogEventUsecase>().call(
+          eventName: AnalyticsEvents.scanStarted,
+          properties: {
+            'source': ScanSource.scanErrorRetry,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
+        context.router.push(ScannerRoute());
+      case 'scan_label':
+        sl<LogEventUsecase>().call(
+          eventName: AnalyticsEvents.labelScanStarted,
+          properties: {
+            'source': ScanSource.scanError,
+            'outcome': state.outcome,
+            'has_product_key': state.productKey != null,
+            'has_gtin': state.gtin != null,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
+        context.router.push(ScannerRoute(
+          mode: ScanMode.label,
+          labelTarget: LabelTarget(
+            productKey: state.productKey,
+            gtin: state.gtin,
+            brand: state.identifiedBrand,
+            name: state.identifiedName,
+          ),
+        ));
+      case 'search':
+        context.router.push(const SearchRoute());
+    }
+  }
+
   String _localizeError(HomeErrorType type, AppLocalizations l10n) =>
       switch (type) {
         HomeErrorType.notFound => l10n.homeErrorProductNotFound,
         HomeErrorType.timeout => l10n.homeErrorTimeout,
         HomeErrorType.noInternet => l10n.homeErrorNoInternet,
+        HomeErrorType.serviceBusy => l10n.homeErrorServiceBusy,
+        // Both label failures always carry an `outcome`, so they render
+        // through HomeScanErrorView above; these are the safety net.
+        HomeErrorType.labelUnreadable => l10n.homeErrorLabelUnreadableBody,
+        HomeErrorType.labelNoData => l10n.homeErrorLabelNoDataBody,
         HomeErrorType.generic => l10n.homeErrorGeneric,
       };
 }

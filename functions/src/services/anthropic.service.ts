@@ -37,6 +37,11 @@ import {
   generateAnalysisUserPrompt,
 } from "../prompts/analyze-product";
 import {
+  generateLabelSystemPrompt,
+  generateLabelUserPrompt,
+} from "../prompts/analyze-label";
+import {retailerFor} from "../prompts/retailers";
+import {
   CatNarrativeInput,
   generateCatNarrativeSystemPrompt,
   generateCatNarrativeUserPrompt,
@@ -89,6 +94,64 @@ function normalizeMediaType(mimeType: string): AnthropicMediaType {
 }
 
 /**
+ * The image content block, or nothing. The nightly self-heal job re-analyses
+ * cached rows from their brand/name alone — there is no photo to send — so
+ * every analyze path accepts `null` and simply omits the block.
+ */
+function imageBlock(
+  imageBase64: string | null,
+  mimeType: string
+): Anthropic.ImageBlockParam[] {
+  if (!imageBase64) return [];
+  return [{
+    type: "image",
+    source: {
+      type: "base64",
+      media_type: normalizeMediaType(mimeType),
+      data: imageBase64,
+    },
+  }];
+}
+
+/**
+ * Per-model request parameters. Sonnet 5 (the A/B candidate for identify and
+ * label) rejects `temperature` with a 400 and runs adaptive thinking unless
+ * told otherwise; both steps are extraction tasks that don't need thinking,
+ * so it is disabled there. Haiku 4.5 keeps the low temperature. Every
+ * model-switchable call must go through this — a call site that passes
+ * `temperature` directly will 400 the moment the param names Sonnet.
+ */
+function modelParams(model: string): Record<string, unknown> {
+  if (model.startsWith("claude-sonnet-5") || model.startsWith("claude-opus-5")) {
+    return {thinking: {type: "disabled"}};
+  }
+  return {temperature: config.anthropic.temperature};
+}
+
+/**
+ * The server-side web-search tool, versioned per model: Sonnet 5 and Opus 5
+ * take `web_search_20260209` (dynamic filtering); Haiku 4.5 only accepts the
+ * original `web_search_20250305`. Still `as any` — the pinned SDK predates
+ * both. `country` is best-effort (an unsupported code 400s; callers retry
+ * without it).
+ */
+function webSearchTool(
+  model: string,
+  maxUses: number,
+  country: string | undefined
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any {
+  const modern =
+    model.startsWith("claude-sonnet-5") || model.startsWith("claude-opus-5");
+  return {
+    type: modern ? "web_search_20260209" : "web_search_20250305",
+    name: "web_search",
+    max_uses: maxUses,
+    ...(country ? {user_location: {type: "approximate", country}} : {}),
+  };
+}
+
+/**
  * Retries an async operation with exponential backoff on transient failures
  * (5xx, 429). Mirrors the yucat-api Gemini retry pattern.
  */
@@ -125,6 +188,36 @@ async function withRetry<T>(
   throw lastError;
 }
 
+/**
+ * One structured usage line per model call, joinable to a scan by `requestId`.
+ *
+ * Before this only the three fan-out instances logged tokens, without a
+ * request id and without the cache counters — so cost per scan could not be
+ * computed from logs, and the (silently no-op) prompt caching was invisible.
+ * Haiku 4.5 needs a 4,096-token prefix to cache; ours is ~2,000, so expect
+ * `cacheReadInputTokens: 0` until the prompt or the model changes.
+ */
+function logUsage(
+  label: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  response: any,
+  extra: Record<string, unknown> = {}
+): void {
+  const usage = response?.usage ?? {};
+  logger.info("anthropic usage", {
+    label,
+    model: response?.model ?? config.anthropic.model,
+    inputTokens: usage.input_tokens ?? 0,
+    outputTokens: usage.output_tokens ?? 0,
+    cacheCreationInputTokens: usage.cache_creation_input_tokens ?? 0,
+    cacheReadInputTokens: usage.cache_read_input_tokens ?? 0,
+    webSearchRequests: usage.server_tool_use?.web_search_requests ?? 0,
+    stopReason: response?.stop_reason ?? null,
+    ...extra,
+    structuredData: true,
+  });
+}
+
 export interface ProductIdentification {
   brand: string;
   name: string;
@@ -144,6 +237,25 @@ export interface LitterIdentification {
 export type ScanIdentification =
   | {category: "food"; food: ProductIdentification}
   | {category: "litter"; litter: LitterIdentification};
+
+/**
+ * Why the identify step produced nothing. `reason` is the model's own
+ * classification from the `not_cat_product` tool, or `no_tool` when the call
+ * returned no tool_use at all. "That's a dog food" and "the photo is too blurry
+ * to read" used to collapse into one null — 20% of scans — with no way to tell
+ * a UX problem from a product-scope one.
+ */
+export interface ScanRejection {
+  category: "none";
+  reason: string;
+  note?: string;
+}
+
+export type ScanSubject = ScanIdentification | ScanRejection;
+
+export const REJECTION_REASONS = [
+  "dog_food", "human_food", "other_item", "no_product", "unreadable",
+] as const;
 
 const FOOD_TYPE_ENUM: FoodType[] = [
   "wet", "dry", "treat", "topper", "supplement",
@@ -189,8 +301,27 @@ const IDENTIFICATION_TOOLS: Anthropic.Tool[] = [
     name: "not_cat_product",
     description:
       "Call this if the image is neither cat food nor cat litter (dog food, " +
-      "human food, other non-cat items, or unrecognizable).",
-    input_schema: {type: "object", properties: {}},
+      "human food, other non-cat items) OR if it may be a cat product but the " +
+      "packaging cannot be read well enough to identify it.",
+    input_schema: {
+      type: "object",
+      required: ["reason"],
+      properties: {
+        reason: {
+          type: "string",
+          enum: [...REJECTION_REASONS],
+          description:
+            "dog_food / human_food / other_item: clearly not a cat product. " +
+            "no_product: no product packaging in frame at all. unreadable: " +
+            "possibly a cat product but blurry, dark, cropped or too far away " +
+            "to read the brand and name.",
+        },
+        note: {
+          type: "string",
+          description: "What you saw instead, in at most 80 characters.",
+        },
+      },
+    },
   },
 ];
 
@@ -203,7 +334,7 @@ const LITTER_ANALYSIS_TOOLS: Anthropic.Tool[] = [
       required: [
         "name", "brand", "material", "clumping", "dustLevel", "scented",
         "trackingLevel", "odorControl", "flushable", "biodegradable",
-        "additives", "format", "packageSize", "description", "imageUrl",
+        "additives", "format", "packageSize", "description",
         "score", "pros", "cons",
       ],
       properties: {
@@ -291,10 +422,13 @@ const ANALYSIS_TOOLS: Anthropic.Tool[] = [
     description: "Submit the final cat food product analysis.",
     input_schema: {
       type: "object",
+      // `imageUrl` is deliberately optional: the model's URL was unusable in
+      // about half of scans (page URLs, dead links) and SerpAPI now sources the
+      // image on every miss regardless — see index.ts.
       required: [
         "name", "brand", "foodType", "format", "packageSize", "description",
         "protein", "fat", "moisture", "carbs", "fiber", "ash",
-        "imageUrl", "score", "pros", "cons", "ingredients",
+        "score", "pros", "cons", "ingredients",
       ],
       properties: {
         name: {type: "string"},
@@ -361,32 +495,32 @@ function findToolUse(content: any[], name: string): any | undefined {
  */
 export async function identifyScanSubject(
   imageBase64: string,
-  mimeType: string
-): Promise<ScanIdentification | null> {
-  const mediaType = normalizeMediaType(mimeType);
+  mimeType: string,
+  requestId?: string,
+  model: string = config.anthropic.model
+): Promise<ScanSubject> {
   const prompt = generateIdentificationPrompt();
 
   const response = await withRetry("identifyScanSubject", () =>
     getClient().messages.create({
-      model: config.anthropic.model,
+      model,
       max_tokens: 256,
-      temperature: config.anthropic.temperature,
+      ...modelParams(model),
       messages: [
         {
           role: "user",
           content: [
-            {
-              type: "image",
-              source: {type: "base64", media_type: mediaType, data: imageBase64},
-            },
+            ...imageBlock(imageBase64, mimeType),
             {type: "text", text: prompt},
           ],
         },
       ],
       tools: IDENTIFICATION_TOOLS,
       tool_choice: {type: "any"},
-    })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
   );
+  logUsage("identify", response, {requestId, model});
 
   const submit = findToolUse(response.content, "submit_identification");
   if (submit) {
@@ -418,21 +552,122 @@ export async function identifyScanSubject(
 
   const notCatProduct = findToolUse(response.content, "not_cat_product");
   if (notCatProduct) {
-    logger.info("Image classified as non-cat-product", {structuredData: true});
-    return null;
+    const reason = typeof notCatProduct.input?.reason === "string" ?
+      notCatProduct.input.reason :
+      "other_item";
+    const note = typeof notCatProduct.input?.note === "string" ?
+      notCatProduct.input.note.slice(0, 80) :
+      undefined;
+    logger.info("Image classified as non-cat-product", {
+      requestId,
+      reason,
+      note,
+      structuredData: true,
+    });
+    return {category: "none", reason, note};
   }
 
   logger.warn("Identification call returned no tool_use", {
+    requestId,
     stopReason: response.stop_reason,
     structuredData: true,
   });
-  return null;
+  return {category: "none", reason: "no_tool"};
 }
 
 // web_search is a server-side tool: when its internal loop pauses, the API
 // returns stop_reason "pause_turn" with NO submit_product block yet. We must
 // re-send the assistant turn to resume. This caps how many times we resume.
 const MAX_CONTINUATIONS = 3;
+
+/**
+ * Identity from a barcode via one web search. Reuses the identify tools, so the
+ * result is a `ScanIdentification` the pipeline treats exactly like a read
+ * pack. Called only when the photo itself was unreadable — the cost is one
+ * search plus a small call, versus the full analysis that would otherwise be
+ * impossible. Returns null when the search finds nothing (or not a cat product).
+ */
+export async function identifyByGtinSearch(
+  gtin: string,
+  countryCode: string | undefined,
+  requestId?: string
+): Promise<ScanIdentification | null> {
+  let country = countryCode?.trim().toUpperCase() || undefined;
+  const prompt =
+    `A cat owner scanned a product whose barcode (EAN/UPC) is ${gtin}. Use ` +
+    "web_search ONCE to find which product this barcode belongs to, then " +
+    "call exactly one tool: submit_identification (cat food), " +
+    "submit_litter_identification (cat litter) or not_cat_product. Transcribe " +
+    "the brand and full product name as the retailer or manufacturer lists " +
+    "them; if the search does not clearly identify a cat product, call " +
+    "not_cat_product with reason \"no_product\".";
+
+  const messages: Anthropic.MessageParam[] = [
+    {role: "user", content: [{type: "text", text: prompt}]},
+  ];
+  const createParams = () => ({
+    model: config.anthropic.model,
+    max_tokens: 1024,
+    temperature: config.anthropic.temperature,
+    messages,
+    tools: [
+      webSearchTool(config.anthropic.model, 1, country),
+      ...IDENTIFICATION_TOOLS,
+    ],
+    tool_choice: {type: "auto" as const},
+  });
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let accumulated: any[] = [];
+    for (let i = 0; i <= 1; i++) {
+      let response;
+      try {
+        response = await withRetry("identifyByGtinSearch", () =>
+          getClient().messages.create(createParams())
+        );
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (country && /country code/i.test(msg)) {
+          country = undefined;
+          response = await withRetry("identifyByGtinSearch", () =>
+            getClient().messages.create(createParams())
+          );
+        } else {
+          throw err;
+        }
+      }
+      logUsage("identify:gtin", response, {requestId, gtin, roundTrip: i + 1});
+      accumulated = accumulated.concat(response.content);
+      if ((response.stop_reason as string) === "pause_turn") {
+        messages.push({role: "assistant", content: response.content});
+        continue;
+      }
+      break;
+    }
+
+    const food = findToolUse(accumulated, "submit_identification");
+    if (food) {
+      return {category: "food", food: food.input as ProductIdentification};
+    }
+    const litter = findToolUse(accumulated, "submit_litter_identification");
+    if (litter) {
+      return {
+        category: "litter",
+        litter: litter.input as LitterIdentification,
+      };
+    }
+    return null;
+  } catch (error) {
+    logger.warn("identifyByGtinSearch failed", {
+      requestId,
+      gtin,
+      error: error instanceof Error ? error.message : String(error),
+      structuredData: true,
+    });
+    return null;
+  }
+}
 
 /**
  * Step 2 — Full analysis with Anthropic web_search. Returns a Product on
@@ -447,10 +682,12 @@ const MAX_CONTINUATIONS = 3;
  * never silently dropped to null.
  */
 export async function analyzeProductImage(
-  imageBase64: string,
+  imageBase64: string | null,
   mimeType: string,
   identification?: ProductIdentification,
-  countryCode?: string
+  countryCode?: string,
+  requestId?: string,
+  gtin?: string
 ): Promise<{product: Product | null; rawResponse: string}> {
   // Run the web_search source and the manufacturer-page source concurrently,
   // then keep the most complete (pickBestProduct). The page source overlaps the
@@ -460,8 +697,12 @@ export async function analyzeProductImage(
       maxUses: config.anthropic.maxWebSearches,
       label: "single",
       countryCode,
+      requestId,
+      gtin,
     }),
-    analyzeFromManufacturerPages(imageBase64, mimeType, identification),
+    analyzeFromManufacturerPages(
+      imageBase64, mimeType, identification, requestId
+    ),
   ]);
   const results = [web, pages].filter((r): r is AnalyzeResult => r !== null);
   return pickBestProduct(results);
@@ -481,6 +722,10 @@ interface AnalyzeSourceOptions {
    * niche non-US brands whose nutrition lives on their own localized site.
    */
   countryCode?: string;
+  /** Scan id, so every usage/timing line can be joined back to one scan. */
+  requestId?: string;
+  /** Normalised barcode, offered to the model as a search anchor. */
+  gtin?: string;
 }
 
 /**
@@ -489,7 +734,7 @@ interface AnalyzeSourceOptions {
  * hint it is the original free-search behavior (the control path).
  */
 async function analyzeOneSource(
-  imageBase64: string,
+  imageBase64: string | null,
   mimeType: string,
   identification: ProductIdentification | undefined,
   opts: AnalyzeSourceOptions
@@ -501,9 +746,10 @@ async function analyzeOneSource(
   // user_location, so an unsupported region degrades to no-biasing instead of
   // failing the whole scan.
   let country = opts.countryCode?.trim().toUpperCase() || undefined;
-  const mediaType = normalizeMediaType(mimeType);
-  const systemText = generateAnalysisSystemPrompt();
-  const userText = generateAnalysisUserPrompt(identification, opts.sourceHint);
+  const systemText = generateAnalysisSystemPrompt(!!imageBase64);
+  const userText = generateAnalysisUserPrompt(
+    identification, opts.sourceHint, opts.gtin
+  );
 
   const systemBlocks = [
     {
@@ -514,10 +760,7 @@ async function analyzeOneSource(
   ];
 
   const userContent: Anthropic.MessageParam["content"] = [
-    {
-      type: "image",
-      source: {type: "base64", media_type: mediaType, data: imageBase64},
-    },
+    ...imageBlock(imageBase64, mimeType),
     {type: "text", text: userText},
   ];
 
@@ -547,18 +790,10 @@ async function analyzeOneSource(
     system: systemBlocks,
     messages,
     tools: [
-      {
-        type: "web_search_20250305",
-        name: "web_search",
-        max_uses: maxUses,
-        // Bias results to the user's country when known (e.g. surface a
-        // Spanish brand's .es pages for an ES user). Omitted when absent so
-        // global/US brands are unaffected.
-        ...(country ?
-          {user_location: {type: "approximate", country}} :
-          {}),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
+      // Biased to the user's country when known (e.g. surface a Spanish
+      // brand's .es pages for an ES user). Omitted when absent so global/US
+      // brands are unaffected.
+      webSearchTool(config.anthropic.model, maxUses, country),
       ...ANALYSIS_TOOLS,
     ],
     tool_choice: {type: "auto" as const},
@@ -595,6 +830,10 @@ async function analyzeOneSource(
     stopReasons.push(response.stop_reason);
     inputTokens += response.usage?.input_tokens ?? 0;
     outputTokens += response.usage?.output_tokens ?? 0;
+    logUsage(`analyze:${label}`, response, {
+      requestId: opts.requestId,
+      roundTrip: i + 1,
+    });
 
     accumulated = accumulated.concat(response.content);
     lastStopReason = response.stop_reason;
@@ -617,6 +856,7 @@ async function analyzeOneSource(
   ).length;
 
   logger.info("analyzeProductImage web_search timing", {
+    requestId: opts.requestId,
     label,
     maxUses,
     country: country ?? "none",
@@ -682,7 +922,11 @@ async function analyzeOneSource(
     );
     inputTokens += fallback.usage?.input_tokens ?? 0;
     outputTokens += fallback.usage?.output_tokens ?? 0;
+    logUsage(`analyze:${label}:forceSubmit`, fallback, {
+      requestId: opts.requestId,
+    });
     logger.info("analyzeProductImage fallback timing", {
+      requestId: opts.requestId,
       label,
       fallbackMs: Date.now() - fallbackStart,
       usedPriorText: !!priorText,
@@ -713,16 +957,91 @@ async function analyzeOneSource(
 type AnalyzeResult = {product: Product | null; rawResponse: string};
 
 /**
+ * Back-label rescue: one vision call, forced `submit_product`, no web search.
+ * Reads the analytical constituents and the composition straight off the
+ * panel in the user's hand — the data the fan-out could not find on the web,
+ * at a fraction of the cost. `identification` (when the front was read
+ * earlier) pins name/brand so the merged record keeps its identity.
+ */
+export async function analyzeProductLabelImage(
+  imageBase64: string,
+  mimeType: string,
+  identification: {brand: string; name: string; foodType?: string} | undefined,
+  requestId?: string,
+  model: string = config.anthropic.model
+): Promise<AnalyzeResult> {
+  const started = Date.now();
+  const response = await withRetry("analyzeProductLabelImage", () =>
+    getClient().messages.create({
+      model,
+      max_tokens: 4096,
+      ...modelParams(model),
+      system: [
+        {
+          type: "text",
+          text: generateLabelSystemPrompt(),
+          cache_control: {type: "ephemeral"},
+        },
+      ],
+      messages: [
+        {
+          role: "user",
+          content: [
+            ...imageBlock(imageBase64, mimeType),
+            {type: "text", text: generateLabelUserPrompt(identification)},
+          ],
+        },
+      ],
+      tools: ANALYSIS_TOOLS,
+      tool_choice: {type: "tool", name: "submit_product"},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
+  );
+  logUsage("label", response, {requestId, model});
+
+  const submit = findToolUse(response.content, "submit_product");
+  if (!submit) {
+    logger.warn("analyzeProductLabelImage: no submit_product returned", {
+      requestId,
+      stopReason: response.stop_reason,
+      structuredData: true,
+    });
+    return {product: null, rawResponse: JSON.stringify(response.content)};
+  }
+
+  const product = ProductModel.fromObject({
+    ...submit.input,
+    barcode: "",
+  } as Partial<Product>).toObject();
+
+  logger.info("analyzeProductLabelImage complete", {
+    requestId,
+    ms: Date.now() - started,
+    hasNutrition: product.score > 0,
+    ingredients: product.ingredients?.length ?? 0,
+    structuredData: true,
+  });
+  return {product, rawResponse: JSON.stringify(submit.input)};
+}
+
+/**
  * Fan-out analysis: run several single-source instances concurrently and keep
  * the most complete result. This is true parallelism (independent API calls),
  * unlike the server-side web_search loop which serializes within one turn.
  */
 export async function analyzeProductImageParallel(
-  imageBase64: string,
+  imageBase64: string | null,
   mimeType: string,
   identification?: ProductIdentification,
-  countryCode?: string
+  countryCode?: string,
+  requestId?: string,
+  gtin?: string
 ): Promise<AnalyzeResult> {
+  // Two web-search sources, not three: the manufacturer plus ONE retailer
+  // chosen for the user's country (see prompts/retailers.ts). The third
+  // instance cost two searches per scan and, measured over two weeks,
+  // finished within a second of the others without adding recall.
+  const retailer = retailerFor(countryCode);
   const SOURCES: {label: string; hint: string}[] = [
     {
       label: "manufacturer",
@@ -731,11 +1050,7 @@ export async function analyzeProductImageParallel(
         "and open the specific product page (the maker often hosts the " +
         "guaranteed analysis when retailers do not)",
     },
-    {label: "retailer-a", hint: "a major retailer such as Chewy or Amazon"},
-    {
-      label: "retailer-b",
-      hint: "a major retailer such as zooplus, Petco, or Pets at Home",
-    },
+    retailer,
   ];
 
   const started = Date.now();
@@ -746,8 +1061,11 @@ export async function analyzeProductImageParallel(
         maxUses: config.anthropic.parallelMaxUses,
         label: s.label,
         countryCode,
+        requestId,
+        gtin,
       }).catch((error) => {
         logger.warn("analyzeProductImageParallel instance failed", {
+          requestId,
           label: s.label,
           error: error instanceof Error ? error.message : String(error),
           structuredData: true,
@@ -759,12 +1077,17 @@ export async function analyzeProductImageParallel(
     // independent). Runs concurrently so it overlaps web_search rather than
     // waiting behind it. Ordered last so a completeness tie keeps the image-
     // grounded web_search result; the page wins only when it alone has nutrition.
-    analyzeFromManufacturerPages(imageBase64, mimeType, identification),
+    analyzeFromManufacturerPages(
+      imageBase64, mimeType, identification, requestId
+    ),
   ]);
   const results = settled.filter((r): r is AnalyzeResult => r !== null);
 
   const best = pickBestProduct(results);
   logger.info("analyzeProductImageParallel complete", {
+    requestId,
+    retailerHint: retailer.label,
+    hasImage: !!imageBase64,
     instances: SOURCES.length + 1,
     succeeded: results.length,
     parallelMs: Date.now() - started,
@@ -808,18 +1131,18 @@ function pickBestProduct(results: AnalyzeResult[]): AnalyzeResult {
  * guaranteed analysis + ingredients. Returns null if no nutrition is recovered.
  */
 async function analyzeFromProductPages(
-  imageBase64: string,
+  imageBase64: string | null,
   mimeType: string,
   identification: ProductIdentification | undefined,
-  pages: {url: string; text: string}[]
+  pages: {url: string; text: string}[],
+  requestId?: string
 ): Promise<AnalyzeResult | null> {
   if (pages.length === 0) return null;
 
-  const mediaType = normalizeMediaType(mimeType);
   const systemBlocks = [
     {
       type: "text" as const,
-      text: generateAnalysisSystemPrompt(),
+      text: generateAnalysisSystemPrompt(!!imageBase64),
       cache_control: {type: "ephemeral" as const},
     },
   ];
@@ -846,10 +1169,7 @@ async function analyzeFromProductPages(
     pagesBlock;
 
   const userContent: Anthropic.MessageParam["content"] = [
-    {
-      type: "image",
-      source: {type: "base64", media_type: mediaType, data: imageBase64},
-    },
+    ...imageBlock(imageBase64, mimeType),
     {type: "text", text: instruction},
   ];
 
@@ -865,10 +1185,12 @@ async function analyzeFromProductPages(
       tool_choice: {type: "tool", name: "submit_product"},
     })
   );
+  logUsage("analyze:pages", response, {requestId, pages: pages.length});
 
   const submit = findToolUse(response.content, "submit_product");
   if (!submit) {
     logger.warn("analyzeFromProductPages: no submit_product returned", {
+      requestId,
       structuredData: true,
     });
     return null;
@@ -880,6 +1202,7 @@ async function analyzeFromProductPages(
   } as Partial<Product>).toObject();
 
   logger.info("analyzeFromProductPages complete", {
+    requestId,
     pages: pages.length,
     ms: Date.now() - start,
     hasNutrition: product.score > 0,
@@ -924,9 +1247,10 @@ function safePath(url: string): string {
  * location-independent, so it's the path that fixes niche brands. Never throws.
  */
 async function analyzeFromManufacturerPages(
-  imageBase64: string,
+  imageBase64: string | null,
   mimeType: string,
-  identification: ProductIdentification | undefined
+  identification: ProductIdentification | undefined,
+  requestId?: string
 ): Promise<AnalyzeResult | null> {
   if (!config.anthropic.useManufacturerPageFallback) return null;
 
@@ -994,7 +1318,8 @@ async function analyzeFromManufacturerPages(
       imageBase64,
       mimeType,
       identification,
-      pages
+      pages,
+      requestId
     );
     if (result?.product && result.product.score > 0) {
       logger.info("manufacturer-page source: nutrition recovered", {
@@ -1063,30 +1388,31 @@ const NARRATIVE_TOOLS: Anthropic.Tool[] = [
  * attribute "unknown".
  */
 export async function analyzeLitterImage(
-  imageBase64: string,
+  imageBase64: string | null,
   mimeType: string,
   identification?: LitterIdentification,
-  countryCode?: string
+  countryCode?: string,
+  requestId?: string,
+  gtin?: string
 ): Promise<{litter: Litter | null; rawResponse: string}> {
   // Mutable: web_search accepts only an allowlist of country codes, so an
   // unsupported region degrades to no biasing rather than failing the scan.
   let country = countryCode?.trim().toUpperCase() || undefined;
-  const mediaType = normalizeMediaType(mimeType);
 
   const systemBlocks = [
     {
       type: "text" as const,
-      text: generateLitterAnalysisSystemPrompt(),
+      text: generateLitterAnalysisSystemPrompt(!!imageBase64),
       cache_control: {type: "ephemeral" as const},
     },
   ];
 
   const userContent: Anthropic.MessageParam["content"] = [
+    ...imageBlock(imageBase64, mimeType),
     {
-      type: "image",
-      source: {type: "base64", media_type: mediaType, data: imageBase64},
+      type: "text",
+      text: generateLitterAnalysisUserPrompt(identification, gtin),
     },
-    {type: "text", text: generateLitterAnalysisUserPrompt(identification)},
   ];
 
   const messages: Anthropic.MessageParam[] = [
@@ -1106,15 +1432,7 @@ export async function analyzeLitterImage(
     system: systemBlocks,
     messages,
     tools: [
-      {
-        type: "web_search_20250305",
-        name: "web_search",
-        max_uses: config.anthropic.maxWebSearches,
-        ...(country ?
-          {user_location: {type: "approximate", country}} :
-          {}),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
+      webSearchTool(config.anthropic.model, config.anthropic.maxWebSearches, country),
       ...LITTER_ANALYSIS_TOOLS,
     ],
     tool_choice: {type: "auto" as const},
@@ -1148,6 +1466,7 @@ export async function analyzeLitterImage(
     roundTripMs.push(Date.now() - roundStart);
     inputTokens += response.usage?.input_tokens ?? 0;
     outputTokens += response.usage?.output_tokens ?? 0;
+    logUsage("analyze:litter", response, {requestId, roundTrip: i + 1});
     accumulated = accumulated.concat(response.content);
     lastStopReason = response.stop_reason;
 
@@ -1160,6 +1479,7 @@ export async function analyzeLitterImage(
   }
 
   logger.info("analyzeLitterImage web_search timing", {
+    requestId,
     country: country ?? "none",
     roundTrips: roundTripMs.length,
     roundTripMs,
@@ -1218,6 +1538,7 @@ export async function analyzeLitterImage(
         tool_choice: {type: "tool", name: "submit_litter"},
       })
     );
+    logUsage("analyze:litter:forceSubmit", fallback, {requestId});
 
     submit = findToolUse(fallback.content, "submit_litter");
     if (!submit) {
@@ -1423,7 +1744,8 @@ const TRANSLATION_TOOLS: Anthropic.Tool[] = [
  */
 export async function translateProductText(
   text: ProductText,
-  languageCode: string
+  languageCode: string,
+  requestId?: string
 ): Promise<ProductText | null> {
   const language = languageName(languageCode);
   const started = Date.now();
@@ -1454,6 +1776,7 @@ export async function translateProductText(
         tool_choice: {type: "tool", name: "submit_translation"},
       })
     );
+    logUsage("translate", response, {requestId, languageCode});
 
     const submit = findToolUse(response.content, "submit_translation");
     const out = submit?.input;
@@ -2131,28 +2454,30 @@ export async function findProductImageUrl(
 ): Promise<string> {
   if (!brand && !name) return "";
 
-  // Timing: split the external SerpAPI fetch from the serial HEAD validation so
-  // we know which part of the image-fallback cost is the third-party call vs ours.
+  // Timing: split the external SerpAPI fetch from the HEAD validation so we
+  // know which part of the image-fallback cost is the third-party call vs ours.
   const serpStart = Date.now();
   const candidates = await searchProductImageUrls(brand, name);
   const serpapiMs = Date.now() - serpStart;
 
+  // Validate every candidate concurrently and keep the first (best-ranked)
+  // that passes. Serially, six slow hosts cost six timeouts; now the worst
+  // case is one HEAD timeout, and the SerpAPI ranking is still honoured.
   const validateStart = Date.now();
-  let validated = 0;
-  for (const candidate of candidates) {
-    validated++;
-    if (await isImageUrlValid(candidate)) {
-      logger.info("findProductImageUrl using SerpAPI candidate", {
-        brand,
-        name,
-        imageUrl: candidate,
-        serpapiMs,
-        validateMs: Date.now() - validateStart,
-        candidatesChecked: validated,
-        structuredData: true,
-      });
-      return candidate;
-    }
+  const verdicts = await Promise.all(candidates.map(isImageUrlValid));
+  const winnerIndex = verdicts.indexOf(true);
+  const winner = winnerIndex >= 0 ? candidates[winnerIndex] : undefined;
+  if (winner) {
+    logger.info("findProductImageUrl using SerpAPI candidate", {
+      brand,
+      name,
+      imageUrl: winner,
+      serpapiMs,
+      validateMs: Date.now() - validateStart,
+      candidatesChecked: candidates.length,
+      structuredData: true,
+    });
+    return winner;
   }
 
   logger.info("findProductImageUrl found no image", {
@@ -2160,7 +2485,7 @@ export async function findProductImageUrl(
     name,
     serpapiMs,
     validateMs: Date.now() - validateStart,
-    candidatesChecked: validated,
+    candidatesChecked: candidates.length,
     structuredData: true,
   });
   return "";
@@ -2177,7 +2502,8 @@ export async function findProductImageUrl(
  */
 export async function verifyMatchWithLLM(
   expected: ProductIdentification,
-  candidates: Product[]
+  candidates: Product[],
+  requestId?: string
 ): Promise<Product | null> {
   if (candidates.length === 0) return null;
 
@@ -2231,11 +2557,13 @@ export async function verifyMatchWithLLM(
         tool_choice: {type: "any"},
       })
     );
+    logUsage("verifyMatch", response, {requestId});
 
     const submit = findToolUse(response.content, "submit_match");
     const idx = submit?.input?.matchIndex;
     if (typeof idx !== "number" || idx < 0 || idx >= candidates.length) {
       logger.info("LLM verifier rejected all candidates", {
+        requestId,
         expectedBrand: expected.brand,
         expectedName: expected.name,
         candidateCount: candidates.length,
@@ -2273,7 +2601,8 @@ export async function verifyMatchWithLLM(
  */
 export async function verifyLitterMatchWithLLM(
   expected: LitterIdentification,
-  candidates: Litter[]
+  candidates: Litter[],
+  requestId?: string
 ): Promise<Litter | null> {
   if (candidates.length === 0) return null;
 
@@ -2324,6 +2653,7 @@ export async function verifyLitterMatchWithLLM(
         tool_choice: {type: "any"},
       })
     );
+    logUsage("verifyLitterMatch", response, {requestId});
 
     const submit = findToolUse(response.content, "submit_match");
     const idx = submit?.input?.matchIndex;

@@ -108,6 +108,9 @@ export interface Litter {
    * code. The flat fields stay canonical English — no "en" entry.
    */
   translations?: Record<string, LitterText>;
+  /** Normalised EAN-13 from the pack — same contract as `Product.gtin`. */
+  gtin?: string;
+  gtinSource?: "scan" | "resolver";
 }
 
 export class LitterModel implements Litter {
@@ -135,6 +138,8 @@ export class LitterModel implements Litter {
   lastAnalysisAttempt?: number;
   lastImageAttempt?: number;
   translations?: Record<string, LitterText>;
+  gtin?: string;
+  gtinSource?: "scan" | "resolver";
 
   constructor(data: Partial<Litter>) {
     this.id = data.id || "";
@@ -161,6 +166,8 @@ export class LitterModel implements Litter {
     this.lastAnalysisAttempt = data.lastAnalysisAttempt;
     this.lastImageAttempt = data.lastImageAttempt;
     this.translations = data.translations;
+    this.gtin = data.gtin;
+    this.gtinSource = data.gtinSource;
   }
 
   static fromObject(data: Partial<Litter>): LitterModel {
@@ -193,6 +200,8 @@ export class LitterModel implements Litter {
       lastAnalysisAttempt: this.lastAnalysisAttempt,
       lastImageAttempt: this.lastImageAttempt,
       translations: this.translations,
+      gtin: this.gtin,
+      gtinSource: this.gtinSource,
     };
   }
 }
