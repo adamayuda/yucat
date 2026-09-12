@@ -109,7 +109,28 @@ class NotificationService {
       OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
     }
     OneSignal.initialize(_appId);
+    // Registered right after initialize; the SDK buffers a cold-launch click
+    // until a listener exists, so a tap that started the app is not lost.
+    OneSignal.Notifications.addClickListener(_onNotificationClick);
     _initialized = true;
+  }
+
+  /// A push was tapped (app in background or killed). Logged so Mixpanel can
+  /// attribute the session to the Journey step that sent it — OneSignal only
+  /// reports clicks on its own side.
+  void _onNotificationClick(OSNotificationClickEvent event) {
+    final n = event.notification;
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.pushOpened,
+      properties: {
+        'notification_id': n.notificationId,
+        'template_id': n.templateId,
+        'template_name': n.templateName,
+        'title': n.title,
+        'launch_url': n.launchUrl,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
   }
 
   /// Prompt the OS notification permission dialog. Returns whether permission

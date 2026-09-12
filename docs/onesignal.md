@@ -43,7 +43,8 @@ The app never touches the OneSignal SDK directly. Everything goes through
 | `initialize()` | `OneSignal.initialize(appId)`. Idempotent. **Deliberately does not prompt** | `main.dart:56`, once at boot after Firebase |
 | `requestPermission()` | `OneSignal.Notifications.requestPermission(true)`; logs `Notifications Opted In`/`Opted Out` and sets the `notifications_enabled` People property | `reminders_screen.dart:48` |
 | `login(uid)` | `OneSignal.login(uid)` — attaches the external id | `splash_bloc.dart` `_ensureSignedIn`, beside `identify(uid)` |
-| `logout()` | Detaches it. Unused while auth is anonymous-only | — |
+| `logout()` | Detaches it | `QaResetService` (Reset test user) |
+| `_onNotificationClick` | Logs `Push Opened` with the template name | Registered in `initialize()` |
 | `setTags(map)` | `OneSignal.User.addTags`. Fire-and-forget | The funnel checkpoints in §5 |
 | `setFunnelStage(stage)` | Monotonic `funnel_stage` write | ditto |
 | `setSubscriber(bool, {isTrial})` | `is_subscriber`, and `is_trial` when the entitlement was read | Paywall success, splash gate |
@@ -235,6 +236,6 @@ Finally, build each segment in §6 and confirm the test user lands in exactly on
 | **Reminders screen is presentational** | Its three toggles are not stored anywhere (they cost 3 of the Free plan's 6 tags); "Monthly check-in" schedules nothing. Revisit on Growth |
 | **Free-plan MAU cap from 2026-10-01** | Mobile push stops above 1,000 MAU on Free; the app is already over. Decide on Growth before then or accept losing push |
 | **No Android push** | Nothing wired at all |
-| **No click / foreground listeners** | `Notifications.addClickListener` and `addForegroundWillDisplayListener` are never registered, so a push cannot deep-link into a screen and there's no in-app handling of a notification arriving while the app is open |
+| **Clicks are logged, not routed** | `Notifications.addClickListener` emits `Push Opened { template_name, … }` to Mixpanel (attribution), but nothing deep-links into a screen — a tap just opens the app and the splash gate decides. No `addForegroundWillDisplayListener` either, so a push arriving while the app is open is shown by the OS as usual |
 | **No In-App Messages** | The SDK subspec is present but unused |
 | **No tests** | `NotificationService` has no coverage; the monotonic guard in `setFunnelStage` is pure and cheap to test if a `test/` directory is ever added |

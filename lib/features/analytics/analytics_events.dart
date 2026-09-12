@@ -136,6 +136,10 @@ class AnalyticsEvents {
   static const reviewPromptRequested = 'Review Prompt Requested';
   static const notificationsOptedIn = 'Notifications Opted In';
   static const notificationsOptedOut = 'Notifications Opted Out';
+  // A push was tapped. OneSignal's own dashboard counts delivered/clicked,
+  // but without this nothing in Mixpanel ties an app open to a Journey —
+  // `template_name` is the Journey step that brought them back.
+  static const pushOpened = 'Push Opened';
   // Unreachable under the hard paywall — the two tracking services are kept
   // registered so a free tier can be re-enabled without rewiring.
   static const freeLimitHit = 'Free Limit Hit';
