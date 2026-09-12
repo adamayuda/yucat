@@ -61,7 +61,11 @@ plan with a discounted first year**:
   there.
 - Offered **once per paywall session** (`_secondChanceShownThisSession`), never after
   cancelling the offer's own sheet, and never when the paywall already fell back to a
-  non-annual plan.
+  non-annual plan. Two ways in, stamped as `source` on the events: **`cancel`** (the
+  onboarding gate — after the first back-out of Apple's sheet) and **`auto`** (the
+  `returning_user` gate presents it on its own ~600 ms after load — those users already
+  declined full price once, and the OneSignal "dropped at paywall" push promises them
+  this exact offer, so they must not have to cancel a store sheet to find it).
 - **Eligibility is checked at load**, in parallel with the main plan's: Apple grants
   one introductory offer per subscription group per customer, so a lapsed subscriber
   who already used the trial is ineligible for the discount too — the store would
@@ -499,7 +503,7 @@ Events in `lib/features/analytics/analytics_events.dart`:
 | `Paywall CTA Tapped` | `package_id`, `package_type`, `price`, `currency`, `trigger`, `is_trial`, `trial_days` |
 | `Paywall Restore Tapped` | `trigger` |
 | `Paywall Dismissed` | `cta_tapped`, `time_viewed_seconds` |
-| `Paywall Second Chance Shown` / `Tapped` / `Dismissed` | `package_id` (`annual_offer`), `package_type` (`custom`), `price`, `intro_price`, `currency`, `trigger` — the downsell sheet; `Tapped` is followed by `Plan Selected`, `Paywall CTA Tapped` and the normal purchase outcome |
+| `Paywall Second Chance Shown` / `Tapped` / `Dismissed` | `package_id` (`annual_offer`), `package_type` (`custom`), `price`, `intro_price`, `currency`, `source` (`cancel` / `auto`), `trigger` — the downsell sheet; `Tapped` is followed by `Plan Selected`, `Paywall CTA Tapped` and the normal purchase outcome |
 | `Subscription Completed` | `package_id`, `package_type`, `price`, `currency`, `trigger`, **`is_trial`**, **`trial_days`**, `is_intro_offer`, `intro_price` |
 | `Subscription Restored` | `trigger` |
 | `Subscription Purchase Failed` | `reason`, `error_message?`, `package_type`, `trigger` |

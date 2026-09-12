@@ -76,7 +76,7 @@ Set on the user's People profile (keyed by Firebase UID). Use these to **segment
 Stalled (`onboarding_completed = true` AND `is_subscriber = false`).
 
 > **These are mirrored, in part, to OneSignal.** A coarse subset — `funnel_stage`,
-> `onboarding_completed`, `has_cat`, `paywall_seen`, `is_subscriber`, `last_active_at` — is
+> `paywall_seen`, `is_subscriber`, `is_trial`, `last_active_at`, `last_scan_at` (six, the Free-plan cap) — is
 > written as OneSignal **tags** at the same checkpoints, so drop-off audiences can be
 > pushed to. The two systems are written side by side in the same functions and must be
 > kept in step. Note the OneSignal copies are **strings**, not typed, and `funnel_stage` is
@@ -227,7 +227,7 @@ litter scans too; segment on the outcome event to separate them.
 | `Paywall CTA Tapped` | `package_id`, `package_type`, `price`, `currency`, `trigger`, `is_trial`, `trial_days`, `timestamp` | **NEW** — fires *before* the store sheet opens, so a sheet that never presents or never resolves is still counted. Same property set as `Subscription Completed` so the funnel segments identically |
 | `Paywall Restore Tapped` | `trigger`, `timestamp` | **NEW** — fires before `Purchases.restorePurchases()` |
 | `Plan Selected` | `package_id`, `package_type`, `trigger`, `timestamp` | Fires when the selected plan changes. The paywall still renders a single annual plan with no picker, so today this fires on **one** path only: accepting the second-chance sheet (`package_id = annual_offer`, `package_type = custom`) |
-| `Paywall Second Chance Shown` | `package_id` (`annual_offer`), `package_type` (`custom`), `price`, `intro_price`, `currency`, `trigger`, `timestamp` | The discounted-first-year sheet, offered **once per paywall session** after the first cancel of the annual store sheet. Never fires when the offering has no `annual_offer` package **or the user is ineligible for its introductory offer** (Apple: one per subscription group, ever — lapsed subscribers never see it) |
+| `Paywall Second Chance Shown` | `package_id` (`annual_offer`), `package_type` (`custom`), `price`, `intro_price`, `currency`, `source` (`cancel` / `auto`), `trigger`, `timestamp` | The discounted-first-year sheet, offered **once per paywall session** — `source = cancel` after the first cancel of the annual store sheet (onboarding gate), `source = auto` presented unprompted on the `returning_user` gate. Never fires when the offering has no `annual_offer` package **or the user is ineligible for its introductory offer** (Apple: one per subscription group, ever — lapsed subscribers never see it). Break down by `source`: the `auto` rows are the denominator for the OneSignal "dropped at paywall" push |
 | `Paywall Second Chance Tapped` | same | Leads to `Plan Selected`, `Paywall CTA Tapped` and then `Subscription Completed { package_id: annual_offer, is_trial: false, is_intro_offer: true, intro_price }` — or `Paywall Purchase Cancelled { package_type: custom }` |
 | `Paywall Second Chance Dismissed` | same | Swipe-down, tap-outside and the "keep the free trial" link all count here |
 | `Subscription Completed` | `package_id`, `package_type`, `price`, `currency`, `trigger`, `is_trial`, `trial_days`, `is_intro_offer`, `intro_price`, `timestamp` | `is_trial: true` means **no money moved today** — revenue reporting must exclude these. `is_intro_offer: true` means the user paid `intro_price` today, not `price` |

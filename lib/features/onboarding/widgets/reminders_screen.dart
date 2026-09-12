@@ -10,11 +10,11 @@ import 'package:yucat/services/notification_service.dart';
 
 /// Reminder-preferences screen.
 ///
-/// Tapping "Done" writes the three toggles as OneSignal tags
-/// (`reminder_food_change` / `reminder_better_fit` / `reminder_monthly`) and
-/// then triggers the OS push-permission prompt before advancing. Delivery is
-/// a OneSignal Journey keyed on those tags — the app schedules nothing locally.
-/// "Set up later" advances without writing or prompting.
+/// The three toggles are presentational only. They were briefly persisted as
+/// OneSignal tags (2026-09-12) and then dropped the same day: the Free plan
+/// allows 6 data tags and every slot went to the two Journeys in
+/// `docs/onesignal.md` §5. Tapping "Done" triggers the OS push-permission
+/// prompt before advancing; "Set up later" advances without prompting.
 class RemindersScreen extends StatefulWidget {
   final VoidCallback onNext;
 
@@ -43,20 +43,10 @@ List<_ReminderOption> _buildReminderOptions(AppLocalizations l10n) => [
 class _RemindersScreenState extends State<RemindersScreen> {
   final Set<int> _selected = {};
 
-  /// Persist the toggles, prompt for push permission, then advance regardless
-  /// of the user's choice so onboarding never blocks on the OS dialog.
-  ///
-  /// Tags are written *before* the prompt: they need the SDK initialised, not
-  /// permission granted, and a user who declines today can still be reached
-  /// with the right reminders if they enable notifications in Settings later.
+  /// Prompt for push permission, then advance regardless of the user's choice
+  /// so onboarding never blocks on the OS dialog.
   Future<void> _onDone() async {
-    final notifications = sl<NotificationService>();
-    await notifications.setReminderPreferences(
-      foodChange: _selected.contains(0),
-      betterFit: _selected.contains(1),
-      monthly: _selected.contains(2),
-    );
-    await notifications.requestPermission();
+    await sl<NotificationService>().requestPermission();
     widget.onNext();
   }
 

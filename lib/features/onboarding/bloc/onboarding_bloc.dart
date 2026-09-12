@@ -287,13 +287,9 @@ class OnBoardingBloc extends Bloc<OnBoardingEvent, OnBoardingState> {
       },
     );
     _userAnalyticsService.markOnboardingComplete();
-    // Tagged here, not where the `onboarding_completed` pref is written (that
-    // happens on cat creation, before the paywall). This means the tag does
-    // NOT imply the user got past the paywall — `is_subscriber` is what says
-    // that.
-    _notificationService.setTags({
-      NotificationTags.onboardingCompleted: NotificationTags.boolValue(true),
-    });
+    // No OneSignal tag here any more: the Free plan's 6-tag budget went to the
+    // Journey tags, and `funnel_stage` reaching `paywall` already implies
+    // onboarding was completed.
 
     // Hard gate: the paywall is the final beat of onboarding and cannot be
     // dismissed. push() only returns once the user has subscribed (or restored

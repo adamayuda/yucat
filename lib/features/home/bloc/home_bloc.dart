@@ -96,11 +96,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           primaryAgeGroup: cats.isNotEmpty ? cats.first.ageGroup : null,
           primaryBreed: cats.isNotEmpty ? cats.first.breed : null,
         ));
-        // Same correction for the OneSignal tag — cat_create only ever sets
-        // has_cat = true, so this is where a delete gets reflected.
-        unawaited(_notificationService.setTags({
-          NotificationTags.hasCat: NotificationTags.boolValue(cats.isNotEmpty),
-        }));
       } catch (_) {
         // Header falls back to generic copy on read failure.
       }

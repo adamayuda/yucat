@@ -29,32 +29,31 @@ enum FunnelStage {
 
 /// OneSignal tag keys. Values are always strings — OneSignal has no typed tags,
 /// and dashboard Segments compare them as strings.
+///
+/// ⚠️ **Exactly six keys, on purpose.** The OneSignal Free plan allows 6 data
+/// tags and does not document what happens to a seventh, so the app never
+/// writes one. Every slot is spent on the two Journeys (`docs/onesignal.md`
+/// §5). Adding a tag means dropping one — or upgrading to Growth (10 tags).
+/// Dropped on 2026-09-12 to fit: `onboarding_completed` (implied by
+/// `funnel_stage` reaching `paywall`), `has_cat`, `trial_started_at`
+/// (Mixpanel keeps it) and the three `reminder_*` toggles.
 class NotificationTags {
   NotificationTags._();
 
   static const funnelStage = 'funnel_stage';
-  static const onboardingCompleted = 'onboarding_completed';
-  static const hasCat = 'has_cat';
   static const paywallSeen = 'paywall_seen';
   static const isSubscriber = 'is_subscriber';
   static const lastActiveAt = 'last_active_at';
 
   /// Trial state, refreshed with [isSubscriber] on every splash gate so it
-  /// flips to `"false"` by itself when the trial converts or lapses — the exit
-  /// condition for a trial Journey.
+  /// flips to `"false"` by itself when the trial converts or lapses — the
+  /// entry *and* exit condition of the trialist Journey.
   static const isTrial = 'is_trial';
-  static const trialStartedAt = 'trial_started_at';
 
-  /// Date of the last successful scan (food or litter). The trial Journey
-  /// branches on this: a day-2 nudge to someone who scanned today is noise.
+  /// Date of the last successful scan (food or litter). The trialist Journey
+  /// skips its nudge when this is today: a "scan something" push to someone
+  /// who just scanned is noise.
   static const lastScanAt = 'last_scan_at';
-
-  /// The three toggles on the onboarding reminders screen. They were purely
-  /// presentational before; persisting them as tags is what lets a Journey
-  /// honour what the user actually asked for.
-  static const reminderFoodChange = 'reminder_food_change';
-  static const reminderBetterFit = 'reminder_better_fit';
-  static const reminderMonthly = 'reminder_monthly';
 
   /// OneSignal has no booleans; these are the only two values a bool tag takes.
   static String boolValue(bool v) => v ? 'true' : 'false';
@@ -200,13 +199,6 @@ class NotificationService {
           NotificationTags.isTrial: NotificationTags.boolValue(isTrial),
       });
 
-  /// Called once, on the purchase that opened a free trial. Entry point for
-  /// the trial Journey (`is_trial = true`, then +24 h / +48 h pushes).
-  Future<void> markTrialStarted() => setTags({
-        NotificationTags.isTrial: NotificationTags.boolValue(true),
-        NotificationTags.trialStartedAt: NotificationTags.dateValue(DateTime.now()),
-      });
-
   /// Stamp today's date, for "dormant for N days" segments.
   Future<void> setLastActive() => setTags({
         NotificationTags.lastActiveAt: NotificationTags.dateValue(DateTime.now()),
@@ -217,18 +209,6 @@ class NotificationService {
         NotificationTags.lastScanAt: NotificationTags.dateValue(DateTime.now()),
       });
 
-  /// Persist the reminders-screen toggles. All three are written every time,
-  /// including `"false"`, so a Segment can distinguish "opted out of monthly"
-  /// from "never saw the screen".
-  Future<void> setReminderPreferences({
-    required bool foodChange,
-    required bool betterFit,
-    required bool monthly,
-  }) => setTags({
-        NotificationTags.reminderFoodChange: NotificationTags.boolValue(foodChange),
-        NotificationTags.reminderBetterFit: NotificationTags.boolValue(betterFit),
-        NotificationTags.reminderMonthly: NotificationTags.boolValue(monthly),
-      });
 
   /// Detach the external id. Kept for completeness; unused while auth is
   /// anonymous-only.

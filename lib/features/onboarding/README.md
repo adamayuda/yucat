@@ -176,12 +176,10 @@ never depend on the prompt.
   → `OneSignal.Notifications.requestPermission(true)`, which is **iOS-only**
   (`if (!Platform.isIOS) return false`). Emits `Notifications Opted In` / `Opted Out` with
   `source: 'onboarding_reminders'`.
-- **The reminder-type selections are persisted as OneSignal tags only.** "Done" writes
-  `reminder_food_change` / `reminder_better_fit` / `reminder_monthly` (all three, as
-  `"true"`/`"false"`) before the permission prompt. Nothing in the app reads them back and
-  no reminder is ever scheduled locally — delivery is a OneSignal Journey keyed on those tags
-  (`docs/onesignal.md` §5), which has to exist in the dashboard for the toggles to mean
-  anything.
+- ⚠️ **The reminder-type selections are never persisted.** They're a local
+  `Set<int> _selected` used only to style the rows. They were tags for one day
+  (2026-09-12) and were dropped to fit the OneSignal Free plan's 6-tag budget; no reminder
+  is ever scheduled — the app has no local-notification scheduling at all.
 - ⚠️ **This screen's position bounds all push reach.** Permission is asked at phase 10 of
   12, so anyone abandoning in phases 0–9 has no push subscription and cannot be messaged —
   including by the OneSignal drop-off segments. `_trackPhaseView` still writes a

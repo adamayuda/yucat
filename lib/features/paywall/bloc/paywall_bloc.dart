@@ -36,8 +36,13 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   /// `Paywall Dismissed` — two very different abandonment stories.
   bool _ctaTappedThisSession = false;
   /// The second-chance sheet is offered once per paywall session. A user who
-  /// backs out of the monthly sheet too has answered; asking again is nagging.
+  /// backs out of the offer's own sheet too has answered; asking again is nagging.
   bool _secondChanceShownThisSession = false;
+  /// How the sheet was opened this session — `cancel` (after backing out of
+  /// the store sheet) or `auto` (presented on its own to a returning user).
+  /// Stamped on all three second-chance events so the two paths can be
+  /// compared; a push that says "€19.99" lands on the `auto` path.
+  String _secondChanceSource = 'cancel';
   String _trigger = 'manual';
 
   PaywallBloc({
@@ -148,7 +153,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       NotificationTags.paywallSeen: NotificationTags.boolValue(true),
     });
 
-    emit(PaywallLoadedState(
+    final loaded = PaywallLoadedState(
       currentOffering: current,
       packages: packages,
       selectedPackage: selected,
@@ -156,6 +161,36 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       secondChanceIntro: secondChanceIntro,
       eligibleTrial: eligibleTrial,
       eligibleIntro: eligibleIntro,
+    );
+    emit(loaded);
+
+    // Returning non-subscribers already declined the full-price plan at least
+    // once, and the "dropped at paywall" push promises them the discount — so
+    // lead with the offer instead of making them cancel Apple's sheet to find
+    // it. Still once per session, still eligibility-gated. The short delay
+    // lets the paywall slide in first so the sheet visibly sits on top of it.
+    if (_trigger == PaywallTrigger.returningUser && secondChance != null) {
+      await Future<void>.delayed(const Duration(milliseconds: 600));
+      if (state != loaded) return;
+      _presentSecondChance(loaded, emit, source: 'auto');
+    }
+  }
+
+  /// Open the sheet once per paywall session and record why.
+  void _presentSecondChance(
+    PaywallLoadedState current,
+    Emitter<PaywallState> emit, {
+    required String source,
+  }) {
+    _secondChanceShownThisSession = true;
+    _secondChanceSource = source;
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.paywallSecondChanceShown,
+      properties: _secondChanceProps(current),
+    );
+    emit(current.copyWith(
+      isPurchasing: false,
+      secondChanceTick: current.secondChanceTick + 1,
     ));
   }
 
@@ -267,6 +302,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       'price': pkg.storeProduct.price,
       'intro_price': s.secondChanceIntro?.price,
       'currency': pkg.storeProduct.currencyCode,
+      'source': _secondChanceSource,
       'trigger': _trigger,
       'timestamp': DateTime.now().toIso8601String(),
     };
@@ -346,12 +382,9 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
           currency: current.selectedPackage.storeProduct.currencyCode,
         );
         _notificationService.setFunnelStage(FunnelStage.subscribed);
+        // `is_trial = true` is the trial Journey's entry; the splash gate
+        // flips it back off once the trial converts or lapses.
         _notificationService.setSubscriber(true, isTrial: isTrial);
-        if (isTrial) {
-          // Opens the trial Journey (+24 h / +48 h pushes). The splash gate
-          // flips `is_trial` back off once the trial converts or lapses.
-          _notificationService.markTrialStarted();
-        }
         emit(const PaywallSuccessState(purchasedSubscription: true));
       } else {
         _logPurchaseFailed(reason: 'not_active', packageType: current.selectedPackage.packageType.name);
@@ -383,15 +416,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
             !_secondChanceShownThisSession &&
             current.selectedPackage.identifier != offer.identifier;
         if (offerSecondChance) {
-          _secondChanceShownThisSession = true;
-          _logEventUsecase.call(
-            eventName: AnalyticsEvents.paywallSecondChanceShown,
-            properties: _secondChanceProps(current),
-          );
-          emit(current.copyWith(
-            isPurchasing: false,
-            secondChanceTick: current.secondChanceTick + 1,
-          ));
+          _presentSecondChance(current, emit, source: 'cancel');
           return;
         }
         emit(current.copyWith(isPurchasing: false));

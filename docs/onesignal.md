@@ -47,10 +47,8 @@ The app never touches the OneSignal SDK directly. Everything goes through
 | `setTags(map)` | `OneSignal.User.addTags`. Fire-and-forget | The funnel checkpoints in §5 |
 | `setFunnelStage(stage)` | Monotonic `funnel_stage` write | ditto |
 | `setSubscriber(bool, {isTrial})` | `is_subscriber`, and `is_trial` when the entitlement was read | Paywall success, splash gate |
-| `markTrialStarted()` | `is_trial = true`, `trial_started_at` | Paywall success when the purchase opened a trial |
 | `setLastActive()` | `last_active_at`, date-only | `splash_bloc.dart` every launch |
 | `setLastScan()` | `last_scan_at`, date-only | `home_bloc.dart` on every successful scan, food or litter |
-| `setReminderPreferences(...)` | `reminder_food_change` / `reminder_better_fit` / `reminder_monthly` | `reminders_screen.dart` "Done" |
 
 All of them no-op off iOS or before `initialize()`, and swallow errors with a
 `debugPrint` — **tagging must never be able to break a user flow.**
@@ -112,23 +110,38 @@ These tags exist to make **Segments** possible, not to duplicate the event funne
 **OneSignal has no typed tags.** Every value is a string, and dashboard Segments compare
 them as strings — hence `NotificationTags.boolValue()` rather than raw bools.
 
+> ⚠️ **Six tags, exactly.** The **Free** plan allows 6 data tags (and, from 2026-10-01, caps
+> mobile push at **1,000 MAU** — the app is already at ~1,060, so push stops then unless the
+> org moves to Growth: $19/mo + $0.012/MAU, 10 tags, 5 Journeys). OneSignal does not document
+> what happens to a seventh tag, so the app never writes one. Dropped on 2026-09-12 to fit:
+> `onboarding_completed` (implied by `funnel_stage` reaching `paywall`), `has_cat`,
+> `trial_started_at` (Mixpanel keeps it) and the three `reminder_*` toggles (the reminders
+> screen is presentational again). Historical users may still carry the old keys.
+
 | Tag | Values | Written when | Where |
 |---|---|---|---|
 | `funnel_stage` | `onboarding` → `cat_create` → `paywall` → `subscribed` | Furthest stage reached | see below |
-| `onboarding_completed` | `"true"` | `_onOnBoardingFinalizedEvent` | `onboarding_bloc.dart` |
-| `has_cat` | `"true"` / `"false"` | Cat created; re-synced on every Home load | `cat_create_bloc.dart`, `home_bloc.dart` |
 | `paywall_seen` | `"true"` | `Paywall Shown` | `paywall_bloc.dart` |
 | `is_subscriber` | `"true"` / `"false"` | Purchase/restore success **and every splash gate** | `paywall_bloc.dart`, `splash_bloc.dart` |
 | `is_trial` | `"true"` / `"false"` | Purchase success, **and every splash gate** from the entitlement's period type — so it turns itself off when the trial converts or lapses | `paywall_bloc.dart`, `splash_bloc.dart` |
-| `trial_started_at` | `YYYY-MM-DD` | Once, on the purchase that opened a trial | `paywall_bloc.dart` |
 | `last_active_at` | `YYYY-MM-DD` | Every launch | `splash_bloc.dart` |
 | `last_scan_at` | `YYYY-MM-DD` | Every successful scan, food or litter | `home_bloc.dart` |
-| `reminder_food_change` / `reminder_better_fit` / `reminder_monthly` | `"true"` / `"false"` | Reminders screen "Done" — all three written every time, so "opted out" is distinguishable from "never saw the screen" | `reminders_screen.dart` |
 
-**The trial Journey** is the reason `is_trial`, `trial_started_at` and `last_scan_at` exist:
-enter on `is_trial = "true"`, push at +24 h and +48 h (skip the +24 h nudge when
-`last_scan_at` is today), exit when `is_trial` ≠ `"true"`. The Journey itself is built in the
-OneSignal dashboard, not in code — nothing in the app schedules a notification.
+### The two Journeys these tags exist for
+
+Both were built in the OneSignal dashboard on 2026-09-12 (Free plan: 3 Journeys allowed) —
+nothing in the app schedules a notification. There is deliberately **no** "your trial ends
+tomorrow" push, and no such promise on the paywall.
+
+| Journey | Status | Enter (segment) | Steps | Exit |
+|---|---|---|---|---|
+| **Trial nudge** | **Live** | `Trialists`: `is_trial = "true"` | Wait 1 day → push template `Trial – scan more` ("Now try the treats and litter", EN + FR) | No longer matches the segment — the app refreshes `is_trial` from the entitlement on every launch, so conversion, lapse and cancellation all end it. Re-entry: once |
+| **Dropped at paywall** | **Draft — do not set live before the build with the returning-user offer ships**, then add an *App Version ≥ that build* filter to the segment | `Dropped at paywall`: `funnel_stage = "paywall"` AND `is_subscriber ≠ "true"` (171 push-reachable on creation; `paywall_seen` is redundant with the stage and kept only for the older Segments) | Wait 1 hour → push `Paywall drop – value` ("Your cat's profile is ready") → wait 1 day → push `Paywall drop – discount` ("Your first year for €19.99"), EN + FR, no countdowns | No longer matches the segment (`is_subscriber` flips to `"true"`). Re-entry: once. "Future additions only" is **off** so past droppers enter too |
+
+The discount push is honest because the `returning_user` paywall gate presents the
+second-chance sheet on its own (`source = auto`), so a tap on the push lands on the offer
+without having to cancel a store sheet first — see the paywall README §1. The app has no
+notification click handler, so a push simply opens the app; the splash gate does the rest.
 
 ### Four rules that keep the segments honest
 
@@ -143,11 +156,11 @@ OneSignal dashboard, not in code — nothing in the app schedules a notification
    subscriber would otherwise keep `is_subscriber = "true"` for ever and never enter a
    win-back segment.
 
-3. **`onboarding_completed` does not mean the user got past the paywall.** It's tagged at
-   `_onOnBoardingFinalizedEvent`, which runs *before* the paywall is pushed. (Confusingly,
-   the `onboarding_completed` **SharedPreferences key** is written even earlier — at
-   `onboarding_bloc.dart:248`, when the cat is created. Same name, two different moments,
-   neither of which implies conversion.) `is_subscriber` is what says they converted.
+3. **`funnel_stage = paywall` does not mean the user got past the paywall.** It's written
+   on `Paywall Shown`, before any purchase. (The old `onboarding_completed` tag said the
+   same thing one step earlier and was dropped for the tag budget; the SharedPreferences
+   key of that name still exists and is written even earlier, when the cat is created.)
+   `is_subscriber` is what says they converted.
 
 4. **`funnel_stage = cat_create` is only written in create mode, not edit mode.**
    `_trackStepView` fires for both; the tag is gated on `_originalCat == null`. Otherwise
@@ -158,7 +171,7 @@ OneSignal dashboard, not in code — nothing in the app schedules a notification
 That event (`cat_create_bloc.dart:122`) sounds like the right signal and isn't — it fires
 only on **backward** movement within the wizard, and a user who kills the app mid-wizard
 fires nothing. Abandonment is captured structurally instead: `funnel_stage = cat_create`
-written on step view, never followed by `has_cat = true`.
+written on step view, never advanced to `paywall`.
 
 ---
 
@@ -169,8 +182,8 @@ Build these under **Audience → Segments**. All comparisons are string comparis
 | Segment | Filter |
 |---|---|
 | **Dropped at paywall** | `paywall_seen` = `true` AND `is_subscriber` ≠ `true` |
-| **Dropped in cat wizard** | `funnel_stage` = `cat_create` AND `has_cat` ≠ `true` |
-| **Dropped in onboarding** | `funnel_stage` = `onboarding` AND `onboarding_completed` ≠ `true` — ⚠️ mostly unreachable, see §3 |
+| **Dropped in cat wizard** | `funnel_stage` = `cat_create` (never advanced to `paywall`) |
+| **Dropped in onboarding** | `funnel_stage` = `onboarding` — ⚠️ mostly unreachable, see §3 |
 | **Churned subscriber** | `funnel_stage` = `subscribed` AND `is_subscriber` ≠ `true` |
 | **Dormant** | any of the above AND `last_active_at` before *N* days ago |
 
@@ -187,16 +200,17 @@ There is no `test/` directory in this repo, so this is a device exercise.
 simulator run shows zero tags and proves nothing. `kDebugMode` sets `OSLogLevel.verbose`
 (`notification_service.dart:40`), so SDK calls print to console.
 
-Delete the app first — that clears both `onboarding_completed` and the funnel-stage
-high-water mark. Then walk the funnel, checking **Audience → Users** and finding yourself
-by external id (the Firebase UID):
+Use Profile → **Reset test user** first (deleting the app is not enough — the Firebase
+session survives in the Keychain, and with it the OneSignal external id). Then walk the
+funnel, checking **Audience → Users** and finding yourself by external id (the Firebase
+UID):
 
 | Step | Expected |
 |---|---|
 | Mid-onboarding | `funnel_stage = onboarding`, `last_active_at` set |
 | Grant at `reminders` | device becomes push-subscribed |
-| Enter cat wizard, quit | `funnel_stage = cat_create`, no `has_cat` |
-| Finish the cat | `has_cat = true`, `onboarding_completed = true` |
+| Enter cat wizard, quit | `funnel_stage = cat_create` |
+| Finish the cat | nothing new — the next tag lands at the paywall |
 | Reach paywall, kill app | `funnel_stage = paywall`, `paywall_seen = true` |
 | Subscribe (sandbox) | `funnel_stage = subscribed`, `is_subscriber = true` |
 
@@ -218,7 +232,8 @@ Finally, build each segment in §6 and confirm the test user lands in exactly on
 | **No `OneSignalNotificationServiceExtension` target** | `ios/Runner.xcodeproj` has only `Runner` and `RunnerTests`, and the `Podfile` has no extension block. Consequence: **no confirmed-delivery stats, no rich media (images) in notifications, no `mutable-content` badge processing.** Doesn't block tags or segments, but caps what campaigns can do |
 | **Dashboard/APNs config unverified** | `aps-environment` = `production` (`Runner.entitlements`) and `UIBackgroundModes` = `[remote-notification]` (`Info.plist:93-96`) are set. Whether the OneSignal dashboard app exists and the APNs `.p8` is uploaded **cannot be checked from the repo** — if it isn't, permission never resolves and no tag ever arrives |
 | **Permission asked very late** | Phase 10 of 12 (§3). Moving it earlier would make most of the funnel reachable, but it changes onboarding conversion — a product decision wanting an A/B test, not a code edit |
-| **No local notification scheduling** | The reminders-screen toggles are persisted as tags (§5) but **delivery depends entirely on a OneSignal Journey existing in the dashboard**. Until one is built, a user who picked "Monthly check-in" receives nothing — exactly as before, just now measurable |
+| **Reminders screen is presentational** | Its three toggles are not stored anywhere (they cost 3 of the Free plan's 6 tags); "Monthly check-in" schedules nothing. Revisit on Growth |
+| **Free-plan MAU cap from 2026-10-01** | Mobile push stops above 1,000 MAU on Free; the app is already over. Decide on Growth before then or accept losing push |
 | **No Android push** | Nothing wired at all |
 | **No click / foreground listeners** | `Notifications.addClickListener` and `addForegroundWillDisplayListener` are never registered, so a push cannot deep-link into a screen and there's no in-app handling of a notification arriving while the app is open |
 | **No In-App Messages** | The SDK subspec is present but unused |

@@ -345,9 +345,6 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
-        _notificationService.setTags({
-          NotificationTags.hasCat: NotificationTags.boolValue(true),
-        });
       }
 
       // Return a structured profile summary so callers (e.g. onboarding) can
