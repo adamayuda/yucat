@@ -46,6 +46,14 @@ class PaywallSecondChanceDismissedEvent extends PaywallEvent {
   const PaywallSecondChanceDismissedEvent();
 }
 
+/// The user tapped the close chip that fades in on the hard-gate paywall
+/// after a few seconds. The gate can't be closed, so the chip opens the
+/// second-chance offer instead (`source: close`). User-initiated, so it is
+/// not limited to once per session the way the other two paths are.
+class PaywallSecondChanceRequestedEvent extends PaywallEvent {
+  const PaywallSecondChanceRequestedEvent();
+}
+
 class PaywallRestoreEvent extends PaywallEvent {
   const PaywallRestoreEvent();
 }

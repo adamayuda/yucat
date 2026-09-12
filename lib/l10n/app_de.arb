@@ -271,7 +271,7 @@
   "paywallOfferHeadline": "Zeitlich begrenzt: {discount}",
   "paywallOfferDiscount": "-{percent} %",
   "paywallOfferExpiresIn": "Angebot endet in: {time}",
-  "paywallOfferPerMonth": "pro Monat",
+  "paywallOfferFirstYear": "für dein erstes Jahr",
   "paywallOfferCta": "Jetzt sichern",
   "paywallIntroDisclosure": "{introPrice} im ersten Jahr, danach {price}/{period}. Jederzeit kündbar.",
   "paywallAutoRenewDisclosureIntro": "Dein erstes Jahr Yucat Plus kostet {introPrice}, danach verlängert es sich automatisch zu {price}/{period}, sofern du nicht mindestens 24 Stunden vor Ablauf des laufenden Zeitraums kündigst. Verwalte oder kündige jederzeit in deinen {store}-Kontoeinstellungen.",

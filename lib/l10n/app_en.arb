@@ -512,7 +512,10 @@
       }
     }
   },
-  "paywallOfferPerMonth": "per month",
+  "paywallOfferFirstYear": "for your first year",
+  "@paywallOfferFirstYear": {
+    "description": "Caption under the big discounted price on the offer sheet; the price shown is the intro price for the first year, the full yearly price sits struck through above it."
+  },
   "paywallOfferCta": "Grab it now",
   "paywallIntroDisclosure": "{introPrice} for the first year, then {price}/{period}. Cancel anytime.",
   "@paywallIntroDisclosure": {

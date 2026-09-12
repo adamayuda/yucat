@@ -50,11 +50,12 @@ class PaywallLoadedState extends PaywallState {
   /// own intro price without re-reading the product.
   final IntroOfferInfo? secondChanceIntro;
 
-  /// When the offer stops being available to this user — set (and persisted)
-  /// the first time the sheet is presented, so the countdown it shows is a
-  /// real deadline rather than a timer that resets on every open. Null until
-  /// the first presentation. Once it has passed, [secondChancePackage] resolves
-  /// to null at load and the sheet never appears again for this device.
+  /// When the offer stops being available in *this paywall session* — set
+  /// the first time the sheet is presented (`PaywallBloc.secondChanceWindow`
+  /// later), in memory only. The countdown counts to it; at zero the sheet
+  /// closes and [withoutSecondChance] drops the offer and the close chip for
+  /// the rest of the session. The next session starts a fresh window, which
+  /// is what lets the "dropped at paywall" push a day later still be honest.
   final DateTime? secondChanceDeadline;
 
   /// The free trial this user will actually receive on [selectedPackage], or
@@ -122,6 +123,21 @@ class PaywallLoadedState extends PaywallState {
       transientError: transientError,
       errorTick: errorTick ?? this.errorTick,
       secondChanceTick: secondChanceTick ?? this.secondChanceTick,
+    );
+  }
+
+  /// The offer's window ran out this session: drop it, which also removes
+  /// the delayed close chip (it only renders while a package is present).
+  PaywallLoadedState withoutSecondChance() {
+    return PaywallLoadedState(
+      currentOffering: currentOffering,
+      packages: packages,
+      selectedPackage: selectedPackage,
+      eligibleTrial: eligibleTrial,
+      eligibleIntro: eligibleIntro,
+      isPurchasing: isPurchasing,
+      errorTick: errorTick,
+      secondChanceTick: secondChanceTick,
     );
   }
 

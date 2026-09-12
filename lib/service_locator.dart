@@ -658,7 +658,6 @@ Future<void> _registerBlocs() async {
       logEventUsecase: sl<LogEventUsecase>(),
       userAnalyticsService: sl<UserAnalyticsService>(),
       notificationService: sl<NotificationService>(),
-      prefs: sl<SharedPreferences>(),
     ),
   );
   sl.registerBloc<RecipesBloc>(

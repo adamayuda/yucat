@@ -1677,11 +1677,11 @@ abstract class AppLocalizations {
   /// **'Offer expires in: {time}'**
   String paywallOfferExpiresIn(String time);
 
-  /// No description provided for @paywallOfferPerMonth.
+  /// Caption under the big discounted price on the offer sheet; the price shown is the intro price for the first year, the full yearly price sits struck through above it.
   ///
   /// In en, this message translates to:
-  /// **'per month'**
-  String get paywallOfferPerMonth;
+  /// **'for your first year'**
+  String get paywallOfferFirstYear;
 
   /// No description provided for @paywallOfferCta.
   ///

@@ -271,7 +271,7 @@
   "paywallOfferHeadline": "Korlátozott ideig: {discount}",
   "paywallOfferDiscount": "-{percent} %",
   "paywallOfferExpiresIn": "Az ajánlat lejár: {time}",
-  "paywallOfferPerMonth": "havonta",
+  "paywallOfferFirstYear": "az első évedre",
   "paywallOfferCta": "Csapj le rá",
   "paywallIntroDisclosure": "{introPrice} az első évben, utána {price}/{period}. Bármikor lemondható.",
   "paywallAutoRenewDisclosureIntro": "A Yucat Plus első éve {introPrice}, utána automatikusan megújul {price}/{period} áron, hacsak nem mondod le legalább 24 órával az aktuális időszak vége előtt. Bármikor kezelheted vagy lemondhatod a(z) {store} fiókbeállításaiban.",

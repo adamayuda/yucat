@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:yucat/config/build_env.dart';
@@ -20,6 +21,11 @@ import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 
 class PaywallLoadedWidget extends StatelessWidget {
+  /// How long the hard-gate paywall stays chip-less before the close chip
+  /// fades in. Long enough that the value props get read first, short enough
+  /// that someone looking for the exit finds one — and the exit is the offer.
+  static const offerChipDelay = Duration(seconds: 7);
+
   final PaywallLoadedState state;
   final PaywallBloc bloc;
   final bool dismissible;
@@ -52,6 +58,13 @@ class PaywallLoadedWidget extends StatelessWidget {
               _Hero(
                 onClose: dismissible
                     ? () => bloc.add(const PaywallDismissEvent())
+                    : null,
+                // On the hard gate the chip can't close anything, so it opens
+                // the discounted offer — and only exists when this user is
+                // eligible for it; a chip that did nothing would be worse
+                // than none.
+                onOffer: !dismissible && state.secondChancePackage != null
+                    ? () => bloc.add(const PaywallSecondChanceRequestedEvent())
                     : null,
               ),
               const SizedBox(height: DSDimens.sizeL),
@@ -183,10 +196,14 @@ class PaywallLoadedWidget extends StatelessWidget {
 }
 
 class _Hero extends StatelessWidget {
-  const _Hero({this.onClose});
+  const _Hero({this.onClose, this.onOffer});
 
-  /// When null the close chip is hidden (hard-gate paywall).
+  /// When null the close chip is hidden (hard-gate paywall)…
   final VoidCallback? onClose;
+
+  /// …unless this is set: then a chip fades in after
+  /// [PaywallLoadedWidget.offerChipDelay] and opens the second-chance offer.
+  final VoidCallback? onOffer;
 
   @override
   Widget build(BuildContext context) {
@@ -286,6 +303,15 @@ class _Hero extends StatelessWidget {
                       top: topInset + DSDimens.sizeS,
                       left: DSDimens.sizeL,
                       child: _CloseChip(onTap: onClose!),
+                    )
+                  else if (onOffer != null)
+                    Positioned(
+                      top: topInset + DSDimens.sizeS,
+                      left: DSDimens.sizeL,
+                      child: _DelayedChip(
+                        delay: PaywallLoadedWidget.offerChipDelay,
+                        child: _CloseChip(onTap: onOffer!),
+                      ),
                     ),
                 ],
               ),
@@ -373,6 +399,51 @@ class _HeroStar extends StatelessWidget {
             BlendMode.srcIn,
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Keeps [child] invisible and untappable for [delay], then fades it in.
+/// State survives parent rebuilds (same widget type in the same slot), so the
+/// sheet opening and closing over the paywall doesn't restart the clock.
+class _DelayedChip extends StatefulWidget {
+  final Duration delay;
+  final Widget child;
+
+  const _DelayedChip({required this.delay, required this.child});
+
+  @override
+  State<_DelayedChip> createState() => _DelayedChipState();
+}
+
+class _DelayedChipState extends State<_DelayedChip> {
+  Timer? _timer;
+  bool _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(widget.delay, () {
+      if (mounted) setState(() => _visible = true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: !_visible,
+      child: AnimatedOpacity(
+        opacity: _visible ? 1 : 0,
+        duration: DSMotion.durSlow,
+        curve: DSMotion.curveStandard,
+        child: widget.child,
       ),
     );
   }

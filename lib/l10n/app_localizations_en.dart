@@ -866,7 +866,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get paywallOfferPerMonth => 'per month';
+  String get paywallOfferFirstYear => 'for your first year';
 
   @override
   String get paywallOfferCta => 'Grab it now';

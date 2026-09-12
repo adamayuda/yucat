@@ -873,7 +873,7 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
-  String get paywallOfferPerMonth => 'havonta';
+  String get paywallOfferFirstYear => 'az első évedre';
 
   @override
   String get paywallOfferCta => 'Csapj le rá';

@@ -879,7 +879,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get paywallOfferPerMonth => 'al mes';
+  String get paywallOfferFirstYear => 'por tu primer año';
 
   @override
   String get paywallOfferCta => 'Aprovéchala ahora';

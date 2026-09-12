@@ -3,7 +3,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:intl/intl.dart' show NumberFormat;
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/paywall/bloc/paywall_bloc.dart';
@@ -20,15 +19,15 @@ import 'package:yucat/presentation/components/ds_haptics.dart';
 /// own for returning users (see `PaywallBloc`).
 ///
 /// Layout: headline with the discount percentage in green, a dark ticket-style
-/// card the mascot peeks over, a countdown pill, the full monthly-equivalent
-/// price struck through above the discounted one, a green CTA, and the legal
-/// line under the card.
+/// card the mascot peeks over, a countdown pill, the full yearly price struck
+/// through above the discounted first year, a green CTA, and the legal line
+/// under the card.
 ///
-/// ⚠️ **The countdown is real.** [deadline] is set the first time the sheet is
-/// presented and persisted by the bloc; the offer is withheld once it passes.
-/// A timer that reset on every open would be fake urgency — App Review rejects
-/// it, and a brand that sells trust can't afford it. When the clock reaches
-/// zero while the sheet is open, it closes itself.
+/// ⚠️ **The countdown is honest within the session.** [deadline] is set the
+/// first time the sheet is presented in a paywall session
+/// (`PaywallBloc.secondChanceWindow`) and reused by later presentations in
+/// that session; at zero the sheet closes itself and the bloc retires the
+/// offer for the session. It is *not* a timer that restarts on every open.
 ///
 /// Resolves to nothing; the outcome is reported to [bloc] as
 /// [PaywallSecondChanceAcceptedEvent] or [PaywallSecondChanceDismissedEvent],
@@ -112,14 +111,6 @@ class _SecondChanceSheetState extends State<_SecondChanceSheet> {
     final discount = _discountPercent(product.price, widget.intro.price);
     final discountLabel = l10n.paywallOfferDiscount(discount);
     final headline = l10n.paywallOfferHeadline(discountLabel);
-    // Per-month equivalents, formatted by the store's currency in the user's
-    // locale — never a hand-built string, separators differ per locale.
-    final money = NumberFormat.simpleCurrency(
-      locale: Localizations.localeOf(context).toString(),
-      name: product.currencyCode,
-    );
-    final fullMonthly = money.format(product.price / 12);
-    final introMonthly = money.format(widget.intro.price / 12);
 
     return Container(
       height: double.infinity,
@@ -144,9 +135,10 @@ class _SecondChanceSheetState extends State<_SecondChanceSheet> {
                 const SizedBox(height: DSDimens.size3xl),
                 _TicketCard(
                   countdown: l10n.paywallOfferExpiresIn(_format(_left)),
-                  fullMonthly: fullMonthly,
-                  introMonthly: introMonthly,
-                  perMonth: l10n.paywallOfferPerMonth,
+                  // The store's own strings — never reformatted.
+                  fullPrice: product.priceString,
+                  introPrice: widget.intro.priceString,
+                  priceLabel: l10n.paywallOfferFirstYear,
                   cta: l10n.paywallOfferCta,
                   onCta: () {
                     DSHaptics.tap();
@@ -188,12 +180,13 @@ class _SecondChanceSheetState extends State<_SecondChanceSheet> {
     return ((1 - intro / full) * 100).round();
   }
 
+  /// MM:SS for a window under an hour; HH:MM:SS if it ever grows past one.
   static String _format(Duration d) {
     String two(int n) => n.toString().padLeft(2, '0');
     final h = d.inHours;
     final m = d.inMinutes.remainder(60);
     final s = d.inSeconds.remainder(60);
-    return '${two(h)}:${two(m)}:${two(s)}';
+    return h > 0 ? '${two(h)}:${two(m)}:${two(s)}' : '${two(m)}:${two(s)}';
   }
 }
 
@@ -234,17 +227,17 @@ class _Headline extends StatelessWidget {
 /// tear line with side notches, and the green CTA.
 class _TicketCard extends StatelessWidget {
   final String countdown;
-  final String fullMonthly;
-  final String introMonthly;
-  final String perMonth;
+  final String fullPrice;
+  final String introPrice;
+  final String priceLabel;
   final String cta;
   final VoidCallback onCta;
 
   const _TicketCard({
     required this.countdown,
-    required this.fullMonthly,
-    required this.introMonthly,
-    required this.perMonth,
+    required this.fullPrice,
+    required this.introPrice,
+    required this.priceLabel,
     required this.cta,
     required this.onCta,
   });
@@ -252,6 +245,10 @@ class _TicketCard extends StatelessWidget {
   static const double _mascotHeight = 120;
   static const double _mascotOverlap = 64;
   static const double _notchRadius = 18;
+
+  /// Soft charcoal with a hint of the app's lavender, rather than
+  /// `inkPrimary` — near-black read as heavy next to the pastel paywall.
+  static const Color _cardColor = Color(0xFF2E2E3C);
 
   @override
   Widget build(BuildContext context) {
@@ -265,7 +262,7 @@ class _TicketCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(DSRadii.xl + 8),
             child: Container(
-              color: DSColors.inkPrimary,
+              color: _cardColor,
               child: CustomPaint(
                 painter: const _PercentPatternPainter(),
                 child: Padding(
@@ -280,7 +277,7 @@ class _TicketCard extends StatelessWidget {
                       _CountdownPill(text: countdown),
                       const SizedBox(height: DSDimens.sizeL),
                       Text(
-                        fullMonthly,
+                        fullPrice,
                         style: DSTextStyles.titleMd.copyWith(
                           color: Colors.white54,
                           decoration: TextDecoration.lineThrough,
@@ -288,7 +285,7 @@ class _TicketCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        introMonthly,
+                        introPrice,
                         style: DSTextStyles.displayHero.copyWith(
                           color: DSColors.inkInverse,
                           fontSize: 56,
@@ -296,7 +293,7 @@ class _TicketCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        perMonth,
+                        priceLabel,
                         style: DSTextStyles.bodyLg.copyWith(
                           color: Colors.white70,
                         ),
@@ -421,9 +418,14 @@ class _DashPainter extends CustomPainter {
 }
 
 /// Faint, tilted "%" glyphs scattered over the card — the wallpaper that makes
-/// the ticket read as a coupon rather than a plain dark box.
+/// the ticket read as a coupon rather than a plain dark box. The pattern fades
+/// out top-to-bottom so it wraps the mascot and countdown but is gone by the
+/// price, which stays on clean ink.
 class _PercentPatternPainter extends CustomPainter {
   const _PercentPatternPainter();
+
+  /// Fraction of the card height at which the glyphs have fully faded.
+  static const double _fadeEnd = 0.62;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -438,21 +440,39 @@ class _PercentPatternPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    final paint = Paint()..color = Colors.white.withValues(alpha: 0.05);
+    final bounds = Offset.zero & size;
+    final glyphPaint = Paint()..color = Colors.white.withValues(alpha: 0.06);
     const stepX = 96.0, stepY = 88.0;
+
+    // Paint every glyph into one layer, then multiply that layer by a vertical
+    // gradient (dstIn keeps the layer's pixels only where the gradient is
+    // opaque) so the whole pattern dissolves as one surface.
+    canvas.saveLayer(bounds, Paint());
     var row = 0;
-    for (var y = -20.0; y < size.height; y += stepY, row++) {
+    for (var y = -20.0; y < size.height * _fadeEnd; y += stepY, row++) {
       final offset = row.isOdd ? stepX / 2 : 0.0;
       for (var x = -30.0 + offset; x < size.width; x += stepX) {
         canvas.save();
         canvas.translate(x, y);
         canvas.rotate(-0.35);
-        canvas.saveLayer(null, paint);
+        canvas.saveLayer(null, glyphPaint);
         tp.paint(canvas, Offset.zero);
         canvas.restore();
         canvas.restore();
       }
     }
+    canvas.drawRect(
+      bounds,
+      Paint()
+        ..blendMode = BlendMode.dstIn
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: const [Colors.white, Colors.white, Colors.transparent],
+          stops: const [0, 0.18, _fadeEnd],
+        ).createShader(bounds),
+    );
+    canvas.restore();
   }
 
   @override

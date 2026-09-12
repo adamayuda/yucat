@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
@@ -26,32 +25,34 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   /// `$rc_annual` is taken by the standard yearly. Absent → no sheet.
   static const secondChancePackageId = 'annual_offer';
 
-  /// How long the discounted first year stays available once first shown.
-  /// The sheet counts down to this and the offer is withheld afterwards — a
-  /// countdown that reset on every open would be fake urgency, which App
-  /// Review rejects and which a trust-positioned brand can't afford. 48 h so
-  /// the "dropped at paywall" push at +1 day still lands inside the window.
-  static const secondChanceWindow = Duration(hours: 48);
-  static const _secondChanceDeadlineKey = 'second_chance_deadline_ms';
+  /// How long the discounted first year stays available within one paywall
+  /// session, counted from its first presentation. The sheet counts down to
+  /// it; at zero the offer and the close chip disappear for the rest of the
+  /// session. Per session, not per device: a returning user (or a tap on the
+  /// "dropped at paywall" push a day later) gets a fresh window, so the push
+  /// never promises something the app then refuses.
+  static const secondChanceWindow = Duration(minutes: 10);
 
   final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
   final LogEventUsecase _logEventUsecase;
   final UserAnalyticsService _userAnalyticsService;
   final NotificationService _notificationService;
-  final SharedPreferences _prefs;
 
   DateTime? _paywallShownTime;
   /// Whether the user reached the store sheet during this paywall session.
   /// Separates "looked and left" from "tried to buy and backed out" on
   /// `Paywall Dismissed` — two very different abandonment stories.
   bool _ctaTappedThisSession = false;
-  /// The second-chance sheet is offered once per paywall session. A user who
-  /// backs out of the offer's own sheet too has answered; asking again is nagging.
-  bool _secondChanceShownThisSession = false;
-  /// How the sheet was opened this session — `cancel` (after backing out of
-  /// the store sheet) or `auto` (presented on its own to a returning user).
-  /// Stamped on all three second-chance events so the two paths can be
-  /// compared; a push that says "€19.99" lands on the `auto` path.
+  /// Which paths have already presented the second-chance sheet this paywall
+  /// session — `auto` (unprompted, returning users), `cancel` (after backing
+  /// out of Apple's sheet) and `close` (the delayed close chip). Only `auto`
+  /// is limited to once; `cancel` and `close` answer a user action and fire
+  /// every time, until the session's 10-minute window runs out. Cleared on
+  /// every `_onInitial`.
+  final Set<String> _secondChanceShown = {};
+  /// How the sheet was last opened — stamped on all three second-chance
+  /// events so the two paths can be compared; a push that says "€19.99" lands
+  /// on the `auto` path.
   String _secondChanceSource = 'cancel';
   String _trigger = 'manual';
 
@@ -60,18 +61,17 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     required LogEventUsecase logEventUsecase,
     required UserAnalyticsService userAnalyticsService,
     required NotificationService notificationService,
-    required SharedPreferences prefs,
   })  : _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
         _logEventUsecase = logEventUsecase,
         _userAnalyticsService = userAnalyticsService,
         _notificationService = notificationService,
-        _prefs = prefs,
         super(const PaywallInitialState()) {
     on<PaywallInitialEvent>(_onInitial);
     on<PaywallPackageSelectedEvent>(_onPackageSelected);
     on<PaywallPurchaseEvent>(_onPurchase);
     on<PaywallSecondChanceAcceptedEvent>(_onSecondChanceAccepted);
     on<PaywallSecondChanceDismissedEvent>(_onSecondChanceDismissed);
+    on<PaywallSecondChanceRequestedEvent>(_onSecondChanceRequested);
     on<PaywallRestoreEvent>(_onRestore);
     on<PaywallDismissEvent>(_onDismiss);
   }
@@ -140,24 +140,13 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     ]);
     final eligibleTrial = resolved[0].trial;
     final eligibleIntro = resolved[0].intro;
-    var secondChanceIntro =
+    final secondChanceIntro =
         resolved.length > 1 ? resolved[1].intro : null;
-    var secondChance = secondChanceIntro != null ? secondChanceCandidate : null;
-
-    // A deadline persisted by an earlier presentation. Past it, the offer is
-    // gone for this device — the countdown the user saw meant what it said.
-    final deadlineMs = _prefs.getInt(_secondChanceDeadlineKey);
-    final deadline = deadlineMs == null
-        ? null
-        : DateTime.fromMillisecondsSinceEpoch(deadlineMs);
-    if (deadline != null && !DateTime.now().isBefore(deadline)) {
-      secondChance = null;
-      secondChanceIntro = null;
-    }
+    final secondChance = secondChanceIntro != null ? secondChanceCandidate : null;
 
     _paywallShownTime = DateTime.now();
     _ctaTappedThisSession = false;
-    _secondChanceShownThisSession = false;
+    _secondChanceShown.clear();
     _logEventUsecase.call(
       eventName: AnalyticsEvents.paywallShown,
       properties: {
@@ -182,7 +171,6 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       selectedPackage: selected,
       secondChancePackage: secondChance,
       secondChanceIntro: secondChanceIntro,
-      secondChanceDeadline: secondChance != null ? deadline : null,
       eligibleTrial: eligibleTrial,
       eligibleIntro: eligibleIntro,
     );
@@ -206,14 +194,17 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     Emitter<PaywallState> emit, {
     required String source,
   }) {
-    _secondChanceShownThisSession = true;
-    _secondChanceSource = source;
-    // First presentation starts the clock; later ones reuse it.
-    var deadline = current.secondChanceDeadline;
-    if (deadline == null) {
-      deadline = DateTime.now().add(secondChanceWindow);
-      _prefs.setInt(_secondChanceDeadlineKey, deadline.millisecondsSinceEpoch);
+    // First presentation this session starts the clock; later ones reuse
+    // it. Past it, the offer is gone for the session — the countdown the
+    // user saw meant what it said.
+    final deadline =
+        current.secondChanceDeadline ?? DateTime.now().add(secondChanceWindow);
+    if (!DateTime.now().isBefore(deadline)) {
+      emit(current.withoutSecondChance());
+      return;
     }
+    _secondChanceShown.add(source);
+    _secondChanceSource = source;
     final next = current.copyWith(
       isPurchasing: false,
       secondChanceTick: current.secondChanceTick + 1,
@@ -324,6 +315,22 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       eventName: AnalyticsEvents.paywallSecondChanceDismissed,
       properties: _secondChanceProps(current),
     );
+    // The sheet closes itself when the countdown hits zero; that dismissal
+    // also retires the offer (and the close chip) for the session.
+    final deadline = current.secondChanceDeadline;
+    if (deadline != null && !DateTime.now().isBefore(deadline)) {
+      emit(current.withoutSecondChance());
+    }
+  }
+
+  void _onSecondChanceRequested(
+    PaywallSecondChanceRequestedEvent event,
+    Emitter<PaywallState> emit,
+  ) {
+    final current = state;
+    if (current is! PaywallLoadedState || current.isPurchasing) return;
+    if (current.secondChancePackage == null) return;
+    _presentSecondChance(current, emit, source: 'close');
   }
 
   Map<String, Object?> _secondChanceProps(PaywallLoadedState s) {
@@ -444,12 +451,11 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
-        // First back-out of the *main* plan's sheet: offer the discounted
-        // first year once. Cancelling the offer's own sheet, or a second
-        // cancel, gets nothing more.
+        // Backing out of the *main* plan's sheet: offer the discounted first
+        // year — every time, while the session's window is open. Backing out
+        // of the offer's own sheet gets nothing more.
         final offer = current.secondChancePackage;
         final offerSecondChance = offer != null &&
-            !_secondChanceShownThisSession &&
             current.selectedPackage.identifier != offer.identifier;
         if (offerSecondChance) {
           _presentSecondChance(current, emit, source: 'cancel');

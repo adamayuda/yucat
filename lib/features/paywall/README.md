@@ -48,26 +48,27 @@ plan with a discounted first year**, styled as a coupon:
   ×        Limited-time offer: -33%        ← discount in green
               (mascot peeking over)
   ┌───────────────────────────────────────┐
-  │   [ Offer expires in: 47:12:09 ]      │  ← red pill, real countdown
-  │              ~~€2.50~~                │  ← full price ÷ 12, struck through
-  │               €1.67                   │  ← intro price ÷ 12, huge
-  │              per month                │
+  │      [ Offer expires in: 09:41 ]      │  ← red pill, 10-min session countdown
+  │              ~~€29.99~~               │  ← full yearly price, struck through
+  │               €19.99                  │  ← intro price, huge
+  │          for your first year          │
   ( - - - - - - - - - - - - - - - - - - - )  ← dashed tear line + notches
   │         [   Grab it now   ]           │  ← green CTA
   └───────────────────────────────────────┘
    €19.99 for the first year, then €29.99/year. Cancel anytime.
 ```
 
-- **The countdown is real.** The first presentation stores a deadline
-  (`PaywallBloc.secondChanceWindow`, 48 h, SharedPreferences
-  `second_chance_deadline_ms`); the sheet counts down to it, closes itself at zero, and
-  once it has passed `secondChancePackage` resolves to null at load so the offer never
-  reappears on that device. A timer that resets on every open is fake urgency — App Review
-  rejects it and a trust-positioned brand can't afford it. 48 h so the "dropped at paywall"
-  push at +1 day still lands inside the window. **Reset test user** clears it.
-- Per-month figures are `NumberFormat.simpleCurrency` in the user's locale with the
-  store's currency code — never a hand-built string. The discount percentage is computed
-  from the two store prices, so a price change in App Store Connect updates the headline.
+- **The countdown is honest within the session.** The first presentation in a paywall
+  session sets `secondChanceDeadline` (`PaywallBloc.secondChanceWindow`, **10 min**, in
+  memory only); every later presentation that session reuses it. The sheet counts down to
+  it and closes itself at zero, and the bloc then drops the offer *and the close chip* for
+  the rest of the session (`withoutSecondChance`). It is not a timer that restarts on
+  every open. Per session rather than per device on purpose: a returning user — or a tap
+  on the "dropped at paywall" push a day later — gets a fresh window, so the push never
+  promises something the app then refuses.
+- Prices are the store's own `priceString`s — never reformatted. The discount percentage
+  is computed from the two store prices, so a price change in App Store Connect updates
+  the headline.
 
 - The discount is a second App Store product in the same group —
   `com.adam.yucat.app.pro.yearly.offer`, €29.99/year with a **pay-up-front
@@ -75,13 +76,18 @@ plan with a discounted first year**, styled as a coupon:
   package **`annual_offer`** (`PaywallBloc.secondChancePackageId`). No package → no
   sheet, nothing else changes. Android has no such product, so the sheet never shows
   there.
-- Offered **once per paywall session** (`_secondChanceShownThisSession`), never after
-  cancelling the offer's own sheet, and never when the paywall already fell back to a
-  non-annual plan. Two ways in, stamped as `source` on the events: **`cancel`** (the
-  onboarding gate — after the first back-out of Apple's sheet) and **`auto`** (the
-  `returning_user` gate presents it on its own ~600 ms after load — those users already
-  declined full price once, and the OneSignal "dropped at paywall" push promises them
-  this exact offer, so they must not have to cancel a store sheet to find it).
+- Three ways in, stamped as `source` on the events, all bounded by the session's
+  10-minute window. **`close`**: on the hard gate a close chip fades in after
+  `PaywallLoadedWidget.offerChipDelay` (7 s) in the hero's chip slot and, since the gate
+  can't be closed, opens the offer instead (it only exists when the user is eligible);
+  every tap. **`cancel`**: every back-out of Apple's sheet for the *main* plan (backing
+  out of the offer's own sheet re-opens nothing). **`auto`**: once per session
+  (`_secondChanceShown`): **`auto`** (the `returning_user` gate presents it on
+  its own ~600 ms after load — those users already declined full price once, and the
+  OneSignal "dropped at paywall" push promises them this exact offer, so they must not
+  have to cancel a store sheet to find it) and **`cancel`** (after the first back-out of
+  Apple's sheet, on either gate). Never shown when the paywall already fell back to a
+  non-annual plan.
 - **Eligibility is checked at load**, in parallel with the main plan's: Apple grants
   one introductory offer per subscription group per customer, so a lapsed subscriber
   who already used the trial is ineligible for the discount too — the store would
