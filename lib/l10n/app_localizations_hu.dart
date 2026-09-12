@@ -858,30 +858,25 @@ class AppLocalizationsHu extends AppLocalizations {
   String get paywallNoPaymentDue => 'Most nem kell fizetned';
 
   @override
-  String get paywallSecondChanceTitle => 'Még gondolkodsz?';
-
-  @override
-  String paywallSecondChanceBody(String introPrice, String price) {
-    return 'Az első éved $introPrice a(z) $price helyett.';
+  String paywallOfferHeadline(String discount) {
+    return 'Korlátozott ideig: $discount';
   }
 
   @override
-  String paywallSecondChanceFirstYear(String price) {
-    return '$price az első évben';
+  String paywallOfferDiscount(int percent) {
+    return '-$percent %';
   }
 
   @override
-  String paywallSecondChanceCta(String price) {
-    return 'Első év megszerzése: $price';
+  String paywallOfferExpiresIn(String time) {
+    return 'Az ajánlat lejár: $time';
   }
 
   @override
-  String paywallSecondChanceKeepTrial(int days) {
-    return 'A $days napos ingyenes próba megtartása';
-  }
+  String get paywallOfferPerMonth => 'havonta';
 
   @override
-  String get paywallSecondChanceNoThanks => 'Köszönöm, nem';
+  String get paywallOfferCta => 'Csapj le rá';
 
   @override
   String paywallIntroDisclosure(

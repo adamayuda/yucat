@@ -41,17 +41,33 @@ now" line, the CTA "Let's get started", and "$24.99/year. Cancel anytime."
 
 Three in four users who tap the CTA back out of Apple's sheet — the first place they
 see the annual price beside the €0.00 trial. On that **first** cancel, and only then,
-a bottom sheet (`widgets/paywall_second_chance_sheet.dart`) offers the **same yearly
-plan with a discounted first year**:
+a full-height sheet (`widgets/paywall_second_chance_sheet.dart`) offers the **same yearly
+plan with a discounted first year**, styled as a coupon:
 
 ```
-       Still thinking it over?
-  Get your first year for €19.99 instead of €29.99.
-         €19.99 for your first year
-      then €29.99/year · Cancel anytime.
-   [ Get the first year for €19.99 ]
-       Keep the 3-day free trial
+  ×        Limited-time offer: -33%        ← discount in green
+              (mascot peeking over)
+  ┌───────────────────────────────────────┐
+  │   [ Offer expires in: 47:12:09 ]      │  ← red pill, real countdown
+  │              ~~€2.50~~                │  ← full price ÷ 12, struck through
+  │               €1.67                   │  ← intro price ÷ 12, huge
+  │              per month                │
+  ( - - - - - - - - - - - - - - - - - - - )  ← dashed tear line + notches
+  │         [   Grab it now   ]           │  ← green CTA
+  └───────────────────────────────────────┘
+   €19.99 for the first year, then €29.99/year. Cancel anytime.
 ```
+
+- **The countdown is real.** The first presentation stores a deadline
+  (`PaywallBloc.secondChanceWindow`, 48 h, SharedPreferences
+  `second_chance_deadline_ms`); the sheet counts down to it, closes itself at zero, and
+  once it has passed `secondChancePackage` resolves to null at load so the offer never
+  reappears on that device. A timer that resets on every open is fake urgency — App Review
+  rejects it and a trust-positioned brand can't afford it. 48 h so the "dropped at paywall"
+  push at +1 day still lands inside the window. **Reset test user** clears it.
+- Per-month figures are `NumberFormat.simpleCurrency` in the user's locale with the
+  store's currency code — never a hand-built string. The discount percentage is computed
+  from the two store prices, so a price change in App Store Connect updates the headline.
 
 - The discount is a second App Store product in the same group —
   `com.adam.yucat.app.pro.yearly.offer`, €29.99/year with a **pay-up-front
@@ -78,8 +94,8 @@ plan with a discounted first year**:
   "€19.99 for the first year, then €29.99/year" via `paywallIntroDisclosure` /
   `paywallAutoRenewDisclosureIntro`, and `Subscription Completed` carries
   `is_intro_offer: true`, `intro_price`.
-- The way back is worded from the main plan's trial ("Keep the 3-day free trial")
-  and falls back to "No thanks" for ineligible users.
+- The only way back is the close chip (or a swipe-down); both count as
+  `Paywall Second Chance Dismissed`. Under it, the paywall still offers the trial.
 - Detection lives in `utils/intro_offer_info.dart` (`introOfferFor`), the paid
   sibling of `trialInfoFor`: on StoreKit a **non-zero** `introductoryPrice` is a
   discount, a zero one is the trial.
@@ -503,7 +519,7 @@ Events in `lib/features/analytics/analytics_events.dart`:
 | `Paywall CTA Tapped` | `package_id`, `package_type`, `price`, `currency`, `trigger`, `is_trial`, `trial_days` |
 | `Paywall Restore Tapped` | `trigger` |
 | `Paywall Dismissed` | `cta_tapped`, `time_viewed_seconds` |
-| `Paywall Second Chance Shown` / `Tapped` / `Dismissed` | `package_id` (`annual_offer`), `package_type` (`custom`), `price`, `intro_price`, `currency`, `source` (`cancel` / `auto`), `trigger` — the downsell sheet; `Tapped` is followed by `Plan Selected`, `Paywall CTA Tapped` and the normal purchase outcome |
+| `Paywall Second Chance Shown` / `Tapped` / `Dismissed` | `package_id` (`annual_offer`), `package_type` (`custom`), `price`, `intro_price`, `currency`, `source` (`cancel` / `auto`), `seconds_left` (to the persisted deadline), `trigger` — the downsell sheet; `Tapped` is followed by `Plan Selected`, `Paywall CTA Tapped` and the normal purchase outcome |
 | `Subscription Completed` | `package_id`, `package_type`, `price`, `currency`, `trigger`, **`is_trial`**, **`trial_days`**, `is_intro_offer`, `intro_price` |
 | `Subscription Restored` | `trigger` |
 | `Subscription Purchase Failed` | `reason`, `error_message?`, `package_type`, `trigger` |

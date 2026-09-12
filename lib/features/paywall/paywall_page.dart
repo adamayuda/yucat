@@ -95,18 +95,19 @@ class _PaywallPage extends State<PaywallPage> {
             :final secondChanceTick,
             :final secondChancePackage,
             :final secondChanceIntro,
-            :final eligibleTrial,
+            :final secondChanceDeadline,
           )
           when secondChanceTick != _seenSecondChanceTick &&
               secondChancePackage != null &&
-              secondChanceIntro != null:
+              secondChanceIntro != null &&
+              secondChanceDeadline != null:
         _seenSecondChanceTick = secondChanceTick;
         showPaywallSecondChanceSheet(
           context,
           bloc: _bloc,
           package: secondChancePackage,
           intro: secondChanceIntro,
-          trialOnMainPlan: eligibleTrial,
+          deadline: secondChanceDeadline,
         );
         break;
       case PaywallLoadedState(:final transientError) when transientError != null:

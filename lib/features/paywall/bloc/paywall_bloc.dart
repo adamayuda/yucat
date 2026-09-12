@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/core/subscription/domain/usecases/has_active_subscription_usecase.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
@@ -25,10 +26,19 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   /// `$rc_annual` is taken by the standard yearly. Absent → no sheet.
   static const secondChancePackageId = 'annual_offer';
 
+  /// How long the discounted first year stays available once first shown.
+  /// The sheet counts down to this and the offer is withheld afterwards — a
+  /// countdown that reset on every open would be fake urgency, which App
+  /// Review rejects and which a trust-positioned brand can't afford. 48 h so
+  /// the "dropped at paywall" push at +1 day still lands inside the window.
+  static const secondChanceWindow = Duration(hours: 48);
+  static const _secondChanceDeadlineKey = 'second_chance_deadline_ms';
+
   final HasActiveSubscriptionUseCase _hasActiveSubscriptionUseCase;
   final LogEventUsecase _logEventUsecase;
   final UserAnalyticsService _userAnalyticsService;
   final NotificationService _notificationService;
+  final SharedPreferences _prefs;
 
   DateTime? _paywallShownTime;
   /// Whether the user reached the store sheet during this paywall session.
@@ -50,10 +60,12 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     required LogEventUsecase logEventUsecase,
     required UserAnalyticsService userAnalyticsService,
     required NotificationService notificationService,
+    required SharedPreferences prefs,
   })  : _hasActiveSubscriptionUseCase = hasActiveSubscriptionUseCase,
         _logEventUsecase = logEventUsecase,
         _userAnalyticsService = userAnalyticsService,
         _notificationService = notificationService,
+        _prefs = prefs,
         super(const PaywallInitialState()) {
     on<PaywallInitialEvent>(_onInitial);
     on<PaywallPackageSelectedEvent>(_onPackageSelected);
@@ -128,9 +140,20 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
     ]);
     final eligibleTrial = resolved[0].trial;
     final eligibleIntro = resolved[0].intro;
-    final secondChanceIntro =
+    var secondChanceIntro =
         resolved.length > 1 ? resolved[1].intro : null;
-    final secondChance = secondChanceIntro != null ? secondChanceCandidate : null;
+    var secondChance = secondChanceIntro != null ? secondChanceCandidate : null;
+
+    // A deadline persisted by an earlier presentation. Past it, the offer is
+    // gone for this device — the countdown the user saw meant what it said.
+    final deadlineMs = _prefs.getInt(_secondChanceDeadlineKey);
+    final deadline = deadlineMs == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(deadlineMs);
+    if (deadline != null && !DateTime.now().isBefore(deadline)) {
+      secondChance = null;
+      secondChanceIntro = null;
+    }
 
     _paywallShownTime = DateTime.now();
     _ctaTappedThisSession = false;
@@ -159,6 +182,7 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       selectedPackage: selected,
       secondChancePackage: secondChance,
       secondChanceIntro: secondChanceIntro,
+      secondChanceDeadline: secondChance != null ? deadline : null,
       eligibleTrial: eligibleTrial,
       eligibleIntro: eligibleIntro,
     );
@@ -184,14 +208,22 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
   }) {
     _secondChanceShownThisSession = true;
     _secondChanceSource = source;
-    _logEventUsecase.call(
-      eventName: AnalyticsEvents.paywallSecondChanceShown,
-      properties: _secondChanceProps(current),
-    );
-    emit(current.copyWith(
+    // First presentation starts the clock; later ones reuse it.
+    var deadline = current.secondChanceDeadline;
+    if (deadline == null) {
+      deadline = DateTime.now().add(secondChanceWindow);
+      _prefs.setInt(_secondChanceDeadlineKey, deadline.millisecondsSinceEpoch);
+    }
+    final next = current.copyWith(
       isPurchasing: false,
       secondChanceTick: current.secondChanceTick + 1,
-    ));
+      secondChanceDeadline: deadline,
+    );
+    _logEventUsecase.call(
+      eventName: AnalyticsEvents.paywallSecondChanceShown,
+      properties: _secondChanceProps(next),
+    );
+    emit(next);
   }
 
   /// The free trial and/or paid introductory offer [pkg] will actually grant
@@ -303,6 +335,10 @@ class PaywallBloc extends Bloc<PaywallEvent, PaywallState> {
       'intro_price': s.secondChanceIntro?.price,
       'currency': pkg.storeProduct.currencyCode,
       'source': _secondChanceSource,
+      'seconds_left': s.secondChanceDeadline
+          ?.difference(DateTime.now())
+          .inSeconds
+          .clamp(0, secondChanceWindow.inSeconds),
       'trigger': _trigger,
       'timestamp': DateTime.now().toIso8601String(),
     };

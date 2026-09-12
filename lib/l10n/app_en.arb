@@ -486,47 +486,34 @@
     }
   },
   "paywallNoPaymentDue": "No payment due now",
-  "paywallSecondChanceTitle": "Still thinking it over?",
-  "@paywallSecondChanceTitle": {
-    "description": "Bottom sheet shown once after the user backs out of the store's annual purchase sheet; offers the same yearly plan with a discounted first year."
-  },
-  "paywallSecondChanceBody": "Get your first year for {introPrice} instead of {price}.",
-  "@paywallSecondChanceBody": {
+  "paywallOfferHeadline": "Limited-time offer: {discount}",
+  "@paywallOfferHeadline": {
+    "description": "Second-chance offer headline; {discount} is paywallOfferDiscount and is rendered in green by locating it inside the composed string.",
     "placeholders": {
-      "introPrice": {
-        "type": "String"
-      },
-      "price": {
+      "discount": {
         "type": "String"
       }
     }
   },
-  "paywallSecondChanceFirstYear": "{price} for your first year",
-  "@paywallSecondChanceFirstYear": {
-    "description": "Big price line on the second-chance sheet. Says 'year' outright: the offer product is the yearly plan.",
+  "paywallOfferDiscount": "-{percent}%",
+  "@paywallOfferDiscount": {
     "placeholders": {
-      "price": {
-        "type": "String"
-      }
-    }
-  },
-  "paywallSecondChanceCta": "Get the first year for {price}",
-  "@paywallSecondChanceCta": {
-    "placeholders": {
-      "price": {
-        "type": "String"
-      }
-    }
-  },
-  "paywallSecondChanceKeepTrial": "Keep the {days}-day free trial",
-  "@paywallSecondChanceKeepTrial": {
-    "placeholders": {
-      "days": {
+      "percent": {
         "type": "int"
       }
     }
   },
-  "paywallSecondChanceNoThanks": "No thanks",
+  "paywallOfferExpiresIn": "Offer expires in: {time}",
+  "@paywallOfferExpiresIn": {
+    "description": "Countdown pill on the offer; {time} is HH:MM:SS to a real, persisted 48-hour deadline.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallOfferPerMonth": "per month",
+  "paywallOfferCta": "Grab it now",
   "paywallIntroDisclosure": "{introPrice} for the first year, then {price}/{period}. Cancel anytime.",
   "@paywallIntroDisclosure": {
     "description": "Footer line under the CTA when the selected plan carries a paid pay-up-front introductory offer. 'year' is literal: the only such product is the yearly plan; {period} is the renewal period from the store.",

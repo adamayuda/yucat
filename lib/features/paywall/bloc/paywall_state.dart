@@ -50,6 +50,13 @@ class PaywallLoadedState extends PaywallState {
   /// own intro price without re-reading the product.
   final IntroOfferInfo? secondChanceIntro;
 
+  /// When the offer stops being available to this user — set (and persisted)
+  /// the first time the sheet is presented, so the countdown it shows is a
+  /// real deadline rather than a timer that resets on every open. Null until
+  /// the first presentation. Once it has passed, [secondChancePackage] resolves
+  /// to null at load and the sheet never appears again for this device.
+  final DateTime? secondChanceDeadline;
+
   /// The free trial this user will actually receive on [selectedPackage], or
   /// null when the product has no trial or this user isn't eligible for it.
   ///
@@ -84,6 +91,7 @@ class PaywallLoadedState extends PaywallState {
     required this.selectedPackage,
     this.secondChancePackage,
     this.secondChanceIntro,
+    this.secondChanceDeadline,
     this.eligibleTrial,
     this.eligibleIntro,
     this.isPurchasing = false,
@@ -99,6 +107,7 @@ class PaywallLoadedState extends PaywallState {
     PaywallTransientError? transientError,
     int? errorTick,
     int? secondChanceTick,
+    DateTime? secondChanceDeadline,
   }) {
     return PaywallLoadedState(
       currentOffering: currentOffering,
@@ -106,6 +115,7 @@ class PaywallLoadedState extends PaywallState {
       selectedPackage: selectedPackage,
       secondChancePackage: secondChancePackage,
       secondChanceIntro: secondChanceIntro,
+      secondChanceDeadline: secondChanceDeadline ?? this.secondChanceDeadline,
       eligibleTrial: eligibleTrial,
       eligibleIntro: eligibleIntro,
       isPurchasing: isPurchasing ?? this.isPurchasing,
@@ -129,6 +139,7 @@ class PaywallLoadedState extends PaywallState {
       selectedPackage: package,
       secondChancePackage: secondChancePackage,
       secondChanceIntro: secondChanceIntro,
+      secondChanceDeadline: secondChanceDeadline,
       eligibleTrial: eligibleTrial,
       eligibleIntro: eligibleIntro,
       isPurchasing: false,
@@ -144,6 +155,7 @@ class PaywallLoadedState extends PaywallState {
         selectedPackage.identifier,
         secondChancePackage?.identifier,
         secondChanceIntro?.priceString,
+        secondChanceDeadline,
         // [TrialInfo] isn't Equatable; the day count is the only part that
         // affects rendering, so compare on that rather than on identity.
         eligibleTrial?.days,

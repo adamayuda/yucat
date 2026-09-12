@@ -1659,41 +1659,35 @@ abstract class AppLocalizations {
   /// **'No payment due now'**
   String get paywallNoPaymentDue;
 
-  /// Bottom sheet shown once after the user backs out of the store's annual purchase sheet; offers the same yearly plan with a discounted first year.
+  /// Second-chance offer headline; {discount} is paywallOfferDiscount and is rendered in green by locating it inside the composed string.
   ///
   /// In en, this message translates to:
-  /// **'Still thinking it over?'**
-  String get paywallSecondChanceTitle;
+  /// **'Limited-time offer: {discount}'**
+  String paywallOfferHeadline(String discount);
 
-  /// No description provided for @paywallSecondChanceBody.
+  /// No description provided for @paywallOfferDiscount.
   ///
   /// In en, this message translates to:
-  /// **'Get your first year for {introPrice} instead of {price}.'**
-  String paywallSecondChanceBody(String introPrice, String price);
+  /// **'-{percent}%'**
+  String paywallOfferDiscount(int percent);
 
-  /// Big price line on the second-chance sheet. Says 'year' outright: the offer product is the yearly plan.
+  /// Countdown pill on the offer; {time} is HH:MM:SS to a real, persisted 48-hour deadline.
   ///
   /// In en, this message translates to:
-  /// **'{price} for your first year'**
-  String paywallSecondChanceFirstYear(String price);
+  /// **'Offer expires in: {time}'**
+  String paywallOfferExpiresIn(String time);
 
-  /// No description provided for @paywallSecondChanceCta.
+  /// No description provided for @paywallOfferPerMonth.
   ///
   /// In en, this message translates to:
-  /// **'Get the first year for {price}'**
-  String paywallSecondChanceCta(String price);
+  /// **'per month'**
+  String get paywallOfferPerMonth;
 
-  /// No description provided for @paywallSecondChanceKeepTrial.
+  /// No description provided for @paywallOfferCta.
   ///
   /// In en, this message translates to:
-  /// **'Keep the {days}-day free trial'**
-  String paywallSecondChanceKeepTrial(int days);
-
-  /// No description provided for @paywallSecondChanceNoThanks.
-  ///
-  /// In en, this message translates to:
-  /// **'No thanks'**
-  String get paywallSecondChanceNoThanks;
+  /// **'Grab it now'**
+  String get paywallOfferCta;
 
   /// Footer line under the CTA when the selected plan carries a paid pay-up-front introductory offer. 'year' is literal: the only such product is the yearly plan; {period} is the renewal period from the store.
   ///

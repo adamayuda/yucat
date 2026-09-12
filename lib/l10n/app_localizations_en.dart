@@ -851,30 +851,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallNoPaymentDue => 'No payment due now';
 
   @override
-  String get paywallSecondChanceTitle => 'Still thinking it over?';
-
-  @override
-  String paywallSecondChanceBody(String introPrice, String price) {
-    return 'Get your first year for $introPrice instead of $price.';
+  String paywallOfferHeadline(String discount) {
+    return 'Limited-time offer: $discount';
   }
 
   @override
-  String paywallSecondChanceFirstYear(String price) {
-    return '$price for your first year';
+  String paywallOfferDiscount(int percent) {
+    return '-$percent%';
   }
 
   @override
-  String paywallSecondChanceCta(String price) {
-    return 'Get the first year for $price';
+  String paywallOfferExpiresIn(String time) {
+    return 'Offer expires in: $time';
   }
 
   @override
-  String paywallSecondChanceKeepTrial(int days) {
-    return 'Keep the $days-day free trial';
-  }
+  String get paywallOfferPerMonth => 'per month';
 
   @override
-  String get paywallSecondChanceNoThanks => 'No thanks';
+  String get paywallOfferCta => 'Grab it now';
 
   @override
   String paywallIntroDisclosure(
