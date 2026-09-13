@@ -48,6 +48,7 @@ class CatRepositoryImpl implements CatRepository {
     required String userId,
     required String name,
     int? age,
+    DateTime? birthDate,
     String? ageGroup,
     double? weight,
     bool neutered = false,
@@ -64,6 +65,7 @@ class CatRepositoryImpl implements CatRepository {
       userId: userId,
       name: name,
       age: age,
+      birthDate: birthDate,
       ageGroup: ageGroup,
       weight: weight,
       neutered: neutered,
@@ -88,6 +90,7 @@ class CatRepositoryImpl implements CatRepository {
     final entity = CatEntity(
       name: name,
       age: age,
+      birthDate: birthDate,
       weight: weight,
       neutered: neutered,
       profileImageUrl: profileImageUrl,
@@ -117,5 +120,13 @@ class CatRepositoryImpl implements CatRepository {
 
     final catData = _mapper.toDocument(cat);
     return _dataSource.updateCat(catId: cat.id!, catData: catData);
+  }
+
+  @override
+  Future<void> updateCatAllergies({
+    required String catId,
+    required List<String> allergies,
+  }) async {
+    await _dataSource.updateCatAllergies(catId: catId, allergies: allergies);
   }
 }

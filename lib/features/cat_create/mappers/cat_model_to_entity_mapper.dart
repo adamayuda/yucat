@@ -6,6 +6,7 @@ class CatModelToEntityMapper {
     id: model.id,
     name: model.name,
     age: model.age,
+    birthDate: model.birthDate,
     weight: model.weight,
     neutered: model.neutered,
     profileImageUrl:

@@ -223,6 +223,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
   List<String> _completedFields(CatCreateModel cat) => [
         if (cat.gender != null) 'gender',
         if (cat.age != null) 'age',
+        if (cat.birthDate != null) 'birth_date',
         if (cat.ageGroup != null) 'age_group',
         if (cat.weight != null) 'weight',
         if (cat.weightCategory != null) 'weight_category',
@@ -235,7 +236,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
 
   /// Total optional fields [_completedFields] can report, so `fields_completed`
   /// is readable in Mixpanel without hardcoding the denominator in a report.
-  static const int _optionalFieldCount = 10;
+  static const int _optionalFieldCount = 11;
 
   /// Step label for a wizard index, or `unknown` if the index is out of range.
   /// Emitted alongside `step_index` on failures so a renumbered wizard does not
@@ -307,6 +308,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
           userId: userId,
           name: event.cat.name,
           age: event.cat.age,
+          birthDate: event.cat.birthDate,
           ageGroup: event.cat.ageGroup,
           weight: event.cat.weight,
           neutered: event.cat.neutered,
@@ -393,6 +395,9 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
 
     if (updatedCat.name != _originalCat!.name) changedFields.add('name');
     if (updatedCat.age != _originalCat!.age) changedFields.add('age');
+    if (updatedCat.birthDate != _originalCat!.birthDate) {
+      changedFields.add('birthDate');
+    }
     if (updatedCat.ageGroup != _originalCat!.ageGroup) {
       changedFields.add('ageGroup');
     }

@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/features/cat/presentation/utils/cat_labels.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
-import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat/presentation/utils/cat_diet_recommendations.dart';
 import 'package:yucat/features/cat/presentation/widgets/dietary_recommendations_card.dart';
 import 'package:yucat/features/cat/presentation/widgets/recommended_products_section.dart';
@@ -12,11 +11,13 @@ import 'package:yucat/features/cat_detail/presentation/bloc/cat_detail_bloc.dart
 import 'package:yucat/features/cat_detail/presentation/widgets/cat_detail_skeleton.dart';
 import 'package:yucat/features/cat_detail/presentation/widgets/cat_hero_section.dart';
 import 'package:yucat/features/cat_detail/presentation/widgets/cat_stat_tile.dart';
+import 'package:yucat/features/cat_listing/mappers/cat_model_to_entity.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_confirm_dialog.dart';
+import 'package:yucat/presentation/components/ds_tag_chip.dart';
 
 @RoutePage()
 class CatDetailPage extends StatefulWidget {
@@ -107,6 +108,8 @@ class _CatDetailPageState extends State<CatDetailPage> {
                           conditions: cat.healthConditions!,
                         ),
                       ],
+                      const SizedBox(height: DSDimens.sizeS),
+                      _HealthCarnetCard(cat: cat),
                       const SizedBox(height: DSDimens.sizeS),
                       _DietaryTipsCard(cat: cat),
                       const SizedBox(height: DSDimens.sizeL),
@@ -330,7 +333,9 @@ class _ConditionsCard extends StatelessWidget {
             spacing: DSDimens.sizeXxs,
             runSpacing: DSDimens.sizeXxs,
             children: conditions
-                .map((c) => _ConditionChip(condition: c))
+                .map((c) => DSTagChip(
+                      label: catFormatHealthCondition(c, l10n),
+                    ))
                 .toList(),
           ),
         ],
@@ -338,35 +343,6 @@ class _ConditionsCard extends StatelessWidget {
     );
   }
 }
-
-class _ConditionChip extends StatelessWidget {
-  final String condition;
-
-  const _ConditionChip({required this.condition});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: DSDimens.sizeS,
-        vertical: DSDimens.sizeXxs,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFCE4E1),
-        borderRadius: BorderRadius.circular(DSRadii.pill),
-      ),
-      child: Text(
-        catFormatHealthCondition(condition, l10n),
-        style: DSTextStyles.label.copyWith(
-          color: DSColors.accentDanger,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  }
 
 class _DeleteLink extends StatelessWidget {
   final VoidCallback onTap;
@@ -398,6 +374,66 @@ class _DeleteLink extends StatelessWidget {
   }
 }
 
+/// Entry point to the cat's health record — vaccines, visits, treatments and
+/// weight over time.
+///
+/// Deliberately shows a **static** subtitle rather than a live "3 to do" count.
+/// The count is derivable only from the cat's records, and `CatDetailBloc` does
+/// no I/O at all by design; adding a Firestore read here to badge a row would
+/// trade that for very little. The number lives inside the carnet, where the
+/// data already is.
+class _HealthCarnetCard extends StatelessWidget {
+  final CatModel cat;
+
+  const _HealthCarnetCard({required this.cat});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return DSCard(
+      padding: const EdgeInsets.all(DSDimens.sizeS),
+      onTap: () => context.router.push(HealthCarnetRoute(cat: cat)),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: DSColors.tintCoralSoft,
+              borderRadius: BorderRadius.circular(DSRadii.md),
+            ),
+            child: const Icon(
+              Icons.favorite_outline_rounded,
+              size: 22,
+              color: DSColors.accentDanger,
+            ),
+          ),
+          const SizedBox(width: DSDimens.sizeXs),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.healthCarnetTitle, style: DSTextStyles.titleMd),
+                const SizedBox(height: DSDimens.sizeXxxs),
+                Text(
+                  l10n.healthCarnetEntryEmpty,
+                  style: DSTextStyles.bodyMd,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: DSColors.inkTertiary,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Personalized dietary tips derived from the cat's profile. Maps the
 /// presentation [CatModel] to a [CatEntity] (field-identical) so it can reuse
 /// the shared `recommendDiet` rule engine.
@@ -409,7 +445,7 @@ class _DietaryTipsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final recommendations = recommendDiet(_entityFromModel(cat), l10n);
+    final recommendations = recommendDiet(catEntityFromModel(cat), l10n);
     if (recommendations.isEmpty) return const SizedBox.shrink();
     return DietaryRecommendationsCard(
       title: l10n.catDetailDietaryTipsSection,
@@ -426,28 +462,9 @@ class _RecommendedProductsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RecommendedProductsSection(cat: _entityFromModel(cat));
+    return RecommendedProductsSection(cat: catEntityFromModel(cat));
   }
 }
-
-/// Maps the presentation [CatModel] to a [CatEntity] (field-identical) for the
-/// shared recommendation engines.
-CatEntity _entityFromModel(CatModel m) => CatEntity(
-      id: m.id,
-      name: m.name,
-      age: m.age,
-      weight: m.weight,
-      neutered: m.neutered,
-      profileImageUrl: m.profileImageUrl,
-      ageGroup: m.ageGroup,
-      neuteredStatus: m.neuteredStatus,
-      breed: m.breed,
-      weightCategory: m.weightCategory,
-      activityLevel: m.activityLevel,
-      coatType: m.coatType,
-      gender: m.gender,
-      healthConditions: m.healthConditions,
-    );
 
 class _TileSpec {
   /// Colorful SVG asset under `assets/images/`, or null to fall back to [icon].

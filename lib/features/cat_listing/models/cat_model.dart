@@ -2,6 +2,7 @@ class CatModel {
   final String? id;
   final String name;
   final int? age;
+  final DateTime? birthDate;
   final double? weight;
   final bool neutered;
   final String? profileImageUrl;
@@ -13,11 +14,13 @@ class CatModel {
   final String? coatType;
   final String? gender;
   final List<String>? healthConditions;
+  final List<String>? allergies;
 
   const CatModel({
     this.id,
     required this.name,
     this.age,
+    this.birthDate,
     this.weight,
     this.neutered = false,
     this.profileImageUrl,
@@ -29,5 +32,6 @@ class CatModel {
     this.coatType,
     this.gender,
     this.healthConditions,
+    this.allergies,
   });
 }

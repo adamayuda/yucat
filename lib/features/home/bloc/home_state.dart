@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
+import 'package:yucat/features/health_carnet/presentation/models/health_next_up.dart';
 import 'package:yucat/features/product/domain/entities/label_target.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 
@@ -57,14 +58,20 @@ class HomeHiddenState extends HomeState {
 class HomeLoadedState extends HomeState {
   final int _timestamp;
 
-  /// The user's cats. Drives the greeting and the active-cat selector.
+  /// The user's cats. Loaded for the People-profile sync and for
+  /// [healthNextUp]; nothing on the page renders the list itself.
   final List<CatEntity> cats;
 
-  HomeLoadedState({this.cats = const []})
+  /// The carnet's Home surface — the nearest dated act across every cat, or
+  /// the setup invitation. Null hides the card (no cats, reads failed, or a
+  /// fully set-up carnet with nothing due within a year).
+  final HealthNextUp? healthNextUp;
+
+  HomeLoadedState({this.cats = const [], this.healthNextUp})
       : _timestamp = DateTime.now().microsecondsSinceEpoch;
 
   @override
-  List<Object?> get props => [_timestamp, cats];
+  List<Object?> get props => [_timestamp, cats, healthNextUp];
 }
 
 class HomeErrorState extends HomeState {

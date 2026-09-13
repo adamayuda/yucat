@@ -34,6 +34,7 @@ class CatDataSource {
     required String userId,
     required String name,
     int? age,
+    DateTime? birthDate,
     String? ageGroup,
     double? weight,
     bool neutered = false,
@@ -51,6 +52,9 @@ class CatDataSource {
         'user': _firestore.collection('users').doc(userId),
         'name': name,
         'age': age,
+        // ⚠️ This map is hand-built, not `CatDocumentMapper.toDocument` —
+        // keep the two in step. Timestamp, like `health_events`.
+        'birth_date': birthDate == null ? null : Timestamp.fromDate(birthDate),
         'age_group': ageGroup,
         'weight': weight,
         'neutered': neutered,
@@ -143,6 +147,26 @@ class CatDataSource {
       }
     } catch (e) {
       debugPrint('Error deleting cat: $e');
+      rethrow;
+    }
+  }
+
+  /// Writes the allergy list outright, including an empty one.
+  ///
+  /// Deliberately not routed through [updateCat]: the document mapper omits an
+  /// empty `allergies` key so a cat-wizard save can't wipe the list, which also
+  /// means it can never *clear* it. Clearing is a real user action, so it gets
+  /// its own write.
+  Future<void> updateCatAllergies({
+    required String catId,
+    required List<String> allergies,
+  }) async {
+    try {
+      await _firestore.collection('cats').doc(catId).update({
+        'allergies': allergies,
+      });
+    } catch (e) {
+      debugPrint('Error updating cat allergies: $e');
       rethrow;
     }
   }

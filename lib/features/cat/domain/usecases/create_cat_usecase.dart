@@ -13,6 +13,7 @@ class CreateCatUsecase {
     required String userId,
     required String name,
     int? age,
+    DateTime? birthDate,
     String? ageGroup,
     double? weight,
     bool neutered = false,
@@ -34,6 +35,7 @@ class CreateCatUsecase {
       userId: userId,
       name: name.trim(),
       age: age,
+      birthDate: birthDate,
       ageGroup: ageGroup,
       weight: weight,
       neutered: neutered,
@@ -64,21 +66,7 @@ class CreateCatUsecase {
       );
 
       // Return entity with the image URL
-      return CatEntity(
-        name: result.entity.name,
-        age: result.entity.age,
-        weight: result.entity.weight,
-        neutered: result.entity.neutered,
-        profileImageUrl: profileImageUrl,
-        ageGroup: result.entity.ageGroup,
-        neuteredStatus: result.entity.neuteredStatus,
-        breed: result.entity.breed,
-        weightCategory: result.entity.weightCategory,
-        activityLevel: result.entity.activityLevel,
-        coatType: result.entity.coatType,
-        gender: result.entity.gender,
-        healthConditions: result.entity.healthConditions,
-      );
+      return result.entity.copyWith(profileImageUrl: profileImageUrl);
     }
 
     return result.entity;

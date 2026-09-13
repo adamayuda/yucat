@@ -101,6 +101,29 @@ class AnalyticsEvents {
   static const catProfileDeleted = 'Cat Profile Deleted';
   static const catProfileDeleteFailed = 'Cat Profile Delete Failed';
 
+  // Health carnet
+  //
+  // ⚠️ `healthTaskCompleted` carries `protocol_id` **and** `was_overdue`. That
+  // pair is the point of the feature: a completion only means something
+  // relative to whether the app surfaced the act in time. Break down by
+  // `protocol_id`, never aggregate completions alone.
+  static const healthCarnetViewed = 'Health Carnet Viewed';
+  static const healthCarnetTabChanged = 'Health Carnet Tab Changed';
+  static const healthTaskCompleted = 'Health Task Completed';
+  static const healthTaskSnoozed = 'Health Task Snoozed';
+  static const healthRecordAdded = 'Health Record Added';
+  static const healthRecordDeleted = 'Health Record Deleted';
+  static const healthAllergiesUpdated = 'Health Allergies Updated';
+  static const healthCarnetLoadFailed = 'Health Carnet Load Failed';
+  // First-open setup: three dated questions that turn an empty carnet into a
+  // real schedule. `source` on Shown separates the auto-presented sheet from
+  // the standing card; `records_written` on Completed is the conversion.
+  static const healthSetupShown = 'Health Setup Shown';
+  static const healthSetupCompleted = 'Health Setup Completed';
+  static const healthSetupSkipped = 'Health Setup Skipped';
+  // Home's next-up card — the carnet's surface on the screen every user sees.
+  static const homeHealthCardTapped = 'Home Health Card Tapped';
+
   // Product & search
   // Resolved once per scanner open, after the first `initialize()`. Without it
   // a user whose camera permission is denied is invisible — `Product Image

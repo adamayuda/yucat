@@ -46,6 +46,27 @@ must move together:
 History shows the hazard: adding `BodyCondition` at index 4 shifted everything above it, and
 the docs were not updated for months.
 
+### ⚠️ Adding a profile field touches ~12 places
+
+`birthDate` (2026-09-13) is the worked example. Every one of these carries the field list
+by hand — there is no code generation — so a new field that misses one is silently dropped
+on that path:
+
+| Where | What |
+|---|---|
+| `cat/domain/entities/cat_entity.dart` | field, constructor, **`copyWith`** |
+| `cat/data/mappers/cat_document_mapper.dart` | read **and** `toDocument` |
+| `cat/data/datasources/cat_datasource.dart` | `createCat`'s **hand-built** map — it does not use the mapper |
+| `cat/domain/repositories/cat_repository.dart` + `data/repositories/cat_repository_impl.dart` | `createCat` named params, and the entity the impl builds from them |
+| `cat/domain/usecases/create_cat_usecase.dart` | named params |
+| `cat_listing/models/cat_model.dart` | field |
+| `cat_listing/mappers/cat_entity_to_model_mapper.dart` + `cat_model_to_entity.dart` | both directions |
+| `cat_create/presentation/models/cat_create_model.dart` | field, `copyWith`, `props` |
+| `cat_create/mappers/cat_model_to_entity_mapper.dart` + `cat_model_to_create_mapper.dart` | both directions |
+| `cat_create/presentation/models/cat_summary.dart` | `fromModel`'s hand-built entity |
+| `bloc/cat_create_bloc.dart` | `_createCatUsecase(...)` call, `_completedFields` + `_optionalFieldCount`, and the `_getChangedFields` diff behind `Cat Profile Updated` |
+| `docs/analytics.md` | the `fields_changed` / `completed_field_names` value lists |
+
 ### ⚠️ `step_index` is a Mixpanel funnel contract
 
 `_trackStepView` emits `step_index` + `step_name` + `is_edit_mode` on

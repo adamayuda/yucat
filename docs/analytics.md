@@ -127,9 +127,35 @@ Use `step_name` or `step_id` as the funnel key and `step_index` only for orderin
 | `Cat Creation Step Completed` | `step_index`, `step_name`, `next_step_index`, `next_step_name` |
 | `Cat Creation Step Abandoned` | `from_step(_name)`, `to_step(_name)` |
 | `Cat Created` | `name`, `age_group`, `breed`, `gender`, `has_health_conditions`, `health_conditions`, `neutered`, `has_photo`, `creation_time_seconds`, `fields_completed`, `fields_skipped`, `completed_field_names` |
-| `Cat Profile Updated` | `cat_name`, `cat_age_group`, `cat_breed`, `fields_changed` |
+| `Cat Profile Updated` | `cat_name`, `cat_age_group`, `cat_breed`, `fields_changed` (11 hand-diffed keys incl. `age`, `birthDate`, `ageGroup`, … — a new profile field must be added to `_getChangedFields` or it never appears) |
 | `Cat Creation Failed` / `Cat Update Failed` | `error_type`, `error_message`, `step_index` |
 | `Cat Profile Viewed` / `Edit Started` / `Deleted` / `Delete Failed` | `cat_*` ids / names |
+
+### Health carnet
+Per-cat veterinary records and the derived schedule. See
+`lib/features/health_carnet/README.md` for the protocol catalogue behind `protocol_id`.
+
+| Event | Key properties |
+|---|---|
+| `Health Carnet Viewed` | `record_count`, `due_count`, `urgent_count`, `has_weight_history`, `cat_age_group` |
+| `Health Carnet Tab Changed` | `tab_index`, `tab_name` (`upcoming` / `history` / `calendar`) |
+| `Health Task Completed` | `protocol_id`, `obligation`, **`was_overdue`**, `urgency` (`overdue` / `urgent` / `soon` / `later` / `to_schedule`), `days_until`, `logged_days_late` (whole days between the act's date and the tap — 0 is "ticked off today"; the done action asks for the date) |
+| `Health Task Snoozed` | `protocol_id`, `snooze_days`, `was_overdue` |
+| `Health Record Added` | `protocol_id` (or `freeform`), `category`, `has_notes`, `has_weight`, `has_vet`, `source` (`add_sheet` / `setup`) |
+| `Health Setup Shown` | `source` — `auto` (presented by itself on the first load of an empty carnet) / `card` (the standing card on the Upcoming tab) |
+| `Health Setup Completed` | `records_written`, `records_answered` — the setup's conversion; one `Health Record Added { source: setup }` per record follows |
+| `Health Setup Skipped` | `dismissed` — `true` for a barrier dismiss, `false` for "Don't know" on every step |
+| `Home Health Card Tapped` | `state` (`due` / `setup`), `cat_id`; for `due` also `protocol_id`, `urgency`, `days_until`. Home's next-up card is the carnet's only surface on the screen every user sees — tap-through here against `App Opened` is the card's conversion |
+| `Health Record Deleted` | `timestamp` |
+| `Health Allergies Updated` | `allergen_count`, `allergens` — the declared list drives product-scan flags and recipe hiding, so this is the adoption signal for both |
+| `Health Carnet Load Failed` | `error_message` |
+
+⚠️ **`Health Task Completed` is only meaningful broken down by `protocol_id` and
+`was_overdue`.** A completion count on its own says nothing: the question the feature
+exists to answer is whether surfacing an act got it done *on time*. `was_overdue = false`
+is the win. Note `urgency = to_schedule` marks a first-ever record for that protocol —
+those are carnet backfill, not the app catching a deadline, and should be excluded from
+any on-time rate.
 
 ### Product & search
 | Event | Key properties |

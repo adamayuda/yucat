@@ -10,6 +10,11 @@ import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/auth/domain/usecase/ensure_signed_in_usecase.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
+import 'package:yucat/features/health_carnet/domain/usecases/get_health_events_usecase.dart';
+import 'package:yucat/features/health_carnet/presentation/models/health_due_item.dart';
+import 'package:yucat/features/health_carnet/presentation/models/health_next_up.dart';
+import 'package:yucat/features/health_carnet/presentation/utils/cat_health_schedule.dart';
+import 'package:yucat/features/health_carnet/presentation/utils/health_events_cache.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
 import 'package:yucat/features/litter_detail/presentation/mappers/litter_entity_to_model_mapper.dart';
@@ -34,6 +39,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final EnsureSignedInUsecase _ensureSignedInUsecase;
   final ReviewPromptService _reviewPromptService;
   final GetCatsUsecase _getCatsUsecase;
+  final GetHealthEventsUsecase _getHealthEventsUsecase;
   final AddScanToHistoryUsecase _addScanToHistoryUsecase;
   final AddLitterToHistoryUsecase _addLitterToHistoryUsecase;
   final LogEventUsecase _logEventUsecase;
@@ -59,6 +65,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required EnsureSignedInUsecase ensureSignedInUsecase,
     required ReviewPromptService reviewPromptService,
     required GetCatsUsecase getCatsUsecase,
+    required GetHealthEventsUsecase getHealthEventsUsecase,
     required AddScanToHistoryUsecase addScanToHistoryUsecase,
     required AddLitterToHistoryUsecase addLitterToHistoryUsecase,
     required LogEventUsecase logEventUsecase,
@@ -72,6 +79,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
        _ensureSignedInUsecase = ensureSignedInUsecase,
        _reviewPromptService = reviewPromptService,
        _getCatsUsecase = getCatsUsecase,
+       _getHealthEventsUsecase = getHealthEventsUsecase,
        _addScanToHistoryUsecase = addScanToHistoryUsecase,
        _addLitterToHistoryUsecase = addLitterToHistoryUsecase,
        _logEventUsecase = logEventUsecase,
@@ -121,7 +129,63 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     debugPrint('CATDIAG home loaded cats='
         '${cats.map((c) => '${c.name}:breed=${c.breed}:health=${c.healthConditions}').toList()}');
-    emit(HomeLoadedState(cats: cats));
+    emit(HomeLoadedState(
+      cats: cats,
+      healthNextUp: await _resolveHealthNextUp(cats),
+    ));
+  }
+
+  /// The carnet's Home card: the nearest dated act across every cat, else an
+  /// invitation to set up the first cat that has no records, else nothing.
+  ///
+  /// Reads go through `health_events_cache.dart`, so after the first load of a
+  /// session (and after any carnet write, which refreshes the mirror) this
+  /// costs no Firestore reads even though Home re-fires on every tab visit. A
+  /// cat whose read fails is skipped rather than failing the card — the rule
+  /// may be missing, the device offline — and if every cat is skipped the card
+  /// hides, like the content lanes do.
+  Future<HealthNextUp?> _resolveHealthNextUp(List<CatEntity> cats) async {
+    if (cats.isEmpty) return null;
+    final now = DateTime.now();
+    final schedules = await Future.wait(
+      cats.where((c) => c.id != null).map((cat) => _readCatSchedule(cat, now)),
+    );
+
+    HealthNextUpDue? nearest;
+    CatEntity? firstWithoutHistory;
+    for (final schedule in schedules) {
+      if (schedule == null) continue; // read failed — skip this cat
+      if (!schedule.hasHistory) firstWithoutHistory ??= schedule.cat;
+      final item = schedule.nearest;
+      if (item == null) continue;
+      if (nearest == null || item.dueDate!.isBefore(nearest.item.dueDate!)) {
+        nearest = HealthNextUpDue(cat: schedule.cat, item: item);
+      }
+    }
+
+    if (nearest != null) return nearest;
+    final setup = firstWithoutHistory;
+    return setup == null ? null : HealthNextUpSetup(cat: setup);
+  }
+
+  Future<_CatSchedule?> _readCatSchedule(CatEntity cat, DateTime now) async {
+    final catId = cat.id!;
+    var events = cachedHealthEvents(catId);
+    if (events == null) {
+      try {
+        events = await _getHealthEventsUsecase(catId: catId);
+        cacheHealthEvents(catId, events);
+      } catch (_) {
+        return null;
+      }
+    }
+    return _CatSchedule(
+      cat: cat,
+      hasHistory: events.any((e) => e.isDone),
+      nearest: nearestDueItem(
+        computeDueItems(cat: cat, history: events, now: now),
+      ),
+    );
   }
 
   Future<void> _onImageCapturedEvent(
@@ -465,4 +529,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
     return HomeErrorType.generic;
   }
+}
+
+/// One cat's contribution to the Home card, read once per session.
+class _CatSchedule {
+  final CatEntity cat;
+  final bool hasHistory;
+  final HealthDueItem? nearest;
+
+  const _CatSchedule({
+    required this.cat,
+    required this.hasHistory,
+    required this.nearest,
+  });
 }

@@ -20,6 +20,9 @@ class RecipeDisplayModel extends Equatable {
 
   /// Markdown blocks the detail screen renders. See `RecipeEntity.body`.
   final List<String> body;
+  /// Allergen keys from the recipe's canonical English ingredients, for
+  /// filtering against a cat's declared allergies. Never rendered.
+  final List<String> allergenKeys;
 
   const RecipeDisplayModel({
     required this.id,
@@ -35,6 +38,7 @@ class RecipeDisplayModel extends Equatable {
     this.steps = const [],
     this.tip,
     this.body = const [],
+    this.allergenKeys = const [],
   });
 
   /// Lower-cased name + description, so the list's filter doesn't re-derive the
@@ -56,5 +60,6 @@ class RecipeDisplayModel extends Equatable {
         steps,
         tip,
         body,
+        allergenKeys,
       ];
 }

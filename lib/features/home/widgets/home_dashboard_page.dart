@@ -4,7 +4,9 @@ import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/food_guide/presentation/models/food_guide_display_model.dart';
 import 'package:yucat/features/home/widgets/food_guide_section.dart';
 import 'package:yucat/features/articles/presentation/models/article_display_model.dart';
+import 'package:yucat/features/health_carnet/presentation/models/health_next_up.dart';
 import 'package:yucat/features/home/widgets/home_articles_section.dart';
+import 'package:yucat/features/home/widgets/home_health_next_up_card.dart';
 import 'package:yucat/features/home/widgets/home_mission_card.dart';
 import 'package:yucat/features/home/widgets/home_recipes_section.dart';
 import 'package:yucat/features/home/widgets/home_scan_header.dart';
@@ -12,7 +14,13 @@ import 'package:yucat/features/recipes/presentation/models/recipe_display_model.
 import 'package:yucat/presentation/components/ds_bottom_nav.dart';
 
 /// The Home tab's discovery feed: [HomeScanHeader] (search + the scan CTA, as
-/// one blue slab) then the three content lanes and the mission panel.
+/// one blue slab), then — when there is one — the carnet's [HomeHealthNextUpCard],
+/// then the three content lanes and the mission panel.
+///
+/// The health card is the one per-cat element on an otherwise discovery-only
+/// page, and it is here because this is the screen every user sees: Cat Detail,
+/// the carnet's other door, reaches about one active subscriber in four. It is
+/// absent (not empty) when [healthNextUp] is null, like a lane that hid itself.
 ///
 /// ⚠️ The header bleeds under the status bar, so this page's `SafeArea` passes
 /// `top: false` and the list starts at zero top padding — [HomeScanHeader] adds
@@ -41,6 +49,8 @@ class HomeDashboardPage extends StatelessWidget {
   final VoidCallback onSeeAllFoodGuide;
   final VoidCallback onSeeAllArticles;
   final ValueChanged<ArticleDisplayModel> onArticleTap;
+  final HealthNextUp? healthNextUp;
+  final ValueChanged<HealthNextUp> onHealthNextUpTap;
 
   const HomeDashboardPage({
     super.key,
@@ -52,6 +62,8 @@ class HomeDashboardPage extends StatelessWidget {
     required this.onSeeAllFoodGuide,
     required this.onSeeAllArticles,
     required this.onArticleTap,
+    required this.onHealthNextUpTap,
+    this.healthNextUp,
   });
 
   @override
@@ -80,6 +92,18 @@ class HomeDashboardPage extends StatelessWidget {
               // Unpadded on purpose: the blue runs to both screen edges.
               HomeScanHeader(onSearchTap: onSearchTap, onScanTap: onScanTap),
               const SizedBox(height: DSDimens.sizeL),
+              if (healthNextUp case final nextUp?) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: DSDimens.sizeL,
+                  ),
+                  child: HomeHealthNextUpCard(
+                    nextUp: nextUp,
+                    onTap: () => onHealthNextUpTap(nextUp),
+                  ),
+                ),
+                const SizedBox(height: DSDimens.sizeL),
+              ],
               // Unpadded on purpose — the lane scrolls under the screen edges.
               FoodGuideSection(
                 onSeeAll: onSeeAllFoodGuide,

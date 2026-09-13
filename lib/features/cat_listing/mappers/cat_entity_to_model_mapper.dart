@@ -12,6 +12,7 @@ class CatEntityToModelMapperImpl extends CatEntityToModelMapper {
       id: entity.id,
       name: entity.name,
       age: entity.age,
+      birthDate: entity.birthDate,
       weight: entity.weight,
       neutered: entity.neutered,
       profileImageUrl: entity.profileImageUrl,
@@ -23,6 +24,7 @@ class CatEntityToModelMapperImpl extends CatEntityToModelMapper {
       coatType: entity.coatType,
       gender: entity.gender,
       healthConditions: entity.healthConditions,
+      allergies: entity.allergies,
     );
   }
 }

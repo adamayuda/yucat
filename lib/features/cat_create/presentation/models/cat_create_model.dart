@@ -6,6 +6,10 @@ class CatCreateModel extends Equatable {
   final String? id;
   final String name;
   final int? age;
+
+  /// Set only when the owner picked a birthday on the Age step; [age] is then
+  /// derived from it. Moving the wheels clears it (`clearBirthDate`).
+  final DateTime? birthDate;
   final String? ageGroup;
   final double? weight;
   final bool neutered;
@@ -23,6 +27,7 @@ class CatCreateModel extends Equatable {
     this.id,
     required this.name,
     this.age,
+    this.birthDate,
     this.ageGroup,
     this.weight,
     this.neutered = false,
@@ -37,10 +42,15 @@ class CatCreateModel extends Equatable {
     this.healthConditions = const [],
   });
 
+  /// `??` semantics throughout, so a null argument keeps the value. The one
+  /// field that must be clearable — the birthday, when the wheels move — has
+  /// an explicit [clearBirthDate] flag instead.
   CatCreateModel copyWith({
     String? id,
     String? name,
     int? age,
+    DateTime? birthDate,
+    bool clearBirthDate = false,
     String? ageGroup,
     double? weight,
     bool? neutered,
@@ -58,6 +68,7 @@ class CatCreateModel extends Equatable {
       id: id ?? this.id,
       name: name ?? this.name,
       age: age ?? this.age,
+      birthDate: clearBirthDate ? null : birthDate ?? this.birthDate,
       ageGroup: ageGroup ?? this.ageGroup,
       weight: weight ?? this.weight,
       neutered: neutered ?? this.neutered,
@@ -78,6 +89,7 @@ class CatCreateModel extends Equatable {
         id,
         name,
         age,
+        birthDate,
         ageGroup,
         weight,
         neutered,

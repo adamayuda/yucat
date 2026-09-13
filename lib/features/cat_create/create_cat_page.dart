@@ -462,12 +462,28 @@ class _CreateCatPageState extends State<CreateCatPage> {
         return AgeStep(
           key: const ValueKey('step_3'),
           age: cat.age,
+          birthDate: cat.birthDate,
           onAgeChanged: (value) {
             final currentState = _bloc.state;
             if (currentState is CatCreateLoadedState) {
+              // The wheels are the owner's word on the age: a birthday they
+              // gave earlier would contradict them, so it goes.
               final updatedCat = currentState.cat.copyWith(
                 age: value,
                 ageGroup: ageGroupFromMonths(value),
+                clearBirthDate: true,
+              );
+              _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
+            }
+          },
+          onBirthDateChanged: (date) {
+            final currentState = _bloc.state;
+            if (currentState is CatCreateLoadedState) {
+              final months = monthsSince(date);
+              final updatedCat = currentState.cat.copyWith(
+                birthDate: date,
+                age: months,
+                ageGroup: ageGroupFromMonths(months),
               );
               _bloc.add(CatCreateUpdateCatEvent(cat: updatedCat));
             }

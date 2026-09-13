@@ -35,6 +35,11 @@ class HomeSkeleton extends StatelessWidget {
             // the individual bones below rather than on the list.
             _ScanHeaderBone(),
             SizedBox(height: DSDimens.sizeL),
+            // Mirrors `HomeHealthNextUpCard`. Most users have a cat, so the
+            // loaded page usually carries the card; a bone here keeps the
+            // lanes from jumping up when it lands.
+            _Inset(child: _NextUpBone()),
+            SizedBox(height: DSDimens.sizeL),
             _Inset(child: _FoodGuideLaneBone()),
             SizedBox(height: DSDimens.sizeL),
             _Inset(child: _RecipeLaneBone()),
@@ -217,6 +222,38 @@ class _LaneStrip extends StatelessWidget {
           alignment: Alignment.centerLeft,
           maxWidth: double.infinity,
           child: Row(mainAxisSize: MainAxisSize.min, children: children),
+        ),
+      ),
+    );
+  }
+}
+
+/// Mirrors `HomeHealthNextUpCard`: avatar, eyebrow, title, one body line.
+class _NextUpBone extends StatelessWidget {
+  const _NextUpBone();
+
+  @override
+  Widget build(BuildContext context) {
+    return DSCard(
+      padding: const EdgeInsets.all(DSDimens.sizeS),
+      child: DSShimmer(
+        child: Row(
+          children: [
+            const ShimmerBone(width: 44, height: 44, radius: DSRadii.pill),
+            const SizedBox(width: DSDimens.sizeXs),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  ShimmerBone(width: 90, height: 12, radius: DSRadii.sm),
+                  SizedBox(height: DSDimens.sizeXxs),
+                  ShimmerBone(width: 160, height: 18, radius: DSRadii.sm),
+                  SizedBox(height: DSDimens.sizeXxs),
+                  ShimmerBone(height: 14, radius: DSRadii.sm),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

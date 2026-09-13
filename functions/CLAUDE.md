@@ -618,8 +618,13 @@ npm run logs       # firebase functions:log
 Deploy from the **repo root**:
 
 ```bash
-firebase deploy --only functions                          # all three
-firebase deploy --only functions:fetchProductByImageV2    # one
+# ⚠️ Deploy by NAME. The project also hosts the legacy `fetchProductByImage` and
+# `fetchProductByBarcode` from the separate yucat-api repo; a bare
+# `deploy --only functions` sees them as "not in local source", asks to delete
+# them, and ABORTS when non-interactive. They must stay (pre-V2 App Store builds).
+npx firebase-tools@latest deploy --project yucat-d8fb5 --only \
+  functions:fetchProductByImageV2,functions:analyzeProductLabel,functions:nightlySelfHeal,functions:generateCatNarrative,functions:analyzeBrand
+npx firebase-tools@latest deploy --only functions:fetchProductByImageV2    # one
 ```
 
 > **Deploys happen only on explicit instruction.** Building and testing locally is never

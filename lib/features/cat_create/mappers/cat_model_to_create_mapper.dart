@@ -12,6 +12,7 @@ class CatModelToCreateMapperImpl extends CatModelToCreateMapper {
       id: model.id,
       name: model.name,
       age: model.age,
+      birthDate: model.birthDate,
       ageGroup: model.ageGroup,
       weight: model.weight,
       neutered: model.neutered,

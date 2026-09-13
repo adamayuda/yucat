@@ -9,7 +9,9 @@ import 'package:yucat/features/analytics/content_analytics.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_screen_view_usecase.dart';
 import 'package:yucat/features/articles/presentation/models/article_display_model.dart';
+import 'package:yucat/features/cat_listing/mappers/cat_entity_to_model_mapper.dart';
 import 'package:yucat/features/food_guide/presentation/models/food_guide_display_model.dart';
+import 'package:yucat/features/health_carnet/presentation/models/health_next_up.dart';
 import 'package:yucat/features/home/bloc/home_bloc.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
@@ -47,6 +49,32 @@ class _HomePage extends State<HomePage> {
 
   void _openSearch() {
     context.router.push(const SearchRoute());
+  }
+
+  /// The health card. Re-fires Home on return so the card reflects whatever
+  /// the carnet just recorded — cheap, since the carnet keeps the events
+  /// mirror current and Home reads from it.
+  Future<void> _openHealthCarnet(HealthNextUp nextUp) async {
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.homeHealthCardTapped,
+      properties: {
+        'state': switch (nextUp) {
+          HealthNextUpDue() => 'due',
+          HealthNextUpSetup() => 'setup',
+        },
+        if (nextUp case HealthNextUpDue(:final item)) ...{
+          'protocol_id': item.protocol.id,
+          'urgency': item.urgency.wire,
+          'days_until': item.daysUntil ?? 0,
+        },
+        'cat_id': nextUp.cat.id,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+    final model = sl<CatEntityToModelMapper>()(nextUp.cat);
+    await context.router.push(HealthCarnetRoute(cat: model));
+    if (!mounted) return;
+    _bloc.add(HomeInitialEvent());
   }
 
   /// Home's scan CTA. Unlike the nav's Scan slot there is no `setActiveIndex`
@@ -137,11 +165,14 @@ class _HomePage extends State<HomePage> {
             onCancel: () => _bloc.add(const ScanAbandonedEvent()),
           ),
         );
-      // `cats` is still loaded by HomeBloc — it drives the People-profile sync
-      // and the OneSignal `has_cat` tag — but nothing on the page renders it
-      // while the greeting card is unmounted.
-      case HomeLoadedState():
+      // `cats` is loaded by HomeBloc for the People-profile sync and for the
+      // health card's schedule; nothing on the page renders the list itself
+      // while the greeting card is unmounted. (The OneSignal `has_cat` tag it
+      // used to feed was dropped for the six-tag budget.)
+      case HomeLoadedState(:final healthNextUp):
         return HomeDashboardPage(
+          healthNextUp: healthNextUp,
+          onHealthNextUpTap: _openHealthCarnet,
           onSearchTap: _openSearch,
           onScanTap: _openScanner,
           onSeeAllRecipes: _openRecipesTab,

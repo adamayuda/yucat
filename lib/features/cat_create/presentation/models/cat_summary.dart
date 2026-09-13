@@ -55,6 +55,7 @@ class CatSummary {
         id: cat.id,
         name: cat.name,
         age: cat.age,
+        birthDate: cat.birthDate,
         weight: cat.weight,
         neutered: cat.neutered,
         profileImageUrl: cat.profileImageUrl,

@@ -139,6 +139,15 @@ class RecipeEntity {
   /// detail screen renders this when it is non-empty and falls back to the
   /// structured fields otherwise. Canonical English; see `DSMarkdownBlock`.
   final List<String> body;
+  /// `CatAllergen` keys detected in this recipe's **canonical English**
+  /// ingredient names.
+  ///
+  /// Resolved once in the mapper rather than at match time, because by the time
+  /// the UI sees a recipe its `ingredients` have already been swapped for the
+  /// localized ones — `RecipeIngredient.name` is only canonical English in an
+  /// English build. Matching translated names against English needles would
+  /// silently do nothing in five of the six locales.
+  final List<String> allergenKeys;
 
   const RecipeEntity({
     required this.id,
@@ -154,5 +163,6 @@ class RecipeEntity {
     this.steps = const [],
     this.tip,
     this.body = const [],
+    this.allergenKeys = const [],
   });
 }
