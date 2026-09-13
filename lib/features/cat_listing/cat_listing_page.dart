@@ -62,6 +62,7 @@ class _CatListingPageState extends State<CatListingPage> {
       case CatListingLoadedState():
         return CatListingLoadedWidget(
           cats: state.cats,
+          health: state.health,
           onPressed: () =>
               _bloc.add(CatListingCreateCatEvent(context: context)),
         );

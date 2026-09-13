@@ -10,7 +10,11 @@ import 'package:yucat/features/cat/domain/usecases/delete_cat_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/update_cat_photo_usecase.dart';
 import 'package:yucat/features/cat_listing/mappers/cat_entity_to_model_mapper.dart';
+import 'package:yucat/features/cat_listing/mappers/cat_model_to_entity.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
+import 'package:yucat/features/health_carnet/domain/usecases/get_health_events_usecase.dart';
+import 'package:yucat/features/health_carnet/presentation/models/cat_health_summary.dart';
+import 'package:yucat/features/health_carnet/presentation/utils/cat_health_summary_resolver.dart';
 
 part 'cat_detail_event.dart';
 part 'cat_detail_state.dart';
@@ -21,6 +25,7 @@ class CatDetailBloc extends Bloc<CatDetailEvent, CatDetailState> {
   final GetCatsUsecase _getCatsUsecase;
   final CurrentUserUsecase _currentUserUsecase;
   final CatEntityToModelMapper _catEntityToModelMapper;
+  final GetHealthEventsUsecase _getHealthEventsUsecase;
   final LogEventUsecase _logEventUsecase;
 
   CatDetailBloc({
@@ -29,12 +34,14 @@ class CatDetailBloc extends Bloc<CatDetailEvent, CatDetailState> {
     required GetCatsUsecase getCatsUsecase,
     required CurrentUserUsecase currentUserUsecase,
     required CatEntityToModelMapper catEntityToModelMapper,
+    required GetHealthEventsUsecase getHealthEventsUsecase,
     required LogEventUsecase logEventUsecase,
   })  : _deleteCatUsecase = deleteCatUsecase,
         _updateCatPhotoUsecase = updateCatPhotoUsecase,
         _getCatsUsecase = getCatsUsecase,
         _currentUserUsecase = currentUserUsecase,
         _catEntityToModelMapper = catEntityToModelMapper,
+        _getHealthEventsUsecase = getHealthEventsUsecase,
         _logEventUsecase = logEventUsecase,
         super(CatDetailInitialState()) {
     on<CatDetailInitialEvent>(_onCatDetailInitialEvent);
@@ -42,6 +49,7 @@ class CatDetailBloc extends Bloc<CatDetailEvent, CatDetailState> {
     on<CatDetailEditEvent>(_onCatDetailEditEvent);
     on<CatDetailPhotoChangedEvent>(_onCatDetailPhotoChangedEvent);
     on<CatDetailReloadEvent>(_onCatDetailReloadEvent);
+    on<CatDetailHealthRefreshEvent>(_onCatDetailHealthRefreshEvent);
   }
 
   Future<void> _onCatDetailInitialEvent(
@@ -58,8 +66,41 @@ class CatDetailBloc extends Bloc<CatDetailEvent, CatDetailState> {
       },
     );
 
+    // The cat renders at once; the carnet row fills in when its read lands.
+    // This bloc is root-provided, so `health: null` here also stops the
+    // previous cat's summary showing on this one for a frame.
     emit(CatDetailLoadedState(cat: event.cat));
+    await _emitHealth(emit);
   }
+
+  /// Resolves the carnet summary for whatever cat the page currently shows
+  /// and attaches it. Reads through `health_events_cache.dart`, so a return
+  /// from the carnet — which refreshes the mirror on every write — costs no
+  /// Firestore read. Null (a failed read) leaves the row on its neutral copy.
+  ///
+  /// Re-reads `state` after the await rather than trusting the event's cat:
+  /// a photo change or reload may have emitted meanwhile, and this must not
+  /// put the older model back.
+  Future<void> _emitHealth(Emitter<CatDetailState> emit) async {
+    final current = state;
+    if (current is! CatDetailLoadedState) return;
+    final health = await resolveCatHealth(
+      cat: catEntityFromModel(current.cat),
+      getHealthEvents: _getHealthEventsUsecase,
+      now: DateTime.now(),
+    );
+    final latest = state;
+    if (latest is! CatDetailLoadedState || latest.cat.id != current.cat.id) {
+      return;
+    }
+    emit(latest.copyWith(health: health, clearHealth: health == null));
+  }
+
+  Future<void> _onCatDetailHealthRefreshEvent(
+    CatDetailHealthRefreshEvent event,
+    Emitter<CatDetailState> emit,
+  ) =>
+      _emitHealth(emit);
 
   Future<void> _onCatDetailDeleteEvent(
     CatDetailDeleteEvent event,
@@ -118,7 +159,15 @@ class CatDetailBloc extends Bloc<CatDetailEvent, CatDetailState> {
     final catId = event.cat.id;
     if (catId == null) return;
 
-    emit(CatDetailLoadedState(cat: event.cat, isUploadingPhoto: true));
+    final health = switch (state) {
+      CatDetailLoadedState(:final health) => health,
+      _ => null,
+    };
+    emit(CatDetailLoadedState(
+      cat: event.cat,
+      isUploadingPhoto: true,
+      health: health,
+    ));
 
     try {
       final url = await _updateCatPhotoUsecase.call(
@@ -139,11 +188,14 @@ class CatDetailBloc extends Bloc<CatDetailEvent, CatDetailState> {
         },
       );
 
-      emit(CatDetailLoadedState(cat: event.cat.copyWith(profileImageUrl: url)));
+      emit(CatDetailLoadedState(
+        cat: event.cat.copyWith(profileImageUrl: url),
+        health: health,
+      ));
     } catch (e) {
       debugPrint('Cat photo update failed: $e');
       emit(CatDetailPhotoErrorState());
-      emit(CatDetailLoadedState(cat: event.cat));
+      emit(CatDetailLoadedState(cat: event.cat, health: health));
     }
   }
 
@@ -161,7 +213,17 @@ class CatDetailBloc extends Bloc<CatDetailEvent, CatDetailState> {
       final cats = await _getCatsUsecase(userId: user.uid);
       for (final cat in cats) {
         if (cat.id == event.catId) {
-          emit(CatDetailLoadedState(cat: _catEntityToModelMapper(cat)));
+          final health = switch (state) {
+            CatDetailLoadedState(:final health) => health,
+            _ => null,
+          };
+          emit(CatDetailLoadedState(
+            cat: _catEntityToModelMapper(cat),
+            health: health,
+          ));
+          // An edit can change age or neutered status, which moves the
+          // schedule; re-derive from the (cached) records.
+          await _emitHealth(emit);
           return;
         }
       }

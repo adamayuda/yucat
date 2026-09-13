@@ -535,7 +535,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingProfileIntroQuote =>
-      'A quick profile unlocks tailored verdicts on every bag';
+      'A quick profile unlocks tailored verdicts on every bag — and a health record that knows what\'s due';
 
   @override
   String get onboardingProfileNameLabel => 'Name your cat';
@@ -630,17 +630,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingNotifPrimerTitle =>
-      'We\'ll keep an eye on\nyour cat\'s food';
+      'We\'ll keep an eye on\nyour cat\'s health';
 
   @override
   String get onboardingSetUpReminders => 'Set up reminders';
 
   @override
-  String get onboardingNotifMatchDropped => 'Match dropped';
+  String get onboardingNotifReminderEyebrow => 'Vaccine due';
 
   @override
   String get onboardingNotifMockBody =>
-      'Luna\'s food changed recipe — see the new verdict 🔍';
+      'Luna\'s rabies booster is due next week — time to book the vet 🩺';
 
   @override
   String get onboardingRemindersTitle => 'What should we\nping you about?';
@@ -658,7 +658,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingRemindersOptionBetterFit => 'When a better fit is found';
 
   @override
-  String get onboardingRemindersOptionMonthly => 'Monthly check-in';
+  String get onboardingRemindersOptionMonthly =>
+      'Vaccine & vet-visit reminders';
 
   @override
   String get onboardingRemindersCalloutPart1 =>
@@ -2021,6 +2022,28 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t update the photo. Please try again.';
 
   @override
+  String catDetailHealthRecords(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count records',
+      one: '1 record',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String catDetailHealthLastWeight(String kg) {
+    return 'last weight $kg kg';
+  }
+
+  @override
+  String get catDetailHealthAllClear => 'All up to date';
+
+  @override
+  String get catDetailHealthSetup => 'Not set up yet · takes 30 seconds';
+
+  @override
   String get catListingTitle => 'Your cats';
 
   @override
@@ -3108,6 +3131,283 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get healthAddTitleRequired => 'Give this record a title.';
+
+  @override
+  String get homeHealthAllClearTitle => 'All up to date';
+
+  @override
+  String homeHealthAllClearNext(String protocol, String date) {
+    return 'Next: $protocol · $date';
+  }
+
+  @override
+  String get homeHealthAllClearNone => 'Nothing due in the next 12 months';
+
+  @override
+  String homeHealthOthersDue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count more due across your cats',
+      one: '+1 more due across your cats',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileHealthLabel => 'Health record';
+
+  @override
+  String profileHealthCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count due soon',
+      one: '1 due soon',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profileHealthSetup(String catName) {
+    return 'Set up $catName\'s record';
+  }
+
+  @override
+  String get healthCatPickerTitle => 'Whose record?';
+
+  @override
+  String get healthVetTitle => 'Your vet';
+
+  @override
+  String get healthVetEmpty =>
+      'No vet saved yet. Add one to call in a tap and prefill new records.';
+
+  @override
+  String get healthVetAdd => 'Add';
+
+  @override
+  String get healthVetEdit => 'Edit';
+
+  @override
+  String get healthVetCall => 'Call';
+
+  @override
+  String get healthVetCallError => 'Couldn\'t open the phone app.';
+
+  @override
+  String get healthVetFieldName => 'Vet\'s name';
+
+  @override
+  String get healthVetFieldClinic => 'Clinic';
+
+  @override
+  String get healthVetFieldPhone => 'Phone';
+
+  @override
+  String get healthVetFieldAddress => 'Address';
+
+  @override
+  String get healthVetSave => 'Save';
+
+  @override
+  String get healthVetRemove => 'Remove vet';
+
+  @override
+  String get healthVetNameRequired => 'Give the vet or clinic a name.';
+
+  @override
+  String healthLifestyleQuestion(String catName) {
+    return 'Does $catName go outdoors?';
+  }
+
+  @override
+  String get healthLifestyleIndoor => 'Indoor only';
+
+  @override
+  String get healthLifestyleOutdoor => 'Goes outdoors';
+
+  @override
+  String get healthLifestyleTitle => 'Lifestyle';
+
+  @override
+  String get healthLifestyleChange => 'Change';
+
+  @override
+  String get healthLifestyleUnset => 'Not set yet';
+
+  @override
+  String get healthLifestyleOutdoorNote =>
+      'Outdoor cats get the FeLV booster and monthly deworming scheduled.';
+
+  @override
+  String get healthLifestyleIndoorNote =>
+      'Indoor cats keep the standard schedule.';
+
+  @override
+  String healthLifestyleUnsetNote(String catName) {
+    return 'Tell us whether $catName goes out and we\'ll tailor the schedule.';
+  }
+
+  @override
+  String get healthCarnetLearnMore => 'Learn more';
+
+  @override
+  String get healthAddPhotoLabel => 'Photo';
+
+  @override
+  String get healthAddPhotoHint => 'Add a booklet page or a lab result';
+
+  @override
+  String get healthAddPhotoRemove => 'Remove';
+
+  @override
+  String get healthAttachmentUploadFailed =>
+      'The record was saved, but the photo couldn\'t be uploaded.';
+
+  @override
+  String get healthAttachmentViewerTitle => 'Photo';
+
+  @override
+  String get healthBookletScanCta => 'Scan the booklet';
+
+  @override
+  String get healthBookletPickerRow => 'Scan the vaccination booklet';
+
+  @override
+  String get healthBookletPickerRowDesc =>
+      'Photograph a page and we\'ll fill in the records';
+
+  @override
+  String get healthBookletReading => 'Reading the page…';
+
+  @override
+  String get healthBookletReviewTitle => 'Records found';
+
+  @override
+  String get healthBookletReviewIntro =>
+      'Untick anything that\'s wrong. Rows we\'re unsure about start unticked.';
+
+  @override
+  String get healthBookletUnreadable =>
+      'We couldn\'t read that page. Try a sharper, straight-on photo.';
+
+  @override
+  String get healthBookletNotBooklet =>
+      'That doesn\'t look like a vaccination booklet page.';
+
+  @override
+  String get healthBookletNone => 'No dated records on that page.';
+
+  @override
+  String healthBookletAdd(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count records',
+      one: 'Add 1 record',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get healthBookletLowConfidence => 'Unsure';
+
+  @override
+  String get healthBookletEditDate => 'Edit date';
+
+  @override
+  String get healthBookletError =>
+      'Couldn\'t reach the reader. Check your connection and try again.';
+
+  @override
+  String get healthBookletTryAgain => 'Try again';
+
+  @override
+  String get healthShareTooltip => 'Share';
+
+  @override
+  String healthShareSubject(String catName) {
+    return '$catName\'s health record';
+  }
+
+  @override
+  String healthShareHeading(String catName) {
+    return '$catName · Health record';
+  }
+
+  @override
+  String get healthShareBirthday => 'Born';
+
+  @override
+  String get healthShareAge => 'Age';
+
+  @override
+  String get healthShareWeight => 'Last weight';
+
+  @override
+  String get healthShareLifestyle => 'Lifestyle';
+
+  @override
+  String get healthShareVaccines => 'Vaccines';
+
+  @override
+  String get healthShareUpcoming => 'Coming up';
+
+  @override
+  String get healthShareAllergies => 'Allergies';
+
+  @override
+  String get healthShareVet => 'Vet';
+
+  @override
+  String healthShareValidUntil(String date) {
+    return 'valid until $date';
+  }
+
+  @override
+  String get healthShareNoRecord => 'no record';
+
+  @override
+  String get healthShareFooter => 'Shared from YuCat';
+
+  @override
+  String get healthAddFieldCourseDaysLabel => 'Course length (days)';
+
+  @override
+  String get healthAddFieldCourseDaysHint => 'e.g. 7';
+
+  @override
+  String get healthAddFieldDosesPerDayLabel => 'Doses per day';
+
+  @override
+  String get healthAddFieldDosesPerDayHint => 'e.g. 2';
+
+  @override
+  String get healthCarnetMedicationTitle => 'Medication';
+
+  @override
+  String healthCarnetDosesPerDay(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count×/day',
+      one: '1×/day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetCourseDaysLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days left',
+      one: '1 day left',
+      zero: 'Last day',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get healthCarnetEntryEmpty => 'Vaccines, visits and weight';

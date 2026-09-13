@@ -62,9 +62,9 @@ class HomeLoadedState extends HomeState {
   /// [healthNextUp]; nothing on the page renders the list itself.
   final List<CatEntity> cats;
 
-  /// The carnet's Home surface — the nearest dated act across every cat, or
-  /// the setup invitation. Null hides the card (no cats, reads failed, or a
-  /// fully set-up carnet with nothing due within a year).
+  /// The carnet's Home surface — the nearest dated act across every cat, the
+  /// setup invitation, or the all-clear. Null hides the card, and now only
+  /// means no cats or every read failed: a quiet carnet earns the all-clear.
   final HealthNextUp? healthNextUp;
 
   HomeLoadedState({this.cats = const [], this.healthNextUp})

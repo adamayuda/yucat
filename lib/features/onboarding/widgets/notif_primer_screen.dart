@@ -8,7 +8,12 @@ import 'package:yucat/presentation/components/onboarding_floating_button.dart';
 ///
 /// MOCK ONLY — this previews the value of alerts but does not request the
 /// iOS notification permission or register for push.
-// TODO(feature): wire real notification permission + push delivery.
+///
+/// The mock previews a **health-carnet reminder** ("Vaccine due · Luna's rabies
+/// booster is due next week"), not the food-recipe alert it used to show: the
+/// carnet is the one thing in the app that moves on a calendar, and the
+/// reminder the deferred push phase will actually send is this one. The
+/// `reminders` screen after it names the same thing.
 class NotifPrimerScreen extends StatelessWidget {
   final VoidCallback onNext;
 
@@ -213,10 +218,14 @@ class _MockNotification extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const _HeartMeter(filled: 1, total: 4),
+                    const Icon(
+                      Icons.vaccines_outlined,
+                      size: 14,
+                      color: DSColors.coralAccent,
+                    ),
                     const SizedBox(width: DSDimens.sizeXxs),
                     Text(
-                      l10n.onboardingNotifMatchDropped,
+                      l10n.onboardingNotifReminderEyebrow,
                       style: DSTextStyles.caption.copyWith(
                         color: DSColors.inkTertiary,
                         fontWeight: FontWeight.w600,
@@ -236,35 +245,6 @@ class _MockNotification extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Row of hearts — [filled] coral, the rest light grey — echoing the
-/// reference notification's life/scan meter.
-class _HeartMeter extends StatelessWidget {
-  final int filled;
-  final int total;
-
-  const _HeartMeter({required this.filled, required this.total});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var i = 0; i < total; i++)
-          Padding(
-            padding: const EdgeInsets.only(right: 2),
-            child: Icon(
-              Icons.favorite,
-              size: 13,
-              color: i < filled
-                  ? DSColors.coralAccent
-                  : DSColors.tintGreySoft,
-            ),
-          ),
-      ],
     );
   }
 }

@@ -14,6 +14,14 @@ import 'package:yucat/features/cat_detail/presentation/widgets/cat_hero_section.
 import 'package:yucat/features/cat_detail/presentation/widgets/cat_stat_tile.dart';
 import 'package:yucat/features/cat_listing/mappers/cat_model_to_entity.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
+import 'package:yucat/features/health_carnet/presentation/models/cat_health_summary.dart';
+import 'package:yucat/features/health_carnet/presentation/utils/health_date_format.dart';
+import 'package:yucat/features/health_carnet/presentation/utils/health_entry_analytics.dart';
+import 'package:yucat/features/health_carnet/presentation/utils/health_labels.dart';
+import 'package:yucat/features/health_carnet/presentation/widgets/due_item_card.dart';
+import 'package:yucat/service_locator.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
@@ -56,6 +64,30 @@ class _CatDetailPageState extends State<CatDetailPage> {
     _bloc.add(CatDetailReloadEvent(catId: cat.id!));
   }
 
+  /// The carnet row. Logs the shared "carnet door" event with this surface,
+  /// then reloads the cat on return: the carnet may have changed the profile
+  /// weight, and the reload re-derives the health row from the (cached) mirror.
+  Future<void> _openCarnet(CatModel cat, CatHealthSummary? health) async {
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.homeHealthCardTapped,
+      properties: healthEntryTapProperties(
+        surface: HealthEntrySurface.catDetail,
+        state: healthEntryStateOf(health),
+        cat: catEntityFromModel(cat),
+        item: health?.nearest,
+      ),
+    );
+    await context.router.push(HealthCarnetRoute(cat: cat));
+    if (!mounted) return;
+    // A weigh-in in the carnet updates the profile weight, so re-read the cat
+    // (which re-derives the health row too) rather than only the row.
+    if (cat.id != null) {
+      _bloc.add(CatDetailReloadEvent(catId: cat.id!));
+    } else {
+      _bloc.add(const CatDetailHealthRefreshEvent());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CatDetailBloc, CatDetailState>(
@@ -94,6 +126,7 @@ class _CatDetailPageState extends State<CatDetailPage> {
         final cat = state is CatDetailLoadedState ? state.cat : widget.cat;
         final isUploadingPhoto =
             state is CatDetailLoadedState && state.isUploadingPhoto;
+        final health = state is CatDetailLoadedState ? state.health : null;
 
         return Scaffold(
           backgroundColor: DSColors.pageBackground,
@@ -142,7 +175,10 @@ class _CatDetailPageState extends State<CatDetailPage> {
                         ),
                       ],
                       const SizedBox(height: DSDimens.sizeS),
-                      _HealthCarnetCard(cat: cat),
+                      _HealthCarnetCard(
+                        health: health,
+                        onTap: () => _openCarnet(cat, health),
+                      ),
                       const SizedBox(height: DSDimens.sizeS),
                       _DietaryTipsCard(cat: cat),
                       const SizedBox(height: DSDimens.sizeL),
@@ -410,22 +446,54 @@ class _DeleteLink extends StatelessWidget {
 /// Entry point to the cat's health record — vaccines, visits, treatments and
 /// weight over time.
 ///
-/// Deliberately shows a **static** subtitle rather than a live "3 to do" count.
-/// The count is derivable only from the cat's records, and `CatDetailBloc` does
-/// no I/O at all by design; adding a Firestore read here to badge a row would
-/// trade that for very little. The number lives inside the carnet, where the
-/// data already is.
+/// Live since the carnet's visibility work: the row carries the nearest due
+/// item with its urgency pill, the record count and the last weight, read
+/// through the shared `resolveCatHealth` (cache-backed, so a return from the
+/// carnet costs nothing). Three fallbacks, in order of honesty:
+///
+/// - [health] is null (the read failed, or has not landed yet) → the original
+///   static subtitle. Never the setup invite: a failed read on a full carnet
+///   must not tell the owner to start over.
+/// - No history → the setup invite.
+/// - History but nothing due inside the horizon → "All up to date".
 class _HealthCarnetCard extends StatelessWidget {
-  final CatModel cat;
+  final CatHealthSummary? health;
+  final VoidCallback onTap;
 
-  const _HealthCarnetCard({required this.cat});
+  const _HealthCarnetCard({required this.health, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = healthLocaleOf(context);
+    final health = this.health;
+    final nearest = health?.nearest;
+
+    final String line1;
+    if (health == null) {
+      line1 = l10n.healthCarnetEntryEmpty;
+    } else if (!health.hasHistory) {
+      line1 = l10n.catDetailHealthSetup;
+    } else if (nearest != null) {
+      line1 = '${healthProtocolName(nearest.protocol.id, l10n)} · '
+          '${healthUrgencyLabel(nearest, l10n)}';
+    } else {
+      line1 = l10n.catDetailHealthAllClear;
+    }
+
+    String? line2;
+    if (health != null && health.hasHistory) {
+      final parts = [l10n.catDetailHealthRecords(health.recordCount)];
+      final kg = health.latestWeightKg;
+      if (kg != null) {
+        parts.add(l10n.catDetailHealthLastWeight(healthFormatKg(kg, locale)));
+      }
+      line2 = parts.join(' · ');
+    }
+
     return DSCard(
       padding: const EdgeInsets.all(DSDimens.sizeS),
-      onTap: () => context.router.push(HealthCarnetRoute(cat: cat)),
+      onTap: onTap,
       child: Row(
         children: [
           Container(
@@ -446,14 +514,33 @@ class _HealthCarnetCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.healthCarnetTitle, style: DSTextStyles.titleMd),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: DSDimens.sizeXxs,
+                  runSpacing: DSDimens.sizeXxxs,
+                  children: [
+                    Text(l10n.healthCarnetTitle, style: DSTextStyles.titleMd),
+                    if (nearest != null) HealthUrgencyPill(item: nearest),
+                  ],
+                ),
                 const SizedBox(height: DSDimens.sizeXxxs),
                 Text(
-                  l10n.healthCarnetEntryEmpty,
+                  line1,
                   style: DSTextStyles.bodyMd,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                if (line2 != null) ...[
+                  const SizedBox(height: DSDimens.sizeXxxs),
+                  Text(
+                    line2,
+                    style: DSTextStyles.caption.copyWith(
+                      color: DSColors.inkTertiary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
             ),
           ),

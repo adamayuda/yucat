@@ -99,6 +99,17 @@ class HealthEventEntity {
 
   final String? vetName;
   final String? clinic;
+
+  /// Download URL of the photo attached to this record (a booklet page, a lab
+  /// result), hosted at `cats/{catId}/health/{eventId}.jpeg`. The *file*
+  /// never rides on the entity — it is handed to the use case beside it.
+  final String? attachmentUrl;
+
+  /// A medication course: the last day the cat takes it (inclusive) and how
+  /// many doses a day. Meaningful on `treatment` records only. Stored, not
+  /// derived — a course is what the vet prescribed, not a protocol.
+  final DateTime? courseEndAt;
+  final int? dosesPerDay;
   final DateTime? createdAt;
 
   const HealthEventEntity({
@@ -114,10 +125,40 @@ class HealthEventEntity {
     this.weightKg,
     this.vetName,
     this.clinic,
+    this.attachmentUrl,
+    this.courseEndAt,
+    this.dosesPerDay,
     this.createdAt,
   });
 
+  HealthEventEntity copyWith({
+    String? id,
+    String? attachmentUrl,
+    DateTime? createdAt,
+  }) =>
+      HealthEventEntity(
+        id: id ?? this.id,
+        protocolId: protocolId,
+        category: category,
+        title: title,
+        notes: notes,
+        status: status,
+        performedAt: performedAt,
+        dueAt: dueAt,
+        intervalDays: intervalDays,
+        weightKg: weightKg,
+        vetName: vetName,
+        clinic: clinic,
+        attachmentUrl: attachmentUrl ?? this.attachmentUrl,
+        courseEndAt: courseEndAt,
+        dosesPerDay: dosesPerDay,
+        createdAt: createdAt ?? this.createdAt,
+      );
+
   bool get isDone => status == HealthEventStatus.done;
+
+  /// A dated medication course, whatever its category was saved as.
+  bool get isCourse => courseEndAt != null && performedAt != null;
 
   /// The date this record sorts by, whichever end of time it sits at.
   DateTime? get effectiveDate => performedAt ?? dueAt ?? createdAt;

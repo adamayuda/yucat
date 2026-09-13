@@ -114,6 +114,25 @@ class AnalyticsEvents {
   static const healthRecordAdded = 'Health Record Added';
   static const healthRecordDeleted = 'Health Record Deleted';
   static const healthAllergiesUpdated = 'Health Allergies Updated';
+  // The saved vet contact (cat document). `Called` carries no number —
+  // it is the owner's data, not an event property.
+  static const healthVetUpdated = 'Health Vet Updated';
+  static const healthVetCalled = 'Health Vet Called';
+  // Indoor / outdoor — the one profile fact that changes the schedule.
+  static const healthLifestyleUpdated = 'Health Lifestyle Updated';
+  // "Learn more" on a due item → the matching article. `Article Read` fires
+  // itself on the detail screen; this is the door, that is the dwell.
+  static const healthArticleOpened = 'Health Article Opened';
+  // The thumbnail on a timeline record → full-screen viewer.
+  static const healthAttachmentViewed = 'Health Attachment Viewed';
+  // The booklet reader: one photo of a vaccination-booklet page → proposed
+  // rows the owner confirms. `Scanned` is the read (outcome + counts),
+  // `Imported` the accept rate; each written row also emits
+  // `Health Record Added { source: booklet }`.
+  static const healthBookletScanned = 'Health Booklet Scanned';
+  static const healthBookletImported = 'Health Booklet Imported';
+  // The carnet as a text note through the system share sheet.
+  static const healthCarnetShared = 'Health Carnet Shared';
   static const healthCarnetLoadFailed = 'Health Carnet Load Failed';
   // First-open setup: three dated questions that turn an empty carnet into a
   // real schedule. `source` on Shown separates the auto-presented sheet from
@@ -121,7 +140,11 @@ class AnalyticsEvents {
   static const healthSetupShown = 'Health Setup Shown';
   static const healthSetupCompleted = 'Health Setup Completed';
   static const healthSetupSkipped = 'Health Setup Skipped';
-  // Home's next-up card — the carnet's surface on the screen every user sees.
+  // The carnet's "door" event, on every surface that opens it — Home's
+  // next-up card, the Cat Detail row, the cat-list pill, Profile. The name
+  // is historical (renaming would orphan the board's breakdown); `surface`
+  // tells the doors apart. Build the properties with
+  // `healthEntryTapProperties`, never by hand.
   static const homeHealthCardTapped = 'Home Health Card Tapped';
 
   // Product & search
@@ -298,6 +321,15 @@ class UserProps {
   static const onboardingCompleted = 'onboarding_completed';
   static const onboardingCompletedAt = 'onboarding_completed_at';
   static const notificationsEnabled = 'notifications_enabled';
+
+  // Health carnet — written by `UserAnalyticsService.syncHealth` from Home,
+  // across every cat. `health_next_due_at` has no unset (see that method);
+  // `health_pending_count = 0` marks it stale. Same name as the OneSignal tag
+  // the deferred push phase adds, so the two stay comparable.
+  static const healthRecordsCount = 'health_records_count';
+  static const healthPendingCount = 'health_pending_count';
+  static const healthSetupDone = 'health_setup_done';
+  static const healthNextDueAt = 'health_next_due_at';
 
   /// Mixpanel reserved. Set with `setOnce` at first identify, so it records the
   /// true first-seen date and later launches never overwrite it. Required for

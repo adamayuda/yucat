@@ -52,3 +52,13 @@ class CatDetailReloadEvent extends CatDetailEvent {
   @override
   List<Object?> get props => [catId];
 }
+
+/// Re-derives the carnet summary — fired on return from the carnet, which may
+/// have added, completed or deleted records. Cheap: the carnet keeps the
+/// events mirror current, so this is a recompute, not a fetch.
+class CatDetailHealthRefreshEvent extends CatDetailEvent {
+  const CatDetailHealthRefreshEvent();
+
+  @override
+  List<Object?> get props => [];
+}

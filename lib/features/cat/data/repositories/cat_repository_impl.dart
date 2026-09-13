@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:yucat/features/cat/data/datasources/cat_datasource.dart';
 import 'package:yucat/features/cat/data/mappers/cat_document_mapper.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
+import 'package:yucat/features/cat/domain/entities/cat_vet_contact.dart';
 import 'package:yucat/features/cat/domain/repositories/cat_repository.dart';
 
 class CatRepositoryImpl implements CatRepository {
@@ -133,5 +134,29 @@ class CatRepositoryImpl implements CatRepository {
     required List<String> allergies,
   }) async {
     await _dataSource.updateCatAllergies(catId: catId, allergies: allergies);
+  }
+
+  @override
+  Future<void> updateCatVet({
+    required String catId,
+    required CatVetContact? vet,
+  }) async {
+    await _dataSource.updateCatVet(catId: catId, vet: _mapper.vetToMap(vet));
+  }
+
+  @override
+  Future<void> updateCatLifestyle({
+    required String catId,
+    required String? lifestyle,
+  }) async {
+    await _dataSource.updateCatLifestyle(catId: catId, lifestyle: lifestyle);
+  }
+
+  @override
+  Future<void> updateCatWeight({
+    required String catId,
+    required double weight,
+  }) async {
+    await _dataSource.updateCatWeight(catId: catId, weight: weight);
   }
 }

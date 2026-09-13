@@ -9,12 +9,15 @@ import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 
 /// Home's "Next up" card: the one carnet item that matters most right now,
-/// across every cat — or, for a cat with no records, the way into the setup.
+/// across every cat — or, for a cat with no records, the way into the setup —
+/// or, for a household whose carnets are all set up and quiet, an all-clear
+/// that names the next act beyond the horizon.
 ///
-/// This is the carnet's only surface on the screen every user sees; Cat Detail
-/// (the other entry point) reaches roughly one active subscriber in four. The
-/// card renders nothing when [nextUp] is null, like the content lanes do on an
-/// empty or failed read — a well-kept carnet earns a quiet Home.
+/// This is the carnet's surface on the screen every user sees; Cat Detail
+/// reaches roughly one active subscriber in four. The card is absent only when
+/// [nextUp] is null (no cats, or every read failed). The all-clear keeps the
+/// same avatar / eyebrow / title / subtitle geometry as the other two, so the
+/// skeleton's `_NextUpBone` fits all three.
 class HomeHealthNextUpCard extends StatelessWidget {
   final HealthNextUp nextUp;
   final VoidCallback onTap;
@@ -42,6 +45,20 @@ class HomeHealthNextUpCard extends StatelessWidget {
           l10n.healthSetupCardBody,
           null,
         ),
+      HealthNextUpAllClear(:final nextItem) => (
+          l10n.homeHealthAllClearTitle,
+          nextItem == null || nextItem.dueDate == null
+              ? l10n.homeHealthAllClearNone
+              : l10n.homeHealthAllClearNext(
+                  healthProtocolName(nextItem.protocol.id, l10n),
+                  healthFormatMonthYear(nextItem.dueDate!, locale),
+                ),
+          null,
+        ),
+    };
+    final othersDue = switch (nextUp) {
+      HealthNextUpDue(:final othersDueCount) => othersDueCount,
+      _ => 0,
     };
 
     return DSCard(
@@ -80,6 +97,16 @@ class HomeHealthNextUpCard extends StatelessWidget {
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                if (othersDue > 0) ...[
+                  const SizedBox(height: DSDimens.sizeXxxs),
+                  Text(
+                    l10n.homeHealthOthersDue(othersDue),
+                    style: DSTextStyles.caption.copyWith(
+                      color: DSColors.accentInfo,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ],

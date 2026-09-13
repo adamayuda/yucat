@@ -12,6 +12,7 @@ import 'package:yucat/features/articles/presentation/models/article_display_mode
 import 'package:yucat/features/cat_listing/mappers/cat_entity_to_model_mapper.dart';
 import 'package:yucat/features/food_guide/presentation/models/food_guide_display_model.dart';
 import 'package:yucat/features/health_carnet/presentation/models/health_next_up.dart';
+import 'package:yucat/features/health_carnet/presentation/utils/health_entry_analytics.dart';
 import 'package:yucat/features/home/bloc/home_bloc.dart';
 import 'package:yucat/features/home/bloc/home_event.dart';
 import 'package:yucat/features/home/bloc/home_state.dart';
@@ -57,19 +58,26 @@ class _HomePage extends State<HomePage> {
   Future<void> _openHealthCarnet(HealthNextUp nextUp) async {
     sl<LogEventUsecase>().call(
       eventName: AnalyticsEvents.homeHealthCardTapped,
-      properties: {
-        'state': switch (nextUp) {
-          HealthNextUpDue() => 'due',
-          HealthNextUpSetup() => 'setup',
+      properties: healthEntryTapProperties(
+        surface: HealthEntrySurface.home,
+        state: switch (nextUp) {
+          HealthNextUpDue() => HealthEntryState.due,
+          HealthNextUpSetup() => HealthEntryState.setup,
+          HealthNextUpAllClear() => HealthEntryState.allClear,
         },
-        if (nextUp case HealthNextUpDue(:final item)) ...{
-          'protocol_id': item.protocol.id,
-          'urgency': item.urgency.wire,
-          'days_until': item.daysUntil ?? 0,
+        cat: nextUp.cat,
+        item: switch (nextUp) {
+          HealthNextUpDue(:final item) => item,
+          HealthNextUpSetup() => null,
+          HealthNextUpAllClear() => null,
         },
-        'cat_id': nextUp.cat.id,
-        'timestamp': DateTime.now().toIso8601String(),
-      },
+        extra: switch (nextUp) {
+          HealthNextUpDue(:final othersDueCount) => {
+              'others_due_count': othersDueCount,
+            },
+          _ => const {},
+        },
+      ),
     );
     final model = sl<CatEntityToModelMapper>()(nextUp.cat);
     await context.router.push(HealthCarnetRoute(cat: model));

@@ -60,6 +60,10 @@ Set on the user's People profile (keyed by Firebase UID). Use these to **segment
 | `onboarding_completed` | bool | onboarding finalized |
 | `onboarding_completed_at` | ISO8601 string | onboarding finalized |
 | `notifications_enabled` | bool | reminders permission prompt |
+| `health_records_count` | int | HomeBloc after the carnet reads (`UserAnalyticsService.syncHealth`) — done records summed across every cat whose read succeeded; never written from an empty read, so a failure cannot zero a real profile |
+| `health_pending_count` | int | same — items overdue / urgent / due within 30 days, summed across cats |
+| `health_setup_done` | bool | same — every cat has at least one recorded act |
+| `health_next_due_at` | ISO8601 string | same — the earliest dated item across cats. ⚠️ **Written only when one exists; there is no unset**, so it goes stale once that act is done and nothing follows within a year. `health_pending_count = 0` is the tell — segment on the pair. Same name as the OneSignal tag the deferred push phase adds |
 
 > **RevenueCat is linked to the same uid.** `SplashBloc._ensureSignedIn` calls
 > `Purchases.logIn(uid)` and `Purchases.setMixpanelDistinctID(uid)` (via
@@ -127,7 +131,7 @@ Use `step_name` or `step_id` as the funnel key and `step_index` only for orderin
 | `Cat Creation Step Completed` | `step_index`, `step_name`, `next_step_index`, `next_step_name` |
 | `Cat Creation Step Abandoned` | `from_step(_name)`, `to_step(_name)` |
 | `Cat Created` | `name`, `age_group`, `breed`, `gender`, `has_health_conditions`, `health_conditions`, `neutered`, `has_photo`, `creation_time_seconds`, `fields_completed`, `fields_skipped`, `completed_field_names` |
-| `Cat Profile Updated` | `cat_name`, `cat_age_group`, `cat_breed`, `fields_changed` (11 hand-diffed keys incl. `age`, `birthDate`, `ageGroup`, … — a new profile field must be added to `_getChangedFields` or it never appears). Also emitted by the Cat Detail avatar's in-place photo change with `fields_changed: ['profileImage']` and `source: cat_detail` (the wizard path carries no `source`) |
+| `Cat Profile Updated` | `cat_name`, `cat_age_group`, `cat_breed`, `fields_changed` (11 hand-diffed keys incl. `age`, `birthDate`, `ageGroup`, … — a new profile field must be added to `_getChangedFields` or it never appears). Also emitted by the Cat Detail avatar's in-place photo change with `fields_changed: ['profileImage']` and `source: cat_detail`, and by the carnet when a newest weigh-in updates the profile weight with `fields_changed: ['weight']` and `source: health_carnet` (the wizard path carries no `source`) |
 | `Cat Creation Failed` / `Cat Update Failed` | `error_type`, `error_message`, `step_index` |
 | `Cat Profile Viewed` / `Edit Started` / `Deleted` / `Delete Failed` | `cat_*` ids / names |
 
@@ -137,18 +141,26 @@ Per-cat veterinary records and the derived schedule. See
 
 | Event | Key properties |
 |---|---|
-| `Health Carnet Viewed` | `record_count`, `due_count`, `urgent_count`, `has_weight_history`, `cat_age_group` |
+| `Health Carnet Viewed` | `record_count`, `due_count`, `urgent_count`, `has_weight_history`, `cat_age_group`, `lifestyle` (`indoor` / `outdoor` / `unknown`) |
 | `Health Carnet Tab Changed` | `tab_index`, `tab_name` (`upcoming` / `history` / `calendar`) |
 | `Health Task Completed` | `protocol_id`, `obligation`, **`was_overdue`**, `urgency` (`overdue` / `urgent` / `soon` / `later` / `to_schedule`), `days_until`, `logged_days_late` (whole days between the act's date and the tap — 0 is "ticked off today"; the done action asks for the date) |
 | `Health Task Snoozed` | `protocol_id`, `snooze_days`, `was_overdue` |
-| `Health Record Added` | `protocol_id` (or `freeform`), `category`, `has_notes`, `has_weight`, `has_vet`, `source` (`add_sheet` / `setup`) |
+| `Health Record Added` | `protocol_id` (or `freeform`), `category`, `has_notes`, `has_weight`, `has_vet`, `source` (`add_sheet` / `setup` / `booklet`), `syncs_profile_weight` — true when the weigh-in is the carnet's newest and therefore becomes the profile `weight`, `has_attachment`, and when true `attachment_uploaded` — false means the record landed but the photo did not; `is_course` — a freeform treatment saved with a course length |
 | `Health Setup Shown` | `source` — `auto` (presented by itself on the first load of an empty carnet) / `card` (the standing card on the Upcoming tab) |
-| `Health Setup Completed` | `records_written`, `records_answered` — the setup's conversion; one `Health Record Added { source: setup }` per record follows |
-| `Health Setup Skipped` | `dismissed` — `true` for a barrier dismiss, `false` for "Don't know" on every step |
-| `Home Health Card Tapped` | `state` (`due` / `setup`), `cat_id`; for `due` also `protocol_id`, `urgency`, `days_until`. Home's next-up card is the carnet's only surface on the screen every user sees — tap-through here against `App Opened` is the card's conversion |
+| `Health Setup Completed` | `records_written`, `records_answered`, `lifestyle_answered` — the setup's conversion; one `Health Record Added { source: setup }` per record follows |
+| `Health Setup Skipped` | `dismissed` — `true` for a barrier dismiss, `false` for "Don't know" on every step; `lifestyle_answered` — the fourth step may still have been answered |
+| `Home Health Card Tapped` | **`surface`** (`home` / `cat_detail` / `cat_listing` / `profile`), `state` (`due` / `setup` / `all_clear` / `unknown` — `unknown` only off Home, where a read failure still renders a row), `cat_id`; for `due` also `protocol_id`, `urgency`, `days_until`; Home adds `others_due_count` on `due`, Profile adds `cats_count` and `due_soon_count` (Profile fires once the cat is chosen, so `state` describes the carnet actually opened). The name is historical — it is the carnet's *door* event on every surface, kept so the board's `state` breakdown survives; break down by `surface` to see which door converts. Tap-through against `App Opened` is each surface's conversion |
 | `Health Record Deleted` | `timestamp` |
 | `Health Allergies Updated` | `allergen_count`, `allergens` — the declared list drives product-scan flags and recipe hiding, so this is the adoption signal for both |
 | `Health Carnet Load Failed` | `error_message` |
+| `Health Vet Updated` | `cleared`, `has_phone`, `has_address` — the saved vet contact on the cat document (edited from the carnet, prefills the add sheet). No names or numbers: owner's data |
+| `Health Vet Called` | `timestamp` only — the one-tap `tel:` from the vet card |
+| `Health Booklet Scanned` | `outcome` (`records` / `unreadable` / `notBooklet` / `error`), `records_proposed`, `low_confidence`, `duration_ms`; `error_message` on `error` — one vision read of a booklet page via `readHealthBooklet` |
+| `Health Booklet Imported` | `records_proposed`, `records_accepted`, `records_written` — the accept rate is the reader's quality signal; one `Health Record Added { source: booklet }` per written row |
+| `Health Carnet Shared` | `record_count`, `due_count`, `has_vet` — the share icon in the carnet's app bar (plain-text summary via the system share sheet; the share target is not observable) |
+| `Health Attachment Viewed` | `protocol_id` (or `freeform`), `category` — the photo thumbnail on a timeline record opened full-screen |
+| `Health Article Opened` | `protocol_id`, `slug` — the "Learn more" link on a due item; the article's own `Article Read` follows with dwell and scroll |
+| `Health Lifestyle Updated` | `lifestyle` (`indoor` / `outdoor`), `source` (`setup` — the sheet's fourth step / `row` — the Lifestyle card). Outdoor unlocks the FeLV booster and monthly deworming, so this is the adoption signal for both |
 
 ⚠️ **`Health Task Completed` is only meaningful broken down by `protocol_id` and
 `was_overdue`.** A completion count on its own says nothing: the question the feature

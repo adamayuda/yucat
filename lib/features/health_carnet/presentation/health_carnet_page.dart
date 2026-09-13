@@ -2,16 +2,24 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/articles/domain/usecases/get_articles_usecase.dart';
+import 'package:yucat/features/articles/presentation/mappers/article_entity_to_model_mapper.dart';
+import 'package:yucat/features/articles/presentation/models/article_display_model.dart';
+import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat/presentation/utils/cat_labels.dart';
 import 'package:yucat/features/cat_listing/mappers/cat_model_to_entity.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
+import 'package:yucat/features/health_carnet/domain/entities/health_event_entity.dart';
 import 'package:yucat/features/health_carnet/presentation/bloc/health_carnet_bloc.dart';
 import 'package:yucat/features/health_carnet/presentation/models/health_due_item.dart';
 import 'package:yucat/features/health_carnet/presentation/utils/cat_health_schedule.dart';
 import 'package:yucat/features/health_carnet/presentation/utils/health_date_format.dart';
+import 'package:yucat/features/health_carnet/presentation/utils/health_labels.dart';
 import 'package:yucat/features/health_carnet/presentation/widgets/add_health_record_sheet.dart';
 import 'package:yucat/features/health_carnet/presentation/widgets/allergies_card.dart';
+import 'package:yucat/features/health_carnet/presentation/widgets/vet_contact_card.dart';
+import 'package:yucat/features/health_carnet/presentation/widgets/lifestyle_card.dart';
 import 'package:yucat/features/health_carnet/presentation/widgets/due_item_card.dart';
 import 'package:yucat/features/health_carnet/presentation/widgets/ongoing_treatments_card.dart';
 import 'package:yucat/features/health_carnet/presentation/widgets/health_calendar_grid.dart';
@@ -20,6 +28,14 @@ import 'package:yucat/features/health_carnet/presentation/widgets/health_setup_c
 import 'package:yucat/features/health_carnet/presentation/widgets/health_setup_sheet.dart';
 import 'package:yucat/features/health_carnet/presentation/widgets/health_summary_tiles.dart';
 import 'package:yucat/features/health_carnet/presentation/widgets/health_timeline_tile.dart';
+import 'package:yucat/features/health_carnet/presentation/widgets/health_attachment_viewer.dart';
+import 'package:yucat/features/health_carnet/presentation/widgets/health_booklet_review_sheet.dart';
+import 'package:yucat/presentation/components/photo_source_sheet.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:yucat/features/health_carnet/presentation/widgets/weight_chart_card.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
@@ -31,6 +47,11 @@ import 'package:yucat/presentation/components/ds_segmented_control.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
 import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:yucat/features/health_carnet/presentation/utils/health_share_text.dart';
+import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/service_locator.dart';
 
 /// The cat's health record: what is due, what has been done, and how the weight
@@ -59,6 +80,49 @@ class _HealthCarnetPageState extends State<HealthCarnetPage> {
   /// Once per page push: the auto-presented setup must not reappear after a
   /// retry or a re-derive, only on the very first load of an empty carnet.
   bool _setupOffered = false;
+
+  /// Articles by slug, for the "Learn more" link on each due item. Loaded once
+  /// per language through the memoized repository — free after Home's lane —
+  /// and left empty on failure, which simply hides every link.
+  Map<String, ArticleDisplayModel> _articles = const {};
+  String? _articlesLanguage;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final language = Localizations.localeOf(context).languageCode;
+    if (language == _articlesLanguage) return;
+    _articlesLanguage = language;
+    _loadArticles(language);
+  }
+
+  Future<void> _loadArticles(String language) async {
+    try {
+      final entities = await sl<GetArticlesUsecase>()(language: language);
+      final mapper = sl<ArticleEntityToModelMapper>();
+      if (!mounted) return;
+      setState(() {
+        _articles = {for (final e in entities) e.id: mapper(e)};
+      });
+    } catch (_) {
+      // No links rather than a link to nowhere.
+    }
+  }
+
+  void _openArticle(HealthDueItem item) {
+    final slug = healthProtocolArticleSlug(item.protocol.id);
+    final article = _articles[slug];
+    if (article == null) return;
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.healthArticleOpened,
+      properties: {
+        'protocol_id': item.protocol.id,
+        'slug': slug,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+    context.router.push(ArticleDetailRoute(article: article));
+  }
 
   @override
   void initState() {
@@ -93,7 +157,11 @@ class _HealthCarnetPageState extends State<HealthCarnetPage> {
           _shownErrorTick = state.errorTick;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(l10n.healthCarnetSaveError),
+              content: Text(switch (state.errorKind) {
+                HealthCarnetErrorKind.attachment =>
+                  l10n.healthAttachmentUploadFailed,
+                HealthCarnetErrorKind.write => l10n.healthCarnetSaveError,
+              }),
               backgroundColor: DSColors.accentDanger,
             ),
           );
@@ -113,7 +181,7 @@ class _HealthCarnetPageState extends State<HealthCarnetPage> {
                     if (state is HealthCarnetLoadedState &&
                         state.lastRecordedAt != null)
                       Padding(
-                        padding: const EdgeInsets.only(right: DSDimens.sizeXs),
+                        padding: const EdgeInsets.only(right: DSDimens.sizeXxs),
                         child: Center(
                           child: Text(
                             l10n.healthCarnetUpdatedOn(
@@ -123,6 +191,18 @@ class _HealthCarnetPageState extends State<HealthCarnetPage> {
                               ),
                             ),
                             style: DSTextStyles.bodyMd,
+                          ),
+                        ),
+                      ),
+                    if (state is HealthCarnetLoadedState)
+                      Builder(
+                        builder: (buttonContext) => IconButton(
+                          tooltip: l10n.healthShareTooltip,
+                          onPressed: () => _share(buttonContext, state),
+                          icon: const Icon(
+                            Icons.ios_share_rounded,
+                            color: DSColors.inkPrimary,
+                            size: 22,
                           ),
                         ),
                       ),
@@ -240,6 +320,7 @@ class _HealthCarnetPageState extends State<HealthCarnetPage> {
         HealthCalendarView(
           history: state.history,
           dueItems: state.dueItems,
+          courses: state.courses,
         ),
       ];
     }
@@ -252,6 +333,7 @@ class _HealthCarnetPageState extends State<HealthCarnetPage> {
       if (state.history.isEmpty) ...[
         HealthSetupCard(
           onStart: () => _openSetupSheet(context, source: 'card'),
+          onScanBooklet: () => _scanBooklet(context),
         ),
         const SizedBox(height: DSDimens.sizeS),
       ],
@@ -270,17 +352,33 @@ class _HealthCarnetPageState extends State<HealthCarnetPage> {
             busy: state.isSaving,
             onMarkDone: () => _markDone(context, item),
             onSnooze: () => _openSnoozeSheet(context, item),
+            onLearnMore: _articles
+                    .containsKey(healthProtocolArticleSlug(item.protocol.id))
+                ? () => _openArticle(item)
+                : null,
           ),
           const SizedBox(height: DSDimens.sizeS),
         ],
-      if (ongoing.isNotEmpty) ...[
+      if (ongoing.isNotEmpty || state.courses.isNotEmpty) ...[
         const SizedBox(height: DSDimens.sizeXs),
-        OngoingTreatmentsCard(treatments: ongoing),
+        OngoingTreatmentsCard(treatments: ongoing, courses: state.courses),
       ],
+      const SizedBox(height: DSDimens.sizeL),
+      LifestyleCard(
+        catName: state.cat.name,
+        lifestyle: state.cat.lifestyle,
+        onChange: () => _openLifestyleSheet(context, state),
+      ),
       const SizedBox(height: DSDimens.sizeL),
       AllergiesCard(
         allergyKeys: state.cat.allergies ?? const [],
         onEdit: () => _openAllergiesSheet(context, state),
+      ),
+      const SizedBox(height: DSDimens.sizeL),
+      VetContactCard(
+        vet: state.cat.vet,
+        onEdit: () => _openVetSheet(context, state),
+        onCall: () => _callVet(context, state),
       ),
       const SizedBox(height: DSDimens.sizeL),
       _disclaimer(l10n),
@@ -338,6 +436,9 @@ class _HealthCarnetPageState extends State<HealthCarnetPage> {
           event: history[i],
           isLast: i == history.length - 1,
           onConfirmDelete: () => _confirmDelete(context, history[i].id!),
+          onAttachmentTap: history[i].attachmentUrl == null
+              ? null
+              : () => _openAttachment(context, history[i]),
         ),
     ];
   }
@@ -412,19 +513,162 @@ class _HealthCarnetPageState extends State<HealthCarnetPage> {
     required String source,
   }) async {
     _bloc.add(HealthCarnetSetupShownEvent(source: source));
-    final drafts = await showHealthSetupSheet(context, cat: _cat);
+    final result = await showHealthSetupSheet(context, cat: _cat);
     await sl<SharedPreferences>().setBool(_setupDismissedKey, true);
     if (!mounted) return;
     _bloc.add(HealthCarnetSetupCompletedEvent(
-      drafts: drafts ?? const [],
-      dismissed: drafts == null,
+      drafts: result?.drafts ?? const [],
+      lifestyle: result?.lifestyle,
+      dismissed: result == null,
     ));
   }
 
   Future<void> _openAddSheet(BuildContext context) async {
-    final draft = await showAddHealthRecordSheet(context);
+    final vet = switch (_bloc.state) {
+      HealthCarnetLoadedState(:final cat) => cat.vet,
+      _ => null,
+    };
+    final draft = await showAddHealthRecordSheet(
+      context,
+      vet: vet,
+      onScanBooklet: () => _scanBooklet(context),
+    );
     if (draft == null) return;
-    _bloc.add(HealthCarnetAddRecordEvent(draft: draft));
+    _bloc.add(HealthCarnetAddRecordEvent(
+      draft: draft.event,
+      attachment: draft.attachment,
+    ));
+  }
+
+  /// Longest side of the booklet photo sent to the reader. Above the scanner's
+  /// 1280: a page of small stamped dates has to survive the downscale.
+  static const int _bookletUploadMinSide = 1600;
+
+  /// Booklet scan: pick a page (camera or library — pages are often already
+  /// in the library), downscale, and hand the bytes to the review sheet,
+  /// which reads them and returns the rows the owner ticked. Deliberately
+  /// **not** `ScannerRoute`: the scanner pops into `HomeBloc`'s theater, and
+  /// this must stay inside the carnet.
+  Future<void> _scanBooklet(BuildContext context) async {
+    final file = await pickPhotoFromSheet(context, ImagePicker());
+    if (!context.mounted || file == null) return;
+    Uint8List? bytes;
+    try {
+      bytes = await FlutterImageCompress.compressWithFile(
+        file.path,
+        minWidth: _bookletUploadMinSide,
+        minHeight: _bookletUploadMinSide,
+        quality: 85,
+        format: CompressFormat.jpeg,
+        autoCorrectionAngle: true,
+        keepExif: false,
+      );
+    } catch (_) {
+      // Fall through to the original bytes.
+    }
+    bytes ??= await File(file.path).readAsBytes();
+    if (!context.mounted) return;
+    final drafts = await showHealthBookletReviewSheet(
+      context,
+      imageBase64: base64Encode(bytes),
+      catName: _cat.name,
+    );
+    if (!mounted || drafts == null || drafts.isEmpty) return;
+    _bloc.add(HealthCarnetImportRecordsEvent(
+      drafts: drafts,
+      proposedCount: drafts.length,
+    ));
+  }
+
+  /// The carnet as a text note through the system share sheet. The button's
+  /// own context supplies `sharePositionOrigin`, which iPad needs to anchor
+  /// its popover; the summary is built from the state, not re-read.
+  Future<void> _share(
+    BuildContext buttonContext,
+    HealthCarnetLoadedState state,
+  ) async {
+    final l10n = AppLocalizations.of(buttonContext);
+    final text = buildHealthShareText(
+      state: state,
+      l10n: l10n,
+      locale: healthLocaleOf(buttonContext),
+    );
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.healthCarnetShared,
+      properties: {
+        'record_count': state.history.length,
+        'due_count': state.actionableCount,
+        'has_vet': state.cat.vet != null,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+    final box = buttonContext.findRenderObject() as RenderBox?;
+    await SharePlus.instance.share(ShareParams(
+      text: text,
+      subject: l10n.healthShareSubject(state.cat.name),
+      sharePositionOrigin: box == null
+          ? null
+          : box.localToGlobal(Offset.zero) & box.size,
+    ));
+  }
+
+  void _openAttachment(BuildContext context, HealthEventEntity event) {
+    final url = event.attachmentUrl;
+    if (url == null) return;
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.healthAttachmentViewed,
+      properties: {
+        'protocol_id': event.protocolId ?? 'freeform',
+        'category': event.category.wire,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+    HealthAttachmentViewer.open(context, url);
+  }
+
+  Future<void> _openLifestyleSheet(
+    BuildContext context,
+    HealthCarnetLoadedState state,
+  ) async {
+    final chosen = await showLifestyleSheet(
+      context,
+      catName: state.cat.name,
+      initial: state.cat.lifestyle,
+    );
+    if (chosen == null) return;
+    _bloc.add(HealthCarnetUpdateLifestyleEvent(lifestyle: chosen));
+  }
+
+  Future<void> _openVetSheet(
+    BuildContext context,
+    HealthCarnetLoadedState state,
+  ) async {
+    final result = await showVetContactSheet(context, initial: state.cat.vet);
+    if (result == null) return;
+    _bloc.add(HealthCarnetUpdateVetEvent(vet: result));
+  }
+
+  /// `tel:` via url_launcher, the same shape as Profile's mailto link. The
+  /// number is the owner's data, so it is not sent as an event property.
+  Future<void> _callVet(
+    BuildContext context,
+    HealthCarnetLoadedState state,
+  ) async {
+    final phone = state.cat.vet?.phone?.trim();
+    if (phone == null || phone.isEmpty) return;
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.healthVetCalled,
+      properties: {'timestamp': DateTime.now().toIso8601String()},
+    );
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      if (!await launchUrl(Uri(scheme: 'tel', path: phone))) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.healthVetCallError)));
+      }
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.healthVetCallError)));
+    }
   }
 
   Future<void> _openSnoozeSheet(

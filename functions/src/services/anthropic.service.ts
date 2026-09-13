@@ -15,6 +15,12 @@ import {FoodGuideText} from "../models/food-guide";
 import {RecipeIngredient, RecipeText} from "../models/recipe";
 import {generateIdentificationPrompt} from "../prompts/identify-product";
 import {
+  HEALTH_CATEGORIES,
+  HEALTH_PROTOCOL_IDS,
+  generateBookletSystemPrompt,
+  generateBookletUserPrompt,
+} from "../prompts/read-health-booklet";
+import {
   generateLitterAnalysisSystemPrompt,
   generateLitterAnalysisUserPrompt,
 } from "../prompts/analyze-litter";
@@ -1022,6 +1028,172 @@ export async function analyzeProductLabelImage(
     structuredData: true,
   });
   return {product, rawResponse: JSON.stringify(submit.input)};
+}
+
+// --- Vaccination booklet reader -------------------------------------------
+
+const HEALTH_BOOKLET_TOOLS: Anthropic.Tool[] = [
+  {
+    name: "submit_health_records",
+    description: "Submit every dated act read from the booklet page.",
+    input_schema: {
+      type: "object",
+      required: ["outcome", "records"],
+      properties: {
+        outcome: {type: "string", enum: ["records", "unreadable", "not_booklet"]},
+        records: {
+          type: "array",
+          items: {
+            type: "object",
+            required: ["protocol_id", "title", "category", "performed_at", "confidence"],
+            properties: {
+              protocol_id: {
+                type: "string",
+                description: "One of the known ids, or \"\" for an act no protocol schedules.",
+                enum: [...HEALTH_PROTOCOL_IDS, ""],
+              },
+              title: {type: "string"},
+              category: {type: "string", enum: [...HEALTH_CATEGORIES]},
+              performed_at: {type: "string", description: "YYYY-MM-DD"},
+              interval_days: {type: "integer", enum: [365, 1095]},
+              vet: {type: "string"},
+              clinic: {type: "string"},
+              confidence: {type: "string", enum: ["high", "medium", "low"]},
+            },
+          },
+        },
+      },
+    },
+  },
+];
+
+export type HealthBookletOutcome = "records" | "unreadable" | "not_booklet";
+
+export interface HealthBookletRecord {
+  protocolId: string | null;
+  title: string;
+  category: string;
+  performedAt: string;
+  intervalDays?: number;
+  vet?: string;
+  clinic?: string;
+  confidence: "high" | "medium" | "low";
+}
+
+export interface HealthBookletResult {
+  outcome: HealthBookletOutcome;
+  records: HealthBookletRecord[];
+  model: string;
+}
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * One forced-tool vision read of a vaccination-booklet page. No web search,
+ * no persistence — the photo is medical PII and there is nothing to cache or
+ * self-heal. Records the model returns without a valid ISO date are dropped
+ * here rather than trusted, because a wrong date becomes a wrong booster.
+ */
+export async function readHealthBookletImage(
+  imageBase64: string,
+  mimeType: string,
+  today: string,
+  catName?: string,
+  requestId?: string,
+  model: string = config.anthropic.model
+): Promise<HealthBookletResult> {
+  const started = Date.now();
+  const response = await withRetry("readHealthBookletImage", () =>
+    getClient().messages.create({
+      model,
+      max_tokens: 2048,
+      ...modelParams(model),
+      system: [
+        {
+          type: "text",
+          text: generateBookletSystemPrompt(),
+          cache_control: {type: "ephemeral"},
+        },
+      ],
+      messages: [
+        {
+          role: "user",
+          content: [
+            ...imageBlock(imageBase64, mimeType),
+            {type: "text", text: generateBookletUserPrompt(today, catName)},
+          ],
+        },
+      ],
+      tools: HEALTH_BOOKLET_TOOLS,
+      tool_choice: {type: "tool", name: "submit_health_records"},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
+  );
+  logUsage("booklet", response, {requestId, model});
+
+  const submit = findToolUse(response.content, "submit_health_records");
+  if (!submit) {
+    logger.warn("readHealthBookletImage: no submit_health_records returned", {
+      requestId,
+      stopReason: response.stop_reason,
+      structuredData: true,
+    });
+    return {outcome: "unreadable", records: [], model};
+  }
+
+  const input = submit.input ?? {};
+  const outcome: HealthBookletOutcome =
+    input.outcome === "not_booklet" || input.outcome === "unreadable" ?
+      input.outcome :
+      "records";
+  const raw: unknown[] = Array.isArray(input.records) ? input.records : [];
+  const records: HealthBookletRecord[] = [];
+  for (const item of raw) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const r = item as any;
+    if (!r || typeof r !== "object") continue;
+    const performedAt = typeof r.performed_at === "string" ? r.performed_at.trim() : "";
+    if (!ISO_DATE.test(performedAt)) continue;
+    if (performedAt > today) continue; // a booklet only records the past
+    const protocolId =
+      typeof r.protocol_id === "string" &&
+      (HEALTH_PROTOCOL_IDS as readonly string[]).includes(r.protocol_id) ?
+        r.protocol_id :
+        null;
+    const title = typeof r.title === "string" ? r.title.trim() : "";
+    if (!protocolId && !title) continue;
+    const category =
+      typeof r.category === "string" &&
+      (HEALTH_CATEGORIES as readonly string[]).includes(r.category) ?
+        r.category :
+        "other";
+    const confidence =
+      r.confidence === "high" || r.confidence === "medium" ? r.confidence : "low";
+    const intervalDays =
+      protocolId === "rabies" && (r.interval_days === 365 || r.interval_days === 1095) ?
+        r.interval_days :
+        undefined;
+    records.push({
+      protocolId,
+      title,
+      category,
+      performedAt,
+      intervalDays,
+      vet: typeof r.vet === "string" && r.vet.trim() ? r.vet.trim() : undefined,
+      clinic: typeof r.clinic === "string" && r.clinic.trim() ? r.clinic.trim() : undefined,
+      confidence,
+    });
+  }
+
+  logger.info("readHealthBookletImage complete", {
+    requestId,
+    ms: Date.now() - started,
+    outcome,
+    proposed: raw.length,
+    kept: records.length,
+    structuredData: true,
+  });
+  return {outcome, records, model};
 }
 
 /**

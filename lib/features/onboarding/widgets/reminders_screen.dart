@@ -15,6 +15,10 @@ import 'package:yucat/services/notification_service.dart';
 /// allows 6 data tags and every slot went to the two Journeys in
 /// `docs/onesignal.md` §5. Tapping "Done" triggers the OS push-permission
 /// prompt before advancing; "Set up later" advances without prompting.
+///
+/// The third option reads "Vaccine & vet-visit reminders" (key still
+/// `onboardingRemindersOptionMonthly`, kept so the ARBs and `Calendar.svg`
+/// stay put): it is the reminder the health carnet's push phase will send.
 class RemindersScreen extends StatefulWidget {
   final VoidCallback onNext;
 

@@ -16,10 +16,38 @@ class CatDetailLoadedState extends CatDetailState {
   /// ring over the avatar and ignores further taps.
   final bool isUploadingPhoto;
 
-  const CatDetailLoadedState({required this.cat, this.isUploadingPhoto = false});
+  /// The carnet, summarised for the health row. Null until the read lands —
+  /// and stays null when it fails, in which case the row shows its neutral
+  /// copy rather than inviting setup of a carnet that may be full.
+  final CatHealthSummary? health;
+
+  const CatDetailLoadedState({
+    required this.cat,
+    this.isUploadingPhoto = false,
+    this.health,
+  });
+
+  CatDetailLoadedState copyWith({
+    CatModel? cat,
+    bool? isUploadingPhoto,
+    CatHealthSummary? health,
+    bool clearHealth = false,
+  }) {
+    return CatDetailLoadedState(
+      cat: cat ?? this.cat,
+      isUploadingPhoto: isUploadingPhoto ?? this.isUploadingPhoto,
+      health: clearHealth ? null : (health ?? this.health),
+    );
+  }
 
   @override
-  List<Object?> get props => [cat, isUploadingPhoto];
+  List<Object?> get props => [
+        cat,
+        isUploadingPhoto,
+        health?.events.map((e) => e.id).toList(),
+        health?.nearest?.protocol.id,
+        health?.nearest?.dueDate,
+      ];
 }
 
 class CatDetailLoadingState extends CatDetailState {

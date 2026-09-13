@@ -35,11 +35,18 @@ import 'package:yucat/features/brand/domain/repositories/brand_verdict_repositor
 import 'package:yucat/features/brand/domain/usecases/analyze_brand_usecase.dart';
 import 'package:yucat/features/brand/domain/usecases/get_brands_usecase.dart';
 import 'package:yucat/features/cat/data/datasources/cat_datasource.dart';
+import 'package:yucat/features/health_carnet/data/datasources/health_booklet_datasource.dart';
 import 'package:yucat/features/health_carnet/data/datasources/health_event_datasource.dart';
+import 'package:yucat/features/health_carnet/data/repositories/health_booklet_repository_impl.dart';
+import 'package:yucat/features/health_carnet/domain/repositories/health_booklet_repository.dart';
+import 'package:yucat/features/health_carnet/domain/usecases/read_health_booklet_usecase.dart';
 import 'package:yucat/features/health_carnet/data/mappers/health_event_document_mapper.dart';
 import 'package:yucat/features/health_carnet/data/repositories/health_carnet_repository_impl.dart';
 import 'package:yucat/features/health_carnet/domain/repositories/health_carnet_repository.dart';
 import 'package:yucat/features/cat/domain/usecases/update_cat_allergies_usecase.dart';
+import 'package:yucat/features/cat/domain/usecases/update_cat_vet_usecase.dart';
+import 'package:yucat/features/cat/domain/usecases/update_cat_lifestyle_usecase.dart';
+import 'package:yucat/features/cat/domain/usecases/update_cat_weight_usecase.dart';
 import 'package:yucat/features/health_carnet/domain/usecases/add_health_event_usecase.dart';
 import 'package:yucat/features/health_carnet/domain/usecases/delete_health_event_usecase.dart';
 import 'package:yucat/features/health_carnet/domain/usecases/get_health_events_usecase.dart';
@@ -220,8 +227,17 @@ Future<void> _registerDataSources() async {
       storage: FirebaseStorage.instance,
     ),
   );
+  sl.registerSingleton<HealthBookletDataSource>(
+    HealthBookletDataSource(
+      functions: FirebaseFunctions.instanceFor(region: 'us-central1'),
+      auth: FirebaseAuth.instance,
+    ),
+  );
   sl.registerSingleton<HealthEventDataSource>(
-    HealthEventDataSource(firestore: FirebaseFirestore.instance),
+    HealthEventDataSource(
+      firestore: FirebaseFirestore.instance,
+      storage: FirebaseStorage.instance,
+    ),
   );
   sl.registerSingleton<CatNarrativeDataSource>(
     CatNarrativeDataSource(functions: sl<FirebaseFunctions>()),
@@ -318,6 +334,9 @@ Future<void> _registerRepositories() async {
       dataSource: sl<CatDataSource>(),
       mapper: sl<CatDocumentMapper>(),
     ),
+  );
+  sl.registerSingleton<HealthBookletRepository>(
+    HealthBookletRepositoryImpl(dataSource: sl<HealthBookletDataSource>()),
   );
   sl.registerSingleton<HealthCarnetRepository>(
     HealthCarnetRepositoryImpl(
@@ -427,6 +446,18 @@ Future<void> _registerUseCases() async {
   );
   sl.registerSingleton<UpdateCatAllergiesUsecase>(
     UpdateCatAllergiesUsecase(repository: sl<CatRepository>()),
+  );
+  sl.registerSingleton<UpdateCatVetUsecase>(
+    UpdateCatVetUsecase(repository: sl<CatRepository>()),
+  );
+  sl.registerSingleton<UpdateCatLifestyleUsecase>(
+    UpdateCatLifestyleUsecase(repository: sl<CatRepository>()),
+  );
+  sl.registerSingleton<UpdateCatWeightUsecase>(
+    UpdateCatWeightUsecase(repository: sl<CatRepository>()),
+  );
+  sl.registerSingleton<ReadHealthBookletUsecase>(
+    ReadHealthBookletUsecase(repository: sl<HealthBookletRepository>()),
   );
   sl.registerSingleton<GetHealthEventsUsecase>(
     GetHealthEventsUsecase(repository: sl<HealthCarnetRepository>()),
@@ -639,6 +670,7 @@ Future<void> _registerBlocs() async {
       getScanHistoryUsecase: sl<GetScanHistoryUsecase>(),
       getLitterHistoryUsecase: sl<GetLitterHistoryUsecase>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
+      getHealthEventsUsecase: sl<GetHealthEventsUsecase>(),
       qaResetService: sl<QaResetService>(),
     ),
   );
@@ -675,6 +707,7 @@ Future<void> _registerBlocs() async {
       getCatsUsecase: sl<GetCatsUsecase>(),
       catEntityToModelMapper: sl<CatEntityToModelMapper>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
+      getHealthEventsUsecase: sl<GetHealthEventsUsecase>(),
     ),
   );
   sl.registerBloc<CatDetailBloc>(
@@ -684,6 +717,7 @@ Future<void> _registerBlocs() async {
       getCatsUsecase: sl<GetCatsUsecase>(),
       currentUserUsecase: sl<CurrentUserUsecase>(),
       catEntityToModelMapper: sl<CatEntityToModelMapper>(),
+      getHealthEventsUsecase: sl<GetHealthEventsUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
     ),
   );
@@ -697,6 +731,9 @@ Future<void> _registerBlocs() async {
       addHealthEventUsecase: sl<AddHealthEventUsecase>(),
       deleteHealthEventUsecase: sl<DeleteHealthEventUsecase>(),
       updateCatAllergiesUsecase: sl<UpdateCatAllergiesUsecase>(),
+      updateCatVetUsecase: sl<UpdateCatVetUsecase>(),
+      updateCatLifestyleUsecase: sl<UpdateCatLifestyleUsecase>(),
+      updateCatWeightUsecase: sl<UpdateCatWeightUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
     ),
   );

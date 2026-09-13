@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat/presentation/utils/cat_labels.dart';
 import 'package:yucat/features/cat_listing/models/cat_model.dart';
+import 'package:yucat/features/health_carnet/presentation/models/cat_health_summary.dart';
+import 'package:yucat/features/health_carnet/presentation/widgets/health_due_pill.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
@@ -10,7 +12,21 @@ class CatSummaryCard extends StatelessWidget {
   final CatModel cat;
   final VoidCallback onTap;
 
-  const CatSummaryCard({super.key, required this.cat, required this.onTap});
+  /// The carnet summary, when its read has landed. Drives the due pill; null
+  /// shows nothing rather than a nudge.
+  final CatHealthSummary? health;
+
+  /// Tapping the due pill goes straight to the carnet instead of through
+  /// detail — the pill names the act, so the next tap should be on it.
+  final VoidCallback? onHealthTap;
+
+  const CatSummaryCard({
+    super.key,
+    required this.cat,
+    required this.onTap,
+    this.health,
+    this.onHealthTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +54,10 @@ class CatSummaryCard extends StatelessWidget {
                     cat.healthConditions!.isNotEmpty) ...[
                   const SizedBox(height: DSDimens.sizeXxs),
                   _ConditionsPill(count: cat.healthConditions!.length),
+                ],
+                if (HealthDuePill.shows(health?.nearest)) ...[
+                  const SizedBox(height: DSDimens.sizeXxs),
+                  HealthDuePill(item: health!.nearest, onTap: onHealthTap),
                 ],
               ],
             ),

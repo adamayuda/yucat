@@ -5,6 +5,7 @@ import 'package:yucat/features/health_carnet/domain/entities/health_event_entity
 import 'package:yucat/features/health_carnet/domain/entities/health_protocol.dart';
 import 'package:yucat/features/health_carnet/presentation/utils/health_date_format.dart';
 import 'package:yucat/features/health_carnet/presentation/widgets/health_date_row.dart';
+import 'package:yucat/features/health_carnet/presentation/widgets/lifestyle_card.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
 
@@ -18,17 +19,33 @@ import 'package:yucat/presentation/components/ds_pill_button.dart';
 /// antiparasitic is monthly and rarely remembered to the day.
 const _kSetupProtocolIds = ['fvrcp', 'deworming_internal', 'annual_checkup'];
 
-/// First-open setup: three dates, each skippable.
+/// Three dates plus one lifestyle question.
+const _kStepCount = 4;
+const _kLifestyleStep = 3;
+
+/// What the setup sheet hands back: the dated records to write and, when the
+/// owner answered it, the lifestyle. Both optional — every step is skippable.
+class HealthSetupResult {
+  final List<HealthEventEntity> drafts;
+  final String? lifestyle;
+
+  const HealthSetupResult({required this.drafts, this.lifestyle});
+
+  bool get isEmpty => drafts.isEmpty && lifestyle == null;
+}
+
+/// First-open setup: three dates and one question, each skippable.
 ///
-/// Returns the drafts to write (possibly empty when every step was skipped),
-/// or null when the sheet was dismissed by the barrier. Persistence is the
-/// bloc's job — see `HealthCarnetSetupCompletedEvent`, which writes them
+/// Returns the result (possibly empty when every step was skipped), or null
+/// when the sheet was dismissed by the barrier. Persistence is the bloc's
+/// job — see `HealthCarnetSetupCompletedEvent`, which writes the lifestyle
+/// first (it changes the schedule the records feed) and then the records
 /// sequentially rather than firing three add events that would race.
-Future<List<HealthEventEntity>?> showHealthSetupSheet(
+Future<HealthSetupResult?> showHealthSetupSheet(
   BuildContext context, {
   required CatEntity cat,
 }) {
-  return showModalBottomSheet<List<HealthEventEntity>>(
+  return showModalBottomSheet<HealthSetupResult>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -48,8 +65,14 @@ class _HealthSetupSheet extends StatefulWidget {
 class _HealthSetupSheetState extends State<_HealthSetupSheet> {
   int _step = 0;
   final List<DateTime?> _dates = List.filled(_kSetupProtocolIds.length, null);
+  String? _lifestyle;
 
-  bool get _isLast => _step == _kSetupProtocolIds.length - 1;
+  bool get _isLast => _step == _kStepCount - 1;
+  bool get _isLifestyleStep => _step == _kLifestyleStep;
+
+  /// Whether the current step has an answer to move on with.
+  bool get _canAdvance =>
+      _isLifestyleStep ? _lifestyle != null : _dates[_step] != null;
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
@@ -65,12 +88,20 @@ class _HealthSetupSheetState extends State<_HealthSetupSheet> {
   }
 
   void _advance({required bool skip}) {
-    if (skip) _dates[_step] = null;
+    if (skip) {
+      if (_isLifestyleStep) {
+        _lifestyle = null;
+      } else {
+        _dates[_step] = null;
+      }
+    }
     if (!_isLast) {
       setState(() => _step += 1);
       return;
     }
-    Navigator.of(context).pop(_drafts());
+    Navigator.of(context).pop(
+      HealthSetupResult(drafts: _drafts(), lifestyle: _lifestyle),
+    );
   }
 
   List<HealthEventEntity> _drafts() {
@@ -96,14 +127,15 @@ class _HealthSetupSheetState extends State<_HealthSetupSheet> {
   String _question(AppLocalizations l10n) => switch (_step) {
         0 => l10n.healthSetupQuestionVaccine,
         1 => l10n.healthSetupQuestionDeworming,
-        _ => l10n.healthSetupQuestionCheckup,
+        2 => l10n.healthSetupQuestionCheckup,
+        _ => l10n.healthLifestyleQuestion(widget.cat.name),
       };
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = healthLocaleOf(context);
-    final date = _dates[_step];
+    final date = _isLifestyleStep ? null : _dates[_step];
 
     return Container(
       decoration: const BoxDecoration(
@@ -146,7 +178,7 @@ class _HealthSetupSheetState extends State<_HealthSetupSheet> {
                 ),
               ),
               const SizedBox(height: DSDimens.sizeL),
-              _StepDots(current: _step, count: _kSetupProtocolIds.length),
+              _StepDots(current: _step, count: _kStepCount),
               const SizedBox(height: DSDimens.sizeS),
               // Keyed so the switch reads as a new question, not a relabel.
               AnimatedSwitcher(
@@ -158,21 +190,27 @@ class _HealthSetupSheetState extends State<_HealthSetupSheet> {
                   children: [
                     Text(_question(l10n), style: DSTextStyles.headlineMd),
                     const SizedBox(height: DSDimens.sizeS),
-                    HealthDateRow(
-                      label: l10n.healthAddFieldDateLabel,
-                      value: date == null
-                          ? l10n.healthSetupPickDate
-                          : healthFormatDate(date, locale),
-                      placeholder: date == null,
-                      onTap: _pickDate,
-                    ),
+                    if (_isLifestyleStep)
+                      LifestyleOptions(
+                        selected: _lifestyle,
+                        onSelect: (v) => setState(() => _lifestyle = v),
+                      )
+                    else
+                      HealthDateRow(
+                        label: l10n.healthAddFieldDateLabel,
+                        value: date == null
+                            ? l10n.healthSetupPickDate
+                            : healthFormatDate(date, locale),
+                        placeholder: date == null,
+                        onTap: _pickDate,
+                      ),
                   ],
                 ),
               ),
               const SizedBox(height: DSDimens.sizeL),
               DSPillButton(
                 label: _isLast ? l10n.healthSetupFinish : l10n.commonNext,
-                onPressed: date == null ? null : () => _advance(skip: false),
+                onPressed: _canAdvance ? () => _advance(skip: false) : null,
                 showChevron: !_isLast,
               ),
               const SizedBox(height: DSDimens.sizeXs),
@@ -190,7 +228,7 @@ class _HealthSetupSheetState extends State<_HealthSetupSheet> {
   }
 }
 
-/// Three small dots; the current step is ink, the rest dim. Kept local rather
+/// Four small dots; the current step is ink, the rest dim. Kept local rather
 /// than using `DSDotIndicator`, which is bound to a `PageController` — this
 /// sheet has no page view, since a `PageView` needs a fixed height that a
 /// bottom sheet sized to its content cannot give it.

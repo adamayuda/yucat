@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
+import 'package:yucat/features/cat/domain/entities/cat_lifestyle.dart';
+import 'package:yucat/features/cat/domain/entities/cat_vet_contact.dart';
 
 abstract class CatDocumentMapper {
   CatEntity call(QueryDocumentSnapshot<Map<String, dynamic>> doc);
   Map<String, dynamic> toDocument(CatEntity entity);
+
+  /// The `vet` map field. Null for a contact with nothing in it.
+  Map<String, dynamic>? vetToMap(CatVetContact? vet);
 }
 
 class CatDocumentMapperImpl implements CatDocumentMapper {
@@ -48,7 +53,36 @@ class CatDocumentMapperImpl implements CatDocumentMapper {
       allergies: (data['allergies'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      vet: _vetFromMap(data['vet']),
+      lifestyle: CatLifestyle.normalize(data['lifestyle'] as String?),
     );
+  }
+
+  static CatVetContact? _vetFromMap(Object? raw) {
+    if (raw is! Map) return null;
+    final vet = CatVetContact(
+      name: raw['name'] as String? ?? '',
+      clinic: raw['clinic'] as String?,
+      phone: raw['phone'] as String?,
+      address: raw['address'] as String?,
+    );
+    return vet.isEmpty ? null : vet;
+  }
+
+  @override
+  Map<String, dynamic>? vetToMap(CatVetContact? vet) {
+    if (vet == null || vet.isEmpty) return null;
+    String? clean(String? v) {
+      final t = v?.trim();
+      return t == null || t.isEmpty ? null : t;
+    }
+
+    return {
+      'name': vet.name.trim(),
+      if (clean(vet.clinic) != null) 'clinic': clean(vet.clinic),
+      if (clean(vet.phone) != null) 'phone': clean(vet.phone),
+      if (clean(vet.address) != null) 'address': clean(vet.address),
+    };
   }
 
   @override
@@ -80,6 +114,10 @@ class CatDocumentMapperImpl implements CatDocumentMapper {
       // Clearing goes through `updateCatAllergies`, which writes `[]` outright.
       if (entity.allergies != null && entity.allergies!.isNotEmpty)
         'allergies': entity.allergies,
+      // Same contract as allergies: the carnet owns it, the wizard never
+      // carries it. Clearing goes through `updateCatVet`.
+      if (vetToMap(entity.vet) case final vet?) 'vet': vet,
+      if (entity.lifestyle != null) 'lifestyle': entity.lifestyle,
     };
   }
 }

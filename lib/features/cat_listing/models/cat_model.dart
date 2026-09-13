@@ -1,3 +1,5 @@
+import 'package:yucat/features/cat/domain/entities/cat_vet_contact.dart';
+
 class CatModel {
   final String? id;
   final String name;
@@ -15,6 +17,8 @@ class CatModel {
   final String? gender;
   final List<String>? healthConditions;
   final List<String>? allergies;
+  final CatVetContact? vet;
+  final String? lifestyle;
 
   const CatModel({
     this.id,
@@ -33,6 +37,8 @@ class CatModel {
     this.gender,
     this.healthConditions,
     this.allergies,
+    this.vet,
+    this.lifestyle,
   });
 
   /// Only the fields an in-place edit can change today. Widen as needed.
@@ -54,6 +60,8 @@ class CatModel {
       gender: gender,
       healthConditions: healthConditions,
       allergies: allergies,
+      vet: vet,
+      lifestyle: lifestyle,
     );
   }
 }

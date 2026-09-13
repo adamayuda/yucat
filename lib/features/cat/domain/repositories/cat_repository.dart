@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
+import 'package:yucat/features/cat/domain/entities/cat_vet_contact.dart';
 
 abstract class CatRepository {
   Future<List<CatEntity>> getCats({required String userId});
@@ -40,5 +41,24 @@ abstract class CatRepository {
   Future<void> updateCatAllergies({
     required String catId,
     required List<String> allergies,
+  });
+
+  /// Replaces the cat's vet contact; null removes it. Separate from
+  /// [updateCat] for the same reason as [updateCatAllergies].
+  Future<void> updateCatVet({
+    required String catId,
+    required CatVetContact? vet,
+  });
+
+  /// `CatLifestyle.indoor` / `.outdoor`; null clears it.
+  Future<void> updateCatLifestyle({
+    required String catId,
+    required String? lifestyle,
+  });
+
+  /// The measured weight, in kg — from a carnet weigh-in.
+  Future<void> updateCatWeight({
+    required String catId,
+    required double weight,
   });
 }

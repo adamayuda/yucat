@@ -170,6 +170,13 @@ never depend on the prompt.
 
 ### `notifPrimer` (9) is a mock; `reminders` (10) is real
 
+Since the health-carnet visibility work the mock notification previews a **carnet
+reminder** ("Vaccine due · Luna's rabies booster is due next week"), and the third
+reminders option reads "Vaccine & vet-visit reminders" — under its historical key
+`onboardingRemindersOptionMonthly`, unchanged so the ARBs and `Calendar.svg` stay put.
+The primer's old food-recipe copy and its heart meter are gone. Neither screen schedules
+anything: the reminder itself is the deferred OneSignal phase in the carnet plan.
+
 - `notif_primer_screen.dart` is **MOCK ONLY** (says so at the top, with a `TODO`) — it
   previews the value of alerts and requests **no** permission.
 - `reminders_screen.dart:_onDone` calls the real `NotificationService.requestPermission()`

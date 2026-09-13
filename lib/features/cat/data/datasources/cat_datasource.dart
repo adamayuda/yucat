@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:yucat/core/image/compress_jpeg.dart';
 import 'package:flutter/foundation.dart';
 
 class CatDataSource {
@@ -97,7 +97,13 @@ class CatDataSource {
       final fileName = '${catId}_$stamp.jpg';
       final ref = _storage.ref().child('cats').child(fileName);
 
-      final upload = await _compressProfileImage(imageFile, stamp) ?? imageFile;
+      final upload = await compressToJpeg(
+            imageFile,
+            maxSide: _profileImageMaxSide,
+            quality: _profileImageQuality,
+            prefix: 'cat_profile',
+          ) ??
+          imageFile;
       await ref.putFile(
         upload,
         SettableMetadata(contentType: 'image/jpeg'),
@@ -107,29 +113,6 @@ class CatDataSource {
       return downloadUrl;
     } catch (e) {
       debugPrint('Error uploading cat profile image: $e');
-      return null;
-    }
-  }
-
-  /// Downscales and re-encodes the picked photo to a temp JPEG. Returns null on
-  /// any failure so the caller falls back to uploading the original — a bigger
-  /// upload beats no upload.
-  Future<File?> _compressProfileImage(File source, int stamp) async {
-    try {
-      final target = '${Directory.systemTemp.path}/cat_profile_$stamp.jpg';
-      final result = await FlutterImageCompress.compressAndGetFile(
-        source.path,
-        target,
-        minWidth: _profileImageMaxSide,
-        minHeight: _profileImageMaxSide,
-        quality: _profileImageQuality,
-        format: CompressFormat.jpeg,
-        autoCorrectionAngle: true,
-        keepExif: false,
-      );
-      return result == null ? null : File(result.path);
-    } catch (e) {
-      debugPrint('Error compressing cat profile image: $e');
       return null;
     }
   }
@@ -192,6 +175,19 @@ class CatDataSource {
         // Ignore if image doesn't exist or can't be deleted
         debugPrint('Error deleting cat profile image: $e');
       }
+
+      // Carnet attachments live under their own prefix; Storage has no
+      // recursive delete, so list and remove them one by one. Best-effort,
+      // like the profile photo: the document is already gone.
+      try {
+        final attachments =
+            await _storage.ref().child('cats/$catId/health').listAll();
+        for (final item in attachments.items) {
+          await item.delete();
+        }
+      } catch (e) {
+        debugPrint('Error deleting cat health attachments: $e');
+      }
     } catch (e) {
       debugPrint('Error deleting cat: $e');
       rethrow;
@@ -214,6 +210,55 @@ class CatDataSource {
       });
     } catch (e) {
       debugPrint('Error updating cat allergies: $e');
+      rethrow;
+    }
+  }
+
+  /// Writes the vet map, or deletes the field when [vet] is null. Same
+  /// reasoning as [updateCatAllergies]: the mapper omits the key when unset,
+  /// so removal needs its own write.
+  Future<void> updateCatVet({
+    required String catId,
+    required Map<String, dynamic>? vet,
+  }) async {
+    try {
+      await _firestore.collection('cats').doc(catId).update({
+        'vet': vet ?? FieldValue.delete(),
+      });
+    } catch (e) {
+      debugPrint('Error updating cat vet: $e');
+      rethrow;
+    }
+  }
+
+  /// Writes the lifestyle string, or deletes the field when null. Same
+  /// reasoning as [updateCatAllergies].
+  Future<void> updateCatLifestyle({
+    required String catId,
+    required String? lifestyle,
+  }) async {
+    try {
+      await _firestore.collection('cats').doc(catId).update({
+        'lifestyle': lifestyle ?? FieldValue.delete(),
+      });
+    } catch (e) {
+      debugPrint('Error updating cat lifestyle: $e');
+      rethrow;
+    }
+  }
+
+  /// Writes `weight` alone. Called by the carnet when a weigh-in is logged, so
+  /// the profile weight the food assessment reads stops being a snapshot from
+  /// the wizard. `weight_category` (the owner's body-condition answer) is
+  /// deliberately not touched.
+  Future<void> updateCatWeight({
+    required String catId,
+    required double weight,
+  }) async {
+    try {
+      await _firestore.collection('cats').doc(catId).update({'weight': weight});
+    } catch (e) {
+      debugPrint('Error updating cat weight: $e');
       rethrow;
     }
   }

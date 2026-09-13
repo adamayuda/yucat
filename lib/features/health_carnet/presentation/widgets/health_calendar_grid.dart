@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/health_carnet/domain/entities/health_event_entity.dart';
 import 'package:yucat/features/health_carnet/presentation/models/health_due_item.dart';
+import 'package:yucat/features/health_carnet/presentation/utils/cat_health_schedule.dart';
 import 'package:yucat/features/health_carnet/presentation/utils/health_calendar_layout.dart';
 import 'package:yucat/features/health_carnet/presentation/utils/health_date_format.dart';
 import 'package:yucat/features/health_carnet/presentation/utils/health_labels.dart';
@@ -25,10 +26,16 @@ class HealthCalendarView extends StatefulWidget {
   final List<HealthEventEntity> history;
   final List<HealthDueItem> dueItems;
 
+  /// Medication courses running today. Every day of a course from tomorrow
+  /// to its end gets a treatment-coloured ring — the start day already has
+  /// the record's filled dot, and past days are history.
+  final List<HealthCourse> courses;
+
   const HealthCalendarView({
     super.key,
     required this.history,
     required this.dueItems,
+    this.courses = const [],
   });
 
   @override
@@ -68,8 +75,20 @@ class _HealthCalendarViewState extends State<HealthCalendarView> {
       dueByDay.putIfAbsent(_dayOf(at), () => []).add(item);
     }
 
+    final courseByDay = <DateTime, List<HealthCourse>>{};
+    final today = _dayOf(DateTime.now());
+    for (final course in widget.courses) {
+      final end = _dayOf(course.event.courseEndAt!);
+      var day = today;
+      while (!day.isAfter(end)) {
+        courseByDay.putIfAbsent(day, () => []).add(course);
+        day = day.add(const Duration(days: 1));
+      }
+    }
+
     final selectedDone = doneByDay[_selected] ?? const [];
     final selectedDue = dueByDay[_selected] ?? const [];
+    final selectedCourses = courseByDay[_selected] ?? const [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,6 +109,7 @@ class _HealthCalendarViewState extends State<HealthCalendarView> {
                 material: material,
                 doneByDay: doneByDay,
                 dueByDay: dueByDay,
+                courseByDay: courseByDay,
               ),
               const SizedBox(height: DSDimens.sizeXs),
               _Legend(l10n: l10n),
@@ -101,6 +121,7 @@ class _HealthCalendarViewState extends State<HealthCalendarView> {
           date: _selected,
           done: selectedDone,
           due: selectedDue,
+          courses: selectedCourses,
           locale: locale,
         ),
         const SizedBox(height: DSDimens.sizeXs),
@@ -122,6 +143,7 @@ class _HealthCalendarViewState extends State<HealthCalendarView> {
     required MaterialLocalizations material,
     required Map<DateTime, List<HealthEventEntity>> doneByDay,
     required Map<DateTime, List<HealthDueItem>> dueByDay,
+    required Map<DateTime, List<HealthCourse>> courseByDay,
   }) {
     final firstColumn =
         leadingBlankDays(_month, material.firstDayOfWeekIndex);
@@ -142,6 +164,7 @@ class _HealthCalendarViewState extends State<HealthCalendarView> {
             isSelected: date == _selected,
             doneCount: (doneByDay[date] ?? const []).length,
             dueCount: (dueByDay[date] ?? const []).length,
+            courseCount: (courseByDay[date] ?? const []).length,
             categories: [
               for (final e in doneByDay[date] ?? const <HealthEventEntity>[])
                 e.category,
@@ -258,6 +281,7 @@ class _DayCell extends StatelessWidget {
   final bool isSelected;
   final int doneCount;
   final int dueCount;
+  final int courseCount;
   final List<HealthCategory> categories;
   final VoidCallback onTap;
 
@@ -271,6 +295,7 @@ class _DayCell extends StatelessWidget {
     required this.isSelected,
     required this.doneCount,
     required this.dueCount,
+    this.courseCount = 0,
     required this.categories,
     required this.onTap,
   });
@@ -283,6 +308,13 @@ class _DayCell extends StatelessWidget {
     }
     for (var i = 0; i < dueCount && markers.length < _maxMarkers; i++) {
       markers.add(_dot(DSColors.accentInfo, filled: false));
+    }
+    // A course is a ring in the treatment colour: scheduled, not yet done,
+    // but distinguishable from a booked act.
+    for (var i = 0; i < courseCount && markers.length < _maxMarkers; i++) {
+      markers.add(
+        _dot(healthCategoryInk(HealthCategory.treatment), filled: false),
+      );
     }
 
     return GestureDetector(
@@ -385,12 +417,14 @@ class _DayDetail extends StatelessWidget {
   final DateTime date;
   final List<HealthEventEntity> done;
   final List<HealthDueItem> due;
+  final List<HealthCourse> courses;
   final String locale;
 
   const _DayDetail({
     required this.date,
     required this.done,
     required this.due,
+    this.courses = const [],
     required this.locale,
   });
 
@@ -405,7 +439,7 @@ class _DayDetail extends StatelessWidget {
         children: [
           Text(healthFormatDate(date, locale), style: DSTextStyles.titleMd),
           const SizedBox(height: DSDimens.sizeXs),
-          if (done.isEmpty && due.isEmpty)
+          if (done.isEmpty && due.isEmpty && courses.isEmpty)
             Text(
               l10n.healthCarnetCalendarEmptyDay,
               style: DSTextStyles.bodyMd,
@@ -438,6 +472,26 @@ class _DayDetail extends StatelessWidget {
                 category: item.protocol.category,
                 label: healthProtocolName(item.protocol.id, l10n),
                 secondary: healthRecurrenceLabel(item.intervalDays, l10n),
+                filled: false,
+              ),
+          ],
+          if (courses.isNotEmpty) ...[
+            if (done.isNotEmpty || due.isNotEmpty)
+              const SizedBox(height: DSDimens.sizeXs),
+            Text(
+              l10n.healthCarnetMedicationTitle,
+              style: DSTextStyles.label,
+            ),
+            const SizedBox(height: DSDimens.sizeXxs),
+            for (final course in courses)
+              _DetailRow(
+                category: HealthCategory.treatment,
+                label: course.event.title.isNotEmpty
+                    ? course.event.title
+                    : healthProtocolName(course.event.protocolId ?? '', l10n),
+                secondary: course.dosesPerDay == null
+                    ? null
+                    : l10n.healthCarnetDosesPerDay(course.dosesPerDay!),
                 filled: false,
               ),
           ],

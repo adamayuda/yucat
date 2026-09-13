@@ -39,6 +39,20 @@ String healthProtocolName(String protocolId, AppLocalizations l10n) {
   };
 }
 
+/// The article (Firestore `articles` doc id) a due item's "Learn more" opens.
+///
+/// Every protocol maps to something — a new protocol with no article would
+/// silently ship without a link, so the test asserts full coverage. Preventive
+/// acts share the calendar piece; the three with a dedicated article get it.
+String healthProtocolArticleSlug(String protocolId) {
+  return switch (protocolId) {
+    'dental_scaling' => 'dental-disease-in-cats',
+    'senior_panel' => 'caring-for-a-senior-cat',
+    'condition_follow_up' => 'why-cats-hide-pain',
+    _ => 'the-preventive-care-calendar',
+  };
+}
+
 /// One-line explanation of what the act is for.
 String healthProtocolDescription(String protocolId, AppLocalizations l10n) {
   return switch (protocolId) {

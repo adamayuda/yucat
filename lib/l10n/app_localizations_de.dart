@@ -542,7 +542,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get onboardingProfileIntroQuote =>
-      'Ein schnelles Profil schaltet maßgeschneiderte Urteile für jede Tüte frei';
+      'Ein schnelles Profil schaltet maßgeschneiderte Urteile für jede Tüte frei — und eine Gesundheitsakte, die weiß, was ansteht';
 
   @override
   String get onboardingProfileNameLabel => 'Benenne deine Katze';
@@ -638,17 +638,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get onboardingNotifPrimerTitle =>
-      'Wir behalten das Futter\ndeiner Katze im Auge';
+      'Wir behalten die Gesundheit\ndeiner Katze im Auge';
 
   @override
   String get onboardingSetUpReminders => 'Erinnerungen einrichten';
 
   @override
-  String get onboardingNotifMatchDropped => 'Passung gesunken';
+  String get onboardingNotifReminderEyebrow => 'Impfung fällig';
 
   @override
   String get onboardingNotifMockBody =>
-      'Lunas Futter hat die Rezeptur geändert — sieh dir das neue Urteil an 🔍';
+      'Lunas Tollwut-Auffrischung ist nächste Woche fällig — Zeit für den Tierarzttermin 🩺';
 
   @override
   String get onboardingRemindersTitle =>
@@ -669,7 +669,8 @@ class AppLocalizationsDe extends AppLocalizations {
       'Wenn eine bessere Option gefunden wird';
 
   @override
-  String get onboardingRemindersOptionMonthly => 'Monatlicher Check-in';
+  String get onboardingRemindersOptionMonthly =>
+      'Impf- und Tierarzt-Erinnerungen';
 
   @override
   String get onboardingRemindersCalloutPart1 =>
@@ -2050,6 +2051,29 @@ class AppLocalizationsDe extends AppLocalizations {
       'Das Foto konnte nicht aktualisiert werden. Bitte versuche es erneut.';
 
   @override
+  String catDetailHealthRecords(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge',
+      one: '1 Eintrag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String catDetailHealthLastWeight(String kg) {
+    return 'letztes Gewicht $kg kg';
+  }
+
+  @override
+  String get catDetailHealthAllClear => 'Alles auf dem neuesten Stand';
+
+  @override
+  String get catDetailHealthSetup =>
+      'Noch nicht eingerichtet · dauert 30 Sekunden';
+
+  @override
   String get catListingTitle => 'Deine Katzen';
 
   @override
@@ -3143,6 +3167,286 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get healthAddTitleRequired => 'Bitte einen Titel eingeben.';
+
+  @override
+  String get homeHealthAllClearTitle => 'Alles auf dem neuesten Stand';
+
+  @override
+  String homeHealthAllClearNext(String protocol, String date) {
+    return 'Als Nächstes: $protocol · $date';
+  }
+
+  @override
+  String get homeHealthAllClearNone =>
+      'In den nächsten 12 Monaten steht nichts an';
+
+  @override
+  String homeHealthOthersDue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count weitere Termine bei deinen Katzen',
+      one: '+1 weiterer Termin bei deinen Katzen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileHealthLabel => 'Gesundheitsakte';
+
+  @override
+  String profileHealthCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stehen bald an',
+      one: '1 steht bald an',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profileHealthSetup(String catName) {
+    return 'Akte von $catName einrichten';
+  }
+
+  @override
+  String get healthCatPickerTitle => 'Wessen Akte?';
+
+  @override
+  String get healthVetTitle => 'Dein Tierarzt';
+
+  @override
+  String get healthVetEmpty =>
+      'Noch kein Tierarzt gespeichert. Füge einen hinzu, um mit einem Tipp anzurufen und neue Einträge vorauszufüllen.';
+
+  @override
+  String get healthVetAdd => 'Hinzufügen';
+
+  @override
+  String get healthVetEdit => 'Bearbeiten';
+
+  @override
+  String get healthVetCall => 'Anrufen';
+
+  @override
+  String get healthVetCallError =>
+      'Die Telefon-App konnte nicht geöffnet werden.';
+
+  @override
+  String get healthVetFieldName => 'Name des Tierarztes';
+
+  @override
+  String get healthVetFieldClinic => 'Praxis';
+
+  @override
+  String get healthVetFieldPhone => 'Telefon';
+
+  @override
+  String get healthVetFieldAddress => 'Adresse';
+
+  @override
+  String get healthVetSave => 'Speichern';
+
+  @override
+  String get healthVetRemove => 'Tierarzt entfernen';
+
+  @override
+  String get healthVetNameRequired =>
+      'Gib dem Tierarzt oder der Praxis einen Namen.';
+
+  @override
+  String healthLifestyleQuestion(String catName) {
+    return 'Geht $catName nach draußen?';
+  }
+
+  @override
+  String get healthLifestyleIndoor => 'Nur drinnen';
+
+  @override
+  String get healthLifestyleOutdoor => 'Geht nach draußen';
+
+  @override
+  String get healthLifestyleTitle => 'Lebensweise';
+
+  @override
+  String get healthLifestyleChange => 'Ändern';
+
+  @override
+  String get healthLifestyleUnset => 'Noch nicht angegeben';
+
+  @override
+  String get healthLifestyleOutdoorNote =>
+      'Freigänger bekommen die FeLV-Auffrischung und monatliche Entwurmung eingeplant.';
+
+  @override
+  String get healthLifestyleIndoorNote =>
+      'Wohnungskatzen behalten den Standardplan.';
+
+  @override
+  String healthLifestyleUnsetNote(String catName) {
+    return 'Sag uns, ob $catName rausgeht, und wir passen den Plan an.';
+  }
+
+  @override
+  String get healthCarnetLearnMore => 'Mehr erfahren';
+
+  @override
+  String get healthAddPhotoLabel => 'Foto';
+
+  @override
+  String get healthAddPhotoHint => 'Impfpass-Seite oder Laborbefund hinzufügen';
+
+  @override
+  String get healthAddPhotoRemove => 'Entfernen';
+
+  @override
+  String get healthAttachmentUploadFailed =>
+      'Der Eintrag wurde gespeichert, aber das Foto konnte nicht hochgeladen werden.';
+
+  @override
+  String get healthAttachmentViewerTitle => 'Foto';
+
+  @override
+  String get healthBookletScanCta => 'Impfpass scannen';
+
+  @override
+  String get healthBookletPickerRow => 'Impfpass scannen';
+
+  @override
+  String get healthBookletPickerRowDesc =>
+      'Fotografiere eine Seite und wir tragen die Einträge ein';
+
+  @override
+  String get healthBookletReading => 'Seite wird gelesen…';
+
+  @override
+  String get healthBookletReviewTitle => 'Gefundene Einträge';
+
+  @override
+  String get healthBookletReviewIntro =>
+      'Entferne den Haken bei allem, was nicht stimmt. Unsichere Zeilen sind zunächst nicht angehakt.';
+
+  @override
+  String get healthBookletUnreadable =>
+      'Diese Seite konnte nicht gelesen werden. Versuche ein schärferes, gerades Foto.';
+
+  @override
+  String get healthBookletNotBooklet =>
+      'Das sieht nicht nach einer Impfpass-Seite aus.';
+
+  @override
+  String get healthBookletNone => 'Keine datierten Einträge auf dieser Seite.';
+
+  @override
+  String healthBookletAdd(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge hinzufügen',
+      one: '1 Eintrag hinzufügen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get healthBookletLowConfidence => 'Unsicher';
+
+  @override
+  String get healthBookletEditDate => 'Datum ändern';
+
+  @override
+  String get healthBookletError =>
+      'Der Leser ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.';
+
+  @override
+  String get healthBookletTryAgain => 'Erneut versuchen';
+
+  @override
+  String get healthShareTooltip => 'Teilen';
+
+  @override
+  String healthShareSubject(String catName) {
+    return 'Gesundheitsakte von $catName';
+  }
+
+  @override
+  String healthShareHeading(String catName) {
+    return '$catName · Gesundheitsakte';
+  }
+
+  @override
+  String get healthShareBirthday => 'Geboren';
+
+  @override
+  String get healthShareAge => 'Alter';
+
+  @override
+  String get healthShareWeight => 'Letztes Gewicht';
+
+  @override
+  String get healthShareLifestyle => 'Lebensweise';
+
+  @override
+  String get healthShareVaccines => 'Impfungen';
+
+  @override
+  String get healthShareUpcoming => 'Demnächst';
+
+  @override
+  String get healthShareAllergies => 'Allergien';
+
+  @override
+  String get healthShareVet => 'Tierarzt';
+
+  @override
+  String healthShareValidUntil(String date) {
+    return 'gültig bis $date';
+  }
+
+  @override
+  String get healthShareNoRecord => 'kein Eintrag';
+
+  @override
+  String get healthShareFooter => 'Geteilt aus YuCat';
+
+  @override
+  String get healthAddFieldCourseDaysLabel => 'Dauer (Tage)';
+
+  @override
+  String get healthAddFieldCourseDaysHint => 'z. B. 7';
+
+  @override
+  String get healthAddFieldDosesPerDayLabel => 'Gaben pro Tag';
+
+  @override
+  String get healthAddFieldDosesPerDayHint => 'z. B. 2';
+
+  @override
+  String get healthCarnetMedicationTitle => 'Medikamente';
+
+  @override
+  String healthCarnetDosesPerDay(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count×/Tag',
+      one: '1×/Tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetCourseDaysLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Noch $count Tage',
+      one: 'Noch 1 Tag',
+      zero: 'Letzter Tag',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get healthCarnetEntryEmpty => 'Impfungen, Besuche und Gewicht';

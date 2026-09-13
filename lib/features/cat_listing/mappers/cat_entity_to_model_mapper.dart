@@ -25,6 +25,8 @@ class CatEntityToModelMapperImpl extends CatEntityToModelMapper {
       gender: entity.gender,
       healthConditions: entity.healthConditions,
       allergies: entity.allergies,
+      vet: entity.vet,
+      lifestyle: entity.lifestyle,
     );
   }
 }

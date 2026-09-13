@@ -540,7 +540,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get onboardingProfileIntroQuote =>
-      'Egy gyors profil egyénre szabott értékeléseket ad minden csomagoláshoz';
+      'Egy gyors profil egyénre szabott értékeléseket ad minden csomagoláshoz — és egy egészségügyi naplót, amely tudja, mi esedékes';
 
   @override
   String get onboardingProfileNameLabel => 'Add meg a macskád nevét';
@@ -636,17 +636,17 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get onboardingNotifPrimerTitle =>
-      'Szemmel tartjuk\na macskád eledelét';
+      'Szemmel tartjuk\na macskád egészségét';
 
   @override
   String get onboardingSetUpReminders => 'Emlékeztetők beállítása';
 
   @override
-  String get onboardingNotifMatchDropped => 'Egyezés csökkent';
+  String get onboardingNotifReminderEyebrow => 'Oltás esedékes';
 
   @override
   String get onboardingNotifMockBody =>
-      'Luna eledelének megváltozott a receptúrája — nézd meg az új értékelést 🔍';
+      'Luna veszettség elleni emlékeztető oltása jövő héten esedékes — ideje időpontot kérni 🩺';
 
   @override
   String get onboardingRemindersTitle => 'Miről értesítsünk\ntéged?';
@@ -665,7 +665,8 @@ class AppLocalizationsHu extends AppLocalizations {
   String get onboardingRemindersOptionBetterFit => 'Ha jobb egyezést találunk';
 
   @override
-  String get onboardingRemindersOptionMonthly => 'Havi áttekintés';
+  String get onboardingRemindersOptionMonthly =>
+      'Oltás- és állatorvos-emlékeztetők';
 
   @override
   String get onboardingRemindersCalloutPart1 =>
@@ -2034,6 +2035,29 @@ class AppLocalizationsHu extends AppLocalizations {
       'Nem sikerült frissíteni a fotót. Próbáld újra.';
 
   @override
+  String catDetailHealthRecords(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bejegyzés',
+      one: '1 bejegyzés',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String catDetailHealthLastWeight(String kg) {
+    return 'utolsó súly $kg kg';
+  }
+
+  @override
+  String get catDetailHealthAllClear => 'Minden naprakész';
+
+  @override
+  String get catDetailHealthSetup =>
+      'Még nincs beállítva · 30 másodperc az egész';
+
+  @override
   String get catListingTitle => 'Macskáid';
 
   @override
@@ -3116,6 +3140,286 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get healthAddTitleRequired => 'Adj meg egy megnevezést.';
+
+  @override
+  String get homeHealthAllClearTitle => 'Minden naprakész';
+
+  @override
+  String homeHealthAllClearNext(String protocol, String date) {
+    return 'Következő: $protocol · $date';
+  }
+
+  @override
+  String get homeHealthAllClearNone =>
+      'Az elkövetkező 12 hónapban nincs esedékes teendő';
+
+  @override
+  String homeHealthOthersDue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count további teendő a cicáidnál',
+      one: '+1 további teendő a cicáidnál',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get profileHealthLabel => 'Egészségügyi napló';
+
+  @override
+  String profileHealthCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hamarosan esedékes',
+      one: '1 hamarosan esedékes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String profileHealthSetup(String catName) {
+    return '$catName naplójának beállítása';
+  }
+
+  @override
+  String get healthCatPickerTitle => 'Melyik cica naplója?';
+
+  @override
+  String get healthVetTitle => 'Az állatorvosod';
+
+  @override
+  String get healthVetEmpty =>
+      'Még nincs mentett állatorvos. Adj hozzá egyet, hogy egy érintéssel hívhasd, és az új bejegyzések előre kitöltődjenek.';
+
+  @override
+  String get healthVetAdd => 'Hozzáadás';
+
+  @override
+  String get healthVetEdit => 'Szerkesztés';
+
+  @override
+  String get healthVetCall => 'Hívás';
+
+  @override
+  String get healthVetCallError =>
+      'Nem sikerült megnyitni a telefon alkalmazást.';
+
+  @override
+  String get healthVetFieldName => 'Állatorvos neve';
+
+  @override
+  String get healthVetFieldClinic => 'Rendelő';
+
+  @override
+  String get healthVetFieldPhone => 'Telefon';
+
+  @override
+  String get healthVetFieldAddress => 'Cím';
+
+  @override
+  String get healthVetSave => 'Mentés';
+
+  @override
+  String get healthVetRemove => 'Állatorvos eltávolítása';
+
+  @override
+  String get healthVetNameRequired =>
+      'Add meg az állatorvos vagy a rendelő nevét.';
+
+  @override
+  String healthLifestyleQuestion(String catName) {
+    return '$catName kijár a szabadba?';
+  }
+
+  @override
+  String get healthLifestyleIndoor => 'Csak bent';
+
+  @override
+  String get healthLifestyleOutdoor => 'Kijár a szabadba';
+
+  @override
+  String get healthLifestyleTitle => 'Életmód';
+
+  @override
+  String get healthLifestyleChange => 'Módosítás';
+
+  @override
+  String get healthLifestyleUnset => 'Még nincs megadva';
+
+  @override
+  String get healthLifestyleOutdoorNote =>
+      'A kijáró cicáknál a FeLV emlékeztető oltás és a havi féregtelenítés is bekerül a naptárba.';
+
+  @override
+  String get healthLifestyleIndoorNote =>
+      'A bentlakó cicák a szokásos ütemtervet követik.';
+
+  @override
+  String healthLifestyleUnsetNote(String catName) {
+    return 'Mondd el, kijár-e $catName, és ehhez igazítjuk az ütemtervet.';
+  }
+
+  @override
+  String get healthCarnetLearnMore => 'Tudj meg többet';
+
+  @override
+  String get healthAddPhotoLabel => 'Fotó';
+
+  @override
+  String get healthAddPhotoHint =>
+      'Adj hozzá egy oltási könyv oldalt vagy laboreredményt';
+
+  @override
+  String get healthAddPhotoRemove => 'Eltávolítás';
+
+  @override
+  String get healthAttachmentUploadFailed =>
+      'A bejegyzés mentve, de a fotót nem sikerült feltölteni.';
+
+  @override
+  String get healthAttachmentViewerTitle => 'Fotó';
+
+  @override
+  String get healthBookletScanCta => 'Oltási könyv beolvasása';
+
+  @override
+  String get healthBookletPickerRow => 'Az oltási könyv beolvasása';
+
+  @override
+  String get healthBookletPickerRowDesc =>
+      'Fotózz le egy oldalt, és kitöltjük a bejegyzéseket';
+
+  @override
+  String get healthBookletReading => 'Az oldal olvasása…';
+
+  @override
+  String get healthBookletReviewTitle => 'Talált bejegyzések';
+
+  @override
+  String get healthBookletReviewIntro =>
+      'Vedd ki a pipát mindenből, ami nem stimmel. A bizonytalan sorok alapból nincsenek kipipálva.';
+
+  @override
+  String get healthBookletUnreadable =>
+      'Nem sikerült elolvasni az oldalt. Próbálj élesebb, szemből készült fotót.';
+
+  @override
+  String get healthBookletNotBooklet => 'Ez nem tűnik oltási könyv oldalnak.';
+
+  @override
+  String get healthBookletNone => 'Nincs dátumozott bejegyzés ezen az oldalon.';
+
+  @override
+  String healthBookletAdd(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bejegyzés hozzáadása',
+      one: '1 bejegyzés hozzáadása',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get healthBookletLowConfidence => 'Bizonytalan';
+
+  @override
+  String get healthBookletEditDate => 'Dátum módosítása';
+
+  @override
+  String get healthBookletError =>
+      'Az olvasó nem elérhető. Ellenőrizd a kapcsolatot, és próbáld újra.';
+
+  @override
+  String get healthBookletTryAgain => 'Újra';
+
+  @override
+  String get healthShareTooltip => 'Megosztás';
+
+  @override
+  String healthShareSubject(String catName) {
+    return '$catName egészségügyi naplója';
+  }
+
+  @override
+  String healthShareHeading(String catName) {
+    return '$catName · Egészségügyi napló';
+  }
+
+  @override
+  String get healthShareBirthday => 'Született';
+
+  @override
+  String get healthShareAge => 'Kor';
+
+  @override
+  String get healthShareWeight => 'Utolsó súly';
+
+  @override
+  String get healthShareLifestyle => 'Életmód';
+
+  @override
+  String get healthShareVaccines => 'Oltások';
+
+  @override
+  String get healthShareUpcoming => 'Következik';
+
+  @override
+  String get healthShareAllergies => 'Allergiák';
+
+  @override
+  String get healthShareVet => 'Állatorvos';
+
+  @override
+  String healthShareValidUntil(String date) {
+    return 'érvényes eddig: $date';
+  }
+
+  @override
+  String get healthShareNoRecord => 'nincs bejegyzés';
+
+  @override
+  String get healthShareFooter => 'Megosztva a YuCat appból';
+
+  @override
+  String get healthAddFieldCourseDaysLabel => 'Kúra hossza (nap)';
+
+  @override
+  String get healthAddFieldCourseDaysHint => 'pl. 7';
+
+  @override
+  String get healthAddFieldDosesPerDayLabel => 'Adag naponta';
+
+  @override
+  String get healthAddFieldDosesPerDayHint => 'pl. 2';
+
+  @override
+  String get healthCarnetMedicationTitle => 'Gyógyszerek';
+
+  @override
+  String healthCarnetDosesPerDay(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'napi $count×',
+      one: 'napi 1×',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String healthCarnetCourseDaysLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nap van hátra',
+      one: '1 nap van hátra',
+      zero: 'Utolsó nap',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get healthCarnetEntryEmpty => 'Oltások, vizsgálatok és testsúly';

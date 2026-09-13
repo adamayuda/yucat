@@ -14,10 +14,23 @@ class CatListingLoadingState extends CatListingState {
 class CatListingLoadedState extends CatListingState {
   final List<CatModel> cats;
 
-  const CatListingLoadedState({required this.cats});
+  /// Carnet summaries keyed by cat id. A cat missing from the map had a
+  /// failed read (or no id) and shows no pill — never a "set up" nudge.
+  final Map<String, CatHealthSummary> health;
+
+  const CatListingLoadedState({
+    required this.cats,
+    this.health = const {},
+  });
 
   @override
-  List<Object?> get props => [cats];
+  List<Object?> get props => [
+        cats,
+        health.keys.toList(),
+        health.values
+            .map((h) => '${h.nearest?.protocol.id}:${h.nearest?.dueDate}')
+            .toList(),
+      ];
 }
 
 class CatListingErrorState extends CatListingState {

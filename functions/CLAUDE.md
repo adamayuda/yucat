@@ -25,7 +25,7 @@ been removed from both backend and client.
 
 ---
 
-## 2. The three callables and the nightly job
+## 2. The callables and the nightly job
 
 All in `src/index.ts`, all `onCall` (firebase-functions/v2/https). No region or minInstances
 is set (us-central1). `admin.initializeApp()` runs at module load, followed by
@@ -37,6 +37,7 @@ is set (us-central1). `admin.initializeApp()` runs at module load, followed by
 |---|---|---|---|---|
 | `fetchProductByImageV2` | 300s | **1 GiB, 1 cpu, concurrency 10** (`config.functions`) | `ANTHROPIC_API_KEY`, `ALGOLIA_API_KEY`, `SERPAPI_API_KEY` | The scan pipeline — food (§3) and cat litter (§3b) |
 | `analyzeProductLabel` | 90s | same | `ANTHROPIC_API_KEY`, `ALGOLIA_API_KEY` | The back-label rescue (§3c) — one vision read, no web search |
+| `readHealthBooklet` | 90s | same | `ANTHROPIC_API_KEY` | The health carnet's booklet reader (§3e) — one vision read of a vaccination-booklet page → proposed records; nothing persisted |
 | `nightlySelfHeal` (`jobs/self-heal.ts`) | 540s | 1 GiB, `onSchedule` 03:30 Europe/Madrid | all three | Re-analyses score-0 rows and backfills images off the request path (§3d) |
 | `generateCatNarrative` | 60s | defaults (256 MiB) | `ANTHROPIC_API_KEY` | Onboarding personalized note |
 | `analyzeBrand` | 60s | defaults (256 MiB) | `ANTHROPIC_API_KEY` | Onboarding brand critique |
@@ -247,6 +248,30 @@ rubric first, multilingual label vocabulary, no `web_search`), ~5-12 s, under a 
    the timings line. The client treats the result exactly like a scanned product (history,
    `Product Selected { path: label }`, detail page).
 
+## 3e. The booklet reader (`readHealthBooklet`)
+
+The physical carnet is what the vet stamps; this turns a photo of one page into
+*proposed* records for the app's carnet. One forced `submit_health_records` vision call
+(`readHealthBookletImage`, `prompts/read-health-booklet.ts`: multilingual vaccine vocabulary
+→ the 15 protocol ids of the Flutter schedule engine, day-first European dates, rabies
+validity stickers → `interval_days`), no `web_search`, ~5-10 s, under a cent.
+
+1. Auth, `image` validation, media sniff (HEIC refused). `today` (YYYY-MM-DD, the device's
+   date) resolves two-digit years; a malformed value falls back to server time. `catName`
+   is only prompt flavour.
+2. The model returns `outcome` (`records` / `unreadable` / `not_booklet`) and a record list.
+   **Server-side validation drops** any record without a valid ISO date, dated in the
+   future, or with neither a known `protocol_id` nor a title — a wrong date becomes a
+   wrong booster, so nothing unverifiable reaches the client. `interval_days` survives only
+   on rabies and only as 365 / 1095. `confidence` defaults to `low` when missing.
+3. **Nothing is persisted** — no scan log, no Storage copy. The photo is medical PII and
+   there is nothing to cache or self-heal. The client shows every row for confirmation and
+   writes the accepted ones to `cats/{catId}/health_events` itself.
+
+Wire: in `{image, mimeType?, catName?, today}`; out `{outcome, model, records: [{protocol_id
+| null, title, category, performed_at, interval_days | null, vet | null, clinic | null,
+confidence}]}`. Failures throw `internal`.
+
 ## 3d. Nightly self-heal (`nightlySelfHeal`, `jobs/self-heal.ts`)
 
 `onSchedule("every day 03:30", Europe/Madrid, 540 s, 1 GiB, retryCount 0)`, all tunables in
@@ -343,7 +368,7 @@ the price of data completeness on obscure products. Config comments the parallel
 ```
 functions/
 ├── src/
-│   ├── index.ts                  the 3 callables + scan pipeline + self-heal logic
+│   ├── index.ts                  the callables + scan pipeline + self-heal logic
 │   ├── config/index.ts           all tunables and keys (§8)
 │   ├── constants/index.ts        retry, image validation/optimization, score bounds
 │   ├── models/product.ts         Product interface + ProductModel (§9)
@@ -355,6 +380,7 @@ functions/
 │   ├── prompts/                  (§6)
 │   │   ├── identify-product.ts   analyze-product.ts    quality-rubric.ts
 │   │   ├── analyze-label.ts      back-label extraction (§3c)
+│   │   ├── read-health-booklet.ts  vaccination-booklet reader (§3e)
 │   │   ├── retailers.ts          retailerFor(countryCode) — the fan-out's second source (§4)
 │   │   ├── analyze-litter.ts     litter-rubric.ts
 │   │   ├── translate-recipe.ts   translate-food-guide.ts
@@ -623,7 +649,7 @@ Deploy from the **repo root**:
 # `deploy --only functions` sees them as "not in local source", asks to delete
 # them, and ABORTS when non-interactive. They must stay (pre-V2 App Store builds).
 npx firebase-tools@latest deploy --project yucat-d8fb5 --only \
-  functions:fetchProductByImageV2,functions:analyzeProductLabel,functions:nightlySelfHeal,functions:generateCatNarrative,functions:analyzeBrand
+  functions:fetchProductByImageV2,functions:analyzeProductLabel,functions:readHealthBooklet,functions:nightlySelfHeal,functions:generateCatNarrative,functions:analyzeBrand
 npx firebase-tools@latest deploy --only functions:fetchProductByImageV2    # one
 ```
 

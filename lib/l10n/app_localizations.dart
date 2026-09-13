@@ -1105,7 +1105,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingProfileIntroQuote.
   ///
   /// In en, this message translates to:
-  /// **'A quick profile unlocks tailored verdicts on every bag'**
+  /// **'A quick profile unlocks tailored verdicts on every bag — and a health record that knows what\'s due'**
   String get onboardingProfileIntroQuote;
 
   /// No description provided for @onboardingProfileNameLabel.
@@ -1279,7 +1279,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingNotifPrimerTitle.
   ///
   /// In en, this message translates to:
-  /// **'We\'ll keep an eye on\nyour cat\'s food'**
+  /// **'We\'ll keep an eye on\nyour cat\'s health'**
   String get onboardingNotifPrimerTitle;
 
   /// No description provided for @onboardingSetUpReminders.
@@ -1288,16 +1288,16 @@ abstract class AppLocalizations {
   /// **'Set up reminders'**
   String get onboardingSetUpReminders;
 
-  /// No description provided for @onboardingNotifMatchDropped.
+  /// No description provided for @onboardingNotifReminderEyebrow.
   ///
   /// In en, this message translates to:
-  /// **'Match dropped'**
-  String get onboardingNotifMatchDropped;
+  /// **'Vaccine due'**
+  String get onboardingNotifReminderEyebrow;
 
   /// No description provided for @onboardingNotifMockBody.
   ///
   /// In en, this message translates to:
-  /// **'Luna\'s food changed recipe — see the new verdict 🔍'**
+  /// **'Luna\'s rabies booster is due next week — time to book the vet 🩺'**
   String get onboardingNotifMockBody;
 
   /// No description provided for @onboardingRemindersTitle.
@@ -1333,7 +1333,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingRemindersOptionMonthly.
   ///
   /// In en, this message translates to:
-  /// **'Monthly check-in'**
+  /// **'Vaccine & vet-visit reminders'**
   String get onboardingRemindersOptionMonthly;
 
   /// No description provided for @onboardingRemindersCalloutPart1.
@@ -3608,6 +3608,30 @@ abstract class AppLocalizations {
   /// **'Couldn\'t update the photo. Please try again.'**
   String get catDetailPhotoUpdateError;
 
+  /// No description provided for @catDetailHealthRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 record} other{{count} records}}'**
+  String catDetailHealthRecords(int count);
+
+  /// No description provided for @catDetailHealthLastWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'last weight {kg} kg'**
+  String catDetailHealthLastWeight(String kg);
+
+  /// No description provided for @catDetailHealthAllClear.
+  ///
+  /// In en, this message translates to:
+  /// **'All up to date'**
+  String get catDetailHealthAllClear;
+
+  /// No description provided for @catDetailHealthSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set up yet · takes 30 seconds'**
+  String get catDetailHealthSetup;
+
   /// No description provided for @catListingTitle.
   ///
   /// In en, this message translates to:
@@ -5317,6 +5341,432 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Give this record a title.'**
   String get healthAddTitleRequired;
+
+  /// No description provided for @homeHealthAllClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All up to date'**
+  String get homeHealthAllClearTitle;
+
+  /// No description provided for @homeHealthAllClearNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {protocol} · {date}'**
+  String homeHealthAllClearNext(String protocol, String date);
+
+  /// No description provided for @homeHealthAllClearNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing due in the next 12 months'**
+  String get homeHealthAllClearNone;
+
+  /// No description provided for @homeHealthOthersDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+1 more due across your cats} other{+{count} more due across your cats}}'**
+  String homeHealthOthersDue(int count);
+
+  /// No description provided for @profileHealthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Health record'**
+  String get profileHealthLabel;
+
+  /// No description provided for @profileHealthCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 due soon} other{{count} due soon}}'**
+  String profileHealthCount(int count);
+
+  /// No description provided for @profileHealthSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up {catName}\'s record'**
+  String profileHealthSetup(String catName);
+
+  /// No description provided for @healthCatPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Whose record?'**
+  String get healthCatPickerTitle;
+
+  /// No description provided for @healthVetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your vet'**
+  String get healthVetTitle;
+
+  /// No description provided for @healthVetEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No vet saved yet. Add one to call in a tap and prefill new records.'**
+  String get healthVetEmpty;
+
+  /// No description provided for @healthVetAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get healthVetAdd;
+
+  /// No description provided for @healthVetEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get healthVetEdit;
+
+  /// No description provided for @healthVetCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get healthVetCall;
+
+  /// No description provided for @healthVetCallError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the phone app.'**
+  String get healthVetCallError;
+
+  /// No description provided for @healthVetFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Vet\'s name'**
+  String get healthVetFieldName;
+
+  /// No description provided for @healthVetFieldClinic.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinic'**
+  String get healthVetFieldClinic;
+
+  /// No description provided for @healthVetFieldPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get healthVetFieldPhone;
+
+  /// No description provided for @healthVetFieldAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get healthVetFieldAddress;
+
+  /// No description provided for @healthVetSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get healthVetSave;
+
+  /// No description provided for @healthVetRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove vet'**
+  String get healthVetRemove;
+
+  /// No description provided for @healthVetNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the vet or clinic a name.'**
+  String get healthVetNameRequired;
+
+  /// No description provided for @healthLifestyleQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Does {catName} go outdoors?'**
+  String healthLifestyleQuestion(String catName);
+
+  /// No description provided for @healthLifestyleIndoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Indoor only'**
+  String get healthLifestyleIndoor;
+
+  /// No description provided for @healthLifestyleOutdoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Goes outdoors'**
+  String get healthLifestyleOutdoor;
+
+  /// No description provided for @healthLifestyleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifestyle'**
+  String get healthLifestyleTitle;
+
+  /// No description provided for @healthLifestyleChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get healthLifestyleChange;
+
+  /// No description provided for @healthLifestyleUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set yet'**
+  String get healthLifestyleUnset;
+
+  /// No description provided for @healthLifestyleOutdoorNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoor cats get the FeLV booster and monthly deworming scheduled.'**
+  String get healthLifestyleOutdoorNote;
+
+  /// No description provided for @healthLifestyleIndoorNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Indoor cats keep the standard schedule.'**
+  String get healthLifestyleIndoorNote;
+
+  /// No description provided for @healthLifestyleUnsetNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us whether {catName} goes out and we\'ll tailor the schedule.'**
+  String healthLifestyleUnsetNote(String catName);
+
+  /// No description provided for @healthCarnetLearnMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn more'**
+  String get healthCarnetLearnMore;
+
+  /// No description provided for @healthAddPhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get healthAddPhotoLabel;
+
+  /// No description provided for @healthAddPhotoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a booklet page or a lab result'**
+  String get healthAddPhotoHint;
+
+  /// No description provided for @healthAddPhotoRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get healthAddPhotoRemove;
+
+  /// No description provided for @healthAttachmentUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The record was saved, but the photo couldn\'t be uploaded.'**
+  String get healthAttachmentUploadFailed;
+
+  /// No description provided for @healthAttachmentViewerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get healthAttachmentViewerTitle;
+
+  /// No description provided for @healthBookletScanCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the booklet'**
+  String get healthBookletScanCta;
+
+  /// No description provided for @healthBookletPickerRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the vaccination booklet'**
+  String get healthBookletPickerRow;
+
+  /// No description provided for @healthBookletPickerRowDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph a page and we\'ll fill in the records'**
+  String get healthBookletPickerRowDesc;
+
+  /// No description provided for @healthBookletReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the page…'**
+  String get healthBookletReading;
+
+  /// No description provided for @healthBookletReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Records found'**
+  String get healthBookletReviewTitle;
+
+  /// No description provided for @healthBookletReviewIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Untick anything that\'s wrong. Rows we\'re unsure about start unticked.'**
+  String get healthBookletReviewIntro;
+
+  /// No description provided for @healthBookletUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t read that page. Try a sharper, straight-on photo.'**
+  String get healthBookletUnreadable;
+
+  /// No description provided for @healthBookletNotBooklet.
+  ///
+  /// In en, this message translates to:
+  /// **'That doesn\'t look like a vaccination booklet page.'**
+  String get healthBookletNotBooklet;
+
+  /// No description provided for @healthBookletNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No dated records on that page.'**
+  String get healthBookletNone;
+
+  /// No description provided for @healthBookletAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 record} other{Add {count} records}}'**
+  String healthBookletAdd(int count);
+
+  /// No description provided for @healthBookletLowConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsure'**
+  String get healthBookletLowConfidence;
+
+  /// No description provided for @healthBookletEditDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit date'**
+  String get healthBookletEditDate;
+
+  /// No description provided for @healthBookletError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the reader. Check your connection and try again.'**
+  String get healthBookletError;
+
+  /// No description provided for @healthBookletTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get healthBookletTryAgain;
+
+  /// No description provided for @healthShareTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get healthShareTooltip;
+
+  /// No description provided for @healthShareSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'{catName}\'s health record'**
+  String healthShareSubject(String catName);
+
+  /// No description provided for @healthShareHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'{catName} · Health record'**
+  String healthShareHeading(String catName);
+
+  /// No description provided for @healthShareBirthday.
+  ///
+  /// In en, this message translates to:
+  /// **'Born'**
+  String get healthShareBirthday;
+
+  /// No description provided for @healthShareAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get healthShareAge;
+
+  /// No description provided for @healthShareWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Last weight'**
+  String get healthShareWeight;
+
+  /// No description provided for @healthShareLifestyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifestyle'**
+  String get healthShareLifestyle;
+
+  /// No description provided for @healthShareVaccines.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccines'**
+  String get healthShareVaccines;
+
+  /// No description provided for @healthShareUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming up'**
+  String get healthShareUpcoming;
+
+  /// No description provided for @healthShareAllergies.
+  ///
+  /// In en, this message translates to:
+  /// **'Allergies'**
+  String get healthShareAllergies;
+
+  /// No description provided for @healthShareVet.
+  ///
+  /// In en, this message translates to:
+  /// **'Vet'**
+  String get healthShareVet;
+
+  /// No description provided for @healthShareValidUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'valid until {date}'**
+  String healthShareValidUntil(String date);
+
+  /// No description provided for @healthShareNoRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'no record'**
+  String get healthShareNoRecord;
+
+  /// No description provided for @healthShareFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared from YuCat'**
+  String get healthShareFooter;
+
+  /// No description provided for @healthAddFieldCourseDaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Course length (days)'**
+  String get healthAddFieldCourseDaysLabel;
+
+  /// No description provided for @healthAddFieldCourseDaysHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 7'**
+  String get healthAddFieldCourseDaysHint;
+
+  /// No description provided for @healthAddFieldDosesPerDayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Doses per day'**
+  String get healthAddFieldDosesPerDayLabel;
+
+  /// No description provided for @healthAddFieldDosesPerDayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 2'**
+  String get healthAddFieldDosesPerDayHint;
+
+  /// No description provided for @healthCarnetMedicationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Medication'**
+  String get healthCarnetMedicationTitle;
+
+  /// No description provided for @healthCarnetDosesPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1×/day} other{{count}×/day}}'**
+  String healthCarnetDosesPerDay(int count);
+
+  /// No description provided for @healthCarnetCourseDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Last day} =1{1 day left} other{{count} days left}}'**
+  String healthCarnetCourseDaysLeft(int count);
 
   /// No description provided for @healthCarnetEntryEmpty.
   ///

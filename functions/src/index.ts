@@ -18,6 +18,7 @@ import {
   analyzeProductImage,
   analyzeProductLabelImage,
   analyzeProductImageParallel,
+  readHealthBookletImage,
   findProductImageUrl,
   verifyLitterMatchWithLLM,
   verifyMatchWithLLM,
@@ -1399,6 +1400,89 @@ export const analyzeProductLabel = onCall(
  * failure so the client falls back to its local template (never throws for a
  * missing narrative — it's a non-critical enhancement).
  */
+/**
+ * The health carnet's booklet reader: a photo of one vaccination-booklet page
+ * → proposed records. One vision call, no web search, nothing persisted (the
+ * photo is medical PII; there is nothing to cache or self-heal). The client
+ * shows every row for confirmation before writing to `health_events`.
+ */
+export const readHealthBooklet = onCall(
+  {
+    cors: config.functions.corsEnabled,
+    timeoutSeconds: config.functions.labelTimeoutSeconds,
+    memory: config.functions.memory,
+    cpu: 1,
+    concurrency: config.functions.concurrency,
+    secrets: ["ANTHROPIC_API_KEY"],
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required");
+    }
+    const {image, catName, today} = request.data;
+    if (!image || typeof image !== "string") {
+      throw new HttpsError(
+        "invalid-argument",
+        "Missing required field: image (base64-encoded string)"
+      );
+    }
+    const sniffed = sniffMediaType(image);
+    if (sniffed === "image/heic") {
+      throw new HttpsError(
+        "invalid-argument",
+        "HEIC images are not supported; send JPEG or PNG"
+      );
+    }
+    const mimeType = sniffed ?? "image/jpeg";
+    // The device's date, for resolving two-digit years; server time is the
+    // fallback and never trusted over a well-formed client value.
+    const resolvedToday =
+      typeof today === "string" && /^\d{4}-\d{2}-\d{2}$/.test(today) ?
+        today :
+        new Date().toISOString().slice(0, 10);
+    const requestId = `booklet-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+
+    logger.info("Booklet endpoint called", {
+      requestId,
+      userId: request.auth.uid,
+      imageSize: image.length,
+      hasCatName: typeof catName === "string" && !!catName.trim(),
+      structuredData: true,
+    });
+
+    try {
+      const result = await readHealthBookletImage(
+        image,
+        mimeType,
+        resolvedToday,
+        typeof catName === "string" && catName.trim() ? catName.trim() : undefined,
+        requestId
+      );
+      return {
+        outcome: result.outcome,
+        model: result.model,
+        records: result.records.map((r) => ({
+          protocol_id: r.protocolId,
+          title: r.title,
+          category: r.category,
+          performed_at: r.performedAt,
+          interval_days: r.intervalDays ?? null,
+          vet: r.vet ?? null,
+          clinic: r.clinic ?? null,
+          confidence: r.confidence,
+        })),
+      };
+    } catch (error) {
+      logger.error("Booklet endpoint failed", {
+        requestId,
+        error: error instanceof Error ? error.message : String(error),
+        structuredData: true,
+      });
+      throw new HttpsError("internal", "Failed to read the booklet page");
+    }
+  }
+);
+
 export const generateCatNarrative = onCall(
   {
     cors: config.functions.corsEnabled,

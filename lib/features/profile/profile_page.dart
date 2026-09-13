@@ -9,6 +9,9 @@ import 'package:yucat/core/legal_urls.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat_listing/mappers/cat_entity_to_model_mapper.dart';
+import 'package:yucat/features/health_carnet/presentation/models/cat_health_summary.dart';
+import 'package:yucat/features/health_carnet/presentation/utils/health_entry_analytics.dart';
+import 'package:yucat/features/health_carnet/presentation/widgets/health_cat_picker_sheet.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/hatched_placeholder.dart';
 import 'package:yucat/features/profile/bloc/profile_bloc.dart';
@@ -85,6 +88,42 @@ class _ProfilePage extends State<ProfilePage> {
     _bloc.add(ProfileInitialEvent());
   }
 
+  /// The Health row. One cat opens its carnet directly; several ask which.
+  /// The shared "carnet door" event fires once the cat is known, so `state`
+  /// describes the carnet actually opened, and the row re-derives on return.
+  Future<void> _openHealth(List<CatHealthSummary> health) async {
+    if (health.isEmpty) return;
+    CatHealthSummary? chosen;
+    if (health.length == 1) {
+      chosen = health.first;
+    } else {
+      final cat = await showHealthCatPickerSheet(context, summaries: health);
+      if (cat == null) return;
+      for (final summary in health) {
+        if (summary.cat.id == cat.id) chosen = summary;
+      }
+    }
+    if (chosen == null || !mounted) return;
+    var dueSoon = 0;
+    for (final summary in health) {
+      dueSoon += summary.dueSoonCount;
+    }
+    sl<LogEventUsecase>().call(
+      eventName: AnalyticsEvents.homeHealthCardTapped,
+      properties: healthEntryTapProperties(
+        surface: HealthEntrySurface.profile,
+        state: healthEntryStateOf(chosen),
+        cat: chosen.cat,
+        item: chosen.nearest,
+        extra: {'cats_count': health.length, 'due_soon_count': dueSoon},
+      ),
+    );
+    final model = sl<CatEntityToModelMapper>()(chosen.cat);
+    await context.router.push(HealthCarnetRoute(cat: model));
+    if (!mounted) return;
+    _bloc.add(ProfileInitialEvent());
+  }
+
   void _openSavedProducts() {
     context.router.push(const SavedProductsRoute());
   }
@@ -121,6 +160,7 @@ class _ProfilePage extends State<ProfilePage> {
       builder: (context, state) => switch (state) {
         ProfileLoadedState(
           :final cats,
+          :final health,
           :final savedProducts,
           :final savedLitters,
           :final scanHistory,
@@ -128,6 +168,7 @@ class _ProfilePage extends State<ProfilePage> {
         ) =>
           _ProfileHub(
             cats: cats,
+            health: health,
             savedProducts: savedProducts,
             savedLitters: savedLitters,
             scanHistory: scanHistory,
@@ -135,6 +176,7 @@ class _ProfilePage extends State<ProfilePage> {
             onCatTap: _openCatDetail,
             onAddCat: _openCreateCat,
             onManageCats: _openManageCats,
+            onHealthTap: () => _openHealth(health),
             onSavedProductsTap: _openSavedProducts,
             onScanHistoryTap: _openScanHistory,
             onContactTap: () => _launchUri(
@@ -166,6 +208,7 @@ class _ProfilePage extends State<ProfilePage> {
 
 class _ProfileHub extends StatelessWidget {
   final List<CatEntity> cats;
+  final List<CatHealthSummary> health;
   final List<ProductDisplayModel> savedProducts;
   final List<LitterDisplayModel> savedLitters;
   final List<ProductDisplayModel> scanHistory;
@@ -173,6 +216,7 @@ class _ProfileHub extends StatelessWidget {
   final ValueChanged<CatEntity> onCatTap;
   final VoidCallback onAddCat;
   final VoidCallback onManageCats;
+  final VoidCallback onHealthTap;
   final VoidCallback onSavedProductsTap;
   final VoidCallback onScanHistoryTap;
   final VoidCallback onContactTap;
@@ -183,6 +227,7 @@ class _ProfileHub extends StatelessWidget {
 
   const _ProfileHub({
     required this.cats,
+    required this.health,
     required this.savedProducts,
     required this.savedLitters,
     required this.scanHistory,
@@ -190,6 +235,7 @@ class _ProfileHub extends StatelessWidget {
     required this.onCatTap,
     required this.onAddCat,
     required this.onManageCats,
+    required this.onHealthTap,
     required this.onSavedProductsTap,
     required this.onScanHistoryTap,
     required this.onContactTap,
@@ -199,9 +245,23 @@ class _ProfileHub extends StatelessWidget {
     required this.onResetTestUserTap,
   });
 
+  /// The Health row's subtitle when nothing is due soon: the first cat that
+  /// has never been set up wins, else "all up to date". Computed here rather
+  /// than in `_LibraryRow`, which only knows a count.
+  String _healthEmptyLabel(AppLocalizations l10n) {
+    for (final summary in health) {
+      if (!summary.hasHistory) return l10n.profileHealthSetup(summary.cat.name);
+    }
+    return l10n.catDetailHealthAllClear;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    var dueSoon = 0;
+    for (final summary in health) {
+      dueSoon += summary.dueSoonCount;
+    }
     return Scaffold(
       backgroundColor: DSColors.pageBackground,
       body: SafeArea(
@@ -227,6 +287,24 @@ class _ProfileHub extends StatelessWidget {
               padding: EdgeInsets.zero,
               child: Column(
                 children: [
+                  // Hidden, not empty, when no carnet could be read — the
+                  // row must never invite setup of a carnet it couldn't see.
+                  if (health.isNotEmpty) ...[
+                    _LibraryRow(
+                      icon: Icons.favorite_outline_rounded,
+                      label: l10n.profileHealthLabel,
+                      count: dueSoon,
+                      emptyLabel: _healthEmptyLabel(l10n),
+                      countLabel: (n) => l10n.profileHealthCount(n),
+                      previews: [
+                        for (final summary in health)
+                          if (summary.cat.profileImageUrl != null)
+                            summary.cat.profileImageUrl,
+                      ],
+                      onTap: onHealthTap,
+                    ),
+                    const _MenuDivider(),
+                  ],
                   _LibraryRow(
                     icon: Icons.bookmark_outline_rounded,
                     label: l10n.profileSavedProductsLabel,

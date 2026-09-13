@@ -19,12 +19,18 @@ class DueItemCard extends StatelessWidget {
   final VoidCallback onSnooze;
   final bool busy;
 
+  /// Opens the article behind this act. Null hides the link — the page only
+  /// passes it once the article is known to be loaded, so the link can never
+  /// lead to an error screen.
+  final VoidCallback? onLearnMore;
+
   const DueItemCard({
     super.key,
     required this.item,
     required this.onMarkDone,
     required this.onSnooze,
     this.busy = false,
+    this.onLearnMore,
   });
 
   @override
@@ -84,6 +90,13 @@ class DueItemCard extends StatelessWidget {
                         color: DSColors.inkTertiary,
                       ),
                     ),
+                    if (onLearnMore != null) ...[
+                      const SizedBox(height: DSDimens.sizeXxxs),
+                      DSTextLink(
+                        label: l10n.healthCarnetLearnMore,
+                        onPressed: onLearnMore,
+                      ),
+                    ],
                   ],
                 ),
               ),

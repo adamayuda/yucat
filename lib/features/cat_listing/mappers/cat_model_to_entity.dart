@@ -28,4 +28,6 @@ CatEntity catEntityFromModel(CatModel m) => CatEntity(
       gender: m.gender,
       healthConditions: m.healthConditions,
       allergies: m.allergies,
+      vet: m.vet,
+      lifestyle: m.lifestyle,
     );

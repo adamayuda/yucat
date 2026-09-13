@@ -31,11 +31,16 @@ class HealthTimelineTile extends StatelessWidget {
 
   final Future<void> Function() onConfirmDelete;
 
+  /// Opens the attached photo full-screen. Only rendered when the record has
+  /// one; the thumbnail is an image, so session replay masks it by itself.
+  final VoidCallback? onAttachmentTap;
+
   const HealthTimelineTile({
     super.key,
     required this.event,
     required this.isLast,
     required this.onConfirmDelete,
+    this.onAttachmentTap,
   });
 
   @override
@@ -152,6 +157,13 @@ class HealthTimelineTile extends StatelessWidget {
                     ),
                   ),
                 ],
+                if (event.attachmentUrl != null) ...[
+                  const SizedBox(height: DSDimens.sizeXs),
+                  _AttachmentThumb(
+                    url: event.attachmentUrl!,
+                    onTap: onAttachmentTap,
+                  ),
+                ],
               ],
             ),
           ),
@@ -214,6 +226,36 @@ class _CategoryPill extends StatelessWidget {
         style: DSTextStyles.label.copyWith(
           color: healthCategoryInk(event.category),
           fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _AttachmentThumb extends StatelessWidget {
+  final String url;
+  final VoidCallback? onTap;
+
+  const _AttachmentThumb({required this.url, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(DSRadii.md),
+        child: Container(
+          width: 56,
+          height: 56,
+          color: DSColors.surfaceCardDim,
+          child: Image.network(
+            url,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.broken_image_outlined,
+              color: DSColors.inkTertiary,
+            ),
+          ),
         ),
       ),
     );

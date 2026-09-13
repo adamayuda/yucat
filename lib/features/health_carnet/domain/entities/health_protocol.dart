@@ -1,3 +1,5 @@
+import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
+import 'package:yucat/features/cat/domain/entities/cat_lifestyle.dart';
 import 'package:yucat/features/health_carnet/domain/entities/health_event_entity.dart';
 
 /// How strongly the app may push an act.
@@ -14,7 +16,9 @@ enum HealthObligation {
   core,
 
   /// Only for cats matching a condition (outdoor, multi-cat, hunter). The
-  /// profile carries no such signal today, so these are manual-add only.
+  /// profile carries one such signal — `CatEntity.lifestyle`, indoor or
+  /// outdoor — so a protocol flagged [HealthProtocol.requiresOutdoor] is
+  /// generated for outdoor cats; the rest stay manual-add.
   lifestyle,
 
   /// User- or vet-directed one-offs. Never auto-generated.
@@ -38,11 +42,22 @@ class ProtocolPhase {
   /// Repeat interval in days, or null for a single act somewhere in the window.
   final int? intervalDays;
 
+  /// The interval for a cat that goes outdoors, when it differs. Only the
+  /// adult deworming band uses it (ESCCAP: quarterly indoors, monthly for
+  /// hunters and roamers). One protocol, one line in the schedule — rather
+  /// than a second "monthly deworming" protocol that would need aliasing to
+  /// the records already logged under this one.
+  final int? outdoorIntervalDays;
+
   const ProtocolPhase({
     required this.fromAgeMonths,
     this.toAgeMonths,
     this.intervalDays,
+    this.outdoorIntervalDays,
   });
+
+  int? intervalFor({required bool outdoor}) =>
+      outdoor ? (outdoorIntervalDays ?? intervalDays) : intervalDays;
 
   bool contains(double ageMonths) =>
       ageMonths >= fromAgeMonths &&
@@ -73,10 +88,14 @@ class HealthProtocol {
 
   /// Whether the engine may generate a due item for this on its own.
   ///
-  /// False for everything lifestyle-gated: the profile carries no
-  /// indoor/outdoor or multi-cat signal, so the app cannot know these apply.
-  /// They still appear in the "Add an act" picker so a user can opt in.
+  /// False for what the profile cannot decide (multi-cat, raw-fed, endemic
+  /// region). Those still appear in the "Add an act" picker so a user can opt
+  /// in. Outdoor access *is* known, so see [requiresOutdoor].
   final bool autoSchedule;
+
+  /// Generated only when `CatEntity.lifestyle` is outdoor. Unknown counts as
+  /// indoor — the app never schedules a vaccine on a guess.
+  final bool requiresOutdoor;
 
   /// Drops out of the schedule once `CatEntity.neutered` is true.
   final bool suppressWhenNeutered;
@@ -96,6 +115,7 @@ class HealthProtocol {
     required this.obligation,
     required this.phases,
     this.autoSchedule = true,
+    this.requiresOutdoor = false,
     this.suppressWhenNeutered = false,
     this.requiresHealthCondition = false,
     this.defaultIntervalDays,
@@ -167,20 +187,21 @@ class HealthProtocols {
   );
 
   /// The same vaccine after the first year, where it stops being core and
-  /// becomes risk-based. Manual-add only — the app cannot tell whether the cat
-  /// goes outdoors.
+  /// becomes risk-based: scheduled for cats the profile says go outdoors,
+  /// manual-add for everyone else.
   static const felvBooster = HealthProtocol(
     id: 'felv_booster',
     category: HealthCategory.vaccine,
     obligation: HealthObligation.lifestyle,
     phases: [ProtocolPhase(fromAgeMonths: 12.0, intervalDays: 730)],
-    autoSchedule: false,
+    requiresOutdoor: true,
   );
 
   // --- Parasites -----------------------------------------------------------
 
   /// ESCCAP: every 2 weeks from 3 weeks old, monthly to 6 months, then at least
-  /// four times a year.
+  /// four times a year — **monthly for a cat that goes outdoors** (hunters and
+  /// roamers), which the adult band's outdoor interval carries.
   static const dewormingInternal = HealthProtocol(
     id: 'deworming_internal',
     category: HealthCategory.parasite,
@@ -188,12 +209,18 @@ class HealthProtocols {
     phases: [
       ProtocolPhase(fromAgeMonths: 0.75, toAgeMonths: 3.0, intervalDays: 14),
       ProtocolPhase(fromAgeMonths: 3.0, toAgeMonths: 6.0, intervalDays: 30),
-      ProtocolPhase(fromAgeMonths: 6.0, intervalDays: 91),
+      ProtocolPhase(
+        fromAgeMonths: 6.0,
+        intervalDays: 91,
+        outdoorIntervalDays: 30,
+      ),
     ],
   );
 
-  /// Monthly deworming, for hunters, raw-fed cats, or households with young
-  /// children. Manual-add only.
+  /// Monthly deworming, for raw-fed cats or households with young children.
+  /// Manual-add only — outdoor cats get the monthly cadence on
+  /// [dewormingInternal] itself, so this stays for the other reasons and for
+  /// anyone who already logs under it.
   static const dewormingMonthly = HealthProtocol(
     id: 'deworming_monthly',
     category: HealthCategory.parasite,
@@ -210,7 +237,9 @@ class HealthProtocols {
     phases: [ProtocolPhase(fromAgeMonths: 2.0, intervalDays: 30)],
   );
 
-  /// Endemic regions only. Manual-add only.
+  /// Endemic regions only. Manual-add only, **even for outdoor cats**: the app
+  /// has no region signal, and scheduling a monthly preventive for a cat in a
+  /// non-endemic country would be the app asserting local practice.
   static const heartworm = HealthProtocol(
     id: 'heartworm',
     category: HealthCategory.parasite,
@@ -313,9 +342,18 @@ class HealthProtocols {
     microchip,
   ];
 
-  /// The subset the schedule engine may generate on its own.
-  static List<HealthProtocol> get scheduled =>
-      all.where((p) => p.autoSchedule && p.phases.isNotEmpty).toList();
+  /// The subset the schedule engine may generate for [cat]: auto-scheduled
+  /// protocols with phases, plus the outdoor-gated ones when the profile says
+  /// the cat goes out. Unknown lifestyle reads as indoor.
+  static List<HealthProtocol> scheduledFor(CatEntity cat) {
+    final outdoor = CatLifestyle.isOutdoor(cat.lifestyle);
+    return all
+        .where((p) =>
+            p.autoSchedule &&
+            p.phases.isNotEmpty &&
+            (!p.requiresOutdoor || outdoor))
+        .toList();
+  }
 
   static HealthProtocol? byId(String? id) {
     if (id == null) return null;

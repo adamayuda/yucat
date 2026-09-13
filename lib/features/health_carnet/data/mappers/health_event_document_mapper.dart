@@ -45,6 +45,9 @@ class HealthEventDocumentMapperImpl implements HealthEventDocumentMapper {
       weightKg: (data['weight_kg'] as num?)?.toDouble(),
       vetName: _emptyToNull(data['vet_name'] as String?),
       clinic: _emptyToNull(data['clinic'] as String?),
+      attachmentUrl: _emptyToNull(data['attachment_url'] as String?),
+      courseEndAt: _toDate(data['course_end_at']),
+      dosesPerDay: (data['doses_per_day'] as num?)?.toInt(),
       createdAt: _toDate(data['created_at']),
     );
   }
@@ -64,6 +67,10 @@ class HealthEventDocumentMapperImpl implements HealthEventDocumentMapper {
       if (entity.weightKg != null) 'weight_kg': entity.weightKg,
       if (entity.vetName != null) 'vet_name': entity.vetName,
       if (entity.clinic != null) 'clinic': entity.clinic,
+      if (entity.attachmentUrl != null) 'attachment_url': entity.attachmentUrl,
+      if (entity.courseEndAt != null)
+        'course_end_at': Timestamp.fromDate(entity.courseEndAt!),
+      if (entity.dosesPerDay != null) 'doses_per_day': entity.dosesPerDay,
       'created_at': FieldValue.serverTimestamp(),
     };
   }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:yucat/features/health_carnet/data/datasources/health_event_datasource.dart';
 import 'package:yucat/features/health_carnet/data/mappers/health_event_document_mapper.dart';
 import 'package:yucat/features/health_carnet/domain/entities/health_event_entity.dart';
@@ -39,29 +41,36 @@ class HealthCarnetRepositoryImpl implements HealthCarnetRepository {
   Future<HealthEventEntity> addEvent({
     required String catId,
     required HealthEventEntity event,
+    File? attachment,
   }) async {
     final docRef = await _dataSource.addEvent(
       catId: catId,
       data: _mapper.toDocument(event),
     );
-    return HealthEventEntity(
-      id: docRef.id,
-      protocolId: event.protocolId,
-      category: event.category,
-      title: event.title,
-      notes: event.notes,
-      status: event.status,
-      performedAt: event.performedAt,
-      dueAt: event.dueAt,
-      intervalDays: event.intervalDays,
-      weightKg: event.weightKg,
-      vetName: event.vetName,
-      clinic: event.clinic,
-      // The document's own `created_at` is a server timestamp we have not read
-      // back; the local clock is close enough for ordering an unsaved-then-saved
-      // record within the session.
-      createdAt: DateTime.now(),
-    );
+    // The document's own `created_at` is a server timestamp we have not read
+    // back; the local clock is close enough for ordering an unsaved-then-saved
+    // record within the session.
+    final saved = event.copyWith(id: docRef.id, createdAt: DateTime.now());
+    if (attachment == null) return saved;
+
+    // Write, then upload, then patch: the record must exist before the
+    // object is named after it, and the URL is only worth storing once the
+    // object is there.
+    try {
+      final url = await _dataSource.uploadAttachment(
+        catId: catId,
+        eventId: docRef.id,
+        file: attachment,
+      );
+      await _dataSource.updateEvent(
+        catId: catId,
+        eventId: docRef.id,
+        data: {'attachment_url': url},
+      );
+      return saved.copyWith(attachmentUrl: url);
+    } catch (e) {
+      throw HealthAttachmentFailed(saved, e);
+    }
   }
 
   @override

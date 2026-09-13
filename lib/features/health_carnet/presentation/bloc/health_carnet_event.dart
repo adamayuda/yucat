@@ -66,15 +66,31 @@ class HealthCarnetSetupShownEvent extends HealthCarnetEvent {
 /// show one until reload).
 class HealthCarnetSetupCompletedEvent extends HealthCarnetEvent {
   final List<HealthEventEntity> drafts;
+
+  /// `CatLifestyle.indoor` / `.outdoor` when the fourth step was answered.
+  /// Written **before** the drafts: it changes which protocols they feed.
+  final String? lifestyle;
   final bool dismissed;
 
   const HealthCarnetSetupCompletedEvent({
     required this.drafts,
+    this.lifestyle,
     this.dismissed = false,
   });
 
   @override
-  List<Object?> get props => [drafts.length, dismissed];
+  List<Object?> get props => [drafts.length, lifestyle, dismissed];
+}
+
+/// Replaces the cat's lifestyle on the **cat document** and re-derives the
+/// schedule. Null clears it.
+class HealthCarnetUpdateLifestyleEvent extends HealthCarnetEvent {
+  final String? lifestyle;
+
+  const HealthCarnetUpdateLifestyleEvent({required this.lifestyle});
+
+  @override
+  List<Object?> get props => [lifestyle];
 }
 
 /// "Reporter" — pushes this one occurrence back without touching history.
@@ -91,10 +107,15 @@ class HealthCarnetSnoozeEvent extends HealthCarnetEvent {
 class HealthCarnetAddRecordEvent extends HealthCarnetEvent {
   final HealthEventEntity draft;
 
-  const HealthCarnetAddRecordEvent({required this.draft});
+  /// The photo to attach, uploaded after the record is written. Never on the
+  /// entity: a `File` is a device-local handle, not record data.
+  final File? attachment;
+
+  const HealthCarnetAddRecordEvent({required this.draft, this.attachment});
 
   @override
-  List<Object?> get props => [draft.title, draft.performedAt, draft.protocolId];
+  List<Object?> get props =>
+      [draft.title, draft.performedAt, draft.protocolId, attachment?.path];
 }
 
 class HealthCarnetDeleteRecordEvent extends HealthCarnetEvent {
@@ -116,4 +137,31 @@ class HealthCarnetUpdateAllergiesEvent extends HealthCarnetEvent {
 
   @override
   List<Object?> get props => [allergies];
+}
+
+/// Replaces the cat's vet contact on the **cat document**. Null or an empty
+/// contact removes it.
+class HealthCarnetUpdateVetEvent extends HealthCarnetEvent {
+  final CatVetContact? vet;
+
+  const HealthCarnetUpdateVetEvent({required this.vet});
+
+  @override
+  List<Object?> get props => [vet?.name, vet?.clinic, vet?.phone, vet?.address];
+}
+
+/// The rows the owner ticked in the booklet review sheet, written
+/// sequentially like the setup's answers. [proposedCount] is what the reader
+/// offered, for the accept-rate analytics.
+class HealthCarnetImportRecordsEvent extends HealthCarnetEvent {
+  final List<HealthEventEntity> drafts;
+  final int proposedCount;
+
+  const HealthCarnetImportRecordsEvent({
+    required this.drafts,
+    required this.proposedCount,
+  });
+
+  @override
+  List<Object?> get props => [drafts.length, proposedCount];
 }

@@ -17,6 +17,7 @@
 library;
 
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
+import 'package:yucat/features/cat/domain/entities/cat_lifestyle.dart';
 import 'package:yucat/features/health_carnet/domain/entities/health_event_entity.dart';
 import 'package:yucat/features/health_carnet/domain/entities/health_protocol.dart';
 import 'package:yucat/features/health_carnet/presentation/models/health_due_item.dart';
@@ -36,8 +37,9 @@ const int _kSoonDays = 30;
 ///
 /// A triennial FVRCP due in 2029 is not a to-do, and listing it would both bury
 /// the real items and inflate the "à faire" count. Anything beyond a year drops
-/// out until it comes into range.
-const int _kHorizonDays = 365;
+/// out until it comes into range. Public so a surface that wants to say what
+/// comes *after* the horizon (Home's all-clear card) can ask for it explicitly.
+const int kHorizonDays = 365;
 
 /// How far ahead of a band's opening a dose still counts as *that* band's dose.
 ///
@@ -76,18 +78,24 @@ DateTime? estimatedBirthDate(CatEntity cat, DateTime now) {
 ///
 /// Returns an empty list only for a profile that matches no protocol at all —
 /// which in practice means every protocol has been completed or suppressed.
+///
+/// [horizonDays] drops items due further out than that; null keeps everything.
+/// The carnet and every badge use the default — the override exists only so
+/// a quiet carnet can name the *next* act rather than nothing.
 List<HealthDueItem> computeDueItems({
   required CatEntity cat,
   required List<HealthEventEntity> history,
   required DateTime now,
+  int? horizonDays = kHorizonDays,
 }) {
   final birth = estimatedBirthDate(cat, now);
   final ageMonths = cat.age?.toDouble();
   final hasConditions = cat.healthConditions?.isNotEmpty ?? false;
+  final outdoor = CatLifestyle.isOutdoor(cat.lifestyle);
 
   final items = <HealthDueItem>[];
 
-  for (final protocol in HealthProtocols.scheduled) {
+  for (final protocol in HealthProtocols.scheduledFor(cat)) {
     if (protocol.suppressWhenNeutered && cat.neutered) continue;
     if (protocol.requiresHealthCondition && !hasConditions) continue;
 
@@ -97,9 +105,10 @@ List<HealthDueItem> computeDueItems({
       birth: birth,
       ageMonths: ageMonths,
       now: now,
+      outdoor: outdoor,
     );
     if (item == null) continue;
-    if ((item.daysUntil ?? 0) > _kHorizonDays) continue;
+    if (horizonDays != null && (item.daysUntil ?? 0) > horizonDays) continue;
     items.add(item);
   }
 
@@ -144,6 +153,7 @@ HealthDueItem? _dueItemFor({
   required DateTime? birth,
   required double? ageMonths,
   required DateTime now,
+  bool outdoor = false,
 }) {
   final lastDone = _latestDone(history, protocol.id);
 
@@ -164,8 +174,9 @@ HealthDueItem? _dueItemFor({
         : protocol.phaseAt(ageThen) ?? _earlyDosePhase(protocol, ageThen);
     // A per-record override wins: the rabies booster interval is a property of
     // the vial the vet used, not of the cat.
-    final interval =
-        lastDone.intervalDays ?? phase?.intervalDays ?? protocol.defaultIntervalDays;
+    final interval = lastDone.intervalDays ??
+        phase?.intervalFor(outdoor: outdoor) ??
+        protocol.defaultIntervalDays;
 
     if (interval != null) {
       due = performedAt.add(Duration(days: interval));
@@ -183,7 +194,7 @@ HealthDueItem? _dueItemFor({
       final next = protocol.nextPhaseFrom(from + 0.01);
       if (next == null || birth == null) return null;
       due = _dateAtAge(birth, next.fromAgeMonths);
-      intervalDays = next.intervalDays;
+      intervalDays = next.intervalFor(outdoor: outdoor);
       if (due.isBefore(performedAt)) due = performedAt;
     }
   } else {
@@ -207,7 +218,7 @@ HealthDueItem? _dueItemFor({
         protocol.nextPhaseFrom(ageMonths ?? 0);
     if (phase == null) return null;
     due = _dateAtAge(birth, phase.fromAgeMonths);
-    intervalDays = phase.intervalDays;
+    intervalDays = phase.intervalFor(outdoor: outdoor);
     // The band may have opened years ago — an 11-year-old cat's first wellness
     // visit was "due" at 12 months. Surfacing that literal date would read as
     // "planned for September 2016", which is nonsense. What the owner actually
@@ -333,6 +344,45 @@ int _wholeDaysBetween(DateTime from, DateTime to) {
   return b.difference(a).inDays;
 }
 
+/// A medication course the cat is on today.
+class HealthCourse {
+  final HealthEventEntity event;
+
+  /// Whole days from today to the last day, inclusive of neither: 0 means
+  /// today is the last day.
+  final int daysLeft;
+
+  const HealthCourse({required this.event, required this.daysLeft});
+
+  int? get dosesPerDay => event.dosesPerDay;
+}
+
+/// Courses whose window contains today — start ≤ today ≤ end, both inclusive.
+/// Soonest to finish first. A course is a `done` record carrying
+/// `courseEndAt`; the day it started is its `performedAt`.
+///
+/// Not part of [computeDueItems] on purpose: a course is not a protocol, it
+/// has no interval and nothing follows it. Once the end date passes it is
+/// plain history.
+List<HealthCourse> activeCourses(
+  List<HealthEventEntity> history,
+  DateTime now,
+) {
+  final today = DateTime(now.year, now.month, now.day);
+  final courses = <HealthCourse>[];
+  for (final event in history) {
+    if (!event.isDone || !event.isCourse) continue;
+    final start = event.performedAt!;
+    final end = event.courseEndAt!;
+    if (_wholeDaysBetween(start, today) < 0) continue; // not started yet
+    final daysLeft = _wholeDaysBetween(today, end);
+    if (daysLeft < 0) continue; // finished
+    courses.add(HealthCourse(event: event, daysLeft: daysLeft));
+  }
+  courses.sort((a, b) => a.daysLeft.compareTo(b.daysLeft));
+  return courses;
+}
+
 /// A weighing, for the history tab's chart.
 class WeightPoint {
   final DateTime date;
@@ -367,6 +417,24 @@ List<WeightPoint> monthlyWeightBuckets(
     ..sort((a, b) => a.date.compareTo(b.date));
   if (buckets.length <= maxMonths) return buckets;
   return buckets.sublist(buckets.length - maxMonths);
+}
+
+/// Whether [draft] — a record about to be written — would be the most recent
+/// weighing in the carnet, i.e. the one the profile weight should follow.
+///
+/// A back-dated weigh-in (an old vet visit typed in later) is history, not a
+/// measurement of the cat today, so it must not overwrite the profile. Ties
+/// on the same day go to the draft: it is the later entry.
+bool isLatestWeighing(
+  HealthEventEntity draft,
+  List<HealthEventEntity> history,
+) {
+  if (!draft.isDone || draft.weightKg == null || draft.performedAt == null) {
+    return false;
+  }
+  final series = weightSeries(history.where((e) => e.isDone).toList());
+  if (series.isEmpty) return true;
+  return !draft.performedAt!.isBefore(series.last.date);
 }
 
 /// Every weight this carnet knows about, oldest first.

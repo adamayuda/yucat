@@ -1,14 +1,20 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/cat/domain/entities/cat_vet_contact.dart';
 import 'package:yucat/features/health_carnet/domain/entities/health_event_entity.dart';
 import 'package:yucat/features/health_carnet/domain/entities/health_protocol.dart';
 import 'package:yucat/features/health_carnet/presentation/utils/health_date_format.dart';
 import 'package:yucat/features/health_carnet/presentation/utils/health_labels.dart';
 import 'package:yucat/features/health_carnet/presentation/widgets/health_date_row.dart';
+import 'package:yucat/features/health_carnet/presentation/widgets/health_text_field.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_option_row.dart';
 import 'package:yucat/presentation/components/ds_pill_button.dart';
+import 'package:yucat/presentation/components/photo_source_sheet.dart';
 
 /// Freeform categories offered alongside the protocol catalogue, for acts no
 /// protocol schedules — an illness, an X-ray, a one-off medication course.
@@ -30,17 +36,43 @@ const _kFreeformCategories = <HealthCategory>[
 /// Follows `_showPhotoSourceSheet` in `profile_photo_step.dart`, the app's only
 /// other modal sheet: transparent barrier, own rounded container, grab handle,
 /// `SafeArea(top: false)`.
-Future<HealthEventEntity?> showAddHealthRecordSheet(BuildContext context) {
-  return showModalBottomSheet<HealthEventEntity>(
+///
+/// [vet] prefills the vet and clinic fields from the cat's saved contact —
+/// editable, since a one-off act may have happened elsewhere.
+///
+/// [onScanBooklet] adds a "scan the booklet" row at the top of the picker; the
+/// sheet closes (returning null) before calling it, so the caller opens the
+/// capture from the page, not from inside a dismissed sheet's context.
+Future<HealthRecordDraft?> showAddHealthRecordSheet(
+  BuildContext context, {
+  CatVetContact? vet,
+  VoidCallback? onScanBooklet,
+}) {
+  return showModalBottomSheet<HealthRecordDraft>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (sheetContext) => const _AddHealthRecordSheet(),
+    builder: (sheetContext) => _AddHealthRecordSheet(
+      vet: vet,
+      onScanBooklet: onScanBooklet,
+    ),
   );
 }
 
+/// The sheet's answer: the record, and the photo to attach to it once it has
+/// an id. Two values because the file is device state, not record data.
+class HealthRecordDraft {
+  final HealthEventEntity event;
+  final File? attachment;
+
+  const HealthRecordDraft({required this.event, this.attachment});
+}
+
 class _AddHealthRecordSheet extends StatefulWidget {
-  const _AddHealthRecordSheet();
+  final CatVetContact? vet;
+  final VoidCallback? onScanBooklet;
+
+  const _AddHealthRecordSheet({this.vet, this.onScanBooklet});
 
   @override
   State<_AddHealthRecordSheet> createState() => _AddHealthRecordSheetState();
@@ -53,11 +85,17 @@ class _AddHealthRecordSheetState extends State<_AddHealthRecordSheet> {
 
   final _titleController = TextEditingController();
   final _notesController = TextEditingController();
-  final _vetController = TextEditingController();
-  final _clinicController = TextEditingController();
+  late final _vetController =
+      TextEditingController(text: widget.vet?.name ?? '');
+  late final _clinicController =
+      TextEditingController(text: widget.vet?.clinic ?? '');
   final _weightController = TextEditingController();
+  final _courseDaysController = TextEditingController();
+  final _dosesPerDayController = TextEditingController();
 
   DateTime _date = DateTime.now();
+  File? _attachment;
+  final _imagePicker = ImagePicker();
 
   /// Rabies only: the booster interval is a property of the vial the vet used,
   /// so it has to be asked rather than assumed. Defaults to the conservative
@@ -73,6 +111,8 @@ class _AddHealthRecordSheetState extends State<_AddHealthRecordSheet> {
     _vetController.dispose();
     _clinicController.dispose();
     _weightController.dispose();
+    _courseDaysController.dispose();
+    _dosesPerDayController.dispose();
     super.dispose();
   }
 
@@ -127,6 +167,18 @@ class _AddHealthRecordSheetState extends State<_AddHealthRecordSheet> {
         children: [
           Text(l10n.healthAddSheetTitle, style: DSTextStyles.titleMd),
           const SizedBox(height: DSDimens.sizeS),
+          if (widget.onScanBooklet case final scan?) ...[
+            DSOptionRow(
+              label: l10n.healthBookletPickerRow,
+              description: l10n.healthBookletPickerRowDesc,
+              leadingIcon: Icons.document_scanner_outlined,
+              onTap: () {
+                Navigator.of(context).pop();
+                scan();
+              },
+            ),
+            const SizedBox(height: DSDimens.sizeS),
+          ],
           Text(l10n.healthAddSectionCare, style: DSTextStyles.label),
           const SizedBox(height: DSDimens.sizeXxs),
           for (final protocol in HealthProtocols.all) ...[
@@ -209,7 +261,7 @@ class _AddHealthRecordSheetState extends State<_AddHealthRecordSheet> {
           // it from `protocolId`, so it stays correct if the user changes app
           // language. Only a freeform act needs one.
           if (isFreeform) ...[
-            _Field(
+            HealthTextField(
               label: l10n.healthAddFieldTitleLabel,
               controller: _titleController,
               hint: l10n.healthAddFieldTitleHint,
@@ -251,7 +303,35 @@ class _AddHealthRecordSheetState extends State<_AddHealthRecordSheet> {
             const SizedBox(height: DSDimens.sizeS),
           ],
 
-          _Field(
+          // A medication course: how long, how often. Only offered on a
+          // freeform treatment — protocols have their own cadence.
+          if (isFreeform && _freeformCategory == HealthCategory.treatment) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: HealthTextField(
+                    label: l10n.healthAddFieldCourseDaysLabel,
+                    controller: _courseDaysController,
+                    hint: l10n.healthAddFieldCourseDaysHint,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+                ),
+                const SizedBox(width: DSDimens.sizeXs),
+                Expanded(
+                  child: HealthTextField(
+                    label: l10n.healthAddFieldDosesPerDayLabel,
+                    controller: _dosesPerDayController,
+                    hint: l10n.healthAddFieldDosesPerDayHint,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: DSDimens.sizeS),
+          ],
+          HealthTextField(
             label: l10n.healthAddFieldWeightLabel,
             controller: _weightController,
             hint: l10n.healthAddFieldWeightHint,
@@ -261,7 +341,7 @@ class _AddHealthRecordSheetState extends State<_AddHealthRecordSheet> {
             ],
           ),
           const SizedBox(height: DSDimens.sizeS),
-          _Field(
+          HealthTextField(
             label: l10n.healthAddFieldNotesLabel,
             controller: _notesController,
             hint: l10n.healthAddFieldNotesHint,
@@ -269,10 +349,16 @@ class _AddHealthRecordSheetState extends State<_AddHealthRecordSheet> {
             textCapitalization: TextCapitalization.sentences,
           ),
           const SizedBox(height: DSDimens.sizeS),
+          _PhotoRow(
+            attachment: _attachment,
+            onAdd: _pickAttachment,
+            onRemove: () => setState(() => _attachment = null),
+          ),
+          const SizedBox(height: DSDimens.sizeS),
           Row(
             children: [
               Expanded(
-                child: _Field(
+                child: HealthTextField(
                   label: l10n.healthAddFieldVetLabel,
                   controller: _vetController,
                   hint: l10n.healthAddFieldVetHint,
@@ -281,7 +367,7 @@ class _AddHealthRecordSheetState extends State<_AddHealthRecordSheet> {
               ),
               const SizedBox(width: DSDimens.sizeXs),
               Expanded(
-                child: _Field(
+                child: HealthTextField(
                   label: l10n.healthAddFieldClinicLabel,
                   controller: _clinicController,
                   hint: l10n.healthAddFieldClinicHint,
@@ -313,6 +399,12 @@ class _AddHealthRecordSheetState extends State<_AddHealthRecordSheet> {
     );
   }
 
+  Future<void> _pickAttachment() async {
+    final file = await pickPhotoFromSheet(context, _imagePicker);
+    if (!mounted || file == null) return;
+    setState(() => _attachment = file);
+  }
+
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -339,19 +431,36 @@ class _AddHealthRecordSheetState extends State<_AddHealthRecordSheet> {
     final weight = double.tryParse(
       _weightController.text.trim().replaceAll(',', '.'),
     );
+    // A 7-day course started on Monday ends on Sunday: end = start + days − 1.
+    final isTreatment =
+        protocol == null && _freeformCategory == HealthCategory.treatment;
+    final courseDays =
+        isTreatment ? int.tryParse(_courseDaysController.text.trim()) : null;
+    final courseEndAt = courseDays == null || courseDays < 1
+        ? null
+        : _date.add(Duration(days: courseDays - 1));
+    final dosesPerDay = courseEndAt == null
+        ? null
+        : int.tryParse(_dosesPerDayController.text.trim());
 
     Navigator.of(context).pop(
-      HealthEventEntity(
-        protocolId: protocol?.id,
-        category: protocol?.category ?? _freeformCategory ?? HealthCategory.other,
-        title: protocol == null ? title : '',
-        notes: _emptyToNull(_notesController.text),
-        status: HealthEventStatus.done,
-        performedAt: _date,
-        intervalDays: protocol?.id == 'rabies' ? _rabiesIntervalDays : null,
-        weightKg: weight,
-        vetName: _emptyToNull(_vetController.text),
-        clinic: _emptyToNull(_clinicController.text),
+      HealthRecordDraft(
+        event: HealthEventEntity(
+          protocolId: protocol?.id,
+          category:
+              protocol?.category ?? _freeformCategory ?? HealthCategory.other,
+          title: protocol == null ? title : '',
+          notes: _emptyToNull(_notesController.text),
+          status: HealthEventStatus.done,
+          performedAt: _date,
+          intervalDays: protocol?.id == 'rabies' ? _rabiesIntervalDays : null,
+          weightKg: weight,
+          vetName: _emptyToNull(_vetController.text),
+          clinic: _emptyToNull(_clinicController.text),
+          courseEndAt: courseEndAt,
+          dosesPerDay: dosesPerDay != null && dosesPerDay > 0 ? dosesPerDay : null,
+        ),
+        attachment: _attachment,
       ),
     );
   }
@@ -359,86 +468,6 @@ class _AddHealthRecordSheetState extends State<_AddHealthRecordSheet> {
   static String? _emptyToNull(String value) {
     final trimmed = value.trim();
     return trimmed.isEmpty ? null : trimmed;
-  }
-}
-
-/// Labelled text input.
-///
-/// ⚠️ Built from scratch rather than leaning on
-/// `AppTheme.lightTheme.inputDecorationTheme`, which still points at the legacy
-/// palette (`inputLightGrey` fill, `DSColors.black` labels). Every real input in
-/// the app overrides it for the same reason.
-class _Field extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? hint;
-  final String? errorText;
-  final int maxLines;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final TextCapitalization textCapitalization;
-
-  const _Field({
-    required this.label,
-    required this.controller,
-    this.hint,
-    this.errorText,
-    this.maxLines = 1,
-    this.keyboardType,
-    this.inputFormatters,
-    this.textCapitalization = TextCapitalization.none,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: DSTextStyles.label),
-        const SizedBox(height: DSDimens.sizeXxs),
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: DSDimens.sizeXs,
-            vertical: DSDimens.sizeXxs,
-          ),
-          decoration: BoxDecoration(
-            color: DSColors.surfaceCardDim,
-            borderRadius: BorderRadius.circular(DSRadii.md),
-            border: errorText == null
-                ? null
-                : Border.all(color: DSColors.accentDanger),
-          ),
-          child: TextField(
-            controller: controller,
-            maxLines: maxLines,
-            keyboardType: keyboardType,
-            inputFormatters: inputFormatters,
-            textCapitalization: textCapitalization,
-            cursorColor: DSColors.coralAccent,
-            style: DSTextStyles.bodyLg,
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: DSTextStyles.bodyLg.copyWith(
-                color: DSColors.inkTertiary,
-              ),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              filled: false,
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-            ),
-          ),
-        ),
-        if (errorText != null) ...[
-          const SizedBox(height: DSDimens.sizeXxxs),
-          Text(
-            errorText!,
-            style: DSTextStyles.caption.copyWith(color: DSColors.accentDanger),
-          ),
-        ],
-      ],
-    );
   }
 }
 
@@ -475,6 +504,82 @@ class _IntervalChoice extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// "Add a photo" — a booklet page or a lab result — or the picked file's
+/// thumbnail with a remove link.
+class _PhotoRow extends StatelessWidget {
+  final File? attachment;
+  final VoidCallback onAdd;
+  final VoidCallback onRemove;
+
+  const _PhotoRow({
+    required this.attachment,
+    required this.onAdd,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final file = attachment;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.healthAddPhotoLabel, style: DSTextStyles.label),
+        const SizedBox(height: DSDimens.sizeXxs),
+        if (file == null)
+          GestureDetector(
+            onTap: onAdd,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: DSDimens.sizeXs,
+                vertical: DSDimens.sizeXs,
+              ),
+              decoration: BoxDecoration(
+                color: DSColors.surfaceCardDim,
+                borderRadius: BorderRadius.circular(DSRadii.md),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.add_a_photo_outlined,
+                    size: 20,
+                    color: DSColors.inkSecondary,
+                  ),
+                  const SizedBox(width: DSDimens.sizeXs),
+                  Expanded(
+                    child: Text(
+                      l10n.healthAddPhotoHint,
+                      style: DSTextStyles.bodyMd.copyWith(
+                        color: DSColors.inkTertiary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(DSRadii.md),
+                child: Image.file(
+                  file,
+                  width: 72,
+                  height: 72,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: DSDimens.sizeS),
+              DSTextLink(label: l10n.healthAddPhotoRemove, onPressed: onRemove),
+            ],
+          ),
+      ],
     );
   }
 }

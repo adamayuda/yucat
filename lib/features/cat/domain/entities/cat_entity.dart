@@ -1,3 +1,5 @@
+import 'package:yucat/features/cat/domain/entities/cat_vet_contact.dart';
+
 /// Maps an age in months to the assessment's age group:
 /// `<12` → kitten, `12–119` → adult, `>=120` → senior. Mirrors the life-stage
 /// labels shown in the onboarding Age step. Returns null when [months] is null.
@@ -54,6 +56,17 @@ class CatEntity {
   /// which writes the empty list explicitly.
   final List<String>? allergies;
 
+  /// The cat's vet — same contract as [allergies]: written by the document
+  /// mapper only when set, cleared through `CatRepository.updateCatVet`, so a
+  /// wizard save can never wipe it.
+  final CatVetContact? vet;
+
+  /// `CatLifestyle.indoor` / `.outdoor`, or null when never asked. Set from
+  /// the carnet's setup sheet and lifestyle row, on the allergies contract
+  /// (written only when set, cleared via `updateCatLifestyle`). Drives which
+  /// lifestyle-gated protocols the schedule engine may generate.
+  final String? lifestyle;
+
   const CatEntity({
     this.id,
     required this.name,
@@ -71,12 +84,14 @@ class CatEntity {
     this.gender,
     this.healthConditions,
     this.allergies,
+    this.vet,
+    this.lifestyle,
   });
 
   /// `??` semantics: a null argument keeps the current value. There is no way
-  /// to *clear* a field through this; the two call sites that need to (the
-  /// wizard dropping a birth date, the carnet clearing allergies) go through
-  /// their own explicit paths.
+  /// to *clear* a field through this (except [clearVet]); the call sites that
+  /// need to (the wizard dropping a birth date, the carnet clearing allergies)
+  /// go through their own explicit paths.
   CatEntity copyWith({
     String? id,
     String? name,
@@ -94,6 +109,10 @@ class CatEntity {
     String? gender,
     List<String>? healthConditions,
     List<String>? allergies,
+    CatVetContact? vet,
+    bool clearVet = false,
+    String? lifestyle,
+    bool clearLifestyle = false,
   }) =>
       CatEntity(
         id: id ?? this.id,
@@ -112,5 +131,7 @@ class CatEntity {
         gender: gender ?? this.gender,
         healthConditions: healthConditions ?? this.healthConditions,
         allergies: allergies ?? this.allergies,
+        vet: clearVet ? null : (vet ?? this.vet),
+        lifestyle: clearLifestyle ? null : (lifestyle ?? this.lifestyle),
       );
 }

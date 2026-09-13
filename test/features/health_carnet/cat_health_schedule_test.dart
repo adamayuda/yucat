@@ -15,6 +15,7 @@ void main() {
     int? age,
     bool neutered = true,
     List<String>? conditions,
+    String? lifestyle,
   }) =>
       CatEntity(
         id: 'cat-1',
@@ -22,6 +23,7 @@ void main() {
         age: age,
         neutered: neutered,
         healthConditions: conditions,
+        lifestyle: lifestyle,
       );
 
   HealthEventEntity done(
@@ -366,5 +368,146 @@ void main() {
     ]);
 
     expect(series.map((s) => s.kg), [4.2, 4.5]);
+  });
+
+  group('lifestyle', () {
+    final lastDeworming = now.subtract(const Duration(days: 20));
+
+    test('an outdoor adult gets the FeLV booster and monthly deworming', () {
+      final items = computeDueItems(
+        cat: cat(age: 36, lifestyle: 'outdoor'),
+        history: [done('deworming_internal', on: lastDeworming)],
+        now: now,
+      );
+      expect(itemFor(items, 'felv_booster'), isNotNull);
+      final deworming = itemFor(items, 'deworming_internal')!;
+      expect(deworming.intervalDays, 30);
+      expect(deworming.daysUntil, 10);
+      // Region-dependent: never generated, whatever the lifestyle.
+      expect(itemFor(items, 'heartworm'), isNull);
+      // The manual-add monthly protocol is untouched by the override.
+      expect(itemFor(items, 'deworming_monthly'), isNull);
+    });
+
+    test('an indoor cat keeps quarterly deworming and no booster', () {
+      final items = computeDueItems(
+        cat: cat(age: 36, lifestyle: 'indoor'),
+        history: [done('deworming_internal', on: lastDeworming)],
+        now: now,
+      );
+      expect(itemFor(items, 'felv_booster'), isNull);
+      expect(itemFor(items, 'deworming_internal')!.intervalDays, 91);
+    });
+
+    test('an unknown lifestyle reads as indoor — never a vaccine on a guess',
+        () {
+      final items = computeDueItems(
+        cat: cat(age: 36),
+        history: [done('deworming_internal', on: lastDeworming)],
+        now: now,
+      );
+      expect(itemFor(items, 'felv_booster'), isNull);
+      expect(itemFor(items, 'deworming_internal')!.intervalDays, 91);
+    });
+
+    test('the kitten deworming bands ignore lifestyle', () {
+      final items = computeDueItems(
+        cat: cat(age: 4, neutered: false, lifestyle: 'outdoor'),
+        history: [
+          done('deworming_internal', on: atAge(3.5, catAgeMonths: 4)),
+        ],
+        now: now,
+      );
+      expect(itemFor(items, 'deworming_internal')!.intervalDays, 30);
+    });
+  });
+
+  group('isLatestWeighing', () {
+    HealthEventEntity weighIn(DateTime on, double kg) => HealthEventEntity(
+          category: HealthCategory.weight,
+          title: '',
+          status: HealthEventStatus.done,
+          performedAt: on,
+          weightKg: kg,
+        );
+
+    test('the first weighing ever is the latest', () {
+      expect(isLatestWeighing(weighIn(now, 4.5), const []), isTrue);
+    });
+
+    test('a newer or same-day weighing wins; a back-dated one does not', () {
+      final history = [weighIn(now.subtract(const Duration(days: 30)), 4.4)];
+      expect(isLatestWeighing(weighIn(now, 4.6), history), isTrue);
+      expect(
+        isLatestWeighing(
+          weighIn(now.subtract(const Duration(days: 30)), 4.3),
+          history,
+        ),
+        isTrue,
+      );
+      expect(
+        isLatestWeighing(
+          weighIn(now.subtract(const Duration(days: 90)), 4.0),
+          history,
+        ),
+        isFalse,
+      );
+    });
+
+    test('a record without a weight never syncs', () {
+      expect(
+        isLatestWeighing(done('annual_checkup', on: now), const []),
+        isFalse,
+      );
+    });
+  });
+
+  group('activeCourses', () {
+    HealthEventEntity course({
+      required DateTime start,
+      required int days,
+      int dosesPerDay = 2,
+      String title = 'Amoxicillin',
+    }) =>
+        HealthEventEntity(
+          category: HealthCategory.treatment,
+          title: title,
+          status: HealthEventStatus.done,
+          performedAt: start,
+          courseEndAt: start.add(Duration(days: days - 1)),
+          dosesPerDay: dosesPerDay,
+        );
+
+    test('a course that contains today is active with the right days left', () {
+      final started = now.subtract(const Duration(days: 2));
+      final active = activeCourses([course(start: started, days: 7)], now);
+      expect(active, hasLength(1));
+      expect(active.first.daysLeft, 4);
+      expect(active.first.dosesPerDay, 2);
+    });
+
+    test('the end day is inclusive: the last day reads 0 days left', () {
+      final started = now.subtract(const Duration(days: 6));
+      final active = activeCourses([course(start: started, days: 7)], now);
+      expect(active.single.daysLeft, 0);
+    });
+
+    test('a finished course and a future course are not active', () {
+      final finished = course(
+        start: now.subtract(const Duration(days: 10)),
+        days: 3,
+      );
+      final future = course(start: now.add(const Duration(days: 1)), days: 5);
+      expect(activeCourses([finished, future], now), isEmpty);
+    });
+
+    test('records without a course end are ignored; soonest to finish first',
+        () {
+      final plain = done('deworming_internal', on: now);
+      final long = course(start: now, days: 14, title: 'Long');
+      final short = course(start: now, days: 3, title: 'Short');
+      final active = activeCourses([plain, long, short], now);
+      expect(active.map((c) => c.event.title), ['Short', 'Long']);
+    });
   });
 }

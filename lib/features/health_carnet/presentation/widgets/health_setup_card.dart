@@ -11,7 +11,10 @@ import 'package:yucat/presentation/components/ds_pill_button.dart';
 class HealthSetupCard extends StatelessWidget {
   final VoidCallback onStart;
 
-  const HealthSetupCard({super.key, required this.onStart});
+  /// Photograph a booklet page instead of answering the three questions.
+  final VoidCallback? onScanBooklet;
+
+  const HealthSetupCard({super.key, required this.onStart, this.onScanBooklet});
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +33,16 @@ class HealthSetupCard extends StatelessWidget {
             onPressed: onStart,
             verticalPadding: DSDimens.sizeXs,
           ),
+          if (onScanBooklet != null) ...[
+            const SizedBox(height: DSDimens.sizeXxs),
+            DSPillButton(
+              label: l10n.healthBookletScanCta,
+              onPressed: onScanBooklet,
+              variant: DSPillButtonVariant.secondary,
+              showChevron: false,
+              verticalPadding: DSDimens.sizeXs,
+            ),
+          ],
         ],
       ),
     );

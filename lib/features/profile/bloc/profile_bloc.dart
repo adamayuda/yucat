@@ -5,6 +5,8 @@ import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/features/auth/domain/usecase/current_user_usecase.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
+import 'package:yucat/features/health_carnet/domain/usecases/get_health_events_usecase.dart';
+import 'package:yucat/features/health_carnet/presentation/utils/cat_health_summary_resolver.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/profile/bloc/profile_event.dart';
 import 'package:yucat/features/profile/bloc/profile_state.dart';
@@ -25,6 +27,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final GetSavedLittersUsecase _getSavedLittersUsecase;
   final GetLitterHistoryUsecase _getLitterHistoryUsecase;
   final CurrentUserUsecase _currentUserUsecase;
+  final GetHealthEventsUsecase _getHealthEventsUsecase;
   final QaResetService _qaResetService;
 
   ProfileBloc({
@@ -35,6 +38,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     required GetSavedLittersUsecase getSavedLittersUsecase,
     required GetLitterHistoryUsecase getLitterHistoryUsecase,
     required CurrentUserUsecase currentUserUsecase,
+    required GetHealthEventsUsecase getHealthEventsUsecase,
     required QaResetService qaResetService,
   })  : _prefs = prefs,
         _getCatsUsecase = getCatsUsecase,
@@ -43,6 +47,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         _getSavedLittersUsecase = getSavedLittersUsecase,
         _getLitterHistoryUsecase = getLitterHistoryUsecase,
         _currentUserUsecase = currentUserUsecase,
+        _getHealthEventsUsecase = getHealthEventsUsecase,
         _qaResetService = qaResetService,
         super(ProfileHiddenState()) {
     on<ProfileInitialEvent>(_onProfileInitialEvent);
@@ -65,6 +70,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         // The cats section falls back to empty on read failure.
       }
     }
+
+    // Cache-backed after Home's first load, so this is usually free. A cat
+    // whose read failed is dropped; an empty list hides the Health row.
+    final health = await resolveHouseholdHealth(
+      cats: cats,
+      getHealthEvents: _getHealthEventsUsecase,
+      now: DateTime.now(),
+    );
 
     List<ProductDisplayModel> savedProducts = const [];
     try {
@@ -98,6 +111,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     emit(ProfileLoadedState(
       cats: cats,
+      health: health,
       savedProducts: savedProducts,
       savedLitters: savedLitters,
       scanHistory: scanHistory,

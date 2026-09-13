@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
+import 'package:yucat/features/health_carnet/presentation/models/cat_health_summary.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/litter_detail/presentation/models/litter_display_model.dart';
 
@@ -21,6 +22,10 @@ class ProfileLoadedState extends ProfileState {
   /// The user's cats, for the compact "Your cats" section.
   final List<CatEntity> cats;
 
+  /// One carnet summary per cat whose read succeeded — the Health row's
+  /// count and its tap target. Empty hides the row (no cats, or reads failed).
+  final List<CatHealthSummary> health;
+
   /// Saved products and scan history (newest-first) for the library preview
   /// rows — drive the counts and recent cover thumbnails.
   final List<ProductDisplayModel> savedProducts;
@@ -30,6 +35,7 @@ class ProfileLoadedState extends ProfileState {
 
   const ProfileLoadedState({
     this.cats = const [],
+    this.health = const [],
     this.savedProducts = const [],
     this.savedLitters = const [],
     this.scanHistory = const [],
@@ -37,8 +43,14 @@ class ProfileLoadedState extends ProfileState {
   });
 
   @override
-  List<Object?> get props =>
-      [cats, savedProducts, savedLitters, scanHistory, litterHistory];
+  List<Object?> get props => [
+        cats,
+        health.map((h) => '${h.cat.id}:${h.dueSoonCount}:${h.hasHistory}').toList(),
+        savedProducts,
+        savedLitters,
+        scanHistory,
+        litterHistory,
+      ];
 }
 
 class ProfileErrorState extends ProfileState {
