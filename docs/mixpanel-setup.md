@@ -282,6 +282,20 @@ Use **Stalled** as a remarketing audience and as a funnel filter to study why th
 4. **Alert (optional):** open the Funnel A or conversion metric → **"⋯" → Set Alert** → notify
    on a significant drop (e.g. weekly conversion down >20%). Route to email/Slack.
 
+### Boards that exist (project 4032645)
+
+The numbered boards, in reading order. Each one's description states the baseline it is
+measured against.
+
+| Board | Id | What it answers |
+|---|---|---|
+| 0 · North Star | 11491816 | Install → activation → paid, retention, paywall micro-funnel. Start here |
+| 1 · Cat wizard drop-off | 11266491 | Per-step drop-off through the 12-step wizard (break down by `step_name`, never `step_index`) |
+| 2 · Content engagement | 11516429 | Articles, recipes, food guide: tap-through vs lane impressions, read depth |
+| 4 · Quality | 11491820 | Failure rates by app version |
+| 5 · Trial slice | 11521691 | Did the September 2026 trial-retention slice move anything |
+| 6 · Health carnet | 11522118 | Is the carnet used and does it bring people back: rollout by version, reach, Home card taps, setup funnels, tasks by protocol and `was_overdue`, retention on 2.5.0 vs all builds vs carnet viewers. ⚠️ The 2.5.0 retention report filters `$app_version_string = 2.5.0` — update it when 2.6 ships. Read usage after 2 weeks on the App Store build, retention after 4–6 |
+
 ---
 
 ## Done / hand-back checklist
