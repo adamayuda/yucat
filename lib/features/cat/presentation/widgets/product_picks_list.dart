@@ -4,12 +4,14 @@ import 'package:yucat/features/product_detail/presentation/utils/verdict_headlin
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/cat/presentation/utils/cat_product_recommendations.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
+import 'package:yucat/features/product_detail/presentation/widgets/fit_verdict_pill.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/hatched_placeholder.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 
-/// Presentational "Top picks" list. Each row shows the per-cat **fit** (not the
-/// product's base quality score) plus the headline reason it was picked. Hidden
-/// when [picks] is empty.
+/// Presentational "Top picks" list. Each row shows the product's quality badge
+/// ("82 • Excellent"), the per-cat fit **verdict** pill ("Great fit" — never a
+/// second number) and the headline reason it was picked. Rows are ordered by
+/// fit, then quality. Hidden when [picks] is empty.
 class ProductPicksList extends StatelessWidget {
   final String title;
   final List<ProductPick> picks;
@@ -75,7 +77,14 @@ class _PickRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: DSDimens.sizeXxs),
-                _QualityPill(product: product),
+                Wrap(
+                  spacing: DSDimens.sizeXxs,
+                  runSpacing: DSDimens.sizeXxxs,
+                  children: [
+                    _QualityPill(product: product),
+                    FitVerdictPill(verdict: pick.verdict, compact: true),
+                  ],
+                ),
                 if (pick.why != null) ...[
                   const SizedBox(height: DSDimens.sizeXxs),
                   _WhyChip(text: pick.why!),
@@ -95,8 +104,8 @@ class _PickRow extends StatelessWidget {
 }
 
 /// The food's quality badge ("82 • Excellent"), coloured by its quality grade.
-/// (Suitability for the cat is conveyed by the section heading + why-reason;
-/// ranking still orders by per-cat fit.)
+/// Sits beside the fit verdict pill so quality and suitability read as two
+/// different things.
 class _QualityPill extends StatelessWidget {
   final ProductDisplayModel product;
 

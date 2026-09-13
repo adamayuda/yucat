@@ -947,17 +947,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productDetailLoadError => 'Could not load this product.';
 
   @override
-  String get productDetailOverallAnalysis => 'OVERALL ANALYSIS';
+  String get productDetailOverallAnalysis => 'FOOD QUALITY';
 
   @override
   String get productDetailAiIdentifiedPill => '* AI IDENTIFIED';
 
   @override
-  String get productDetailMyCatScore => 'My cat\'s score';
+  String get productDetailMyCatScore => 'For your cat';
 
   @override
   String get productDetailNoCatPrompt =>
-      'Create a cat profile to see a personalized score for your cat.';
+      'Create a cat profile to see how this food fits your cat.';
 
   @override
   String get productDetailAddACat => 'Add a cat';
@@ -975,8 +975,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Pick a cat to see how this product fits its profile.';
 
   @override
-  String get productDetailPersonalizedScore =>
-      'Personalized score based on your cat\'s profile.';
+  String productDetailFitIntro(String name) {
+    return 'How it fits $name\'s profile.';
+  }
+
+  @override
+  String get productDetailFitGreat => 'Great fit';
+
+  @override
+  String get productDetailFitGood => 'Good fit';
+
+  @override
+  String get productDetailFitCautions => 'Some cautions';
+
+  @override
+  String get productDetailFitNotRecommended => 'Not recommended';
 
   @override
   String get productDetailDimHealth => 'HEALTH';
@@ -998,7 +1011,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productDetailNeutralFit =>
-      'No strong matches for this cat — neutral fit.';
+      'Nothing in this cat\'s profile changes the verdict — the food quality score above applies as is.';
 
   @override
   String get productDetailAgeGroupKitten => 'Kitten';
@@ -1089,7 +1102,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assessmentUnderweightHighCalories =>
-      'High calories (>380 kcal/100g) can help an underweight cat gain weight';
+      'Energy-dense food can help an underweight cat gain weight';
 
   @override
   String get assessmentUnderweightHighFat =>
@@ -1097,15 +1110,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assessmentOverweightHighCalories =>
-      'High calories (>360 kcal/100g) may not be ideal for an overweight cat';
+      'Energy-dense food may not be ideal for an overweight cat';
 
   @override
   String get assessmentOverweightLowCalories =>
-      'Lower calories (<320 kcal/100g) help manage weight in overweight cats';
+      'Lower energy density helps manage weight in overweight cats';
 
   @override
   String get assessmentOverweightHighFiber =>
       'Higher fiber (>4%) can help with satiety for overweight cats';
+
+  @override
+  String get assessmentOverweightHighMoisture =>
+      'High moisture (>70%) adds volume without calories, which helps a cat that needs to eat less feel full';
 
   @override
   String get assessmentObeseHighFat =>
@@ -1113,7 +1130,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assessmentObeseHighCalories =>
-      'High calories (>330 kcal/100g) are not ideal for obese cats';
+      'Energy-dense food is not ideal for obese cats';
 
   @override
   String get assessmentObeseLeanProtein =>
@@ -1121,15 +1138,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assessmentLowActivityHighCalories =>
-      'High calories (>360 kcal/100g) may not suit a low-activity cat';
+      'Energy-dense food may not suit a low-activity cat';
 
   @override
   String get assessmentLowActivityModerateCalories =>
-      'Moderate calories (<330 kcal/100g) are better for low-activity cats';
+      'Moderate energy density is better for low-activity cats';
 
   @override
   String get assessmentHighActivityHighCalories =>
-      'Higher calories (>380 kcal/100g) support a highly active cat';
+      'Higher energy density supports a highly active cat';
 
   @override
   String get assessmentHighActivityHighProtein =>
@@ -1137,7 +1154,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assessmentNeuteredHighCalories =>
-      'Very calorie-dense food (>380 kcal/100g) can promote weight gain in neutered cats';
+      'Very energy-dense food can promote weight gain in neutered cats';
 
   @override
   String get assessmentNeuteredUrinarySupport =>
@@ -1157,7 +1174,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assessmentPregnantHighCalories =>
-      'Very calorie-dense food (>400 kcal/100g) helps meet energy demands in pregnancy/lactation';
+      'Very energy-dense food helps meet energy demands in pregnancy/lactation';
 
   @override
   String get assessmentMaineCoonJointSupport =>
@@ -1596,6 +1613,149 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productDetailScanLabelCta => 'Photograph the back label';
+
+  @override
+  String get productDetailIngredientsTitle => 'INGREDIENTS';
+
+  @override
+  String productDetailIngredientsShowAll(int count) {
+    return 'Show all $count';
+  }
+
+  @override
+  String get productDetailIngredientsShowLess => 'Show less';
+
+  @override
+  String get productDetailIngredientsFlaggedNote =>
+      'Highlighted: allergens declared on your cats\' profiles.';
+
+  @override
+  String get productDetailIngredientsSource => 'As listed by the manufacturer.';
+
+  @override
+  String get productDetailComplementaryTreat => 'Treat · not a complete meal';
+
+  @override
+  String get productDetailComplementaryTopper => 'Topper · not a complete meal';
+
+  @override
+  String get productDetailComplementarySupplement =>
+      'Supplement · not a complete meal';
+
+  @override
+  String get productDetailComplementaryNote =>
+      'Scored as a treat: it goes with a complete food, not instead of one. Keep treats under 10% of daily calories.';
+
+  @override
+  String get productDetailNutritionTitle => 'GUARANTEED ANALYSIS';
+
+  @override
+  String get productDetailBasisAsFed => 'As fed';
+
+  @override
+  String get productDetailBasisDryMatter => 'Dry matter';
+
+  @override
+  String get productDetailBasisAsFedHint =>
+      'Percentages as printed on the pack. Energy is an estimate.';
+
+  @override
+  String get productDetailBasisDryMatterHint =>
+      'Water removed, so wet and dry foods sit on the same scale. Energy is an estimate.';
+
+  @override
+  String get productDetailNutrientAsh => 'Ash';
+
+  @override
+  String get productDetailNutrientEnergy => 'Energy';
+
+  @override
+  String productDetailEnergyValue(int kcal) {
+    return '~$kcal kcal';
+  }
+
+  @override
+  String productDetailPortionTitle(String name) {
+    return 'DAILY PORTION FOR $name';
+  }
+
+  @override
+  String productDetailPortionNeedsWeight(String name) {
+    return 'Add $name\'s weight to see a daily portion.';
+  }
+
+  @override
+  String productDetailPortionGrams(int grams) {
+    return '≈ $grams g';
+  }
+
+  @override
+  String productDetailPortionKcal(int kcal) {
+    return '≈ $kcal kcal a day';
+  }
+
+  @override
+  String productDetailPortionUnits(String count, String unit) {
+    return '≈ $count × $unit a day';
+  }
+
+  @override
+  String productDetailPortionTreatBudget(int kcal, int grams) {
+    return 'Treat budget: up to ≈ $kcal kcal a day, about $grams g of this treat.';
+  }
+
+  @override
+  String get productDetailPortionDisclaimer =>
+      'An estimate from weight, age and activity. Adjust to body condition and your vet\'s advice.';
+
+  @override
+  String get productDetailShare => 'Share this result';
+
+  @override
+  String get productDetailReport => 'Report a problem';
+
+  @override
+  String get productDetailReportDescription =>
+      'Wrong product, nutrition or score';
+
+  @override
+  String get productDetailReportTitle => 'What is wrong?';
+
+  @override
+  String get productDetailReportWrongProduct =>
+      'This is not the product I scanned';
+
+  @override
+  String get productDetailReportWrongNutrition =>
+      'The nutrition figures are wrong';
+
+  @override
+  String get productDetailReportWrongScore => 'The score seems wrong';
+
+  @override
+  String get productDetailReportWrongImage => 'The photo is wrong';
+
+  @override
+  String get productDetailReportOther => 'Something else';
+
+  @override
+  String get productDetailReportThanks => 'Thanks — we will take a look.';
+
+  @override
+  String productDetailShareText(
+    String name,
+    String brand,
+    int score,
+    String verdict,
+    String url,
+  ) {
+    return '$name by $brand scores $score/100 on YuCat — $verdict. Check your cat’s food: $url';
+  }
+
+  @override
+  String productDetailShareTextNoScore(String name, String brand, String url) {
+    return 'I looked up $name by $brand on YuCat. Check your cat’s food: $url';
+  }
 
   @override
   String get homeLoadingLabelEyebrow => 'Reading the label';

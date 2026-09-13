@@ -572,10 +572,10 @@
   "paywallErrorRestoreFailed": "Could not restore purchases. Please try again.",
   "commonGoBack": "Go back",
   "productDetailLoadError": "Could not load this product.",
-  "productDetailOverallAnalysis": "OVERALL ANALYSIS",
+  "productDetailOverallAnalysis": "FOOD QUALITY",
   "productDetailAiIdentifiedPill": "* AI IDENTIFIED",
-  "productDetailMyCatScore": "My cat's score",
-  "productDetailNoCatPrompt": "Create a cat profile to see a personalized score for your cat.",
+  "productDetailMyCatScore": "For your cat",
+  "productDetailNoCatPrompt": "Create a cat profile to see how this food fits your cat.",
   "productDetailAddACat": "Add a cat",
   "productDetailForYourCats": "For your cats",
   "productDetailCatsCount": "{count} CATS",
@@ -587,14 +587,25 @@
     }
   },
   "productDetailPickACat": "Pick a cat to see how this product fits its profile.",
-  "productDetailPersonalizedScore": "Personalized score based on your cat's profile.",
+  "productDetailFitIntro": "How it fits {name}'s profile.",
+  "@productDetailFitIntro": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productDetailFitGreat": "Great fit",
+  "productDetailFitGood": "Good fit",
+  "productDetailFitCautions": "Some cautions",
+  "productDetailFitNotRecommended": "Not recommended",
   "productDetailDimHealth": "HEALTH",
   "productDetailDimWeight": "WEIGHT",
   "productDetailDimAge": "AGE",
   "productDetailDimActivity": "ACTIVITY",
   "productDetailDimNeuteredStatus": "NEUTERED STATUS",
   "productDetailDimBreed": "BREED",
-  "productDetailNeutralFit": "No strong matches for this cat — neutral fit.",
+  "productDetailNeutralFit": "Nothing in this cat's profile changes the verdict — the food quality score above applies as is.",
   "productDetailAgeGroupKitten": "Kitten",
   "productDetailAgeGroupAdult": "Adult",
   "productDetailAgeGroupSenior": "Senior",
@@ -630,24 +641,25 @@
   "assessmentSeniorHighFat": "Very high fat (>20%) may be unsuitable for seniors",
   "assessmentSeniorJointSupport": "Contains joint support ingredients (e.g. glucosamine, chondroitin)",
   "assessmentSeniorKidneyFriendly": "Kidney-friendly formulation (e.g. lower phosphorus)",
-  "assessmentUnderweightHighCalories": "High calories (>380 kcal/100g) can help an underweight cat gain weight",
+  "assessmentUnderweightHighCalories": "Energy-dense food can help an underweight cat gain weight",
   "assessmentUnderweightHighFat": "High fat (>18%) supports weight gain for underweight cats",
-  "assessmentOverweightHighCalories": "High calories (>360 kcal/100g) may not be ideal for an overweight cat",
-  "assessmentOverweightLowCalories": "Lower calories (<320 kcal/100g) help manage weight in overweight cats",
+  "assessmentOverweightHighCalories": "Energy-dense food may not be ideal for an overweight cat",
+  "assessmentOverweightLowCalories": "Lower energy density helps manage weight in overweight cats",
   "assessmentOverweightHighFiber": "Higher fiber (>4%) can help with satiety for overweight cats",
+  "assessmentOverweightHighMoisture": "High moisture (>70%) adds volume without calories, which helps a cat that needs to eat less feel full",
   "assessmentObeseHighFat": "High fat (>15%) is not suitable for obese cats",
-  "assessmentObeseHighCalories": "High calories (>330 kcal/100g) are not ideal for obese cats",
+  "assessmentObeseHighCalories": "Energy-dense food is not ideal for obese cats",
   "assessmentObeseLeanProtein": "Lean, high-protein formula (>40% protein, <12% fat) is good for obese cats",
-  "assessmentLowActivityHighCalories": "High calories (>360 kcal/100g) may not suit a low-activity cat",
-  "assessmentLowActivityModerateCalories": "Moderate calories (<330 kcal/100g) are better for low-activity cats",
-  "assessmentHighActivityHighCalories": "Higher calories (>380 kcal/100g) support a highly active cat",
+  "assessmentLowActivityHighCalories": "Energy-dense food may not suit a low-activity cat",
+  "assessmentLowActivityModerateCalories": "Moderate energy density is better for low-activity cats",
+  "assessmentHighActivityHighCalories": "Higher energy density supports a highly active cat",
   "assessmentHighActivityHighProtein": "High protein (>35%) helps maintain muscle in active cats",
-  "assessmentNeuteredHighCalories": "Very calorie-dense food (>380 kcal/100g) can promote weight gain in neutered cats",
+  "assessmentNeuteredHighCalories": "Very energy-dense food can promote weight gain in neutered cats",
   "assessmentNeuteredUrinarySupport": "Contains urinary support ingredients, good for neutered cats",
   "assessmentNeuteredHighFat": "High fat (>16%) may not be ideal for neutered cats",
   "assessmentPregnantHighProtein": "Very high protein (>35%) supports the increased needs of pregnant/lactating cats",
   "assessmentPregnantHighFat": "High fat (>20%) provides extra energy for pregnant/lactating cats",
-  "assessmentPregnantHighCalories": "Very calorie-dense food (>400 kcal/100g) helps meet energy demands in pregnancy/lactation",
+  "assessmentPregnantHighCalories": "Very energy-dense food helps meet energy demands in pregnancy/lactation",
   "assessmentMaineCoonJointSupport": "Contains joint support ingredients, helpful for Maine Coons",
   "assessmentMaineCoonHighProtein": "High protein (>35%) supports large-breed Maine Coons",
   "assessmentPersianHairball": "Hairball-control style formula (fiber 4–6% or hairball claims)",
@@ -809,6 +821,136 @@
   "homeErrorExitScanLabel": "Photograph the back label",
   "homeErrorExitSearch": "Search by name",
   "productDetailScanLabelCta": "Photograph the back label",
+  "productDetailIngredientsTitle": "INGREDIENTS",
+  "productDetailIngredientsShowAll": "Show all {count}",
+  "@productDetailIngredientsShowAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "productDetailIngredientsShowLess": "Show less",
+  "productDetailIngredientsFlaggedNote": "Highlighted: allergens declared on your cats' profiles.",
+  "productDetailIngredientsSource": "As listed by the manufacturer.",
+  "productDetailComplementaryTreat": "Treat · not a complete meal",
+  "productDetailComplementaryTopper": "Topper · not a complete meal",
+  "productDetailComplementarySupplement": "Supplement · not a complete meal",
+  "productDetailComplementaryNote": "Scored as a treat: it goes with a complete food, not instead of one. Keep treats under 10% of daily calories.",
+  "productDetailNutritionTitle": "GUARANTEED ANALYSIS",
+  "productDetailBasisAsFed": "As fed",
+  "productDetailBasisDryMatter": "Dry matter",
+  "productDetailBasisAsFedHint": "Percentages as printed on the pack. Energy is an estimate.",
+  "productDetailBasisDryMatterHint": "Water removed, so wet and dry foods sit on the same scale. Energy is an estimate.",
+  "productDetailNutrientAsh": "Ash",
+  "productDetailNutrientEnergy": "Energy",
+  "productDetailEnergyValue": "~{kcal} kcal",
+  "@productDetailEnergyValue": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "productDetailPortionTitle": "DAILY PORTION FOR {name}",
+  "@productDetailPortionTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productDetailPortionNeedsWeight": "Add {name}'s weight to see a daily portion.",
+  "@productDetailPortionNeedsWeight": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "productDetailPortionGrams": "≈ {grams} g",
+  "@productDetailPortionGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "productDetailPortionKcal": "≈ {kcal} kcal a day",
+  "@productDetailPortionKcal": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      }
+    }
+  },
+  "productDetailPortionUnits": "≈ {count} × {unit} a day",
+  "@productDetailPortionUnits": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "productDetailPortionTreatBudget": "Treat budget: up to ≈ {kcal} kcal a day, about {grams} g of this treat.",
+  "@productDetailPortionTreatBudget": {
+    "placeholders": {
+      "kcal": {
+        "type": "int"
+      },
+      "grams": {
+        "type": "int"
+      }
+    }
+  },
+  "productDetailPortionDisclaimer": "An estimate from weight, age and activity. Adjust to body condition and your vet's advice.",
+  "productDetailShare": "Share this result",
+  "productDetailReport": "Report a problem",
+  "productDetailReportDescription": "Wrong product, nutrition or score",
+  "productDetailReportTitle": "What is wrong?",
+  "productDetailReportWrongProduct": "This is not the product I scanned",
+  "productDetailReportWrongNutrition": "The nutrition figures are wrong",
+  "productDetailReportWrongScore": "The score seems wrong",
+  "productDetailReportWrongImage": "The photo is wrong",
+  "productDetailReportOther": "Something else",
+  "productDetailReportThanks": "Thanks — we will take a look.",
+  "productDetailShareText": "{name} by {brand} scores {score}/100 on YuCat — {verdict}. Check your cat’s food: {url}",
+  "@productDetailShareText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "brand": {
+        "type": "String"
+      },
+      "score": {
+        "type": "int"
+      },
+      "verdict": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "productDetailShareTextNoScore": "I looked up {name} by {brand} on YuCat. Check your cat’s food: {url}",
+  "@productDetailShareTextNoScore": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "brand": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
   "homeLoadingLabelEyebrow": "Reading the label",
   "homeLoadingMsgReadingLabel": "Reading the analysis table…",
   "homeLoadingMsgScoring": "Scoring the ingredients…",

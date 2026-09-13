@@ -38,6 +38,17 @@ class ProductEntity {
   /// Normalised EAN-13 read off the pack, when the backend knows one.
   final String? gtin;
 
+  /// Backend classification: `wet` / `dry` / `treat` / `topper` /
+  /// `supplement`. Null on rows that predate the field. Treats, toppers and
+  /// supplements are graded on the same 0–100 as complete foods, so the UI
+  /// must say so and the alternatives must not mix the two.
+  final String? foodType;
+
+  /// Ingredients as printed on the pack, in order. Canonical (never
+  /// translated) — the per-cat engine scans it for allergens and fillers, and
+  /// the detail screen renders it. Empty when the analysis never found a list.
+  final List<String> ingredients;
+
   const ProductEntity({
     required this.name,
     required this.brand,
@@ -62,5 +73,7 @@ class ProductEntity {
     this.localizedCons,
     this.cacheKey,
     this.gtin,
+    this.foodType,
+    this.ingredients = const [],
   });
 }

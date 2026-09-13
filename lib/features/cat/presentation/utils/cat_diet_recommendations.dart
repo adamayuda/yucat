@@ -1,4 +1,5 @@
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
+import 'package:yucat/features/cat/presentation/utils/assessment_weights.dart';
 import 'package:yucat/features/product_detail/presentation/utils/cat_product_assessment.dart'
     show CatAssessmentDimension;
 import 'package:yucat/l10n/app_localizations.dart';
@@ -57,16 +58,17 @@ class DietRecommendation {
   });
 }
 
-// Dimension priorities — same ordering as the product assessment (health and
-// weight dominate; breed/coat are tiebreakers). General hydration sits low.
-const _wHealth = 15;
-const _wWeight = 12;
-const _wAge = 10;
-const _wActivity = 8;
-const _wNeutered = 6;
-const _wBreed = 5;
-const _wCoat = 4;
-const _wHydration = 3;
+// Dimension priorities — one source shared with the product assessment
+// (`assessment_weights.dart`): health and weight dominate; breed/coat are
+// tiebreakers; general hydration sits low.
+const _wHealth = AssessmentWeights.health;
+const _wWeight = AssessmentWeights.weight;
+const _wAge = AssessmentWeights.age;
+const _wActivity = AssessmentWeights.activity;
+const _wNeutered = AssessmentWeights.neutered;
+const _wBreed = AssessmentWeights.breed;
+const _wCoat = AssessmentWeights.coat;
+const _wHydration = AssessmentWeights.hydration;
 
 /// Produces the personalized dietary tips for [cat], ordered most-important
 /// first. Returns an empty list only for a profile with no usable attributes.

@@ -26,6 +26,7 @@ class ProductEntityToModelMapperImpl extends ProductEntityToModelMapper {
       fat: entity.fat,
       fiber: entity.fiber,
       carbs: _calculateCarbs(entity),
+      ash: entity.ash,
       isAiIdentified: entity.isAiIdentified,
       format: entity.format,
       packageSize: entity.packageSize,
@@ -40,6 +41,8 @@ class ProductEntityToModelMapperImpl extends ProductEntityToModelMapper {
       dataUnavailable: entity.score <= 0,
       cacheKey: entity.cacheKey,
       gtin: entity.gtin,
+      foodType: entity.foodType,
+      ingredients: entity.ingredients,
     );
   }
 

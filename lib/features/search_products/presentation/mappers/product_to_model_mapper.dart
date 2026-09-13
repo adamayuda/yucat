@@ -26,6 +26,9 @@ class ProductToModelMapperImpl extends ProductToModelMapper {
       fat: product.fat,
       fiber: product.fiber,
       carbs: _calculateCarbs(product),
+      ash: product.ash,
+      foodType: product.foodType,
+      ingredients: product.ingredients,
     );
   }
 

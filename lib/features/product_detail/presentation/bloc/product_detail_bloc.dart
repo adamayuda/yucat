@@ -45,6 +45,10 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
       properties: {
         'product_name': product.name,
         'product_brand': product.brand,
+        // The score users actually see was unmeasurable — no event carried it.
+        'product_score': product.score,
+        'rating_band': product.ratingText.toLowerCase(),
+        'data_unavailable': product.dataUnavailable,
         'timestamp': DateTime.now().toIso8601String(),
       },
     );

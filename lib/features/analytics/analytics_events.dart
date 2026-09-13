@@ -188,6 +188,12 @@ class AnalyticsEvents {
   // only layer that knows the selected cat.
   static const alternativesShown = 'Alternatives Shown';
   static const alternativeTapped = 'Alternative Tapped';
+  // The as-fed / dry-matter switch on the guaranteed-analysis card.
+  static const nutritionBasisToggled = 'Nutrition Basis Toggled';
+  // The overflow menu on a product: share sheet opened, and a "something is
+  // wrong" report with its reason — the only feedback channel on a result.
+  static const productShared = 'Product Shared';
+  static const productReported = 'Product Reported';
 
   // Profile & misc
   static const profileCatTapped = 'Profile Cat Tapped';

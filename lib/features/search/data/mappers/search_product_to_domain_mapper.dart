@@ -14,6 +14,11 @@ class SearchProductToDomainMapperImpl extends SearchProductToDomainMapper {
       final cons = hit['cons'] != null
           ? List<String>.from(hit['cons'].map((e) => e.toString()))
           : <String>[];
+      final ingredients = hit['ingredients'] is List
+          ? List<String>.from(
+              (hit['ingredients'] as List).map((e) => e.toString()))
+          : <String>[];
+      final foodType = hit['foodType']?.toString();
 
       // Extract values from correct JSON paths
       final product = ProductEntity(
@@ -29,6 +34,8 @@ class SearchProductToDomainMapperImpl extends SearchProductToDomainMapper {
         moisture: _parseDouble(hit['moisture']),
         pros: pros,
         cons: cons,
+        foodType: foodType == null || foodType.isEmpty ? null : foodType,
+        ingredients: ingredients,
       );
       return product;
     } catch (e) {

@@ -30,6 +30,10 @@ class ProductToDomainMapperImpl extends ProductToDomainMapper {
       final cons = product['cons'] != null
           ? List<String>.from(product['cons'].map((e) => e.toString()))
           : <String>[];
+      final ingredients = product['ingredients'] is List
+          ? List<String>.from(
+              (product['ingredients'] as List).map((e) => e.toString()))
+          : <String>[];
 
       final l = localizedText;
       List<String>? localizedList(String key) {
@@ -77,6 +81,8 @@ class ProductToDomainMapperImpl extends ProductToDomainMapper {
         // (a legacy field name); `gtin` is the real one when known.
         cacheKey: _nonEmpty(product['barcode']),
         gtin: _nonEmpty(product['gtin']),
+        foodType: _nonEmpty(product['foodType']),
+        ingredients: ingredients,
       );
     } catch (e) {
       // Return a default entity if mapping fails to prevent app crash

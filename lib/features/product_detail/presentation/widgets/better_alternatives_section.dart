@@ -9,6 +9,7 @@ import 'package:yucat/features/cat/presentation/utils/cat_product_recommendation
 import 'package:yucat/features/cat/presentation/widgets/product_picks_list.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/utils/cat_product_assessment.dart';
+import 'package:yucat/features/product_detail/presentation/utils/fit_verdict.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/service_locator.dart';
 
@@ -74,16 +75,19 @@ class _BetterAlternativesSectionState extends State<BetterAlternativesSection> {
     }
   }
 
-  Map<String, Object?> _productProps(AppLocalizations l10n) => {
+  Map<String, Object?> _productProps(AppLocalizations l10n) {
+    final current = evaluateCatProduct(widget.cat, widget.product, l10n);
+    return {
         'product_name': widget.product.name,
         'product_brand': widget.product.brand,
         'product_score': widget.product.score,
-        'current_fit':
-            evaluateCatProduct(widget.cat, widget.product, l10n).score,
+        'current_fit': current.score,
+        'fit_band': FitVerdict.of(current).analyticsName,
         'cat_age_group': widget.cat.ageGroup,
         'cat_has_health_conditions':
             (widget.cat.healthConditions ?? const []).isNotEmpty,
       };
+  }
 
   void _open(ProductPick pick) {
     final l10n = AppLocalizations.of(context);
@@ -95,6 +99,7 @@ class _BetterAlternativesSectionState extends State<BetterAlternativesSection> {
         'alternative_brand': pick.product.brand,
         'alternative_score': pick.product.score,
         'alternative_fit': pick.fit,
+        'alternative_fit_band': pick.verdict.analyticsName,
         'position': _picks.indexOf(pick),
         'source': 'product_detail',
         'timestamp': DateTime.now().toIso8601String(),

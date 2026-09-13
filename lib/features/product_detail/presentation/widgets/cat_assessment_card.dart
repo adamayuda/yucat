@@ -4,6 +4,7 @@ import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/better_alternatives_section.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/cat_verdict_card.dart';
+import 'package:yucat/features/product_detail/presentation/widgets/daily_portion_card.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
@@ -103,7 +104,7 @@ class _CatAssessmentSectionState extends State<CatAssessmentSection> {
               Text(
                 hasMultiple
                     ? l10n.productDetailPickACat
-                    : l10n.productDetailPersonalizedScore,
+                    : l10n.productDetailFitIntro(selectedCat.name),
                 style: DSTextStyles.bodyMd.copyWith(color: DSColors.inkSecondary),
               ),
             ],
@@ -123,6 +124,17 @@ class _CatAssessmentSectionState extends State<CatAssessmentSection> {
           child: CatVerdictCard(
             // Rebuild the card when the selection changes.
             key: ValueKey(selectedCat.id ?? selectedCat.name),
+            cat: selectedCat,
+            product: widget.product,
+          ),
+        ),
+        // The one number "for your cat" that changes what happens at the
+        // bowl. Same selected cat as the verdict, so it lives here too.
+        const SizedBox(height: DSDimens.sizeS),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DSDimens.sizeL),
+          child: DailyPortionCard(
+            key: ValueKey('portion-${selectedCat.id ?? selectedCat.name}'),
             cat: selectedCat,
             product: widget.product,
           ),

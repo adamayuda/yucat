@@ -15,6 +15,10 @@ class ProductDisplayModel {
   final double fat;
   final double fiber;
   final double carbs;
+
+  /// Crude ash (minerals), as fed. 0 when not on the label — the grid shows a
+  /// dash, and the carbs subtraction already treated it as 0.
+  final double ash;
   final bool isAiIdentified;
 
   /// Canonical **English** text. `cat_product_assessment.dart` keyword-scans
@@ -44,6 +48,14 @@ class ProductDisplayModel {
   final String? cacheKey;
   final String? gtin;
 
+  /// `wet` / `dry` / `treat` / `topper` / `supplement`, or null when unknown
+  /// (older cached rows, pre-field persisted rows). See [isComplementary].
+  final String? foodType;
+
+  /// Ingredients as printed, in order; empty when never found. Canonical text
+  /// the rules engine scans — never translated.
+  final List<String> ingredients;
+
   const ProductDisplayModel({
     required this.name,
     required this.brand,
@@ -59,6 +71,7 @@ class ProductDisplayModel {
     this.fat = 0.0,
     this.fiber = 0.0,
     this.carbs = 0.0,
+    this.ash = 0.0,
     this.isAiIdentified = false,
     this.format = '',
     this.packageSize = '',
@@ -71,7 +84,20 @@ class ProductDisplayModel {
     this.dataUnavailable = false,
     this.cacheKey,
     this.gtin,
+    this.foodType,
+    this.ingredients = const [],
   });
+
+  /// A treat, topper or supplement — something that goes *with* a complete
+  /// food, not instead of one. Its 0–100 score means "how good a treat", which
+  /// the hero badge and the analysis card say out loud, and which keeps it
+  /// out of the "Better for {cat}" list under a complete food (and vice
+  /// versa). Unknown food types count as complete so old rows behave as
+  /// before.
+  bool get isComplementary => switch (foodType) {
+        'treat' || 'topper' || 'supplement' => true,
+        _ => false,
+      };
 
   // --- Display accessors -------------------------------------------------
   // Always render these, never the canonical fields: they fall back to English
@@ -85,9 +111,16 @@ class ProductDisplayModel {
 
   String get scoreDisplay => '$score/$maxScore';
 
-  /// Metabolizable energy estimate (kcal / 100g) via the Atwater factors,
-  /// derived from the displayed macros so it always matches [carbs].
-  double get calories => protein * 4 + fat * 9 + carbs * 4;
+  /// Metabolizable energy estimate, kcal per 100 g **as fed**, via the
+  /// modified Atwater factors (3.5 / 8.5 / 3.5) that AAFCO and FEDIAF use for
+  /// pet food — the plain 4 / 9 / 4 human factors overstate pet-food energy by
+  /// roughly 10 %. Derived from the displayed macros so it always matches
+  /// [carbs]. The rules engine converts it to a dry-matter basis itself.
+  double get calories => protein * 3.5 + fat * 8.5 + carbs * 3.5;
+
+  /// `100 / (100 − moisture)`: multiply an as-fed figure by this to get its
+  /// dry-matter equivalent. Same clamp the rules engine uses.
+  double get dryMatterFactor => 100.0 / (100.0 - moisture.clamp(0.0, 95.0));
 
   /// Subtitle segment for the hero card: "Wet pâté · 85g pouch", or just one
   /// of them, or empty when neither is set.

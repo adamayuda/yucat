@@ -466,7 +466,17 @@ const ANALYSIS_TOOLS: Anthropic.Tool[] = [
         fiber: {type: "number", minimum: 0, maximum: 100},
         ash: {type: "number", minimum: 0, maximum: 100},
         imageUrl: {type: "string"},
-        score: {type: "number", minimum: 0, maximum: 100},
+        score: {
+          type: "number",
+          minimum: 0,
+          maximum: 100,
+          description:
+            "0-100 nutritional quality per the SCORING RUBRIC. 0 is the " +
+            "\"no guaranteed analysis found\" sentinel, NOT a bad grade — " +
+            "any food you could analyse scores at least 1. Treats, toppers " +
+            "and supplements are graded as what they are (how good a treat), " +
+            "not as a complete meal.",
+        },
         pros: {type: "array", items: {type: "string"}, maxItems: 3},
         cons: {type: "array", items: {type: "string"}, maxItems: 3},
         ingredients: {

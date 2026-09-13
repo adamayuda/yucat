@@ -184,10 +184,13 @@ any on-time rate.
 | `Scan Error Exit Tapped` | `outcome` (the error view shown), `exit` (`scan_again` / `scan_label` / `search`). `scan_again` also fires `Scan Started { source: scan_error_retry }` |
 | `Product Searched` | `query`, `query_length`, `results_count` |
 | `Search Results Viewed` | `query`, `results_count`, `has_results` |
-| `Product Detail Viewed` | `product_name`, `product_brand` |
+| `Product Detail Viewed` | `product_name`, `product_brand`, `product_score`, `rating_band` (`excellent` / `good` / `average` / `poor` — the one band table in `score_bands.dart`), `data_unavailable` — the score the user actually saw was unmeasurable before these; break the event down by `rating_band` for the verdict mix |
 | `Product Saved` / `Product Unsaved` | `product_name`, `product_brand` |
-| `Alternatives Shown` | `product_name`, `product_brand`, `product_score`, `current_fit`, `cat_age_group`, `cat_has_health_conditions`, `count` — fires **only when at least one** "Better for {cat}" row rendered under the verdict, once per cat per page. A great product ends at its verdict and is not an ignored list |
-| `Alternative Tapped` | the same product/cat props plus `alternative_name`, `alternative_brand`, `alternative_score`, `alternative_fit`, `position`, `source` (`product_detail`) — the scan → verdict → better food → open loop; compare against `Product Detail Viewed` to see how much browsing the list drives |
+| `Alternatives Shown` | `product_name`, `product_brand`, `product_score`, `current_fit` (the internal 0–100 fit; 70 = neutral), `fit_band` (`great_fit` / `good_fit` / `some_cautions` / `not_recommended` — the verdict pill the user saw), `cat_age_group`, `cat_has_health_conditions`, `count` — fires **only when at least one** "Better for {cat}" row rendered under the verdict, once per cat per page. A great product ends at its verdict and is not an ignored list |
+| `Nutrition Basis Toggled` | `basis` (`as_fed` / `dry_matter`), `product_name`, `product_brand` — the switch on the guaranteed-analysis card; a high toggle rate says the as-fed default is the wrong one |
+| `Product Shared` | `product_name`, `product_brand`, `product_score`, `data_unavailable`, `has_product_key`, `product_key`, `food_type` — the overflow menu's share sheet was opened (the OS does not report whether a share completed) |
+| `Product Reported` | the same product props plus `reason` (`wrong_product` / `wrong_nutrition` / `wrong_score` / `wrong_image` / `other`) — the only feedback channel on a result; `product_key` is the Algolia objectID to fix |
+| `Alternative Tapped` | the same product/cat props plus `alternative_name`, `alternative_brand`, `alternative_score`, `alternative_fit`, `alternative_fit_band`, `position`, `source` (`product_detail`) — the scan → verdict → better food → open loop; compare against `Product Detail Viewed` to see how much browsing the list drives |
 
 ### Cat litter
 | Event | Key properties |

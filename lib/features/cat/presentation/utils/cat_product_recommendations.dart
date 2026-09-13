@@ -3,6 +3,7 @@ import 'package:yucat/features/product/domain/entities/product_entity.dart';
 import 'package:yucat/features/product_detail/presentation/mappers/product_entity_to_model_mapper.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/utils/cat_product_assessment.dart';
+import 'package:yucat/features/product_detail/presentation/utils/fit_verdict.dart';
 import 'package:yucat/features/search/domain/usecases/search_by_query_usecase.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/service_locator.dart';
@@ -12,8 +13,12 @@ class ProductPick {
   final ProductDisplayModel product;
 
   /// Per-cat fit score (0-100) from [evaluateCatProduct] — what drives the
-  /// ranking and the badge (distinct from the product's own quality score).
+  /// ranking (distinct from the product's own quality score). Internal: the
+  /// row shows [verdict], never this number.
   final int fit;
+
+  /// The banded verdict the row renders ("Great fit", …).
+  final FitVerdict verdict;
 
   /// The top matching reason (e.g. "Renal-targeted formulation"), or null.
   final String? why;
@@ -28,6 +33,7 @@ class ProductPick {
   const ProductPick({
     required this.product,
     required this.fit,
+    required this.verdict,
     this.why,
     this.dim,
     this.coverage = 0,
@@ -36,16 +42,20 @@ class ProductPick {
 
 /// Only recommend products that are a genuinely good food in general
 /// (`_minBaseScore`, post-rescore quality) and not actively wrong for this cat
-/// (`_minFit`). For a cat with no special needs every product sits near the
-/// neutral 70, so the fit floor is "not bad" rather than "great"; ranking then
-/// leans on quality. For a cat with conditions, poor-fit foods fall well below
-/// the floor and drop out.
+/// (`_minFitDelta` + no hard flag). For a cat with no special needs every
+/// product sits at the neutral delta 0, so the fit floor is "at most one minor
+/// con" rather than "great"; ranking then leans on quality. For a cat with
+/// conditions, poor-fit foods fall well below the floor and drop out.
+///
+/// ⚠️ Expressed on `delta`, not `score`: the old `score >= 68` looked like a
+/// tolerant floor but, with integer deltas whose smallest con is −3, it
+/// admitted nothing with any con at all.
 // Only recommend genuinely good-quality foods. After the ingredient-quality
 // re-score, real therapeutic/vet diets land at 72+ (so they pass on their own),
 // while cheap foods with good-looking macros (e.g. sugary, plant-protein
 // Whiskas) sit ~52 and are correctly excluded.
 const _minBaseScore = 70;
-const _minFit = 68;
+const _minFitDelta = -3;
 const _poolPerQuery = 40;
 const _poolCacheSize = 10;
 
@@ -84,6 +94,9 @@ Future<List<ProductPick>> recommendProductsForCat(
     for (final list in results) {
       for (final e in list) {
         if (e.score < _minBaseScore) continue; // quality floor
+        // Picks are meals. A treat scoring 92 is a great treat, not a better
+        // dinner than an 80-point pâté.
+        if (_isComplementary(e.foodType)) continue;
         final key = '${e.brand}__${e.name}'.trim().toLowerCase();
         if (seen.add(key)) candidates.add(e);
       }
@@ -98,7 +111,7 @@ Future<List<ProductPick>> recommendProductsForCat(
     for (final e in candidates) {
       final model = mapper(e);
       final a = evaluateCatProduct(cat, model, l10n);
-      if (a.score < _minFit) continue;
+      if (a.hasHardFlag || a.delta < _minFitDelta) continue;
       final reason = _pickReason(a.pros, genericWhy);
       final coverage =
           a.pros.where((p) => p.dimension == CatAssessmentDimension.health).length;
@@ -106,6 +119,7 @@ Future<List<ProductPick>> recommendProductsForCat(
         ProductPick(
           product: model,
           fit: a.score,
+          verdict: FitVerdict.of(a),
           why: reason?.text,
           dim: reason?.dimension,
           coverage: coverage,
@@ -129,6 +143,11 @@ Future<List<ProductPick>> recommendProductsForCat(
     return const [];
   }
 }
+
+bool _isComplementary(String? foodType) => switch (foodType) {
+      'treat' || 'topper' || 'supplement' => true,
+      _ => false,
+    };
 
 /// Drops any cached picks for [catId] (call after editing a cat profile).
 void invalidateProductPicksCache(String? catId) {
@@ -189,6 +208,9 @@ Future<List<ProductPick>> betterAlternativesFor(
   AppLocalizations l10n, {
   int limit = 3,
 }) async {
+  // The picks pool is complete foods only, so for a treat the honest answer is
+  // "no comparable alternative" — never a dinner offered as a better treat.
+  if (product.isComplementary) return const [];
   final current = evaluateCatProduct(cat, product, l10n);
   final selfKey = '${product.brand}__${product.name}'.trim().toLowerCase();
 

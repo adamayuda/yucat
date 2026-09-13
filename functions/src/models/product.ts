@@ -5,7 +5,9 @@ export type FoodType = "wet" | "dry" | "treat" | "topper" | "supplement";
  *
  * `name`/`brand` are deliberately excluded — they are transcribed off the
  * packaging (see prompts/identify-product) and must never be translated.
- * `ingredients` is excluded because the app never renders it.
+ * `ingredients` is excluded on purpose: the app renders it as printed and
+ * the per-cat rules engine keyword-scans it in canonical form, so it must
+ * never be translated in place.
  */
 export interface ProductText {
   format: string;
@@ -165,7 +167,10 @@ export class ProductModel implements Product {
       data.fiber || 0,
       data.ash || 0,
       data.imageUrl || "",
-      data.score || 0,
+      // The live scan paths hand the model's number straight through; only
+      // the batch re-score clamped. Do it here so both paths — and every
+      // future caller — store a 0–100 integer.
+      Math.max(0, Math.min(100, Math.round(data.score || 0))),
       data.pros || [],
       data.cons || [],
       data.version || "v2",

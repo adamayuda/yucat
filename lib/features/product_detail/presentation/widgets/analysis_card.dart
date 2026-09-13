@@ -70,6 +70,15 @@ class AnalysisCard extends StatelessWidget {
               ],
             ],
           ),
+          if (!noData && product.isComplementary) ...[
+            const SizedBox(height: DSDimens.sizeXs),
+            Text(
+              l10n.productDetailComplementaryNote,
+              style: DSTextStyles.caption.copyWith(
+                color: DSColors.inkSecondary,
+              ),
+            ),
+          ],
           if (body != null && body.isNotEmpty) ...[
             const SizedBox(height: DSDimens.sizeS),
             Text(body, style: DSTextStyles.bodyMd),

@@ -4,8 +4,8 @@ import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
 import 'package:yucat/features/cat/presentation/utils/cat_labels.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/features/product_detail/presentation/utils/cat_product_assessment.dart';
-import 'package:yucat/features/product_detail/presentation/utils/per_cat_score.dart';
-import 'package:yucat/features/product_detail/presentation/widgets/ring_score.dart';
+import 'package:yucat/features/product_detail/presentation/utils/fit_verdict.dart';
+import 'package:yucat/features/product_detail/presentation/widgets/fit_verdict_pill.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/cat_avatar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
@@ -40,7 +40,9 @@ class CatVerdictCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final assessment = evaluateCatProduct(cat, product, l10n);
-    final perCat = derivePerCatScore(assessment);
+    // A verdict, not a second score: the product's quality ring above is the
+    // only number on this screen (see fit_verdict.dart).
+    final verdict = FitVerdict.of(assessment);
     final hasFindings = assessment.pros.isNotEmpty || assessment.cons.isNotEmpty;
 
     return DSCard(
@@ -70,12 +72,7 @@ class CatVerdictCard extends StatelessWidget {
                   ],
                 ),
               ),
-              RingScore(
-                score: perCat.score,
-                maxScore: perCat.maxScore,
-                ratingColor: perCat.ratingColor,
-                size: 56,
-              ),
+              FitVerdictPill(verdict: verdict),
             ],
           ),
           if (!hasFindings) ...[

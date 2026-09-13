@@ -14,11 +14,13 @@ import 'package:yucat/features/product_detail/presentation/models/product_displa
 import 'package:yucat/features/product_detail/presentation/widgets/analysis_card.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/cat_assessment_card.dart';
+import 'package:yucat/features/product_detail/presentation/widgets/ingredients_card.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/nutrition_grid_card.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/product_detail_skeleton.dart';
 import 'package:yucat/features/product_detail/presentation/widgets/product_hero_card.dart';
 import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_circle_icon_button.dart';
+import 'package:yucat/features/product_detail/presentation/widgets/product_overflow_sheet.dart';
 import 'package:yucat/presentation/components/ds_state_view.dart';
 import 'package:yucat/presentation/widgets/app_loading_widget.dart';
 import 'package:yucat/service_locator.dart';
@@ -91,11 +93,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         const ProductDetailToggleSavedEvent(),
                       ),
                     ),
-                    DSCircleIconButton(
-                      icon: Icons.more_horiz_rounded,
-                      // TODO: wire overflow menu (report, share)
-                      onPressed: () {},
-                    ),
+                    if (state is ProductDetailLoadedState)
+                      DSCircleIconButton(
+                        icon: Icons.more_horiz_rounded,
+                        onPressed: () => showProductOverflowSheet(
+                          context,
+                          state.product,
+                        ),
+                      ),
                   ],
                 );
               },
@@ -208,6 +213,22 @@ class _LoadedBody extends StatelessWidget {
           padding: hPad,
           child: NutritionGridCard(product: product),
         ),
+        // Renders nothing when the product carries no list; highlights the
+        // allergens the user's cats declare, so it draws on the same cats
+        // future as the verdict section (unflagged until they load).
+        if (product.ingredients.isNotEmpty) ...[
+          const SizedBox(height: DSDimens.sizeL),
+          Padding(
+            padding: hPad,
+            child: FutureBuilder<List<CatEntity>>(
+              future: catsFuture,
+              builder: (context, snapshot) => IngredientsCard(
+                ingredients: product.ingredients,
+                cats: snapshot.data ?? const [],
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: DSDimens.sizeL),
         // Per-cat fit scores are derived from the macros, so they're meaningless
         // when there's no guaranteed analysis. Show a note instead.

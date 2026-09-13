@@ -956,17 +956,17 @@ class AppLocalizationsHu extends AppLocalizations {
   String get productDetailLoadError => 'Nem sikerült betölteni ezt a terméket.';
 
   @override
-  String get productDetailOverallAnalysis => 'ÁLTALÁNOS ELEMZÉS';
+  String get productDetailOverallAnalysis => 'TÁPMINŐSÉG';
 
   @override
   String get productDetailAiIdentifiedPill => '* AI AZONOSÍTOTT';
 
   @override
-  String get productDetailMyCatScore => 'A macskám pontszáma';
+  String get productDetailMyCatScore => 'A macskádnak';
 
   @override
   String get productDetailNoCatPrompt =>
-      'Hozz létre macska-profilt, hogy személyre szabott pontszámot láss a macskádnak.';
+      'Hozz létre macskaprofilt, hogy lásd, mennyire illik ez a táp a macskádhoz.';
 
   @override
   String get productDetailAddACat => 'Macska hozzáadása';
@@ -984,8 +984,21 @@ class AppLocalizationsHu extends AppLocalizations {
       'Válassz macskát, hogy lásd, hogyan illik ez a termék a profiljához.';
 
   @override
-  String get productDetailPersonalizedScore =>
-      'Személyre szabott pontszám a macskád profilja alapján.';
+  String productDetailFitIntro(String name) {
+    return 'Így illik $name profiljához.';
+  }
+
+  @override
+  String get productDetailFitGreat => 'Kiválóan illik';
+
+  @override
+  String get productDetailFitGood => 'Jól illik';
+
+  @override
+  String get productDetailFitCautions => 'Némi óvatosság';
+
+  @override
+  String get productDetailFitNotRecommended => 'Nem ajánlott';
 
   @override
   String get productDetailDimHealth => 'EGÉSZSÉG';
@@ -1007,7 +1020,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get productDetailNeutralFit =>
-      'Nincs erős egyezés ennél a macskánál — semleges illeszkedés.';
+      'A macska profiljában semmi sem változtat az értékelésen – a fenti tápminőség változatlanul érvényes.';
 
   @override
   String get productDetailAgeGroupKitten => 'Kölyök';
@@ -1098,7 +1111,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get assessmentUnderweightHighCalories =>
-      'Magas kalóriatartalom (>380 kcal/100g) segíthet a sovány macskának súlyt gyarapítani';
+      'Energiadús táplálék segíthet a sovány macskának súlyt gyarapítani';
 
   @override
   String get assessmentUnderweightHighFat =>
@@ -1106,15 +1119,19 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get assessmentOverweightHighCalories =>
-      'Magas kalóriatartalom (>360 kcal/100g) nem biztos, hogy ideális egy túlsúlyos macskának';
+      'Energiadús táplálék nem biztos, hogy ideális egy túlsúlyos macskának';
 
   @override
   String get assessmentOverweightLowCalories =>
-      'Alacsonyabb kalóriatartalom (<320 kcal/100g) segít a testsúly kezelésében túlsúlyos macskáknál';
+      'Alacsonyabb energiasűrűség segít a testsúly kezelésében túlsúlyos macskáknál';
 
   @override
   String get assessmentOverweightHighFiber =>
       'Magasabb rosttartalom (>4%) segíthet a teltségérzet fokozásában túlsúlyos macskáknál';
+
+  @override
+  String get assessmentOverweightHighMoisture =>
+      'Magas nedvességtartalom (>70%) kalória nélkül ad tömeget, így segít jóllakni egy macskának, amelynek kevesebbet kell ennie';
 
   @override
   String get assessmentObeseHighFat =>
@@ -1122,7 +1139,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get assessmentObeseHighCalories =>
-      'Magas kalóriatartalom (>330 kcal/100g) nem ideális elhízott macskák számára';
+      'Energiadús táplálék nem ideális elhízott macskák számára';
 
   @override
   String get assessmentObeseLeanProtein =>
@@ -1130,15 +1147,15 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get assessmentLowActivityHighCalories =>
-      'Magas kalóriatartalom (>360 kcal/100g) nem biztos, hogy megfelelő egy kevésbé aktív macskának';
+      'Energiadús táplálék nem biztos, hogy megfelelő egy kevésbé aktív macskának';
 
   @override
   String get assessmentLowActivityModerateCalories =>
-      'Mérsékelt kalóriatartalom (<330 kcal/100g) jobb a kevésbé aktív macskák számára';
+      'Mérsékelt energiasűrűség jobb a kevésbé aktív macskák számára';
 
   @override
   String get assessmentHighActivityHighCalories =>
-      'Magasabb kalóriatartalom (>380 kcal/100g) támogatja a nagyon aktív macskát';
+      'Magasabb energiasűrűség támogatja a nagyon aktív macskát';
 
   @override
   String get assessmentHighActivityHighProtein =>
@@ -1146,7 +1163,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get assessmentNeuteredHighCalories =>
-      'Nagyon kalóriadús táplálék (>380 kcal/100g) elősegítheti a súlygyarapodást ivartalanított macskáknál';
+      'Nagyon energiadús táplálék elősegítheti a súlygyarapodást ivartalanított macskáknál';
 
   @override
   String get assessmentNeuteredUrinarySupport =>
@@ -1166,7 +1183,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get assessmentPregnantHighCalories =>
-      'Nagyon kalóriadús táplálék (>400 kcal/100g) segít kielégíteni az energiaigényt vemhesség/szoptatás alatt';
+      'Nagyon energiadús táplálék segít kielégíteni az energiaigényt vemhesség/szoptatás alatt';
 
   @override
   String get assessmentMaineCoonJointSupport =>
@@ -1606,6 +1623,150 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get productDetailScanLabelCta => 'Hátoldali címke fotózása';
+
+  @override
+  String get productDetailIngredientsTitle => 'ÖSSZETEVŐK';
+
+  @override
+  String productDetailIngredientsShowAll(int count) {
+    return 'Mind a $count mutatása';
+  }
+
+  @override
+  String get productDetailIngredientsShowLess => 'Kevesebb';
+
+  @override
+  String get productDetailIngredientsFlaggedNote =>
+      'Kiemelve: a macskáid profiljában megadott allergének.';
+
+  @override
+  String get productDetailIngredientsSource => 'A gyártó megadása szerint.';
+
+  @override
+  String get productDetailComplementaryTreat =>
+      'Jutalomfalat · nem teljes értékű étkezés';
+
+  @override
+  String get productDetailComplementaryTopper =>
+      'Feltét · nem teljes értékű étkezés';
+
+  @override
+  String get productDetailComplementarySupplement =>
+      'Kiegészítő · nem teljes értékű étkezés';
+
+  @override
+  String get productDetailComplementaryNote =>
+      'Jutalomfalatként értékelve: teljes értékű táp mellé való, nem helyette. A jutalomfalatok maradjanak a napi kalória 10%-a alatt.';
+
+  @override
+  String get productDetailNutritionTitle => 'ANALITIKAI ÖSSZETEVŐK';
+
+  @override
+  String get productDetailBasisAsFed => 'Etetés szerint';
+
+  @override
+  String get productDetailBasisDryMatter => 'Szárazanyag';
+
+  @override
+  String get productDetailBasisAsFedHint =>
+      'Százalékok a csomagoláson feltüntetettek szerint. Az energia becslés.';
+
+  @override
+  String get productDetailBasisDryMatterHint =>
+      'Víz nélkül, hogy a nedves és a száraz táp azonos skálán legyen. Az energia becslés.';
+
+  @override
+  String get productDetailNutrientAsh => 'Hamu';
+
+  @override
+  String get productDetailNutrientEnergy => 'Energia';
+
+  @override
+  String productDetailEnergyValue(int kcal) {
+    return '~$kcal kcal';
+  }
+
+  @override
+  String productDetailPortionTitle(String name) {
+    return 'NAPI ADAG $name SZÁMÁRA';
+  }
+
+  @override
+  String productDetailPortionNeedsWeight(String name) {
+    return 'Add meg $name súlyát a napi adag megjelenítéséhez.';
+  }
+
+  @override
+  String productDetailPortionGrams(int grams) {
+    return '≈ $grams g';
+  }
+
+  @override
+  String productDetailPortionKcal(int kcal) {
+    return '≈ $kcal kcal naponta';
+  }
+
+  @override
+  String productDetailPortionUnits(String count, String unit) {
+    return '≈ $count × $unit naponta';
+  }
+
+  @override
+  String productDetailPortionTreatBudget(int kcal, int grams) {
+    return 'Jutalomfalat-keret: legfeljebb ≈ $kcal kcal naponta, kb. $grams g ebből a jutalomfalatból.';
+  }
+
+  @override
+  String get productDetailPortionDisclaimer =>
+      'Becslés a súly, kor és aktivitás alapján. Igazítsd a testkondícióhoz és az állatorvos tanácsához.';
+
+  @override
+  String get productDetailShare => 'Eredmény megosztása';
+
+  @override
+  String get productDetailReport => 'Probléma jelentése';
+
+  @override
+  String get productDetailReportDescription =>
+      'Rossz termék, tápérték vagy pontszám';
+
+  @override
+  String get productDetailReportTitle => 'Mi a gond?';
+
+  @override
+  String get productDetailReportWrongProduct =>
+      'Nem ezt a terméket szkenneltem';
+
+  @override
+  String get productDetailReportWrongNutrition => 'A tápértékek hibásak';
+
+  @override
+  String get productDetailReportWrongScore => 'A pontszám hibásnak tűnik';
+
+  @override
+  String get productDetailReportWrongImage => 'A fotó nem megfelelő';
+
+  @override
+  String get productDetailReportOther => 'Valami más';
+
+  @override
+  String get productDetailReportThanks => 'Köszönjük, megnézzük.';
+
+  @override
+  String productDetailShareText(
+    String name,
+    String brand,
+    int score,
+    String verdict,
+    String url,
+  ) {
+    return 'A(z) $brand $name $score/100 pontot kapott a YuCat-en – $verdict. Nézd meg a macskád tápját: $url';
+  }
+
+  @override
+  String productDetailShareTextNoScore(String name, String brand, String url) {
+    return 'Megnéztem a(z) $brand $name terméket a YuCat-en. Nézd meg a macskád tápját: $url';
+  }
 
   @override
   String get homeLoadingLabelEyebrow => 'Címke olvasása';

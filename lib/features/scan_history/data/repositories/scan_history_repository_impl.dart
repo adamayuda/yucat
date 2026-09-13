@@ -67,6 +67,7 @@ class ScanHistoryRepositoryImpl implements ScanHistoryRepository {
         'fat': p.fat,
         'fiber': p.fiber,
         'carbs': p.carbs,
+        'ash': p.ash,
         'isAiIdentified': p.isAiIdentified,
         'format': p.format,
         'packageSize': p.packageSize,
@@ -81,6 +82,8 @@ class ScanHistoryRepositoryImpl implements ScanHistoryRepository {
         // Pre-existing bug: this was never persisted, so a score-0 "no analysis"
         // product rehydrated as a red "Poor" verdict computed from zero macros.
         'dataUnavailable': p.dataUnavailable,
+        'foodType': p.foodType,
+        'ingredients': p.ingredients,
       };
 
   ProductDisplayModel _fromJson(Map<String, dynamic> j) => ProductDisplayModel(
@@ -98,6 +101,7 @@ class ScanHistoryRepositoryImpl implements ScanHistoryRepository {
         fat: (j['fat'] as num?)?.toDouble() ?? 0.0,
         fiber: (j['fiber'] as num?)?.toDouble() ?? 0.0,
         carbs: (j['carbs'] as num?)?.toDouble() ?? 0.0,
+        ash: (j['ash'] as num?)?.toDouble() ?? 0.0,
         isAiIdentified: j['isAiIdentified'] == true,
         format: j['format'] as String? ?? '',
         packageSize: j['packageSize'] as String? ?? '',
@@ -108,6 +112,8 @@ class ScanHistoryRepositoryImpl implements ScanHistoryRepository {
         localizedPros: (j['localizedPros'] as List?)?.cast<String>(),
         localizedCons: (j['localizedCons'] as List?)?.cast<String>(),
         dataUnavailable: j['dataUnavailable'] == true,
+        foodType: j['foodType'] as String?,
+        ingredients: (j['ingredients'] as List?)?.cast<String>() ?? const [],
       );
 
   ProductRatingColor _decodeRatingColor(dynamic value) {

@@ -963,17 +963,17 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dieses Produkt konnte nicht geladen werden.';
 
   @override
-  String get productDetailOverallAnalysis => 'GESAMTANALYSE';
+  String get productDetailOverallAnalysis => 'FUTTERQUALITÄT';
 
   @override
   String get productDetailAiIdentifiedPill => '* VON KI ERKANNT';
 
   @override
-  String get productDetailMyCatScore => 'Punktzahl meiner Katze';
+  String get productDetailMyCatScore => 'Für deine Katze';
 
   @override
   String get productDetailNoCatPrompt =>
-      'Erstelle ein Profil für deine Katze, um eine personalisierte Punktzahl zu sehen.';
+      'Lege ein Katzenprofil an, um zu sehen, wie dieses Futter zu deiner Katze passt.';
 
   @override
   String get productDetailAddACat => 'Katze hinzufügen';
@@ -991,8 +991,21 @@ class AppLocalizationsDe extends AppLocalizations {
       'Wähle eine Katze, um zu sehen, wie dieses Produkt zu ihrem Profil passt.';
 
   @override
-  String get productDetailPersonalizedScore =>
-      'Personalisierte Punktzahl basierend auf dem Profil deiner Katze.';
+  String productDetailFitIntro(String name) {
+    return 'So passt es zum Profil von $name.';
+  }
+
+  @override
+  String get productDetailFitGreat => 'Passt sehr gut';
+
+  @override
+  String get productDetailFitGood => 'Passt gut';
+
+  @override
+  String get productDetailFitCautions => 'Mit Vorbehalten';
+
+  @override
+  String get productDetailFitNotRecommended => 'Nicht empfohlen';
 
   @override
   String get productDetailDimHealth => 'GESUNDHEIT';
@@ -1014,7 +1027,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get productDetailNeutralFit =>
-      'Keine starken Übereinstimmungen für diese Katze — neutrale Passung.';
+      'Nichts im Profil dieser Katze ändert das Urteil – die Futterqualität oben gilt unverändert.';
 
   @override
   String get productDetailAgeGroupKitten => 'Kätzchen';
@@ -1107,7 +1120,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get assessmentUnderweightHighCalories =>
-      'Hoher Kaloriengehalt (>380 kcal/100g) kann einer untergewichtigen Katze beim Zunehmen helfen';
+      'Energiereiches Futter kann einer untergewichtigen Katze beim Zunehmen helfen';
 
   @override
   String get assessmentUnderweightHighFat =>
@@ -1115,15 +1128,19 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get assessmentOverweightHighCalories =>
-      'Hoher Kaloriengehalt (>360 kcal/100g) ist für eine übergewichtige Katze möglicherweise nicht ideal';
+      'Energiereiches Futter ist für eine übergewichtige Katze möglicherweise nicht ideal';
 
   @override
   String get assessmentOverweightLowCalories =>
-      'Weniger Kalorien (<320 kcal/100g) helfen, das Gewicht bei übergewichtigen Katzen zu kontrollieren';
+      'Geringere Energiedichte hilft, das Gewicht bei übergewichtigen Katzen zu kontrollieren';
 
   @override
   String get assessmentOverweightHighFiber =>
       'Mehr Faser (>4%) kann bei der Sättigung von übergewichtigen Katzen helfen';
+
+  @override
+  String get assessmentOverweightHighMoisture =>
+      'Hoher Feuchtigkeitsgehalt (>70%) macht satt, ohne Kalorien zu liefern – gut für eine Katze, die weniger fressen soll';
 
   @override
   String get assessmentObeseHighFat =>
@@ -1131,7 +1148,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get assessmentObeseHighCalories =>
-      'Hoher Kaloriengehalt (>330 kcal/100g) ist für fettleibige Katzen nicht ideal';
+      'Energiereiches Futter ist für fettleibige Katzen nicht ideal';
 
   @override
   String get assessmentObeseLeanProtein =>
@@ -1139,15 +1156,15 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get assessmentLowActivityHighCalories =>
-      'Hoher Kaloriengehalt (>360 kcal/100g) passt möglicherweise nicht zu einer wenig aktiven Katze';
+      'Energiereiches Futter passt möglicherweise nicht zu einer wenig aktiven Katze';
 
   @override
   String get assessmentLowActivityModerateCalories =>
-      'Moderate Kalorien (<330 kcal/100g) sind besser für wenig aktive Katzen';
+      'Moderate Energiedichte ist besser für wenig aktive Katzen';
 
   @override
   String get assessmentHighActivityHighCalories =>
-      'Mehr Kalorien (>380 kcal/100g) unterstützen eine sehr aktive Katze';
+      'Höhere Energiedichte unterstützt eine sehr aktive Katze';
 
   @override
   String get assessmentHighActivityHighProtein =>
@@ -1155,7 +1172,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get assessmentNeuteredHighCalories =>
-      'Sehr kalorienreiches Futter (>380 kcal/100g) kann bei kastrierten Katzen die Gewichtszunahme fördern';
+      'Sehr energiereiches Futter kann bei kastrierten Katzen die Gewichtszunahme fördern';
 
   @override
   String get assessmentNeuteredUrinarySupport =>
@@ -1175,7 +1192,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get assessmentPregnantHighCalories =>
-      'Sehr kalorienreiches Futter (>400 kcal/100g) hilft, den Energiebedarf in Trächtigkeit/Laktation zu decken';
+      'Sehr energiereiches Futter hilft, den Energiebedarf in Trächtigkeit/Laktation zu decken';
 
   @override
   String get assessmentMaineCoonJointSupport =>
@@ -1619,6 +1636,150 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get productDetailScanLabelCta => 'Rückseite fotografieren';
+
+  @override
+  String get productDetailIngredientsTitle => 'ZUTATEN';
+
+  @override
+  String productDetailIngredientsShowAll(int count) {
+    return 'Alle $count anzeigen';
+  }
+
+  @override
+  String get productDetailIngredientsShowLess => 'Weniger anzeigen';
+
+  @override
+  String get productDetailIngredientsFlaggedNote =>
+      'Hervorgehoben: Allergene aus den Profilen deiner Katzen.';
+
+  @override
+  String get productDetailIngredientsSource => 'Wie vom Hersteller angegeben.';
+
+  @override
+  String get productDetailComplementaryTreat =>
+      'Leckerli · keine vollständige Mahlzeit';
+
+  @override
+  String get productDetailComplementaryTopper =>
+      'Topping · keine vollständige Mahlzeit';
+
+  @override
+  String get productDetailComplementarySupplement =>
+      'Ergänzung · keine vollständige Mahlzeit';
+
+  @override
+  String get productDetailComplementaryNote =>
+      'Als Leckerli bewertet: es ergänzt ein Alleinfutter, ersetzt es aber nicht. Leckerlis sollten unter 10% der täglichen Kalorien bleiben.';
+
+  @override
+  String get productDetailNutritionTitle => 'ANALYTISCHE BESTANDTEILE';
+
+  @override
+  String get productDetailBasisAsFed => 'Wie gefüttert';
+
+  @override
+  String get productDetailBasisDryMatter => 'Trockenmasse';
+
+  @override
+  String get productDetailBasisAsFedHint =>
+      'Prozentwerte wie auf der Packung. Energie ist eine Schätzung.';
+
+  @override
+  String get productDetailBasisDryMatterHint =>
+      'Ohne Wasser, damit Nass- und Trockenfutter auf derselben Skala liegen. Energie ist eine Schätzung.';
+
+  @override
+  String get productDetailNutrientAsh => 'Asche';
+
+  @override
+  String get productDetailNutrientEnergy => 'Energie';
+
+  @override
+  String productDetailEnergyValue(int kcal) {
+    return '~$kcal kcal';
+  }
+
+  @override
+  String productDetailPortionTitle(String name) {
+    return 'TAGESPORTION FÜR $name';
+  }
+
+  @override
+  String productDetailPortionNeedsWeight(String name) {
+    return 'Trage das Gewicht von $name ein, um eine Tagesportion zu sehen.';
+  }
+
+  @override
+  String productDetailPortionGrams(int grams) {
+    return '≈ $grams g';
+  }
+
+  @override
+  String productDetailPortionKcal(int kcal) {
+    return '≈ $kcal kcal pro Tag';
+  }
+
+  @override
+  String productDetailPortionUnits(String count, String unit) {
+    return '≈ $count × $unit pro Tag';
+  }
+
+  @override
+  String productDetailPortionTreatBudget(int kcal, int grams) {
+    return 'Leckerli-Budget: bis zu ≈ $kcal kcal pro Tag, etwa $grams g von diesem Leckerli.';
+  }
+
+  @override
+  String get productDetailPortionDisclaimer =>
+      'Eine Schätzung aus Gewicht, Alter und Aktivität. An Körperzustand und Tierarztrat anpassen.';
+
+  @override
+  String get productDetailShare => 'Ergebnis teilen';
+
+  @override
+  String get productDetailReport => 'Problem melden';
+
+  @override
+  String get productDetailReportDescription =>
+      'Falsches Produkt, falsche Nährwerte oder Bewertung';
+
+  @override
+  String get productDetailReportTitle => 'Was stimmt nicht?';
+
+  @override
+  String get productDetailReportWrongProduct =>
+      'Das ist nicht das gescannte Produkt';
+
+  @override
+  String get productDetailReportWrongNutrition => 'Die Nährwerte sind falsch';
+
+  @override
+  String get productDetailReportWrongScore => 'Die Bewertung scheint falsch';
+
+  @override
+  String get productDetailReportWrongImage => 'Das Foto ist falsch';
+
+  @override
+  String get productDetailReportOther => 'Etwas anderes';
+
+  @override
+  String get productDetailReportThanks => 'Danke – wir schauen uns das an.';
+
+  @override
+  String productDetailShareText(
+    String name,
+    String brand,
+    int score,
+    String verdict,
+    String url,
+  ) {
+    return '$name von $brand erreicht $score/100 bei YuCat – $verdict. Prüfe das Futter deiner Katze: $url';
+  }
+
+  @override
+  String productDetailShareTextNoScore(String name, String brand, String url) {
+    return 'Ich habe $name von $brand bei YuCat nachgeschlagen. Prüfe das Futter deiner Katze: $url';
+  }
 
   @override
   String get homeLoadingLabelEyebrow => 'Etikett wird gelesen';

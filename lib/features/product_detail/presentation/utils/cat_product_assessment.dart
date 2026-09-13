@@ -1,6 +1,7 @@
 import 'package:yucat/features/cat/domain/entities/cat_allergen.dart';
 import 'package:yucat/features/cat/presentation/utils/cat_labels.dart';
 import 'package:yucat/features/cat/domain/entities/cat_entity.dart';
+import 'package:yucat/features/cat/presentation/utils/assessment_weights.dart';
 import 'package:yucat/features/product_detail/presentation/models/product_display_model.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 
@@ -11,9 +12,14 @@ import 'package:yucat/l10n/app_localizations.dart';
 // IMPORTANT: macro thresholds (protein/fat/carbs/fiber) are compared on a
 // DRY-MATTER basis — the product's as-fed percentages are normalized by
 // moisture first (see `_Nm`), so a wet food (~80% water) and a dry food are
-// judged on the same scale. Calorie thresholds stay on an AS-FED basis: energy
-// density as actually eaten is what matters for weight management (wet food is
-// genuinely lower-calorie per gram eaten).
+// judged on the same scale. Calories are on the same DRY-MATTER basis
+// (kcal per 100 g of dry matter, ≈ 350–500 for complete foods). They used to
+// be as-fed, which compared a wet pâté's ~90 kcal/100 g against cutoffs
+// written for kibble (280–400): no wet food could ever trigger a calorie
+// finding, up or down, and nearly every dry food tripped them all — four of
+// the six dimensions were a wet-vs-dry detector. The one thing as-fed density
+// genuinely captures — water adds volume without calories — is now its own
+// explicit rule (`_satietyMoistureMin`) instead of a side effect.
 // ---------------------------------------------------------------------------
 
 // Age — AAFCO growth life-stage minimums (kitten); senior values are heuristic.
@@ -24,30 +30,35 @@ const _seniorProteinLow = 30.0;
 const _seniorProteinHigh = 35.0;
 const _seniorFatMax = 20.0;
 
-// Weight category — heuristic. Calorie cutoffs are as-fed kcal/100g.
-const _underweightCaloriesHigh = 380.0;
+// Weight category — heuristic. Calorie cutoffs are kcal per 100 g DRY MATTER
+// (modified Atwater, see `ProductDisplayModel.calories`): a lean pâté sits
+// ≈ 380–420, a typical kibble ≈ 390, a fat-rich food ≈ 450+.
+const _underweightCaloriesHigh = 430.0;
 const _underweightFatHigh = 18.0;
-const _overweightCaloriesHigh = 360.0;
-const _overweightCaloriesLowMin = 280.0;
-const _overweightCaloriesLowMax = 320.0;
+const _overweightCaloriesHigh = 420.0;
+const _overweightCaloriesLow = 380.0;
 const _overweightFiberHigh = 4.0;
+// Water bulks a meal without calories — the as-fed advantage of wet food for
+// a cat that needs to eat less, stated as a rule rather than left to fall out
+// of an as-fed calorie figure.
+const _satietyMoistureMin = 70.0;
 const _obeseFatMax = 15.0;
-const _obeseCaloriesMax = 330.0;
+const _obeseCaloriesMax = 400.0;
 const _obeseLeanProteinMin = 40.0;
 const _obeseLeanFatMax = 12.0;
 
-// Activity — heuristic.
-const _lowActivityCaloriesHigh = 360.0;
-const _lowActivityCaloriesLow = 330.0;
-const _highActivityCaloriesHigh = 380.0;
+// Activity — heuristic (kcal/100 g DM).
+const _lowActivityCaloriesHigh = 420.0;
+const _lowActivityCaloriesLow = 380.0;
+const _highActivityCaloriesHigh = 430.0;
 const _highActivityProteinHigh = 35.0;
 
-// Neutered status — heuristic.
-const _neuteredCaloriesHigh = 380.0;
+// Neutered status — heuristic (kcal/100 g DM).
+const _neuteredCaloriesHigh = 430.0;
 const _neuteredFatHigh = 16.0;
 const _pregnantProteinHigh = 35.0;
 const _pregnantFatHigh = 20.0;
-const _pregnantCaloriesHigh = 400.0;
+const _pregnantCaloriesHigh = 440.0;
 
 // Breed — heuristic.
 const _maineCoonProteinHigh = 35.0;
@@ -56,7 +67,7 @@ const _persianFiberHigh = 6.0;
 const _persianCarbsHigh = 30.0;
 const _sphynxFatHigh = 18.0;
 const _sphynxFatLow = 12.0;
-const _britishCaloriesHigh = 360.0;
+const _britishCaloriesHigh = 420.0;
 const _bengalProteinHigh = 38.0;
 const _bengalProteinLow = 30.0;
 // Shared archetype threshold for large / muscular breeds.
@@ -72,13 +83,13 @@ const _hairballFiberHigh = 6.0;
 const _sensitiveStomachIngredientMax = 12;
 
 // Dimension weights, ×10 (we divide by 10 at the end so we stay in ints).
-// Health and weight dominate; breed is a tiebreaker.
-const _wHealth = 15;
-const _wWeight = 12;
-const _wAge = 10;
-const _wActivity = 8;
-const _wNeutered = 6;
-const _wBreed = 5;
+// Shared with the diet-tips engine through `assessment_weights.dart`.
+const _wHealth = AssessmentWeights.health;
+const _wWeight = AssessmentWeights.weight;
+const _wAge = AssessmentWeights.age;
+const _wActivity = AssessmentWeights.activity;
+const _wNeutered = AssessmentWeights.neutered;
+const _wBreed = AssessmentWeights.breed;
 
 // ---------------------------------------------------------------------------
 // Keyword sets — text scans against the LLM's pros/cons summary + name/brand.
@@ -162,7 +173,18 @@ enum CatAssessmentDimension { health, weight, age, activity, neutered, breed, co
 class CatProductFinding {
   final String text;
   final CatAssessmentDimension dimension;
-  const CatProductFinding({required this.text, required this.dimension});
+
+  /// A contraindication, not a trade-off: a declared allergen present in the
+  /// food, kidney disease with high protein, diabetes with high carbs. One hard
+  /// finding makes the verdict "not recommended" regardless of the arithmetic
+  /// (`fit_verdict.dart`), because no number of pros offsets it.
+  final bool hard;
+
+  const CatProductFinding({
+    required this.text,
+    required this.dimension,
+    this.hard = false,
+  });
 }
 
 /// Per-cat fit assessment for a product.
@@ -171,6 +193,11 @@ class CatProductFinding {
 /// `pros` and `cons`. 70 is the neutral baseline; each finding shifts the
 /// score by a small delta proportional to its severity, weighted by
 /// dimension priority (health/weight outweigh breed/neutered).
+///
+/// ⚠️ The score is an internal ranking key (the "Better for {cat}" list), not
+/// display copy. The UI shows `FitVerdict.of(this)` — a banded verdict on
+/// `delta` plus `hasHardFlag` — beside the product's own quality score, which
+/// is the only number on the screen.
 class CatProductAssessment {
   final List<CatProductFinding> pros;
   final List<CatProductFinding> cons;
@@ -186,11 +213,14 @@ class CatProductAssessment {
   });
 
   int get score => (70 + delta).clamp(0, 100);
+
+  /// True when any con is a contraindication (see [CatProductFinding.hard]).
+  bool get hasHardFlag => cons.any((c) => c.hard);
 }
 
-/// Nutrient view used by the rule dimensions. Macros are on a DRY-MATTER basis
-/// (normalized by moisture); calories stay as-fed (energy density as eaten);
-/// moisture is the raw as-fed percentage.
+/// Nutrient view used by the rule dimensions. Macros AND calories are on a
+/// DRY-MATTER basis (normalized by moisture) so wet and dry foods meet the
+/// same cutoffs; moisture is the raw as-fed percentage.
 class _Nm {
   final double protein;
   final double fat;
@@ -218,7 +248,7 @@ class _Nm {
       fat: p.fat * f,
       carbs: p.carbs * f,
       fiber: p.fiber * f,
-      calories: p.calories, // as-fed energy density
+      calories: p.calories * f, // kcal per 100 g dry matter
       moisture: p.moisture,
     );
   }
@@ -257,6 +287,7 @@ CatProductAssessment evaluateCatProduct(
   // allergens" line is the same finding said twice — and a second −12 on top.
   final health = _evaluateHealth(
     cat,
+    product,
     n,
     text,
     l10n,
@@ -338,6 +369,7 @@ _DimensionResult _evaluateDeclaredAllergens(
     cons.add(_p(
       l10n.assessmentDeclaredAllergen(catFormatAllergen(allergen.key, l10n)),
       CatAssessmentDimension.health,
+      hard: true,
     ));
     delta -= 14;
   }
@@ -372,7 +404,9 @@ _DimensionResult _evaluateAge(
   final cons = <CatProductFinding>[];
   var delta = 0;
 
-  switch (_norm(cat.ageGroup)) {
+  // Same fallback the diet-tips engine uses: a cat saved with only a birth
+  // date / age in months must not lose its whole age dimension.
+  switch (_norm(cat.ageGroup) ?? ageGroupFromMonths(cat.age)) {
     case 'kitten':
       if (n.protein > _kittenProteinHigh) {
         pros.add(_p(l10n.assessmentKittenHighProtein,
@@ -459,8 +493,7 @@ _DimensionResult _evaluateWeight(
             CatAssessmentDimension.weight));
         delta -= 10;
       }
-      if (n.calories >= _overweightCaloriesLowMin &&
-          n.calories < _overweightCaloriesLowMax) {
+      if (n.calories < _overweightCaloriesLow) {
         pros.add(_p(
             l10n.assessmentOverweightLowCalories,
             CatAssessmentDimension.weight));
@@ -469,6 +502,12 @@ _DimensionResult _evaluateWeight(
       if (n.fiber > _overweightFiberHigh) {
         pros.add(_p(
             l10n.assessmentOverweightHighFiber,
+            CatAssessmentDimension.weight));
+        delta += 6;
+      }
+      if (n.moisture > _satietyMoistureMin) {
+        pros.add(_p(
+            l10n.assessmentOverweightHighMoisture,
             CatAssessmentDimension.weight));
         delta += 6;
       }
@@ -490,6 +529,12 @@ _DimensionResult _evaluateWeight(
             l10n.assessmentObeseLeanProtein,
             CatAssessmentDimension.weight));
         delta += 10;
+      }
+      if (n.moisture > _satietyMoistureMin) {
+        pros.add(_p(
+            l10n.assessmentOverweightHighMoisture,
+            CatAssessmentDimension.weight));
+        delta += 6;
       }
       break;
   }
@@ -549,7 +594,9 @@ _DimensionResult _evaluateNeutered(
   final cons = <CatProductFinding>[];
   var delta = 0;
 
-  switch (_norm(cat.neuteredStatus)) {
+  // `neuteredStatus` is the richer field (neutered / pregnant / lactating);
+  // the plain bool is what older profiles carry. Read both, like diet tips do.
+  switch (_norm(cat.neuteredStatus) ?? (cat.neutered ? 'neutered' : null)) {
     case 'neutered':
       if (n.calories > _neuteredCaloriesHigh) {
         cons.add(_p(
@@ -858,6 +905,7 @@ _DimensionResult _evaluateBreed(
 
 _DimensionResult _evaluateHealth(
   CatEntity cat,
+  ProductDisplayModel product,
   _Nm n,
   String text,
   AppLocalizations l10n, {
@@ -875,7 +923,7 @@ _DimensionResult _evaluateHealth(
     return const _DimensionResult();
   }
 
-  final ingredientCount = _estimateIngredientCount(text);
+  final ingredientCount = _estimateIngredientCount(product, text);
 
   if (conditions.contains('urinary_issues')) {
     if (_containsAny(text, _kLowAsh)) {
@@ -900,7 +948,7 @@ _DimensionResult _evaluateHealth(
   if (conditions.contains('kidney_disease')) {
     if (n.protein > _kidneyProteinMax) {
       cons.add(_p(l10n.assessmentKidneyHighProtein,
-          CatAssessmentDimension.health));
+          CatAssessmentDimension.health, hard: true));
       delta -= 12;
     }
     // Penalize uncontrolled phosphorus, but not when the product explicitly
@@ -964,7 +1012,7 @@ _DimensionResult _evaluateHealth(
   if (conditions.contains('diabetes')) {
     if (n.carbs > _diabetesCarbsMax) {
       cons.add(_p(l10n.assessmentDiabetesHighCarbs,
-          CatAssessmentDimension.health));
+          CatAssessmentDimension.health, hard: true));
       delta -= 10;
     }
     if (n.protein > _diabetesProteinHigh) {
@@ -1030,8 +1078,9 @@ _DimensionResult _evaluateHealth(
 // Helpers
 // ---------------------------------------------------------------------------
 
-CatProductFinding _p(String text, CatAssessmentDimension dim) =>
-    CatProductFinding(text: text, dimension: dim);
+CatProductFinding _p(String text, CatAssessmentDimension dim,
+        {bool hard = false}) =>
+    CatProductFinding(text: text, dimension: dim, hard: hard);
 
 /// Canonicalizes a loosely-stored cat profile field (trims + lowercases) so a
 /// value like `'Kitten'` or `'adult '` still matches the rule switches. Returns
@@ -1044,11 +1093,18 @@ String? _norm(String? value) {
 
 /// Scanned text = pros + cons + product name + brand (so proteins/claims that
 /// only appear in the name — e.g. "Lamb", "Renal" — are still detected).
+/// The canonical-English text every keyword rule scans. Ingredients are the
+/// strongest signal in here — the pros/cons are six short LLM lines, and
+/// whether they happen to *mention* chicken or corn decided the allergen and
+/// filler findings for as long as the ingredients list stayed unmapped.
 String _normalizeText(ProductDisplayModel product) {
-  return ([...product.pros, ...product.cons, product.name, product.brand])
-      .join(' ')
-      .toLowerCase()
-      .replaceAll('-', ' ');
+  return ([
+    ...product.pros,
+    ...product.cons,
+    product.name,
+    product.brand,
+    ...product.ingredients,
+  ]).join(' ').toLowerCase().replaceAll('-', ' ');
 }
 
 bool _containsAny(String text, List<String> needles) =>
@@ -1066,7 +1122,11 @@ bool _hasManyFillersWordBoundary(String text) {
   return hits >= 2;
 }
 
-int _estimateIngredientCount(String text) {
+/// The real list when the product carries one; otherwise the old heuristic —
+/// a comma count after the word "ingredients", which only ever fired when the
+/// model wrote "Ingredients: …" into a pro or con.
+int _estimateIngredientCount(ProductDisplayModel product, String text) {
+  if (product.ingredients.isNotEmpty) return product.ingredients.length;
   final i = text.indexOf('ingredients');
   if (i == -1) return 0;
   return ','.allMatches(text.substring(i)).length + 1;

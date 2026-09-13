@@ -1805,7 +1805,7 @@ abstract class AppLocalizations {
   /// No description provided for @productDetailOverallAnalysis.
   ///
   /// In en, this message translates to:
-  /// **'OVERALL ANALYSIS'**
+  /// **'FOOD QUALITY'**
   String get productDetailOverallAnalysis;
 
   /// No description provided for @productDetailAiIdentifiedPill.
@@ -1817,13 +1817,13 @@ abstract class AppLocalizations {
   /// No description provided for @productDetailMyCatScore.
   ///
   /// In en, this message translates to:
-  /// **'My cat\'s score'**
+  /// **'For your cat'**
   String get productDetailMyCatScore;
 
   /// No description provided for @productDetailNoCatPrompt.
   ///
   /// In en, this message translates to:
-  /// **'Create a cat profile to see a personalized score for your cat.'**
+  /// **'Create a cat profile to see how this food fits your cat.'**
   String get productDetailNoCatPrompt;
 
   /// No description provided for @productDetailAddACat.
@@ -1850,11 +1850,35 @@ abstract class AppLocalizations {
   /// **'Pick a cat to see how this product fits its profile.'**
   String get productDetailPickACat;
 
-  /// No description provided for @productDetailPersonalizedScore.
+  /// No description provided for @productDetailFitIntro.
   ///
   /// In en, this message translates to:
-  /// **'Personalized score based on your cat\'s profile.'**
-  String get productDetailPersonalizedScore;
+  /// **'How it fits {name}\'s profile.'**
+  String productDetailFitIntro(String name);
+
+  /// No description provided for @productDetailFitGreat.
+  ///
+  /// In en, this message translates to:
+  /// **'Great fit'**
+  String get productDetailFitGreat;
+
+  /// No description provided for @productDetailFitGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good fit'**
+  String get productDetailFitGood;
+
+  /// No description provided for @productDetailFitCautions.
+  ///
+  /// In en, this message translates to:
+  /// **'Some cautions'**
+  String get productDetailFitCautions;
+
+  /// No description provided for @productDetailFitNotRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Not recommended'**
+  String get productDetailFitNotRecommended;
 
   /// No description provided for @productDetailDimHealth.
   ///
@@ -1895,7 +1919,7 @@ abstract class AppLocalizations {
   /// No description provided for @productDetailNeutralFit.
   ///
   /// In en, this message translates to:
-  /// **'No strong matches for this cat — neutral fit.'**
+  /// **'Nothing in this cat\'s profile changes the verdict — the food quality score above applies as is.'**
   String get productDetailNeutralFit;
 
   /// No description provided for @productDetailAgeGroupKitten.
@@ -2051,7 +2075,7 @@ abstract class AppLocalizations {
   /// No description provided for @assessmentUnderweightHighCalories.
   ///
   /// In en, this message translates to:
-  /// **'High calories (>380 kcal/100g) can help an underweight cat gain weight'**
+  /// **'Energy-dense food can help an underweight cat gain weight'**
   String get assessmentUnderweightHighCalories;
 
   /// No description provided for @assessmentUnderweightHighFat.
@@ -2063,13 +2087,13 @@ abstract class AppLocalizations {
   /// No description provided for @assessmentOverweightHighCalories.
   ///
   /// In en, this message translates to:
-  /// **'High calories (>360 kcal/100g) may not be ideal for an overweight cat'**
+  /// **'Energy-dense food may not be ideal for an overweight cat'**
   String get assessmentOverweightHighCalories;
 
   /// No description provided for @assessmentOverweightLowCalories.
   ///
   /// In en, this message translates to:
-  /// **'Lower calories (<320 kcal/100g) help manage weight in overweight cats'**
+  /// **'Lower energy density helps manage weight in overweight cats'**
   String get assessmentOverweightLowCalories;
 
   /// No description provided for @assessmentOverweightHighFiber.
@@ -2077,6 +2101,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Higher fiber (>4%) can help with satiety for overweight cats'**
   String get assessmentOverweightHighFiber;
+
+  /// No description provided for @assessmentOverweightHighMoisture.
+  ///
+  /// In en, this message translates to:
+  /// **'High moisture (>70%) adds volume without calories, which helps a cat that needs to eat less feel full'**
+  String get assessmentOverweightHighMoisture;
 
   /// No description provided for @assessmentObeseHighFat.
   ///
@@ -2087,7 +2117,7 @@ abstract class AppLocalizations {
   /// No description provided for @assessmentObeseHighCalories.
   ///
   /// In en, this message translates to:
-  /// **'High calories (>330 kcal/100g) are not ideal for obese cats'**
+  /// **'Energy-dense food is not ideal for obese cats'**
   String get assessmentObeseHighCalories;
 
   /// No description provided for @assessmentObeseLeanProtein.
@@ -2099,19 +2129,19 @@ abstract class AppLocalizations {
   /// No description provided for @assessmentLowActivityHighCalories.
   ///
   /// In en, this message translates to:
-  /// **'High calories (>360 kcal/100g) may not suit a low-activity cat'**
+  /// **'Energy-dense food may not suit a low-activity cat'**
   String get assessmentLowActivityHighCalories;
 
   /// No description provided for @assessmentLowActivityModerateCalories.
   ///
   /// In en, this message translates to:
-  /// **'Moderate calories (<330 kcal/100g) are better for low-activity cats'**
+  /// **'Moderate energy density is better for low-activity cats'**
   String get assessmentLowActivityModerateCalories;
 
   /// No description provided for @assessmentHighActivityHighCalories.
   ///
   /// In en, this message translates to:
-  /// **'Higher calories (>380 kcal/100g) support a highly active cat'**
+  /// **'Higher energy density supports a highly active cat'**
   String get assessmentHighActivityHighCalories;
 
   /// No description provided for @assessmentHighActivityHighProtein.
@@ -2123,7 +2153,7 @@ abstract class AppLocalizations {
   /// No description provided for @assessmentNeuteredHighCalories.
   ///
   /// In en, this message translates to:
-  /// **'Very calorie-dense food (>380 kcal/100g) can promote weight gain in neutered cats'**
+  /// **'Very energy-dense food can promote weight gain in neutered cats'**
   String get assessmentNeuteredHighCalories;
 
   /// No description provided for @assessmentNeuteredUrinarySupport.
@@ -2153,7 +2183,7 @@ abstract class AppLocalizations {
   /// No description provided for @assessmentPregnantHighCalories.
   ///
   /// In en, this message translates to:
-  /// **'Very calorie-dense food (>400 kcal/100g) helps meet energy demands in pregnancy/lactation'**
+  /// **'Very energy-dense food helps meet energy demands in pregnancy/lactation'**
   String get assessmentPregnantHighCalories;
 
   /// No description provided for @assessmentMaineCoonJointSupport.
@@ -2887,6 +2917,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Photograph the back label'**
   String get productDetailScanLabelCta;
+
+  /// No description provided for @productDetailIngredientsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'INGREDIENTS'**
+  String get productDetailIngredientsTitle;
+
+  /// No description provided for @productDetailIngredientsShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all {count}'**
+  String productDetailIngredientsShowAll(int count);
+
+  /// No description provided for @productDetailIngredientsShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get productDetailIngredientsShowLess;
+
+  /// No description provided for @productDetailIngredientsFlaggedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlighted: allergens declared on your cats\' profiles.'**
+  String get productDetailIngredientsFlaggedNote;
+
+  /// No description provided for @productDetailIngredientsSource.
+  ///
+  /// In en, this message translates to:
+  /// **'As listed by the manufacturer.'**
+  String get productDetailIngredientsSource;
+
+  /// No description provided for @productDetailComplementaryTreat.
+  ///
+  /// In en, this message translates to:
+  /// **'Treat · not a complete meal'**
+  String get productDetailComplementaryTreat;
+
+  /// No description provided for @productDetailComplementaryTopper.
+  ///
+  /// In en, this message translates to:
+  /// **'Topper · not a complete meal'**
+  String get productDetailComplementaryTopper;
+
+  /// No description provided for @productDetailComplementarySupplement.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplement · not a complete meal'**
+  String get productDetailComplementarySupplement;
+
+  /// No description provided for @productDetailComplementaryNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Scored as a treat: it goes with a complete food, not instead of one. Keep treats under 10% of daily calories.'**
+  String get productDetailComplementaryNote;
+
+  /// No description provided for @productDetailNutritionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'GUARANTEED ANALYSIS'**
+  String get productDetailNutritionTitle;
+
+  /// No description provided for @productDetailBasisAsFed.
+  ///
+  /// In en, this message translates to:
+  /// **'As fed'**
+  String get productDetailBasisAsFed;
+
+  /// No description provided for @productDetailBasisDryMatter.
+  ///
+  /// In en, this message translates to:
+  /// **'Dry matter'**
+  String get productDetailBasisDryMatter;
+
+  /// No description provided for @productDetailBasisAsFedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentages as printed on the pack. Energy is an estimate.'**
+  String get productDetailBasisAsFedHint;
+
+  /// No description provided for @productDetailBasisDryMatterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Water removed, so wet and dry foods sit on the same scale. Energy is an estimate.'**
+  String get productDetailBasisDryMatterHint;
+
+  /// No description provided for @productDetailNutrientAsh.
+  ///
+  /// In en, this message translates to:
+  /// **'Ash'**
+  String get productDetailNutrientAsh;
+
+  /// No description provided for @productDetailNutrientEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy'**
+  String get productDetailNutrientEnergy;
+
+  /// No description provided for @productDetailEnergyValue.
+  ///
+  /// In en, this message translates to:
+  /// **'~{kcal} kcal'**
+  String productDetailEnergyValue(int kcal);
+
+  /// No description provided for @productDetailPortionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'DAILY PORTION FOR {name}'**
+  String productDetailPortionTitle(String name);
+
+  /// No description provided for @productDetailPortionNeedsWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {name}\'s weight to see a daily portion.'**
+  String productDetailPortionNeedsWeight(String name);
+
+  /// No description provided for @productDetailPortionGrams.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {grams} g'**
+  String productDetailPortionGrams(int grams);
+
+  /// No description provided for @productDetailPortionKcal.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {kcal} kcal a day'**
+  String productDetailPortionKcal(int kcal);
+
+  /// No description provided for @productDetailPortionUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {count} × {unit} a day'**
+  String productDetailPortionUnits(String count, String unit);
+
+  /// No description provided for @productDetailPortionTreatBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Treat budget: up to ≈ {kcal} kcal a day, about {grams} g of this treat.'**
+  String productDetailPortionTreatBudget(int kcal, int grams);
+
+  /// No description provided for @productDetailPortionDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'An estimate from weight, age and activity. Adjust to body condition and your vet\'s advice.'**
+  String get productDetailPortionDisclaimer;
+
+  /// No description provided for @productDetailShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this result'**
+  String get productDetailShare;
+
+  /// No description provided for @productDetailReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem'**
+  String get productDetailReport;
+
+  /// No description provided for @productDetailReportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong product, nutrition or score'**
+  String get productDetailReportDescription;
+
+  /// No description provided for @productDetailReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is wrong?'**
+  String get productDetailReportTitle;
+
+  /// No description provided for @productDetailReportWrongProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not the product I scanned'**
+  String get productDetailReportWrongProduct;
+
+  /// No description provided for @productDetailReportWrongNutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'The nutrition figures are wrong'**
+  String get productDetailReportWrongNutrition;
+
+  /// No description provided for @productDetailReportWrongScore.
+  ///
+  /// In en, this message translates to:
+  /// **'The score seems wrong'**
+  String get productDetailReportWrongScore;
+
+  /// No description provided for @productDetailReportWrongImage.
+  ///
+  /// In en, this message translates to:
+  /// **'The photo is wrong'**
+  String get productDetailReportWrongImage;
+
+  /// No description provided for @productDetailReportOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Something else'**
+  String get productDetailReportOther;
+
+  /// No description provided for @productDetailReportThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks — we will take a look.'**
+  String get productDetailReportThanks;
+
+  /// No description provided for @productDetailShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} by {brand} scores {score}/100 on YuCat — {verdict}. Check your cat’s food: {url}'**
+  String productDetailShareText(
+    String name,
+    String brand,
+    int score,
+    String verdict,
+    String url,
+  );
+
+  /// No description provided for @productDetailShareTextNoScore.
+  ///
+  /// In en, this message translates to:
+  /// **'I looked up {name} by {brand} on YuCat. Check your cat’s food: {url}'**
+  String productDetailShareTextNoScore(String name, String brand, String url);
 
   /// No description provided for @homeLoadingLabelEyebrow.
   ///

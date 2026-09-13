@@ -569,7 +569,7 @@ renderable fields (`format`, `packageSize`, `description`, `pros`, `cons`), keye
 code, with no `en` entry (that's the flat fields). Filled **lazily**: the first request for a
 language pays one small Haiku call (`translateProductText`), everyone after reads it off the
 record. `name`/`brand` are never translated (they're transcribed off the packaging), and
-`ingredients` isn't either (the app never renders it).
+`ingredients` isn't either — deliberately: the app renders it *as printed* (`IngredientsCard`) and the per-cat engine keyword-scans it for allergens and fillers, so it must stay canonical.
 
 ⚠️ **The flat fields stay canonical English on purpose.** The Flutter client's per-cat rules
 engine (`cat_product_assessment.dart`) keyword-scans `pros + cons + name + brand` against
