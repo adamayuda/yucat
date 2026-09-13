@@ -2799,6 +2799,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get healthCarnetWeightNoData => 'No weigh-in yet';
 
   @override
+  String get healthCarnetWeightAdd => 'Add a weigh-in';
+
+  @override
   String healthCarnetTodoUrgent(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

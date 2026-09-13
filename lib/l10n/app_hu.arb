@@ -918,6 +918,7 @@
   "healthCarnetStatTodoLabel": "TEENDŐ",
   "healthCarnetWeightDelta": "{delta} kg {month} óta",
   "healthCarnetWeightNoData": "Még nincs mérés",
+  "healthCarnetWeightAdd": "Mérés hozzáadása",
   "healthCarnetTodoUrgent": "{count, plural, other{ebből {count} sürgős}}",
   "healthCarnetTodoNone": "Semmi sürgős",
   "healthCarnetTabUpcoming": "Közelgő",

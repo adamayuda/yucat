@@ -81,11 +81,24 @@ class DSPillButton extends StatelessWidget {
                     ),
                   )
                 else
-                  Text(
-                    label,
-                    style: DSTextStyles.bodyLg.copyWith(
-                      color: fg,
-                      fontWeight: FontWeight.w600,
+                  // Flexible + scale-down: when a caller stretches the pill
+                  // (an `Expanded` in the due-item card, Home's scan CTA) a
+                  // long label — French runs ~30 % longer than English — used
+                  // to overflow the padding and start flush left, reading as
+                  // off-centre. Bounded, it shrinks a little and stays centred;
+                  // shrink-wrapped callers are unaffected.
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                        style: DSTextStyles.bodyLg.copyWith(
+                          color: fg,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                 if (showChevron && !loading) ...[

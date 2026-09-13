@@ -2815,6 +2815,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get healthCarnetWeightNoData => 'Még nincs mérés';
 
   @override
+  String get healthCarnetWeightAdd => 'Mérés hozzáadása';
+
+  @override
   String healthCarnetTodoUrgent(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

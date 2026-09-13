@@ -18,6 +18,10 @@ class HealthSummaryTiles extends StatelessWidget {
   final int todoCount;
   final String todoCaption;
 
+  /// Set when there is no weight anywhere (no weighing, no profile weight):
+  /// the tile becomes the way to add one, rather than a dash that goes nowhere.
+  final VoidCallback? onAddWeight;
+
   const HealthSummaryTiles({
     super.key,
     required this.weightValue,
@@ -25,6 +29,7 @@ class HealthSummaryTiles extends StatelessWidget {
     required this.weightDeltaPositive,
     required this.todoCount,
     required this.todoCaption,
+    this.onAddWeight,
   });
 
   @override
@@ -44,9 +49,12 @@ class HealthSummaryTiles extends StatelessWidget {
               label: l10n.healthCarnetStatWeightLabel,
               value: weightValue,
               caption: weightDelta,
-              captionColor: weightDeltaPositive
-                  ? DSColors.accentSuccess
-                  : DSColors.inkTertiary,
+              captionColor: onAddWeight != null
+                  ? DSColors.accentInfo
+                  : weightDeltaPositive
+                      ? DSColors.accentSuccess
+                      : DSColors.inkTertiary,
+              onTap: onAddWeight,
             ),
           ),
           const SizedBox(width: DSDimens.sizeXs),
@@ -69,17 +77,19 @@ class _Tile extends StatelessWidget {
   final String value;
   final String? caption;
   final Color captionColor;
+  final VoidCallback? onTap;
 
   const _Tile({
     required this.label,
     required this.value,
     required this.caption,
     required this.captionColor,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final tile = Container(
       padding: const EdgeInsets.all(DSDimens.sizeS),
       decoration: BoxDecoration(
         color: DSColors.surfaceCard,
@@ -107,6 +117,12 @@ class _Tile extends StatelessWidget {
           ),
         ],
       ),
+    );
+    if (onTap == null) return tile;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: tile,
     );
   }
 }

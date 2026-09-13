@@ -209,7 +209,9 @@ class _HealthCarnetPageState extends State<HealthCarnetPage> {
         healthFormatMonthShort(points.first.date, locale),
       );
     } else if (points.isEmpty) {
-      delta = l10n.healthCarnetWeightNoData;
+      delta = latest == null
+          ? l10n.healthCarnetWeightAdd
+          : l10n.healthCarnetWeightNoData;
     }
 
     final urgent = state.urgentCount;
@@ -221,6 +223,7 @@ class _HealthCarnetPageState extends State<HealthCarnetPage> {
       todoCaption: urgent == 0
           ? l10n.healthCarnetTodoNone
           : l10n.healthCarnetTodoUrgent(urgent),
+      onAddWeight: latest == null ? () => _openAddSheet(context) : null,
     );
   }
 

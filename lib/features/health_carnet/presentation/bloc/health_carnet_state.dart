@@ -56,9 +56,9 @@ class HealthCarnetLoadedState extends HealthCarnetState {
   /// and inflating this with those would make the badge meaningless.
   int get urgentCount => dueItems.where((d) => d.urgency.isPressing).length;
 
-  /// The "à faire" figure: dated items due within a month. `dueItems.length`
-  /// would count a check-up eleven months out and every undated "to schedule"
-  /// row, which turns the headline number into noise on a fresh carnet.
+  /// The "à faire" figure: every dated item. `dueItems.length` would also
+  /// count the undated "to schedule" rows, which turns the headline number
+  /// into noise on a fresh carnet.
   int get actionableCount =>
       dueItems.where((d) => d.urgency.isActionable).length;
 

@@ -1404,6 +1404,7 @@
     }
   },
   "healthCarnetWeightNoData": "No weigh-in yet",
+  "healthCarnetWeightAdd": "Add a weigh-in",
   "healthCarnetTodoUrgent": "{count, plural, =1{including 1 urgent} other{including {count} urgent}}",
   "@healthCarnetTodoUrgent": {
     "placeholders": {

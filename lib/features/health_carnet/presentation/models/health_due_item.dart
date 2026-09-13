@@ -23,13 +23,12 @@ enum HealthUrgency {
   bool get isPressing =>
       this == HealthUrgency.overdue || this == HealthUrgency.urgent;
 
-  /// Dated and within a month: the number on the "à faire" tile. Excludes
-  /// [later] (up to a year out — not a to-do yet) and [toSchedule] (no real
-  /// date behind it).
-  bool get isActionable =>
-      this == HealthUrgency.overdue ||
-      this == HealthUrgency.urgent ||
-      this == HealthUrgency.soon;
+  /// Has a real date behind it: the number on the "à faire" tile. Only
+  /// [toSchedule] is excluded — its date is a placeholder for "no record
+  /// yet", and counting seven of those on a fresh carnet made the figure
+  /// noise. A check-up eleven months out *is* still to do, and a "0" beside
+  /// a list of dated cards read as a bug.
+  bool get isActionable => this != HealthUrgency.toSchedule;
 
   /// The analytics value. snake_case like every other event property, and
   /// explicit rather than [name] so a Dart rename cannot silently fork a

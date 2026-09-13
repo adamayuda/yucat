@@ -918,6 +918,7 @@
   "healthCarnetStatTodoLabel": "À FAIRE",
   "healthCarnetWeightDelta": "{delta} kg depuis {month}",
   "healthCarnetWeightNoData": "Aucune pesée",
+  "healthCarnetWeightAdd": "Ajouter une pesée",
   "healthCarnetTodoUrgent": "{count, plural, =1{dont 1 urgent} other{dont {count} urgents}}",
   "healthCarnetTodoNone": "Rien d'urgent",
   "healthCarnetTabUpcoming": "À venir",

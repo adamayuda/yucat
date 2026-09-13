@@ -918,6 +918,7 @@
   "healthCarnetStatTodoLabel": "ZU TUN",
   "healthCarnetWeightDelta": "{delta} kg seit {month}",
   "healthCarnetWeightNoData": "Noch nicht gewogen",
+  "healthCarnetWeightAdd": "Wiegung hinzufügen",
   "healthCarnetTodoUrgent": "{count, plural, =1{davon 1 dringend} other{davon {count} dringend}}",
   "healthCarnetTodoNone": "Nichts Dringendes",
   "healthCarnetTabUpcoming": "Anstehend",

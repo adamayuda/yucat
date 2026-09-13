@@ -2825,6 +2825,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get healthCarnetWeightNoData => 'Ainda sem pesagem';
 
   @override
+  String get healthCarnetWeightAdd => 'Adicionar uma pesagem';
+
+  @override
   String healthCarnetTodoUrgent(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

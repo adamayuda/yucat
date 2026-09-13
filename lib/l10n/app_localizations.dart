@@ -4886,6 +4886,12 @@ abstract class AppLocalizations {
   /// **'No weigh-in yet'**
   String get healthCarnetWeightNoData;
 
+  /// No description provided for @healthCarnetWeightAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a weigh-in'**
+  String get healthCarnetWeightAdd;
+
   /// No description provided for @healthCarnetTodoUrgent.
   ///
   /// In en, this message translates to:
