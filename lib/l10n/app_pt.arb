@@ -626,6 +626,8 @@
   "catDetailCoatMedium": "Pelo médio",
   "catDetailHealthConditionsSection": "Condições de saúde",
   "catDetailDeleteProfile": "Eliminar perfil",
+  "catDetailChangePhoto": "Alterar foto",
+  "catDetailPhotoUpdateError": "Não foi possível atualizar a foto. Tenta novamente.",
   "catListingTitle": "Os seus gatos",
   "catListingErrorGeneric": "Algo correu mal",
   "catListingEmptyHeadline": "Ainda não há gatos",

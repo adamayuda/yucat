@@ -21,7 +21,23 @@ class CatCreateModel extends Equatable {
   final String? weightCategory;
   final String? activityLevel;
   final String? coatType;
+  /// What the health step holds. May contain [noHealthCondition], the
+  /// "None" chip's value — a wizard answer, not a condition, and never to be
+  /// persisted (see [persistedHealthConditions]).
   final List<String> healthConditions;
+
+  /// The "None" chip's value. The step needs *some* selection to let the user
+  /// proceed, so "no conditions" has to be representable — but YUC-9 was this
+  /// sentinel reaching Firestore: the cat list counted it as "1 condition"
+  /// while the profile rendered it as "None".
+  static const String noHealthCondition = 'none';
+
+  /// [healthConditions] with the sentinel stripped — the only list that may
+  /// reach a use case, a document or an analytics property.
+  List<String> get persistedHealthConditions => [
+        for (final c in healthConditions)
+          if (c != noHealthCondition) c,
+      ];
 
   const CatCreateModel({
     this.id,

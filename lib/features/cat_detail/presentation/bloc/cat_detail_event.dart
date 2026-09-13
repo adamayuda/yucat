@@ -30,3 +30,25 @@ class CatDetailEditEvent extends CatDetailEvent {
   @override
   List<Object?> get props => [cat];
 }
+
+/// The user picked a new profile photo from the hero avatar.
+class CatDetailPhotoChangedEvent extends CatDetailEvent {
+  final CatModel cat;
+  final File photo;
+
+  const CatDetailPhotoChangedEvent({required this.cat, required this.photo});
+
+  @override
+  List<Object?> get props => [cat, photo.path];
+}
+
+/// Re-reads the cat after the edit wizard returns, so the page reflects what
+/// was saved instead of the model it was pushed with.
+class CatDetailReloadEvent extends CatDetailEvent {
+  final String catId;
+
+  const CatDetailReloadEvent({required this.catId});
+
+  @override
+  List<Object?> get props => [catId];
+}

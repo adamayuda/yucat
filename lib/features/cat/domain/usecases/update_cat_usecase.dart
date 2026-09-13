@@ -26,6 +26,15 @@ class UpdateCatUsecase {
       }
     }
 
-    return _repository.updateCat(cat: updated);
+    await _repository.updateCat(cat: updated);
+
+    // Only once the document points at the new photo is the old one safe to
+    // drop — deleting first would leave a broken URL if the write failed.
+    final previous = cat.profileImageUrl;
+    if (previous != null &&
+        previous.isNotEmpty &&
+        previous != updated.profileImageUrl) {
+      await _repository.deleteCatProfileImage(imageUrl: previous);
+    }
   }
 }

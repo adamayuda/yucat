@@ -626,6 +626,8 @@
   "catDetailCoatMedium": "Közepes szőrzet",
   "catDetailHealthConditionsSection": "Egészségi állapot",
   "catDetailDeleteProfile": "Profil törlése",
+  "catDetailChangePhoto": "Fotó módosítása",
+  "catDetailPhotoUpdateError": "Nem sikerült frissíteni a fotót. Próbáld újra.",
   "catListingTitle": "Macskáid",
   "catListingErrorGeneric": "Valami hiba történt",
   "catListingEmptyHeadline": "Még nincs macska",

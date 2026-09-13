@@ -2014,6 +2014,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get catDetailDeleteProfile => 'Delete profile';
 
   @override
+  String get catDetailChangePhoto => 'Change photo';
+
+  @override
+  String get catDetailPhotoUpdateError =>
+      'Couldn\'t update the photo. Please try again.';
+
+  @override
   String get catListingTitle => 'Your cats';
 
   @override

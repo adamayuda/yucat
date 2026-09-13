@@ -626,6 +626,8 @@
   "catDetailCoatMedium": "Poil mi-long",
   "catDetailHealthConditionsSection": "Problèmes de santé",
   "catDetailDeleteProfile": "Supprimer le profil",
+  "catDetailChangePhoto": "Changer la photo",
+  "catDetailPhotoUpdateError": "Impossible de mettre à jour la photo. Réessayez.",
   "catListingTitle": "Tes chats",
   "catListingErrorGeneric": "Une erreur est survenue",
   "catListingEmptyHeadline": "Aucun chat pour l'instant",

@@ -39,8 +39,11 @@ class CatDocumentMapperImpl implements CatDocumentMapper {
       activityLevel: data['activity_level'] as String?,
       coatType: data['coat_type'] as String?,
       gender: data['gender'] as String?,
+      // Cats saved before YUC-9 can carry the wizard's 'none' sentinel; drop
+      // it on read so they display correctly until their next save cleans it.
       healthConditions: (data['health_conditions'] as List<dynamic>?)
           ?.map((e) => e as String)
+          .where((e) => e != 'none')
           .toList(),
       allergies: (data['allergies'] as List<dynamic>?)
           ?.map((e) => e as String)

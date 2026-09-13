@@ -23,7 +23,10 @@ class CatModelToCreateMapperImpl extends CatModelToCreateMapper {
       activityLevel: model.activityLevel,
       coatType: model.coatType,
       gender: model.gender,
-      healthConditions: model.healthConditions ?? [],
+      healthConditions: (model.healthConditions == null ||
+              model.healthConditions!.isEmpty)
+          ? const [CatCreateModel.noHealthCondition]
+          : model.healthConditions!,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:yucat/features/cat/presentation/utils/cat_labels.dart';
 import 'package:yucat/config/routes/router.dart';
 import 'package:yucat/config/themes/theme.dart';
@@ -18,6 +19,7 @@ import 'package:yucat/presentation/components/ds_app_bar.dart';
 import 'package:yucat/presentation/components/ds_card.dart';
 import 'package:yucat/presentation/components/ds_confirm_dialog.dart';
 import 'package:yucat/presentation/components/ds_tag_chip.dart';
+import 'package:yucat/presentation/components/photo_source_sheet.dart';
 
 @RoutePage()
 class CatDetailPage extends StatefulWidget {
@@ -31,12 +33,27 @@ class CatDetailPage extends StatefulWidget {
 
 class _CatDetailPageState extends State<CatDetailPage> {
   late CatDetailBloc _bloc;
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
     _bloc = context.read<CatDetailBloc>();
     _bloc.add(CatDetailInitialEvent(cat: widget.cat));
+  }
+
+  Future<void> _changePhoto(CatModel cat) async {
+    final file = await pickPhotoFromSheet(context, _imagePicker);
+    if (file == null || !mounted) return;
+    _bloc.add(CatDetailPhotoChangedEvent(cat: cat, photo: file));
+  }
+
+  /// Awaits the wizard so the page can re-read the cat it comes back to —
+  /// otherwise an edited photo or breed stays stale until the user backs out.
+  Future<void> _openEdit(CatModel cat) async {
+    await context.router.push(CreateCatRoute(cat: cat));
+    if (!mounted || cat.id == null) return;
+    _bloc.add(CatDetailReloadEvent(catId: cat.id!));
   }
 
   @override
@@ -54,8 +71,16 @@ class _CatDetailPageState extends State<CatDetailPage> {
               backgroundColor: DSColors.accentDanger,
             ),
           );
+        } else if (state is CatDetailPhotoErrorState) {
+          final l10n = AppLocalizations.of(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.catDetailPhotoUpdateError),
+              backgroundColor: DSColors.accentDanger,
+            ),
+          );
         } else if (state is CatDetailNavigateToEditState) {
-          context.router.push(CreateCatRoute(cat: state.cat));
+          _openEdit(state.cat);
         }
       },
       builder: (context, state) {
@@ -67,6 +92,8 @@ class _CatDetailPageState extends State<CatDetailPage> {
         }
 
         final cat = state is CatDetailLoadedState ? state.cat : widget.cat;
+        final isUploadingPhoto =
+            state is CatDetailLoadedState && state.isUploadingPhoto;
 
         return Scaffold(
           backgroundColor: DSColors.pageBackground,
@@ -96,7 +123,13 @@ class _CatDetailPageState extends State<CatDetailPage> {
                     ),
                     children: [
                       const SizedBox(height: DSDimens.sizeS),
-                      CatHeroSection(cat: cat),
+                      CatHeroSection(
+                        cat: cat,
+                        onPhotoTap: cat.id == null
+                            ? null
+                            : () => _changePhoto(cat),
+                        isUploadingPhoto: isUploadingPhoto,
+                      ),
                       const SizedBox(height: DSDimens.size3xl),
                       _ProfileCompletionCard(cat: cat),
                       const SizedBox(height: DSDimens.sizeS),

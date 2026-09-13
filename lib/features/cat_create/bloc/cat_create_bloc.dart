@@ -231,7 +231,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
         if (cat.neuteredStatus != null) 'neutered_status',
         if (cat.coatType != null) 'coat_type',
         if (cat.breed != null) 'breed',
-        if (cat.healthConditions.isNotEmpty) 'health_conditions',
+        if (cat.persistedHealthConditions.isNotEmpty) 'health_conditions',
       ];
 
   /// Total optional fields [_completedFields] can report, so `fields_completed`
@@ -319,7 +319,7 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
           activityLevel: event.cat.activityLevel,
           coatType: event.cat.coatType,
           gender: event.cat.gender,
-          healthConditions: event.cat.healthConditions,
+          healthConditions: event.cat.persistedHealthConditions,
         );
 
         final completedFields = _completedFields(event.cat);
@@ -334,8 +334,9 @@ class CatCreateBloc extends Bloc<CatCreateEvent, CatCreateState> {
             'age_group': event.cat.ageGroup,
             'breed': event.cat.breed,
             'gender': event.cat.gender,
-            'has_health_conditions': event.cat.healthConditions.isNotEmpty,
-            'health_conditions': event.cat.healthConditions,
+            'has_health_conditions':
+                event.cat.persistedHealthConditions.isNotEmpty,
+            'health_conditions': event.cat.persistedHealthConditions,
             'neutered': event.cat.neutered,
             'has_photo': event.cat.profileImageFile != null,
             // How much of the personalisation promise this profile can actually

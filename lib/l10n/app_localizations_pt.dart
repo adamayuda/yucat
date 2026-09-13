@@ -2036,6 +2036,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get catDetailDeleteProfile => 'Eliminar perfil';
 
   @override
+  String get catDetailChangePhoto => 'Alterar foto';
+
+  @override
+  String get catDetailPhotoUpdateError =>
+      'Não foi possível atualizar a foto. Tenta novamente.';
+
+  @override
   String get catListingTitle => 'Os seus gatos';
 
   @override

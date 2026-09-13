@@ -44,6 +44,11 @@ class CatRepositoryImpl implements CatRepository {
   }
 
   @override
+  Future<void> deleteCatProfileImage({required String imageUrl}) {
+    return _dataSource.deleteCatProfileImage(imageUrl: imageUrl);
+  }
+
+  @override
   Future<({CatEntity entity, String catId})> createCat({
     required String userId,
     required String name,

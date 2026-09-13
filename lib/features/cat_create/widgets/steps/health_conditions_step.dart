@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yucat/config/themes/theme.dart';
+import 'package:yucat/features/cat_create/presentation/models/cat_create_model.dart';
 import 'package:yucat/l10n/app_localizations.dart';
 import 'package:yucat/presentation/components/ds_chip.dart';
 import 'package:yucat/presentation/components/mascot_speech_bubble.dart';
@@ -11,7 +12,7 @@ class HealthConditionsStep extends StatelessWidget {
   // `value` is stable (drives the per-cat assessment); only `label` is
   // localized.
   List<({String label, String value})> _options(AppLocalizations l10n) => [
-        (label: l10n.healthNone, value: 'none'),
+        (label: l10n.healthNone, value: CatCreateModel.noHealthCondition),
         (label: l10n.healthUrinaryIssues, value: 'urinary_issues'),
         (label: l10n.healthKidneyDisease, value: 'kidney_disease'),
         (label: l10n.healthSensitiveStomach, value: 'sensitive_stomach'),
@@ -34,7 +35,7 @@ class HealthConditionsStep extends StatelessWidget {
     final isSelected = selectedHealthConditions.contains(value);
     final current = List<String>.from(selectedHealthConditions);
 
-    if (value == 'none') {
+    if (value == CatCreateModel.noHealthCondition) {
       if (isSelected) {
         current.remove(value);
       } else {
@@ -43,7 +44,7 @@ class HealthConditionsStep extends StatelessWidget {
           ..add(value);
       }
     } else {
-      current.remove('none');
+      current.remove(CatCreateModel.noHealthCondition);
       if (isSelected) {
         current.remove(value);
       } else {

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/foundation.dart';
 
 class CatDataSource {
@@ -81,21 +82,67 @@ class CatDataSource {
     }
   }
 
+  /// Longest side of an uploaded profile photo, in px. The avatar never renders
+  /// above ~132 px, so a camera-native 12 MP JPEG is pure upload time and
+  /// Storage cost; 1024 px still looks sharp on a 3× display.
+  static const int _profileImageMaxSide = 1024;
+  static const int _profileImageQuality = 85;
+
   Future<String?> uploadCatProfileImage({
     required File imageFile,
     required String catId,
   }) async {
     try {
-      final fileName = '${catId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final stamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = '${catId}_$stamp.jpg';
       final ref = _storage.ref().child('cats').child(fileName);
 
-      await ref.putFile(imageFile);
+      final upload = await _compressProfileImage(imageFile, stamp) ?? imageFile;
+      await ref.putFile(
+        upload,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
 
       final downloadUrl = await ref.getDownloadURL();
       return downloadUrl;
     } catch (e) {
       debugPrint('Error uploading cat profile image: $e');
       return null;
+    }
+  }
+
+  /// Downscales and re-encodes the picked photo to a temp JPEG. Returns null on
+  /// any failure so the caller falls back to uploading the original — a bigger
+  /// upload beats no upload.
+  Future<File?> _compressProfileImage(File source, int stamp) async {
+    try {
+      final target = '${Directory.systemTemp.path}/cat_profile_$stamp.jpg';
+      final result = await FlutterImageCompress.compressAndGetFile(
+        source.path,
+        target,
+        minWidth: _profileImageMaxSide,
+        minHeight: _profileImageMaxSide,
+        quality: _profileImageQuality,
+        format: CompressFormat.jpeg,
+        autoCorrectionAngle: true,
+        keepExif: false,
+      );
+      return result == null ? null : File(result.path);
+    } catch (e) {
+      debugPrint('Error compressing cat profile image: $e');
+      return null;
+    }
+  }
+
+  /// Best-effort removal of a profile photo by its download URL — used when a
+  /// photo is replaced, so a cat that changes picture five times doesn't leave
+  /// four orphans behind. Never throws: the new photo is already live, and a
+  /// stale object in Storage is not worth failing the user's action over.
+  Future<void> deleteCatProfileImage({required String imageUrl}) async {
+    try {
+      await _storage.refFromURL(imageUrl).delete();
+    } catch (e) {
+      debugPrint('Error deleting replaced cat profile image: $e');
     }
   }
 

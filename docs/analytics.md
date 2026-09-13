@@ -127,7 +127,7 @@ Use `step_name` or `step_id` as the funnel key and `step_index` only for orderin
 | `Cat Creation Step Completed` | `step_index`, `step_name`, `next_step_index`, `next_step_name` |
 | `Cat Creation Step Abandoned` | `from_step(_name)`, `to_step(_name)` |
 | `Cat Created` | `name`, `age_group`, `breed`, `gender`, `has_health_conditions`, `health_conditions`, `neutered`, `has_photo`, `creation_time_seconds`, `fields_completed`, `fields_skipped`, `completed_field_names` |
-| `Cat Profile Updated` | `cat_name`, `cat_age_group`, `cat_breed`, `fields_changed` (11 hand-diffed keys incl. `age`, `birthDate`, `ageGroup`, … — a new profile field must be added to `_getChangedFields` or it never appears) |
+| `Cat Profile Updated` | `cat_name`, `cat_age_group`, `cat_breed`, `fields_changed` (11 hand-diffed keys incl. `age`, `birthDate`, `ageGroup`, … — a new profile field must be added to `_getChangedFields` or it never appears). Also emitted by the Cat Detail avatar's in-place photo change with `fields_changed: ['profileImage']` and `source: cat_detail` (the wizard path carries no `source`) |
 | `Cat Creation Failed` / `Cat Update Failed` | `error_type`, `error_message`, `step_index` |
 | `Cat Profile Viewed` / `Edit Started` / `Deleted` / `Delete Failed` | `cat_*` ids / names |
 

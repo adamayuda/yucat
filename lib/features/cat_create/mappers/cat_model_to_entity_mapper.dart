@@ -9,8 +9,9 @@ class CatModelToEntityMapper {
     birthDate: model.birthDate,
     weight: model.weight,
     neutered: model.neutered,
-    profileImageUrl:
-        null, // Image URL is not available in the model, only the file
+    // The *current* URL. `UpdateCatUsecase` overrides it when a new file was
+    // picked and uses this one to delete the replaced Storage object.
+    profileImageUrl: model.profileImageUrl,
     ageGroup: model.ageGroup,
     neuteredStatus: model.neuteredStatus,
     breed: model.breed,
@@ -18,6 +19,6 @@ class CatModelToEntityMapper {
     activityLevel: model.activityLevel,
     coatType: model.coatType,
     gender: model.gender,
-    healthConditions: model.healthConditions,
+    healthConditions: model.persistedHealthConditions,
   );
 }

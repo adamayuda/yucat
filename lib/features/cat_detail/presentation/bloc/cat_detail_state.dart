@@ -12,10 +12,14 @@ class CatDetailInitialState extends CatDetailState {
 class CatDetailLoadedState extends CatDetailState {
   final CatModel cat;
 
-  const CatDetailLoadedState({required this.cat});
+  /// True while a new profile photo is uploading; the hero shows a progress
+  /// ring over the avatar and ignores further taps.
+  final bool isUploadingPhoto;
+
+  const CatDetailLoadedState({required this.cat, this.isUploadingPhoto = false});
 
   @override
-  List<Object?> get props => [cat];
+  List<Object?> get props => [cat, isUploadingPhoto];
 }
 
 class CatDetailLoadingState extends CatDetailState {
@@ -35,6 +39,14 @@ class CatDetailErrorState extends CatDetailState {
 
   @override
   List<Object?> get props => [message];
+}
+
+/// Transient: the photo upload failed. Always followed by a
+/// [CatDetailLoadedState] carrying the unchanged cat, so the builder never
+/// has to render this one.
+class CatDetailPhotoErrorState extends CatDetailState {
+  @override
+  List<Object?> get props => [];
 }
 
 class CatDetailNavigateToEditState extends CatDetailState {

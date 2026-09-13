@@ -3596,6 +3596,18 @@ abstract class AppLocalizations {
   /// **'Delete profile'**
   String get catDetailDeleteProfile;
 
+  /// No description provided for @catDetailChangePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get catDetailChangePhoto;
+
+  /// No description provided for @catDetailPhotoUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update the photo. Please try again.'**
+  String get catDetailPhotoUpdateError;
+
   /// No description provided for @catListingTitle.
   ///
   /// In en, this message translates to:

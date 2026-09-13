@@ -40,7 +40,11 @@ class CatListingBloc extends Bloc<CatListingEvent, CatListingState> {
     CatListingFetchCatsEvent event,
     Emitter<CatListingState> emit,
   ) async {
-    emit(const CatListingLoadingState());
+    // A refetch behind an already-loaded list (returning from detail) keeps
+    // the cards on screen instead of flashing the skeleton.
+    if (state is! CatListingLoadedState) {
+      emit(const CatListingLoadingState());
+    }
     try {
       final user = _currentUserUsecase();
       if (user == null) {

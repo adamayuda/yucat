@@ -2039,6 +2039,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get catDetailDeleteProfile => 'Supprimer le profil';
 
   @override
+  String get catDetailChangePhoto => 'Changer la photo';
+
+  @override
+  String get catDetailPhotoUpdateError =>
+      'Impossible de mettre à jour la photo. Réessayez.';
+
+  @override
   String get catListingTitle => 'Tes chats';
 
   @override

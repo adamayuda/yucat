@@ -34,4 +34,26 @@ class CatModel {
     this.healthConditions,
     this.allergies,
   });
+
+  /// Only the fields an in-place edit can change today. Widen as needed.
+  CatModel copyWith({String? profileImageUrl}) {
+    return CatModel(
+      id: id,
+      name: name,
+      age: age,
+      birthDate: birthDate,
+      weight: weight,
+      neutered: neutered,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      ageGroup: ageGroup,
+      neuteredStatus: neuteredStatus,
+      breed: breed,
+      weightCategory: weightCategory,
+      activityLevel: activityLevel,
+      coatType: coatType,
+      gender: gender,
+      healthConditions: healthConditions,
+      allergies: allergies,
+    );
+  }
 }

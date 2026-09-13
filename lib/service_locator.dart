@@ -55,6 +55,7 @@ import 'package:yucat/features/cat/domain/usecases/generate_cat_narrative_usecas
 import 'package:yucat/features/cat/domain/usecases/delete_cat_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/get_cats_usecase.dart';
 import 'package:yucat/features/cat/domain/usecases/update_cat_usecase.dart';
+import 'package:yucat/features/cat/domain/usecases/update_cat_photo_usecase.dart';
 import 'package:yucat/features/cat_create/bloc/cat_create_bloc.dart';
 import 'package:yucat/features/cat_create/mappers/cat_model_to_create_mapper.dart';
 import 'package:yucat/features/cat_create/mappers/cat_model_to_entity_mapper.dart';
@@ -421,6 +422,9 @@ Future<void> _registerUseCases() async {
   sl.registerSingleton<UpdateCatUsecase>(
     UpdateCatUsecase(repository: sl<CatRepository>()),
   );
+  sl.registerSingleton<UpdateCatPhotoUsecase>(
+    UpdateCatPhotoUsecase(repository: sl<CatRepository>()),
+  );
   sl.registerSingleton<UpdateCatAllergiesUsecase>(
     UpdateCatAllergiesUsecase(repository: sl<CatRepository>()),
   );
@@ -676,6 +680,10 @@ Future<void> _registerBlocs() async {
   sl.registerBloc<CatDetailBloc>(
     () => CatDetailBloc(
       deleteCatUsecase: sl<DeleteCatUsecase>(),
+      updateCatPhotoUsecase: sl<UpdateCatPhotoUsecase>(),
+      getCatsUsecase: sl<GetCatsUsecase>(),
+      currentUserUsecase: sl<CurrentUserUsecase>(),
+      catEntityToModelMapper: sl<CatEntityToModelMapper>(),
       logEventUsecase: sl<LogEventUsecase>(),
     ),
   );

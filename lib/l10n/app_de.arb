@@ -626,6 +626,8 @@
   "catDetailCoatMedium": "Halblanges Haar",
   "catDetailHealthConditionsSection": "Gesundheitszustand",
   "catDetailDeleteProfile": "Profil löschen",
+  "catDetailChangePhoto": "Foto ändern",
+  "catDetailPhotoUpdateError": "Das Foto konnte nicht aktualisiert werden. Bitte versuche es erneut.",
   "catListingTitle": "Deine Katzen",
   "catListingErrorGeneric": "Etwas ist schiefgelaufen",
   "catListingEmptyHeadline": "Noch keine Katzen",

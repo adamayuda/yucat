@@ -1000,6 +1000,8 @@
   "catDetailCoatMedium": "Medium hair",
   "catDetailHealthConditionsSection": "Health conditions",
   "catDetailDeleteProfile": "Delete profile",
+  "catDetailChangePhoto": "Change photo",
+  "catDetailPhotoUpdateError": "Couldn't update the photo. Please try again.",
   "catListingTitle": "Your cats",
   "catListingErrorGeneric": "Something went wrong",
   "catListingEmptyHeadline": "No cats yet",

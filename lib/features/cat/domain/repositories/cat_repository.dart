@@ -12,6 +12,9 @@ abstract class CatRepository {
     required String catId,
     required String profileImageUrl,
   });
+
+  /// Best-effort delete of a replaced profile photo by URL. Never throws.
+  Future<void> deleteCatProfileImage({required String imageUrl});
   Future<({CatEntity entity, String catId})> createCat({
     required String userId,
     required String name,

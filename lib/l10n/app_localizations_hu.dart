@@ -2027,6 +2027,13 @@ class AppLocalizationsHu extends AppLocalizations {
   String get catDetailDeleteProfile => 'Profil törlése';
 
   @override
+  String get catDetailChangePhoto => 'Fotó módosítása';
+
+  @override
+  String get catDetailPhotoUpdateError =>
+      'Nem sikerült frissíteni a fotót. Próbáld újra.';
+
+  @override
   String get catListingTitle => 'Macskáid';
 
   @override

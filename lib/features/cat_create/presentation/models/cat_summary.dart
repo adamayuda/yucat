@@ -75,10 +75,7 @@ class CatSummary {
       neuteredStatus: cat.neuteredStatus,
       weightCategory: cat.weightCategory,
       breed: (cat.breed != null && cat.breed != 'Other') ? cat.breed : null,
-      healthConditions: [
-        for (final c in cat.healthConditions)
-          if (c != 'none') c,
-      ],
+      healthConditions: cat.persistedHealthConditions,
     );
   }
 }

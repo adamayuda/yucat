@@ -38,10 +38,11 @@ class CatListingLoadedWidget extends StatelessWidget {
         return CatSummaryCard(
           cat: cat,
           onTap: () async {
-            final deleted = await context.router.push<bool>(
-              CatDetailRoute(cat: cat),
-            );
-            if (deleted == true && context.mounted) {
+            await context.router.push<bool>(CatDetailRoute(cat: cat));
+            // Detail can delete the cat, change its photo in place, or hand
+            // off to the edit wizard — refetch unconditionally rather than
+            // thread a "changed" flag through every one of those exits.
+            if (context.mounted) {
               context.read<CatListingBloc>().add(
                 const CatListingFetchCatsEvent(),
               );
