@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import 'package:yucat/config/themes/theme.dart';
 import 'package:yucat/features/splash/presentation/bloc/splash_bloc.dart';
 
@@ -37,6 +38,11 @@ class _SplashPage extends State<SplashPage> {
   }
 }
 
+/// The logo face popping in (YUC-31): ~1 s scale-in, then a subtle settle to
+/// 2.5 s, played once. ⚠️ The native launch screens (iOS storyboard, Android
+/// `launch_background.xml`) are deliberately **plain splash pink** — a static
+/// face there would visibly shrink to the animation's 30 % first frame and
+/// re-pop. `SplashBloc` holds the route for the pop so a fast boot can't cut it.
 class _SplashContent extends StatelessWidget {
   const _SplashContent();
 
@@ -46,9 +52,13 @@ class _SplashContent extends StatelessWidget {
       backgroundColor: DSColors.splashPink,
       body: SafeArea(
         child: Center(
-          child: Image.asset(
-            'assets/images/logo.png',
-            width: 220,
+          child: ExcludeSemantics(
+            child: Lottie.asset(
+              'assets/images/splash-face.json',
+              width: 220,
+              repeat: false,
+              frameRate: FrameRate.composition,
+            ),
           ),
         ),
       ),

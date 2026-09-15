@@ -19,6 +19,12 @@ part 'splash_state.dart';
 class SplashBloc extends Bloc<SplashEvent, SplashState> {
   static const String _onboardingCompletedKey = 'onboarding_completed';
 
+  /// The splash face's pop-in (frames 0–30 of `splash-face.json` at 30 fps).
+  /// A floor, not a delay: boot runs alongside it and usually takes longer
+  /// (sign-in, RevenueCat link, entitlement refresh), so it only ever holds a
+  /// fast boot long enough not to cut the animation mid-pop.
+  static const Duration _minSplash = Duration(milliseconds: 1000);
+
   final SharedPreferences _prefs;
   final GetSubscriptionStatusUseCase _getSubscriptionStatusUseCase;
   final LinkSubscriptionUserUsecase _linkSubscriptionUserUsecase;
@@ -52,6 +58,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
   ) async {
     emit(SplashLoadingState());
     final router = event.context.router;
+    final splashFloor = Future<void>.delayed(_minSplash);
 
     // Bootstrap auth before routing anywhere. Every launch passes through here
     // first, so guaranteeing an anonymous Firebase session now means the uid is
@@ -69,6 +76,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
     // New users go through onboarding, which ends in the hard paywall.
     if (!isCompleted) {
+      await splashFloor;
       router.replace(const OnBoardingRoute());
       return;
     }
@@ -92,6 +100,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     );
     _notificationService.setSubscriber(hasSubscription, isTrial: status.isTrial);
 
+    await splashFloor;
     if (hasSubscription || kTestBuildSkipPaywall) {
       router.replace(const HomeRoute());
     } else {

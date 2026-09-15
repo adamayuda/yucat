@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
+<!-- Plain splash pink (DSColors.splashPink, #FDD4DD) — same as the iOS launch
+     screen. No image: the Flutter splash pops the animated logo face in over
+     this colour (YUC-31), so a static face here would shrink and re-pop. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@android:color/white" />
-
-    <!-- You can insert your own image assets here -->
-    <!-- <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@mipmap/launch_image" />
-    </item> -->
+    <item>
+        <color android:color="#FDD4DD" />
+    </item>
 </layer-list>

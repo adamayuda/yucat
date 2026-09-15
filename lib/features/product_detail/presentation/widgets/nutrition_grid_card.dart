@@ -118,28 +118,37 @@ class _NutritionGridCardState extends State<NutritionGridCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          // Title and toggle share a row only when both fit at their natural
+          // width; otherwise the toggle drops below. An `Expanded` title
+          // (YUC-30) wrapped "CONSTITUANTS ANALYTIQUES" into a narrow column.
+          OverflowBar(
+            alignment: MainAxisAlignment.spaceBetween,
+            spacing: DSDimens.sizeS,
+            overflowSpacing: DSDimens.sizeXs,
             children: [
-              Expanded(
-                child: Text(
-                  l10n.productDetailNutritionTitle,
-                  style: DSTextStyles.caption.copyWith(
-                    color: DSColors.inkSecondary,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
-                  ),
+              Text(
+                l10n.productDetailNutritionTitle,
+                style: DSTextStyles.caption.copyWith(
+                  color: DSColors.inkSecondary,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
                 ),
               ),
-              DSChip(
-                label: l10n.productDetailBasisAsFed,
-                selected: !_dryMatter,
-                onTap: () => _toggle(false),
-              ),
-              const SizedBox(width: DSDimens.sizeXxs),
-              DSChip(
-                label: l10n.productDetailBasisDryMatter,
-                selected: _dryMatter,
-                onTap: () => _toggle(true),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DSChip(
+                    label: l10n.productDetailBasisAsFed,
+                    selected: !_dryMatter,
+                    onTap: () => _toggle(false),
+                  ),
+                  const SizedBox(width: DSDimens.sizeXxs),
+                  DSChip(
+                    label: l10n.productDetailBasisDryMatter,
+                    selected: _dryMatter,
+                    onTap: () => _toggle(true),
+                  ),
+                ],
               ),
             ],
           ),

@@ -46,8 +46,10 @@ class HomeScanErrorView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // YUC-32: the approved "Try Again" Lottie (winking cat with a
+            // phone). Decorative only — the exits below are live immediately.
             const MascotIllustration(
-              mascotAsset: 'assets/images/cat-thinking.svg',
+              mascotAsset: 'assets/images/cat-try-again.json',
               tint: DSColors.tintCoral,
               size: 160,
             ),

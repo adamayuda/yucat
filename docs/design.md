@@ -93,7 +93,7 @@ not eyeballed. If you change a token, change it here in the same commit.
 | `coralAccent` | `#FF7A59` | Selection accent — chips, slider, selected card border |
 | `coralSurface` | `#FFF1ED` | Soft coral surface behind `coralAccent` |
 | `brandPink` | `#ED67CA` | Logo / splash glyph only — **never** UI-primary |
-| `splashPink` | `#FDD4DD` | Splash background (matches the pink baked into `logo.svg`) |
+| `splashPink` | `#FDD4DD` | Splash background (matches the pink baked into `logo.svg`) — also the **native** launch screens (iOS storyboard, Android `launch_background.xml`), which carry no image so the animated `splash-face.json` pops in without a jump (YUC-31) |
 | `paywallAccent` | `#3F8CDB` | Paywall-only accent (selection, badges) — feature-scoped, replaces green within the paywall |
 | `paywallAccentSoft` | `#E3EEFA` | Paywall highlighted backgrounds |
 
@@ -262,7 +262,7 @@ Shared components live in `lib/presentation/components/`. Feature-specific widge
 | `DSQuoteCard` | `ds_quote_card.dart` | Logo + body + underlined source link. Phase C2 domain pitch. |
 | `DSDotIndicator` | `ds_dot_indicator.dart` | Wraps `smooth_page_indicator` for value-prop carousel (A2–A4). |
 | `DSStateView` | `ds_state_view.dart` | Centered `MascotIllustration` + headline + body + optional CTA. Constructors `DSStateView.error()` (thinking cat on `tintCoral` + "Try again") and `DSStateView.empty()` (caller picks `mascotAsset` + `tint`). All empty/error states funnel through this. |
-| `MascotIllustration` | `mascot_illustration.dart` | Cat mascot SVG on a tinted circular halo, framed by gently-twinkling stars (native bob/twinkle, `animate` toggle). The single playful illustration for loading/empty/error — used by `AppLoadingWidget` and `DSStateView`. **No raster GIFs** (legacy `Illustrations/*.gif` removed). |
+| `MascotIllustration` | `mascot_illustration.dart` | Cat mascot SVG on a tinted circular halo, framed by gently-twinkling stars (native bob/twinkle, `animate` toggle). A `.json` `mascotAsset` renders as a Lottie in the same halo (no bob, `FrameRate.composition`) — `HomeScanErrorView` uses `cat-try-again.json` (YUC-32). The single playful illustration for loading/empty/error — used by `AppLoadingWidget` and `DSStateView`. **No raster GIFs** (legacy `Illustrations/*.gif` removed). |
 | `DSConfirmDialog` | `ds_confirm_dialog.dart` | Centered confirmation via `showDSConfirmDialog(...)`. White `surfaceCard`, `DSRadii.xl`, tinted icon badge (`tintCoral`/`accentDanger` when `destructive`), `headlineMd` title + `bodyMd` body, stacked CTA: `DSPillButton` (`danger` variant) over a `DSTextLink` cancel. Returns `true`/`false`/`null`. The only confirmation pattern — no raw `AlertDialog`. |
 | `DSBottomNav` | `ds_bottom_nav.dart` | Full-width frosted nav, edge to edge. `DSBottomNavItem(icon, label)` per slot, rendered as an outlined 24px icon above its label; slots share the width via `Expanded`. `BackdropFilter` blur (sigma 24) under a 72% `surfaceCard` fill, hairline top border, safe-area inset *inside* the bar. Selected slot tints `accentInfo`, idle `inkTertiary`, cross-faded over `DSMotion.durFast`. |
 | `CatAvatar` | `cat_avatar.dart` | Circular cat photo or `Icons.pets` fallback on `tintLavender` disc. Default 56px; takes `size`. |

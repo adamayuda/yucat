@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 import 'package:yucat/config/themes/theme.dart';
 
 /// Playful state illustration shared by loading / empty / error views.
@@ -10,7 +11,9 @@ import 'package:yucat/config/themes/theme.dart';
 /// loader (`home_loading_page.dart`). Replaces the legacy raster GIFs; state
 /// views never use `.gif` assets.
 class MascotIllustration extends StatefulWidget {
-  /// Full cat-figure SVG, e.g. `assets/images/cat-thinking.svg`.
+  /// Full cat-figure SVG, e.g. `assets/images/cat-thinking.svg` — or a Lottie
+  /// `.json` (e.g. `cat-try-again.json`), which animates itself and so skips
+  /// the bob. Halo and stars are the same either way.
   final String mascotAsset;
 
   /// Halo color — pick a section tint that matches the state's mood.
@@ -70,13 +73,24 @@ class _MascotIllustrationState extends State<MascotIllustration>
     // of it rather than trapped inside the circle.
     final mascotSize = size * 0.82;
 
-    Widget mascot = SvgPicture.asset(
-      widget.mascotAsset,
-      width: mascotSize,
-      height: mascotSize,
-      fit: BoxFit.contain,
-    );
-    if (widget.animate) {
+    final isLottie = widget.mascotAsset.endsWith('.json');
+    Widget mascot = isLottie
+        ? Lottie.asset(
+            widget.mascotAsset,
+            width: mascotSize,
+            height: mascotSize,
+            fit: BoxFit.contain,
+            animate: widget.animate,
+            // Pinned to the file's own frame rate — see `HomeMissionCard`.
+            frameRate: FrameRate.composition,
+          )
+        : SvgPicture.asset(
+            widget.mascotAsset,
+            width: mascotSize,
+            height: mascotSize,
+            fit: BoxFit.contain,
+          );
+    if (widget.animate && !isLottie) {
       mascot = AnimatedBuilder(
         animation: _bob,
         builder: (context, child) => Transform.translate(
