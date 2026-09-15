@@ -396,7 +396,7 @@ Triggered when `SharedPreferences['onboarding_completed'] != true`.
 | 5 | `nutritionFact` | `nutrition_fact_screen.dart` | |
 | 6 | `profileIntro` | `profile_intro_screen.dart` | |
 | 7 | `profileName` | `profile_name_screen.dart` | Collects the cat name → **seeds the wizard** |
-| 8 | `rating` | `rating_screen.dart` | Fires the native App Store review modal — see the warning below |
+| 8 | `rating` | `rating_screen.dart` | Social proof only — requests **no** review modal (see below) |
 | 9 | `notifPrimer` | `notif_primer_screen.dart` | **Mock** — previews the value of alerts, requests no permission |
 | 10 | `reminders` | `reminders_screen.dart` | The **real** OS push prompt (iOS only). Reminder-type selections are *not* persisted |
 | 11 | `healthIntro` | `health_intro_screen.dart` | CTA fires `OnBoardingCompletedEvent` → leaves the bloc (below) |
@@ -406,11 +406,10 @@ Triggered when `SharedPreferences['onboarding_completed'] != true`.
 > and used to build the Mixpanel onboarding funnel. **Reordering or inserting a phase
 > silently renumbers every historical funnel step.**
 
-> ⚠️ **`rating_screen` bypasses `ReviewPromptService`.** It calls
-> `InAppReview.requestReview()` directly, so every new user spends one of Apple's 3-per-365
-> review modals during onboarding — outside the gate (`_minScansBeforeFirstPrompt = 5`,
-> `_minDaysBetweenPrompts = 90`) that exists to avoid exactly that. There's also no
-> completion callback for the modal, so the screen hard-waits 3 seconds before advancing.
+> ⚠️ **`rating_screen` no longer asks for a review** (since 2026-09-15). It used to call
+> `InAppReview.requestReview()` directly, so every new user spent one of Apple's 3-per-365
+> modals before using the product. The ask now lives only in `ReviewPromptService`
+> (2 positive moments, 90 days apart) — don't reinstate the direct call.
 
 ### After `healthIntro` — the cascade leaves the bloc
 

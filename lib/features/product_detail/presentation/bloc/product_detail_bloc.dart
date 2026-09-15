@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/product_display_model.dart';
@@ -6,6 +8,7 @@ import 'package:yucat/features/saved_products/domain/usecases/is_product_saved_u
 import 'package:yucat/features/saved_products/domain/usecases/save_product_usecase.dart';
 import 'package:yucat/features/saved_products/domain/usecases/unsave_product_usecase.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
+import 'package:yucat/services/review_prompt_service.dart';
 
 part 'product_detail_event.dart';
 part 'product_detail_state.dart';
@@ -15,16 +18,19 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
   final IsProductSavedUsecase _isProductSavedUsecase;
   final SaveProductUsecase _saveProductUsecase;
   final UnsaveProductUsecase _unsaveProductUsecase;
+  final ReviewPromptService _reviewPromptService;
 
   ProductDetailBloc({
     required LogEventUsecase logEventUsecase,
     required IsProductSavedUsecase isProductSavedUsecase,
     required SaveProductUsecase saveProductUsecase,
     required UnsaveProductUsecase unsaveProductUsecase,
+    required ReviewPromptService reviewPromptService,
   })  : _logEventUsecase = logEventUsecase,
         _isProductSavedUsecase = isProductSavedUsecase,
         _saveProductUsecase = saveProductUsecase,
         _unsaveProductUsecase = unsaveProductUsecase,
+        _reviewPromptService = reviewPromptService,
         super(ProductDetailHiddenState()) {
     on<ProductDetailInitialEvent>(_onProductDetailInitialEvent);
     on<ProductDetailToggleSavedEvent>(_onToggleSaved);
@@ -87,5 +93,13 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
       );
     }
     emit(current.copyWith(isSaved: nextSaved));
+    // After the emit, so the bookmark fills before any modal appears.
+    if (nextSaved) {
+      unawaited(
+        _reviewPromptService.recordPositiveMoment(
+          trigger: ReviewTrigger.productSaved,
+        ),
+      );
+    }
   }
 }

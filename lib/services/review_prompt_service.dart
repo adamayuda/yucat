@@ -4,21 +4,37 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
 
+/// Where a review prompt was attempted from — the `trigger` property on
+/// `Review Prompt Requested`, so Mixpanel can tell which moment earns reviews.
+abstract final class ReviewTrigger {
+  /// Back on Home after reading a scan result that carried real data.
+  static const postScan = 'post_scan';
+  static const productSaved = 'product_saved';
+  static const litterSaved = 'litter_saved';
+  static const healthSetupCompleted = 'health_setup_completed';
+  static const healthBookletImported = 'health_booklet_imported';
+}
+
 /// Lifecycle-aware wrapper around `in_app_review`.
 ///
 /// Apple shows the native review modal at most 3 times per 365 days per
 /// user-account, regardless of how often we call it. This service adds a
 /// thinner local gate so we don't burn the budget on low-intent moments:
 ///
-/// - Only prompt after the user has had at least N successful scans.
+/// - Only prompt after the user has had at least N **positive moments** — a
+///   scan result with data, a save, a completed carnet setup or booklet
+///   import. Scans alone used to be the only signal, at 5: two thirds of
+///   scanners never got that far.
 /// - Don't prompt within `_minDaysBetweenPrompts` of the last attempt.
 ///
-/// Trigger sites call `maybePrompt(trigger:)`; the service decides whether
-/// to actually invoke the system modal.
+/// Trigger sites call `recordPositiveMoment(trigger:)`, which counts the moment
+/// and then decides whether to actually invoke the system modal.
 class ReviewPromptService {
-  static const String _scanCountKey = 'review_scan_count';
+  // Historical name: the counter predates the non-scan moments. Kept so the
+  // scans users already have keep counting toward the gate.
+  static const String _momentCountKey = 'review_scan_count';
   static const String _lastPromptKey = 'review_last_prompt_at';
-  static const int _minScansBeforeFirstPrompt = 5;
+  static const int _minMomentsBeforeFirstPrompt = 2;
   static const int _minDaysBetweenPrompts = 90;
 
   final SharedPreferences _prefs;
@@ -33,16 +49,19 @@ class ReviewPromptService {
         _logEventUsecase = logEventUsecase,
         _inAppReview = inAppReview ?? InAppReview.instance;
 
-  /// Records a successful scan. Bumps the gate counter.
-  Future<void> recordScan() async {
-    final count = _prefs.getInt(_scanCountKey) ?? 0;
-    await _prefs.setInt(_scanCountKey, count + 1);
+  /// Counts one positive moment, then considers showing the native review
+  /// prompt. `trigger` is a [ReviewTrigger] value, for analytics.
+  ///
+  /// Call it only once the user has *seen* the value — never before the
+  /// result screen is on top, or the modal lands on a transition.
+  Future<void> recordPositiveMoment({required String trigger}) async {
+    final count = _prefs.getInt(_momentCountKey) ?? 0;
+    await _prefs.setInt(_momentCountKey, count + 1);
+    await _maybePrompt(trigger: trigger);
   }
 
-  /// Considers showing the native review prompt at a high-intent moment.
-  /// `trigger` is for analytics: e.g., 'post_paywall_success', 'nth_scan'.
-  Future<void> maybePrompt({required String trigger}) async {
-    if (!await _shouldPrompt()) return;
+  Future<void> _maybePrompt({required String trigger}) async {
+    if (!_shouldPrompt()) return;
 
     try {
       if (await _inAppReview.isAvailable()) {
@@ -64,9 +83,9 @@ class ReviewPromptService {
     }
   }
 
-  Future<bool> _shouldPrompt() async {
-    final scanCount = _prefs.getInt(_scanCountKey) ?? 0;
-    if (scanCount < _minScansBeforeFirstPrompt) return false;
+  bool _shouldPrompt() {
+    final count = _prefs.getInt(_momentCountKey) ?? 0;
+    if (count < _minMomentsBeforeFirstPrompt) return false;
 
     final lastPromptMs = _prefs.getInt(_lastPromptKey);
     if (lastPromptMs != null) {

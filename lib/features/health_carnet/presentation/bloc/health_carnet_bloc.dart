@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:equatable/equatable.dart';
@@ -20,6 +21,7 @@ import 'package:yucat/features/health_carnet/domain/usecases/get_health_events_u
 import 'package:yucat/features/health_carnet/presentation/models/health_due_item.dart';
 import 'package:yucat/features/health_carnet/presentation/utils/cat_health_schedule.dart';
 import 'package:yucat/features/health_carnet/presentation/utils/health_events_cache.dart';
+import 'package:yucat/services/review_prompt_service.dart';
 
 part 'health_carnet_event.dart';
 part 'health_carnet_state.dart';
@@ -40,6 +42,7 @@ class HealthCarnetBloc extends Bloc<HealthCarnetEvent, HealthCarnetState> {
   final UpdateCatLifestyleUsecase _updateCatLifestyleUsecase;
   final UpdateCatWeightUsecase _updateCatWeightUsecase;
   final LogEventUsecase _logEventUsecase;
+  final ReviewPromptService _reviewPromptService;
 
   CatEntity? _cat;
   int _tabIndex = 0;
@@ -53,6 +56,7 @@ class HealthCarnetBloc extends Bloc<HealthCarnetEvent, HealthCarnetState> {
     required UpdateCatLifestyleUsecase updateCatLifestyleUsecase,
     required UpdateCatWeightUsecase updateCatWeightUsecase,
     required LogEventUsecase logEventUsecase,
+    required ReviewPromptService reviewPromptService,
   })  : _getHealthEventsUsecase = getHealthEventsUsecase,
         _addHealthEventUsecase = addHealthEventUsecase,
         _deleteHealthEventUsecase = deleteHealthEventUsecase,
@@ -61,6 +65,7 @@ class HealthCarnetBloc extends Bloc<HealthCarnetEvent, HealthCarnetState> {
         _updateCatLifestyleUsecase = updateCatLifestyleUsecase,
         _updateCatWeightUsecase = updateCatWeightUsecase,
         _logEventUsecase = logEventUsecase,
+        _reviewPromptService = reviewPromptService,
         super(const HealthCarnetLoadingState()) {
     on<HealthCarnetInitialEvent>(_onInitial);
     on<HealthCarnetTabChanged>(_onTabChanged);
@@ -360,6 +365,14 @@ class HealthCarnetBloc extends Bloc<HealthCarnetEvent, HealthCarnetState> {
 
     final loaded = _buildLoaded(cat: cat, events: events);
     emit(failed ? loaded.copyWith(bumpError: true) : loaded);
+    _promptForReview(written, ReviewTrigger.healthSetupCompleted);
+  }
+
+  /// A carnet that just filled up is a positive moment — but only if something
+  /// actually landed; a failed write ends on an error SnackBar, not a success.
+  void _promptForReview(int written, String trigger) {
+    if (written == 0) return;
+    unawaited(_reviewPromptService.recordPositiveMoment(trigger: trigger));
   }
 
   /// Records the owner accepted from a booklet page. Same sequential loop as
@@ -394,6 +407,7 @@ class HealthCarnetBloc extends Bloc<HealthCarnetEvent, HealthCarnetState> {
 
     final loaded = _buildLoaded(cat: cat, events: events);
     emit(failed ? loaded.copyWith(bumpError: true) : loaded);
+    _promptForReview(written, ReviewTrigger.healthBookletImported);
   }
 
   /// Writes [drafts] one after another, appending each saved record to a

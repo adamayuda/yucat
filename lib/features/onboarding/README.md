@@ -49,7 +49,7 @@ page order and the analytics index** — `OnBoardingPage` pages via
 | 5 | `nutritionFact` | advance |
 | 6 | `profileIntro` | advance |
 | 7 | `profileName` | `NameSeededEvent` + advance — **seeds the wizard** |
-| 8 | `rating` | advance (fires the App Store review modal — §4) |
+| 8 | `rating` | advance (social proof only — no review modal since 2026-09-15, §4) |
 | 9 | `notifPrimer` | advance (**mock**, requests nothing — §4) |
 | 10 | `reminders` | advance (**real** OS push prompt, iOS only — §4) |
 | 11 | `healthIntro` | `OnBoardingCompletedEvent` → §3 |
@@ -155,18 +155,14 @@ headline. Three things about it are load-bearing:
 
 It also honours `MediaQuery.disableAnimationsOf` — the only place in the app that reads it.
 
-### `rating` (phase 8) — burns Apple's review budget outside the gate
+### `rating` (phase 8) — social proof only, no review modal
 
-`rating_screen.dart:_handleNext` calls `InAppReview.instance.requestReview()` **directly**.
-That bypasses `ReviewPromptService` (`_minScansBeforeFirstPrompt = 5`,
-`_minDaysBetweenPrompts = 90`), which exists specifically so we don't burn the budget on
-low-intent moments. **Apple allows 3 modals per 365 days per user**, and every new user
-spends one here — before they have used the product at all.
-
-It also **hard-waits 3 seconds**: `SKStoreReviewController` gives no completion callback and
-doesn't background the app, so there's no signal for when the user finishes. The screen shows
-a spinner and delays so the popup isn't yanked away. Failures are swallowed — advancing must
-never depend on the prompt.
+Until 2026-09-15 `_handleNext` called `InAppReview.instance.requestReview()` directly (plus a
+3-second hold-back), bypassing `ReviewPromptService`. **Apple allows 3 modals per 365 days per
+user**, so every new user spent one here before they had used the product at all. The screen
+now only advances; the ask lives in `ReviewPromptService` (2 positive moments — a scan result
+with data, a save, a completed carnet setup or booklet import — and 90 days between prompts).
+Don't put the direct call back.
 
 ### `notifPrimer` (9) is a mock; `reminders` (10) is real
 

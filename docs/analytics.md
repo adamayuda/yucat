@@ -290,7 +290,7 @@ litter scans too; segment on the outcome event to separate them.
 | `Scan History Viewed` | `timestamp` |
 | `Notifications Opted In` / `Opted Out` | `source` |
 | `Push Opened` | `notification_id`, `template_id`, `template_name`, `title`, `launch_url` — a push was tapped. `template_name` is the Journey step (`Paywall drop – value`, `Paywall drop – discount`, `Trial – scan more`), so a session that starts with this event is attributable to the push that sent it. Fires from `NotificationService._onNotificationClick`; a cold-launch tap is buffered by the SDK until the listener registers |
-| `Review Prompt Requested` | `trigger` |
+| `Review Prompt Requested` | `trigger` — `post_scan` (back on Home after a result with data), `product_saved`, `litter_saved`, `health_setup_completed`, `health_booklet_imported` (`ReviewTrigger`). Fires only when the native modal was *requested* past the local gate (2 positive moments, 90 days apart); Apple may still suppress it, and nothing reports whether it showed |
 | `Free Limit Hit` | `limit_type`, `limit_value` — *currently not fired (hard paywall, no free tier)* |
 
 ---

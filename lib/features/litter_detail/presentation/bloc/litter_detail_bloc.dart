@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yucat/features/analytics/analytics_events.dart';
@@ -5,6 +7,7 @@ import 'package:yucat/features/analytics/domain/usecase/log_event_usecase.dart';
 import 'package:yucat/features/saved_products/domain/usecases/is_litter_saved_usecase.dart';
 import 'package:yucat/features/saved_products/domain/usecases/save_litter_usecase.dart';
 import 'package:yucat/features/saved_products/domain/usecases/unsave_litter_usecase.dart';
+import 'package:yucat/services/review_prompt_service.dart';
 import '../models/litter_display_model.dart';
 
 part 'litter_detail_event.dart';
@@ -15,16 +18,19 @@ class LitterDetailBloc extends Bloc<LitterDetailEvent, LitterDetailState> {
   final IsLitterSavedUsecase _isLitterSavedUsecase;
   final SaveLitterUsecase _saveLitterUsecase;
   final UnsaveLitterUsecase _unsaveLitterUsecase;
+  final ReviewPromptService _reviewPromptService;
 
   LitterDetailBloc({
     required LogEventUsecase logEventUsecase,
     required IsLitterSavedUsecase isLitterSavedUsecase,
     required SaveLitterUsecase saveLitterUsecase,
     required UnsaveLitterUsecase unsaveLitterUsecase,
+    required ReviewPromptService reviewPromptService,
   })  : _logEventUsecase = logEventUsecase,
         _isLitterSavedUsecase = isLitterSavedUsecase,
         _saveLitterUsecase = saveLitterUsecase,
         _unsaveLitterUsecase = unsaveLitterUsecase,
+        _reviewPromptService = reviewPromptService,
         super(LitterDetailHiddenState()) {
     on<LitterDetailInitialEvent>(_onInitial);
     on<LitterDetailToggleSavedEvent>(_onToggleSaved);
@@ -78,5 +84,12 @@ class LitterDetailBloc extends Bloc<LitterDetailEvent, LitterDetailState> {
       },
     );
     emit(current.copyWith(isSaved: nextSaved));
+    if (nextSaved) {
+      unawaited(
+        _reviewPromptService.recordPositiveMoment(
+          trigger: ReviewTrigger.litterSaved,
+        ),
+      );
+    }
   }
 }

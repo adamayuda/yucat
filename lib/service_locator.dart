@@ -680,6 +680,7 @@ Future<void> _registerBlocs() async {
       isProductSavedUsecase: sl<IsProductSavedUsecase>(),
       saveProductUsecase: sl<SaveProductUsecase>(),
       unsaveProductUsecase: sl<UnsaveProductUsecase>(),
+      reviewPromptService: sl<ReviewPromptService>(),
     ),
   );
   sl.registerBloc<LitterDetailBloc>(
@@ -688,6 +689,7 @@ Future<void> _registerBlocs() async {
       isLitterSavedUsecase: sl<IsLitterSavedUsecase>(),
       saveLitterUsecase: sl<SaveLitterUsecase>(),
       unsaveLitterUsecase: sl<UnsaveLitterUsecase>(),
+      reviewPromptService: sl<ReviewPromptService>(),
     ),
   );
   sl.registerBloc<SavedProductsBloc>(
@@ -735,6 +737,7 @@ Future<void> _registerBlocs() async {
       updateCatLifestyleUsecase: sl<UpdateCatLifestyleUsecase>(),
       updateCatWeightUsecase: sl<UpdateCatWeightUsecase>(),
       logEventUsecase: sl<LogEventUsecase>(),
+      reviewPromptService: sl<ReviewPromptService>(),
     ),
   );
   sl.registerBloc<CatCreateBloc>(

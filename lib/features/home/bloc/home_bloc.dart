@@ -387,9 +387,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   /// The shared success tail for a food result, whichever callable produced
-  /// it: local history, `Product Selected`, the scan counters and the review
-  /// gate, then the detail page. `gen` is re-checked after the history write —
-  /// the one await inside — so a Cancel during it still drops the push.
+  /// it: local history, `Product Selected`, the scan counters, the detail page,
+  /// then the review gate once it pops. `gen` is re-checked after the history
+  /// write — the one await inside — so a Cancel during it still drops the push.
   Future<void> _onFoodResolved(
     ProductEntity product, {
     required String path,
@@ -429,13 +429,24 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     unawaited(_userAnalyticsService.recordScan());
     unawaited(_notificationService.setLastScan());
-    await _reviewPromptService.recordScan();
-    if (gen != _scanGeneration) return;
-    // Fire-and-forget; the service applies its own gating.
-    unawaited(_reviewPromptService.maybePrompt(trigger: 'post_scan'));
 
-    router.push(ProductDetailRoute(product: productDetailModel));
+    final returned = router.push(ProductDetailRoute(product: productDetailModel));
     add(HomeInitialEvent());
+    // A no-data result is not a moment anyone rates well.
+    if (!productDetailModel.dataUnavailable) _promptOnReturn(returned);
+  }
+
+  /// Considers the review prompt once the result screen pops — after the user
+  /// has read the verdict, back on Home, instead of over the push transition.
+  /// Not awaited: the handler must not hold the bloc for the page's lifetime.
+  void _promptOnReturn(Future<Object?> returned) {
+    unawaited(
+      returned.then(
+        (_) => _reviewPromptService.recordPositiveMoment(
+          trigger: ReviewTrigger.postScan,
+        ),
+      ),
+    );
   }
 
   /// A scanned litter: record it in the litter history and open the litter
@@ -471,12 +482,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     unawaited(_userAnalyticsService.recordScan());
     unawaited(_notificationService.setLastScan());
-    await _reviewPromptService.recordScan();
-    if (gen != _scanGeneration) return;
-    unawaited(_reviewPromptService.maybePrompt(trigger: 'post_scan'));
 
-    event.router.push(LitterDetailRoute(litter: litterModel));
+    final returned = event.router.push(LitterDetailRoute(litter: litterModel));
     add(HomeInitialEvent());
+    if (!litterModel.dataUnavailable) _promptOnReturn(returned);
   }
 
   HomeErrorType _toErrorType(Object e) {
